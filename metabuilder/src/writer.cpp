@@ -33,7 +33,7 @@ static int luaFuncMkdir(lua_State* l)
 {
     const char* path = lua_tostring(l, 1);
 	
-	if (!mbaCreateDirChain(path))
+	if (!mbCreateDirChain(path))
 	{
 		mbExitError();
 	}
@@ -345,9 +345,14 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				
 		{
 			char buf[MB_MAX_PATH];
-			sprintf(buf, "%s/%s", appState->makeOutputDirAbs.c_str(), metabase->name.c_str());
+			sprintf(buf, "%s/%s/%s", appState->makeOutputDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->name.c_str());
 			lua_pushstring(l, buf);
 			lua_setfield(l, -2, "makeoutputdirabs");
+			
+			if (!mbCreateDirChain(buf))
+			{
+				mbExitError();
+			}
 		}
 
 		lua_pushstring(l, appState->mainMetaMakeFileAbs.c_str());

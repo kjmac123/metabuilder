@@ -401,7 +401,7 @@ static int luaFuncSetOption(lua_State* l)
 static int luaFuncCheckPlatform(lua_State* l)
 {
     const char* testPlatform = lua_tostring(l, 1);
-	for (int i = 0; i < mbGetActiveContext()->metabase->currentPlatforms.size(); ++i)
+	for (int i = 0; i < (int)mbGetActiveContext()->metabase->currentPlatforms.size(); ++i)
 	{
 		const std::string& test = mbGetActiveContext()->metabase->currentPlatforms[i];
 		if (test == testPlatform)
@@ -570,6 +570,7 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc ini
 
 void mbExitError()
 {
+	MB_LOGINFO("Exiting with error.");
     _exit(1);    
 }
 
@@ -1006,4 +1007,37 @@ void mbRemoveDuplicatesAndSort(StringVector* strings_)
 	}
 	
 	strings = tmp;
+}
+
+bool mbCreateDirChain(const char* osDir_)
+{
+#ifdef PLATFORM_WINDOWS
+	const char sep = '\\';
+#else
+	const char sep = '/';
+#endif
+//    Debug::Error("Creating dir chain %s", osDir_);
+
+    char osDir[FILENAME_MAX] = {0};
+    mbaNormaliseFilePath(osDir, osDir_);
+    
+    if (osDir[0] == 0)
+        return false;
+    
+    const char* left = osDir;
+    for (const char* right = osDir+1; *right; ++right)
+    {
+        if (*right == sep)
+        {
+            *(char*)right = 0;
+            const char* partialPath = left;
+            
+            if (!_mbaCreateDir(partialPath))
+                return false;
+            
+            *(char*)right = sep;
+        }
+    }
+    
+    return _mbaCreateDir(osDir);
 }

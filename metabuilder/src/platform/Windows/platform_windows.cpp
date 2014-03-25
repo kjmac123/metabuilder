@@ -10,7 +10,7 @@
 
 #include "platform/platform.h"
 
-bool mbaCreateDir(const char* osDir)
+bool _mbaCreateDir(const char* osDir)
 {
     DWORD ftyp = GetFileAttributesA(osDir);
     if (ftyp != INVALID_FILE_ATTRIBUTES)
@@ -47,34 +47,6 @@ void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)
         ++outCursor;
     }
 	*outCursor = '\0';
-}
-
-bool mbaCreateDirChain(const char* osDir_)
-{
-//    Debug::Error("Creating dir chain %s", osDir_);
-
-    char osDir[FILENAME_MAX] = {0};
-    mbaNormaliseFilePath(osDir, osDir_);
-    
-    if (osDir[0] == 0)
-        return false;
-    
-    const char* left = osDir;
-    for (const char* right = osDir+1; *right; ++right)
-    {
-        if (*right == '/')
-        {
-            *(char*)right = 0;
-            const char* partialPath = left;
-            
-            if (!mbaCreateDir(partialPath))
-                return false;
-            
-            *(char*)right = '/';
-        }
-    }
-    
-    return mbaCreateDir(osDir);
 }
 
 E_FileType mbaGetFileType(const std::string& filepath)
@@ -168,11 +140,13 @@ std::string	mbaFileGetAbsPath(const std::string& path)
 void mbaLogError(const char* str)
 {
 	OutputDebugString(str);
+	printf("%s", str);
 }
 
 void mbaLogInfo(const char* str)
 {
 	OutputDebugString(str);
+	printf("%s", str);
 }
 
 #endif

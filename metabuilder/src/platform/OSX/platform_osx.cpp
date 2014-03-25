@@ -13,7 +13,7 @@
 #include <fnmatch.h>
 #include <dirent.h>
 
-bool mbaCreateDir(const char* osDir)
+bool _mbaCreateDir(const char* osDir)
 {
     struct stat statResult;
     int statresult = stat(osDir, &statResult);
@@ -66,34 +66,6 @@ void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)
         ++outCursor;
     }
 	*outCursor = '\0';
-}
-
-bool mbaCreateDirChain(const char* osDir_)
-{
-//    printf("Creating dir chain %s", osDir_);
-
-    char osDir[FILENAME_MAX] = {0};
-    mbaNormaliseFilePath(osDir, osDir_);
-    
-    if (osDir[0] == 0)
-        return false;
-    
-    const char* left = osDir;
-    for (const char* right = osDir+1; *right; ++right)
-    {
-        if (*right == '/')
-        {
-            *(char*)right = 0;
-            const char* partialPath = left;
-            
-            if (!mbaCreateDir(partialPath))
-                return false;
-            
-            *(char*)right = '/';
-        }
-    }
-    
-    return mbaCreateDir(osDir);
 }
 
 E_FileType mbaGetFileType(const std::string& filepath)

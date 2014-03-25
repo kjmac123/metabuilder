@@ -66,6 +66,7 @@ public:
 	
 	void Process();
 	
+	std::string mainSolutionName;
     std::string mainMetaMakeFileAbs;
     std::string generator;
 	std::string metabaseDirAbs;
@@ -145,7 +146,7 @@ protected:
 								m_groupOptions;
 				
 	StringVector				m_exeDirs;								
-				
+
 	ConfigVector				m_configs;
 };
 
@@ -244,6 +245,8 @@ void				mbCheckExpectedBlock(E_BlockType blockExpected, const char* cmdName);
 void				mbJoinArrays(StringVector* a, const StringVector& b);
 void				mbRemoveDuplicates(StringVector* strings);
 void				mbRemoveDuplicatesAndSort(StringVector* strings);
+
+bool				mbCreateDirChain(const char* osDir_);
 
 #include "makesetup.h"
 #include "config.h"

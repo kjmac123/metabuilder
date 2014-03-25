@@ -17,9 +17,8 @@ enum E_FileType
 	E_FileType_Dir
 };
 
-bool		mbaCreateDir(const char* osDir);
+bool		_mbaCreateDir(const char* osDir);
 void		mbaNormaliseFilePath(char* outFilePath, const char* inFilePath);
-bool		mbaCreateDirChain(const char* osDir_);
 E_FileType	mbaGetFileType(const std::string& filepath);
 bool		mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir);
 

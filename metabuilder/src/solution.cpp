@@ -37,6 +37,12 @@ static int luaFuncSolution(lua_State* lua)
     
 	mbGetActiveContext()->solution = new Solution(mbGetActiveContext()->metabase);
     mbGetActiveContext()->solution->name = name;
+
+	AppState* appState = mbGetAppState();
+	if (appState->isProcessingPrimaryMakefile)
+	{
+		appState->mainSolutionName = name;
+	}
     
     mbGetActiveContext()->activeBlockStack.push(mbGetActiveContext()->solution);
     return 0;
