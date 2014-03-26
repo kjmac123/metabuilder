@@ -13,6 +13,7 @@
 #include <fnmatch.h>
 #include <dirent.h>
 
+
 bool _mbaCreateDir(const char* osDir)
 {
     struct stat statResult;
@@ -35,6 +36,30 @@ bool _mbaCreateDir(const char* osDir)
     
 //    MB_LOGINFO("Created dir %s\n", osDir);
     return true;
+}
+
+bool mbaCreateLink(const char* src, const char* dst)
+{
+	char existingSrcPath[MB_MAX_PATH] = {0};
+	ssize_t readlinkResult = readlink(dst, existingSrcPath, sizeof(existingSrcPath));
+	if (readlinkResult > 0)
+	{
+		//link already exists
+		if (!stricmp(existingSrcPath, src))
+			return true;
+			
+		//Link is to a different location.
+		MB_LOGERROR("Cannot create symbolic link from %s to %s as destination is already linked to %s", src, dst, existingSrcPath);
+		mbExitError();
+		return 0;
+	}
+
+	int result = symlink(src, dst);
+	if (result == 0)
+		return true;
+
+	MB_LOGERROR("Failed to create symbolic link from %s to %s", src, dst);
+	return false;
 }
 
 void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)

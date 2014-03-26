@@ -41,6 +41,24 @@ static int luaFuncMkdir(lua_State* l)
 	return 0;
 }
 
+static int luaFuncMklink(lua_State* l)
+{
+    const char* src = lua_tostring(l, 1);
+    const char* dst = lua_tostring(l, 2);
+	
+	if (!src || !dst)
+	{
+		mbExitError();
+	}
+		
+	if (!mbaCreateLink(src, dst))
+	{
+		mbExitError();
+	}
+	
+	return 0;
+}
+
 static int luaFuncGetFileType(lua_State* l)
 {
     const char* filepath = lua_tostring(l, 1);
@@ -154,6 +172,9 @@ void luaRegisterWriterFuncs(lua_State* l)
     lua_pushcfunction(l, luaFuncMkdir);
     lua_setglobal(l, "mkdir");
 	
+    lua_pushcfunction(l, luaFuncMklink);
+    lua_setglobal(l, "mklink");
+
     lua_pushcfunction(l, luaFuncGetFileType);
     lua_setglobal(l, "getfiletype");
 	
