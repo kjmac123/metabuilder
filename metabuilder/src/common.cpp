@@ -230,7 +230,7 @@ PlatformBlock* MetaBuilderBlockBase::GetPlatformBlock(const char* configName)
 	for (int i = 0; i < (int)m_children.size(); ++i)
 	{
 		MetaBuilderBlockBase* child = m_children[i];
-		if (child->Type() == E_BlockType_Config && child->GetName() == configName)
+		if (child->Type() == E_BlockType_Platform && child->GetName() == configName)
 			return (PlatformBlock*)child;
 	}
 	
@@ -242,7 +242,7 @@ const PlatformBlock* MetaBuilderBlockBase::GetPlatformBlock(const char* configNa
 	for (int i = 0; i < (int)m_children.size(); ++i)
 	{
 		MetaBuilderBlockBase* child = m_children[i];
-		if (child->Type() == E_BlockType_Config && child->GetName() == configName)
+		if (child->Type() == E_BlockType_Platform && child->GetName() == configName)
 			return (PlatformBlock*)child;
 	}
 	
