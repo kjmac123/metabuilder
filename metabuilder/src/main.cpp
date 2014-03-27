@@ -145,6 +145,7 @@ int main(int argc, const char * argv[])
 			mbSolutionLuaRegister(l);
 			mbTargetLuaRegister(l);
 			mbConfigLuaRegister(l);
+			mbPlatformBlockLuaRegister(l);
 			
 			if (!mbGetAppState()->isProcessingPrimaryMakefile)
 			{

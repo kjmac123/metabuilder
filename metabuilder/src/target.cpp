@@ -5,6 +5,7 @@
 
 #include "platform/platform.h"
 
+
 static void BuildUniqueStringList(
 	StringVector* result,
 	StringVector* commonStrings,
@@ -73,14 +74,9 @@ E_BlockType Target::Type() const
 
 void Target::Process()
 {
-	AddHeadersAutomatically(&m_files);
-
-	for (std::map<std::string, StringVector>::iterator it = m_platformFiles.begin(); it != m_platformFiles.end(); ++it)
-	{
-		AddHeadersAutomatically(&it->second);
-	}
+	MetaBuilderBlockBase::Process();
 }
-
+/*
 void Target::AddFiles(const StringVector& files)
 {
 	mbJoinArrays(&m_files, files);
@@ -103,59 +99,75 @@ void Target::AddPlatformFiles(const StringVector& files, const char* platformNam
 	
 	mbJoinArrays(platformFiles, files);
 }
+*/
 
-void Target::GetPlatformFiles(StringVector* result, const char* platformName)
+void Target::GetPlatformFiles(StringVector* result, const char* platformName) const
 {
-	BuildUniqueStringList(result, &m_files, &m_platformFiles, platformName);
+	GetFiles(result);
+
+	if (platformName)
+	{
+		const PlatformBlock* platformBlock = GetPlatformBlock(platformName);
+		if (platformBlock)
+		{
+			platformBlock->GetFiles(result);
+		}
+	}
+	else
+	{
+		PlatformBlockVector platformBlocks;
+		GetPlatformBlocks(&platformBlocks);
+		for (int i = 0; i < platformBlocks.size(); ++i)
+		{
+			platformBlocks[i]->GetFiles(result);
+		}
+	}
 }
 
 void Target::GetPlatformFrameworks(StringVector* result, const char* platformName)
 {
-	BuildUniqueStringList(result, NULL, &platformFrameworks, platformName);
+	GetFrameworks(result);
+
+	if (platformName)
+	{
+		const PlatformBlock* platformBlock = GetPlatformBlock(platformName);
+		if (platformBlock)
+		{
+			platformBlock->GetFrameworks(result);
+		}
+	}
+	else
+	{
+		PlatformBlockVector platformBlocks;
+		GetPlatformBlocks(&platformBlocks);
+		for (int i = 0; i < platformBlocks.size(); ++i)
+		{
+			platformBlocks[i]->GetFrameworks(result);
+		}
+	}
 }
 
 void Target::GetPlatformResources(StringVector* result, const char* platformName)
 {
-	BuildUniqueStringList(result, NULL, &platformResources, platformName);
-}
+	GetResources(result);
 
-void Target::AddHeadersAutomatically(StringVector* files) const
-{
-	MetaBuilderContext* ctx = mbGetMainContext();
-	
-	StringVector result;
-	result.reserve(files->size()*2);
-	for (int i = 0; i < (int)files->size(); ++i)
+	if (platformName)
 	{
-		const std::string& filename = (*files)[i];
-		result.push_back(filename);
-		
-		char fileExt[MB_MAX_PATH];
-		mbPathGetFileExtension(fileExt, filename.c_str());
-		const char* sourceFileExtensions[] = {"cpp", "c", "m", "mm", NULL};
-		for (const char** sourceExtCursor = sourceFileExtensions; *sourceExtCursor; ++sourceExtCursor)
+		const PlatformBlock* platformBlock = GetPlatformBlock(platformName);
+		if (platformBlock)
 		{
-			if (!stricmp(*sourceExtCursor, fileExt))
-			{
-				const char* candidateExt[] = {"h", "inl", NULL};
-				for (const char** candidateExtCursor = candidateExt; *candidateExtCursor; ++candidateExtCursor)
-				{
-					char candidateRelativeName[MB_MAX_PATH];
-					mbPathReplaceFileExtension(candidateRelativeName, filename.c_str(), *candidateExtCursor);
-
-					char candidateFilename[MB_MAX_PATH];
-					sprintf(candidateFilename, "%s/%s", ctx->currentMetaMakeDirAbs.c_str(), candidateRelativeName);
-					if (mbFileExists(candidateFilename))
-					{
-						MB_LOGINFO("Automatically adding header file %s", candidateRelativeName);
-						result.push_back(candidateRelativeName);
-					}
-				}
-			}
+			platformBlock->GetResources(result);
 		}
 	}
-	
-	*files = result;
+	else
+	{
+		PlatformBlockVector platformBlocks;
+		GetPlatformBlocks(&platformBlocks);
+		for (int i = 0; i < platformBlocks.size(); ++i)
+		{
+			platformBlocks[i]->GetResources(result);
+		}
+	}
 }
 
 static int luaFuncTarget(lua_State* l)
@@ -168,11 +180,11 @@ static int luaFuncTarget(lua_State* l)
     
     Solution* solution = (Solution*)mbGetActiveContext()->ActiveBlock();
 
-    const char* targetName = lua_tostring(l, 1);
+    const char* name = lua_tostring(l, 1);
     
 	//Create new target instance.
     Target* target = new Target(solution);
-    target->name = targetName;
+    target->SetName(name);
     
 	solution->targetVector.push_back(target);
 
@@ -210,59 +222,6 @@ static int luaFuncTargetPCH(lua_State* l)
     return 0;
 }
 
-
-static void FilterFiles(StringVector* result, const StringVector& input)
-{
-	for (int i = 0; i < (int)input.size(); ++i)
-	{
-		const std::string& inputFilepath = input[i];
-
-		//Look for wildcard
-		if (inputFilepath.find('*') != std::string::npos)
-		{
-			const char* excludeDirs = NULL;
-			const char* delimiter = "|excludedirs=";
-			char* tmp = (char*)strstr(inputFilepath.c_str(), delimiter);
-			if (tmp)
-			{
-				excludeDirs = tmp + strlen(delimiter);
-				*tmp = '\0';
-			}
-
-			std::string dir = mbPathGetDir(inputFilepath);	
-
-			std::string filename = mbPathGetFilename(inputFilepath);
-			mbaBuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
-		}
-		else
-		{
-			result->push_back(inputFilepath);
-		}
-	}
-}
-
-static int luaFuncTargetFiles(lua_State* l)
-{
-    Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-	
-    luaL_checktype(l, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 1);
-    
-	StringVector inputFiles;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 1, i);
-        const char* filename = lua_tostring(l, -1);
-		inputFiles.push_back(filename);
-    }
-	
-	StringVector filteredList;
-	FilterFiles(&filteredList, inputFiles);
-	target->AddFiles(filteredList);
-		
-    return 0;
-}
-
 static void AddPlatformSpecificStrings(std::map<std::string, StringVector>* platformStringMap, lua_State* l)
 {
 	const char* platformName = lua_tostring(l, 1);
@@ -290,7 +249,7 @@ static void AddPlatformSpecificStrings(std::map<std::string, StringVector>* plat
         platformFiles.push_back(tmp);
     }
 }
-
+/*
 static int luaFuncTargetPlatformFiles(lua_State* l)
 {
 	const char* platformName = lua_tostring(l, 1);
@@ -314,20 +273,8 @@ static int luaFuncTargetPlatformFiles(lua_State* l)
 	
     return 0;
 }
+*/
 
-static int luaFuncTargetPlatformFrameworks(lua_State* l)
-{
-    Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-	AddPlatformSpecificStrings(&target->platformFrameworks, l);
-    return 0;
-}
-
-static int luaFuncTargetPlatformResources(lua_State* l)
-{
-    Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-	AddPlatformSpecificStrings(&target->platformResources, l);
-    return 0;
-}
 
 static int luaFuncTargetDepends(lua_State* l)
 {
@@ -358,23 +305,9 @@ void mbTargetLuaRegister(lua_State* l)
 	
     lua_pushcfunction(l, luaFuncTargetPCH);
     lua_setglobal(l, "pch");
-        
-    lua_pushcfunction(l, luaFuncTargetFiles);
-    lua_setglobal(l, "files");
-
-    lua_pushcfunction(l, luaFuncTargetPlatformFrameworks);
-    lua_setglobal(l, "platformframeworks");
-	
-    lua_pushcfunction(l, luaFuncTargetPlatformResources);
-    lua_setglobal(l, "platformresources");
-	
+        	
     lua_pushcfunction(l, luaFuncTargetDepends);
     lua_setglobal(l, "depends");
-	
-    lua_pushcfunction(l, luaFuncTargetFiles);
-    lua_setglobal(l, "files");
-	
-    lua_pushcfunction(l, luaFuncTargetPlatformFiles);
-    lua_setglobal(l, "platformfiles");
 }
+
 

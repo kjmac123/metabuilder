@@ -36,7 +36,7 @@ static int luaFuncSolution(lua_State* lua)
 	assert(!activeBlock);
     
 	mbGetActiveContext()->solution = new Solution(mbGetActiveContext()->metabase);
-    mbGetActiveContext()->solution->name = name;
+    mbGetActiveContext()->solution->SetName(name);
 
 	AppState* appState = mbGetAppState();
 	if (appState->isProcessingPrimaryMakefile)

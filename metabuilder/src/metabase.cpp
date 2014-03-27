@@ -36,7 +36,7 @@ static int luaFuncMetabaseEnd(lua_State* lua)
 	return 0;
 }
 
-static int luaFuncMetabasePlatform(lua_State* l)
+static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
 {
     if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->Type() != E_BlockType_Metabase)
     {
@@ -54,7 +54,7 @@ static int luaFuncMetabasePlatform(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
         const char* platform = lua_tostring(l, -1);
-		gen->currentPlatforms.push_back(platform);
+		gen->supportedPlatforms.push_back(platform);
     }
 		
 	return 0;
@@ -84,8 +84,8 @@ void mbMetabaseLuaRegister(lua_State* l)
 	lua_pushcfunction(l, luaFuncMetabaseEnd);
     lua_setglobal(l, "metabase_end");
 		
-	lua_pushcfunction(l, luaFuncMetabasePlatform);
-    lua_setglobal(l, "platform");
+	lua_pushcfunction(l, luaFuncMetabaseSupportedPlatforms);
+    lua_setglobal(l, "supportedplatforms");
 
 	lua_pushcfunction(l, luaFuncMetabaseWriter);
     lua_setglobal(l, "writer");

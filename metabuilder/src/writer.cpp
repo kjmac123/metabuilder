@@ -335,6 +335,96 @@ static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValu
 	lua_setfield(l, -2, "options");
 }
 
+static void mbWriterWriteConfigTable(lua_State* l, Metabase* metabase, Solution* solution, Target* target, 	const std::string& configName)
+{
+	//Flatten macros
+	StringVector defines;
+	mbBuildFlatStringListDefines(&defines,	target,	configName.c_str());
+
+	//Flatten include dirs
+	StringVector includeDirs;
+	mbBuildFlatStringListGetIncludeDirs(&includeDirs, target, configName.c_str());
+
+	//Flatten lib dirs
+	StringVector libsDirs;
+	mbBuildFlatStringListGetLibDirs(&libsDirs, target, configName.c_str());
+
+	//Flatten libs
+	StringVector libs;
+	mbBuildFlatStringListGetLibs(&libs,	target, configName.c_str());
+
+	//Flatten exe dirs
+	StringVector exeDirs;
+	mbBuildFlatStringListGetExeDirs(&exeDirs, target, configName.c_str());
+
+	//Set macros
+	int nDefines = (int)defines.size();
+	lua_createtable(l, 0, nDefines);
+	
+	{
+		for (int kDefine = 0; kDefine < nDefines; ++kDefine)
+		{	
+			lua_pushstring(l, defines[kDefine].c_str());
+			lua_rawseti(l, -2, kDefine+1);
+		}
+	}
+	lua_setfield(l, -2, "defines");
+								
+	//Includes
+	lua_createtable(l, 0, 0);
+	{
+		for (int jDir = 0; jDir < (int)includeDirs.size(); ++jDir)
+		{
+			lua_pushstring(l, includeDirs[jDir].c_str());
+			lua_rawseti(l, -2, jDir+1);
+		}
+	}
+	lua_setfield(l, -2, "includedirs");
+
+	//Lib dirs
+	lua_createtable(l, 0, 0);
+	{
+		for (int jDir = 0; jDir < (int)libsDirs.size(); ++jDir)
+		{
+			lua_pushstring(l, libsDirs[jDir].c_str());
+			lua_rawseti(l, -2, jDir+1);
+		}
+	}
+	lua_setfield(l, -2, "libdirs");
+	
+	//Libs
+	lua_createtable(l, 0, 0);
+	{
+		for (int jLib = 0; jLib < (int)libs.size(); ++jLib)
+		{
+			lua_pushstring(l, libs[jLib].c_str());
+			lua_rawseti(l, -2, jLib+1);
+		}
+	}
+	lua_setfield(l, -2, "libs");
+
+	//Exe dirs
+	lua_createtable(l, 0, 0);
+	{
+		for (int jExeDir = 0; jExeDir < (int)exeDirs.size(); ++jExeDir)
+		{
+			lua_pushstring(l, exeDirs[jExeDir].c_str());
+			lua_rawseti(l, -2, jExeDir+1);
+		}
+	}
+	lua_setfield(l, -2, "exedirs");
+
+	//Options
+	std::map<std::string, KeyValueMap> options;
+	mbFlattenConfigOptions(&options,
+		metabase,
+		solution,
+		target,
+		&configName);
+	mbWriterSetOptions(l, options);
+
+}
+
 void mbWriterDo(MetaBuilderContext* ctx)
 {
 	mbPushActiveContext(ctx);
@@ -353,9 +443,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
         MB_LOGERROR("unknown IDE specified.");
         mbExitError();
     }
+	metabase->Process();
 			
 	Solution* solution = ctx->solution;
-	solution->Process();
 	
 	//Global information table
 	{
@@ -403,7 +493,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 	{
 		lua_createtable(l, 0, 4);
 				
-		lua_pushstring(l, solution->name.c_str());
+		lua_pushstring(l, solution->GetName().c_str());
 		lua_setfield(l, -2, "name");
 
 		//Target table
@@ -416,7 +506,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 
 			lua_createtable(l, 0, 2);
 			{
-				lua_pushstring(l, target->name.c_str());
+				lua_pushstring(l, target->GetName().c_str());
 				lua_setfield(l, -2, "name");
 
 				lua_pushstring(l, target->targetType.c_str());
@@ -425,15 +515,16 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				lua_pushstring(l, target->pch.c_str());
 				lua_setfield(l, -2, "pch");
 				
-				//All regular files across all platforms
+				//All regular files across all platforms for this target
 				{
 					StringVector allFiles;
+					
 					target->GetPlatformFiles(&allFiles, NULL);
 					
-					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->currentPlatforms.size(); ++jPlatform)
+					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 					{
-						target->GetPlatformResources(&allFiles, ctx->metabase->currentPlatforms[jPlatform].c_str());
-						target->GetPlatformFrameworks(&allFiles, ctx->metabase->currentPlatforms[jPlatform].c_str());
+						target->GetPlatformResources(&allFiles, ctx->metabase->supportedPlatforms[jPlatform].c_str());
+						target->GetPlatformFrameworks(&allFiles, ctx->metabase->supportedPlatforms[jPlatform].c_str());
 					}
 
 					lua_createtable(l, 0, 0);
@@ -450,104 +541,22 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				}
 
 				//Configs
-				int nConfigs = (int)target->GetConfigs().size();
+				ConfigVector configs;
+				target->GetConfigs(&configs);
+				int nConfigs = (int)configs.size();
 				lua_createtable(l, 0, 0);
 				{
 					for (int jConfig = 0; jConfig < nConfigs; ++jConfig)
 					{
-						Config* config = target->GetConfigs()[jConfig];
+						Config* config = configs[jConfig];
 						
-						//Flatten macros
-						StringVector defines;
-						mbBuildFlatStringListDefines(&defines,	target,	config->name.c_str());
-
-						//Flatten include dirs
-						StringVector includeDirs;
-						mbBuildFlatStringListGetIncludeDirs(&includeDirs, target, config->name.c_str());
-
-						//Flatten lib dirs
-						StringVector libsDirs;
-						mbBuildFlatStringListGetLibDirs(&libsDirs, target, config->name.c_str());
-
-						//Flatten libs
-						StringVector libs;
-						mbBuildFlatStringListGetLibs(&libs,	target, config->name.c_str());
-
-						//Flatten exe dirs
-						StringVector exeDirs;
-						mbBuildFlatStringListGetExeDirs(&exeDirs, target, config->name.c_str());
-
 						lua_createtable(l, 0, 0);
 						{
 							//Set config name
 							lua_pushstring(l, config->name.c_str());
 							lua_setfield(l, -2, "name");
-							
-							//Set macros
-							int nDefines = (int)defines.size();
-							lua_createtable(l, 0, nDefines);
-							
-							{
-								for (int kDefine = 0; kDefine < nDefines; ++kDefine)
-								{	
-									lua_pushstring(l, defines[kDefine].c_str());
-									lua_rawseti(l, -2, kDefine+1);
-								}
-							}
-							lua_setfield(l, -2, "defines");
-														
-							//Includes
-							lua_createtable(l, 0, 0);
-							{
-								for (int jDir = 0; jDir < (int)includeDirs.size(); ++jDir)
-								{
-									lua_pushstring(l, includeDirs[jDir].c_str());
-									lua_rawseti(l, -2, jDir+1);
-								}
-							}
-							lua_setfield(l, -2, "includedirs");
-
-							//Lib dirs
-							lua_createtable(l, 0, 0);
-							{
-								for (int jDir = 0; jDir < (int)libsDirs.size(); ++jDir)
-								{
-									lua_pushstring(l, libsDirs[jDir].c_str());
-									lua_rawseti(l, -2, jDir+1);
-								}
-							}
-							lua_setfield(l, -2, "libdirs");
-							
-							//Libs
-							lua_createtable(l, 0, 0);
-							{
-								for (int jLib = 0; jLib < (int)libs.size(); ++jLib)
-								{
-									lua_pushstring(l, libs[jLib].c_str());
-									lua_rawseti(l, -2, jLib+1);
-								}
-							}
-							lua_setfield(l, -2, "libs");
-
-							//Exe dirs
-							lua_createtable(l, 0, 0);
-							{
-								for (int jExeDir = 0; jExeDir < (int)exeDirs.size(); ++jExeDir)
-								{
-									lua_pushstring(l, exeDirs[jExeDir].c_str());
-									lua_rawseti(l, -2, jExeDir+1);
-								}
-							}
-							lua_setfield(l, -2, "exedirs");
-
-							//Options
-							std::map<std::string, KeyValueMap> options;
-							mbFlattenConfigOptions(&options,
-								metabase,
-								solution,
-								target,
-								&config->name);
-							mbWriterSetOptions(l, options);
+						
+							mbWriterWriteConfigTable(l, metabase, solution, target, config->name);
 						}
 						lua_rawseti(l, -2, jConfig+1);
 					}
@@ -558,10 +567,10 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				lua_createtable(l, 0, 0);
 				{
 					std::set<std::string> uniqueFiles;
-					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->currentPlatforms.size(); ++jPlatform)
+					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 					{
 						StringVector files;
-						target->GetPlatformFiles(&files, ctx->metabase->currentPlatforms[jPlatform].c_str());
+						target->GetPlatformFiles(&files, ctx->metabase->supportedPlatforms[jPlatform].c_str());
 						for (int jFile = 0; jFile < (int)files.size(); ++jFile)
 						{
 							uniqueFiles.insert(files[jFile]);
@@ -581,10 +590,10 @@ void mbWriterDo(MetaBuilderContext* ctx)
 
 				//Frameworks
 				std::set<std::string> uniqueFrameworks;
-				for (int jPlatform = 0; jPlatform < (int)ctx->metabase->currentPlatforms.size(); ++jPlatform)
+				for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 				{
 					StringVector frameworks;
-					target->GetPlatformFrameworks(&frameworks, ctx->metabase->currentPlatforms[jPlatform].c_str());
+					target->GetPlatformFrameworks(&frameworks, ctx->metabase->supportedPlatforms[jPlatform].c_str());
 					for (int jFile = 0; jFile < (int)frameworks.size(); ++jFile)
 					{
 						uniqueFrameworks.insert(frameworks[jFile]);
@@ -604,10 +613,10 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				
 				//Resources
 				std::set<std::string> uniqueResources;
-				for (int jPlatform = 0; jPlatform < (int)ctx->metabase->currentPlatforms.size(); ++jPlatform)
+				for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 				{
 					StringVector resources;
-					target->GetPlatformResources(&resources, ctx->metabase->currentPlatforms[jPlatform].c_str());
+					target->GetPlatformResources(&resources, ctx->metabase->supportedPlatforms[jPlatform].c_str());
 					for (int jFile = 0; jFile < (int)uniqueResources.size(); ++jFile)
 					{
 						uniqueResources.insert(resources[jFile]);

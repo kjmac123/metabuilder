@@ -16,6 +16,7 @@
 		BE11DC8718BB9713008C869D /* config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC8518BB9713008C869D /* config.cpp */; };
 		BE11DC8A18BB971A008C869D /* target.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC8818BB971A008C869D /* target.cpp */; };
 		BE1E5DC118C753C9003A4CFB /* writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE1E5DBF18C753C9003A4CFB /* writer.cpp */; };
+		BE4F100418E42D58009DA1CF /* platformblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE4F100218E42D58009DA1CF /* platformblock.cpp */; };
 		BE72F53218DB155D0017B474 /* platform_osx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE72F53118DB155D0017B474 /* platform_osx.cpp */; };
 		BE72F53518DB48DD0017B474 /* writer_msvc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE72F53318DB48DD0017B474 /* writer_msvc.cpp */; };
 		BE854F2718CA24B4008EAFCD /* writer_xcode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE854F2518CA24B4008EAFCD /* writer_xcode.cpp */; };
@@ -84,6 +85,8 @@
 		BE11DC8918BB971A008C869D /* target.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = target.h; sourceTree = "<group>"; };
 		BE1E5DBF18C753C9003A4CFB /* writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = writer.cpp; sourceTree = "<group>"; };
 		BE1E5DC018C753C9003A4CFB /* writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = writer.h; sourceTree = "<group>"; };
+		BE4F100218E42D58009DA1CF /* platformblock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = platformblock.cpp; sourceTree = "<group>"; };
+		BE4F100318E42D58009DA1CF /* platformblock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platformblock.h; sourceTree = "<group>"; };
 		BE72F52E18DB14C30017B474 /* core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = core.h; sourceTree = "<group>"; };
 		BE72F53018DB14F20017B474 /* platform_windows.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = platform_windows.cpp; path = Windows/platform_windows.cpp; sourceTree = "<group>"; };
 		BE72F53118DB155D0017B474 /* platform_osx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = platform_osx.cpp; path = src/platform/OSX/platform_osx.cpp; sourceTree = SOURCE_ROOT; };
@@ -233,6 +236,8 @@
 				BE11DC7A18BB950B008C869D /* metabase.cpp */,
 				BE11DC8218BB957E008C869D /* metabase.h */,
 				BEAD3A6F178B618F005E695D /* main.cpp */,
+				BE4F100218E42D58009DA1CF /* platformblock.cpp */,
+				BE4F100318E42D58009DA1CF /* platformblock.h */,
 				BE11DC7C18BB950B008C869D /* solution.cpp */,
 				BE11DC8418BB957E008C869D /* solution.h */,
 				BE11DC8818BB971A008C869D /* target.cpp */,
@@ -373,6 +378,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE4F100418E42D58009DA1CF /* platformblock.cpp in Sources */,
 				BE1E5DC118C753C9003A4CFB /* writer.cpp in Sources */,
 				BEAD3A71178B618F005E695D /* main.cpp in Sources */,
 				BE0083A718DDEF8D00F3E12F /* makesetup.cpp in Sources */,

@@ -12,7 +12,6 @@ public:
 	
 	virtual void Process();
 			
-    std::string         name;
     std::string         intDir;
     std::string         outDir;
     

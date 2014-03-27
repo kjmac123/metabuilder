@@ -13,6 +13,85 @@ static std::list<MetaBuilderContext*>		g_contexts; //Has memory ownership of con
 static std::list<MetaBuilderContext*>		g_contextStack;
 static std::stack<std::string>				g_doFileCurrentDirStack;
 
+#define STRINGGROUP_FILES					"files"
+#define STRINGGROUP_DEFINES					"defines"
+#define STRINGGROUP_INCLUDEDIRS				"includedirs"
+#define STRINGGROUP_LIBDIRS					"libdirs"
+#define STRINGGROUP_LIBS					"libs"
+#define STRINGGROUP_EXEDIRS					"exedirs"
+#define STRINGGROUP_RESOURCES				"resources"
+#define STRINGGROUP_FRAMEWORKS				"frameworks"
+
+
+static void FilterFiles(StringVector* result, const StringVector& input)
+{
+	for (int i = 0; i < (int)input.size(); ++i)
+	{
+		const std::string& inputFilepath = input[i];
+
+		//Look for wildcard
+		if (inputFilepath.find('*') != std::string::npos)
+		{
+			const char* excludeDirs = NULL;
+			const char* delimiter = "|excludedirs=";
+			char* tmp = (char*)strstr(inputFilepath.c_str(), delimiter);
+			if (tmp)
+			{
+				excludeDirs = tmp + strlen(delimiter);
+				*tmp = '\0';
+			}
+
+			std::string dir = mbPathGetDir(inputFilepath);	
+
+			std::string filename = mbPathGetFilename(inputFilepath);
+			mbaBuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
+		}
+		else
+		{
+			result->push_back(inputFilepath);
+		}
+	}
+}
+
+static void AddHeadersAutomatically(StringVector* files) 
+{
+	MetaBuilderContext* ctx = mbGetMainContext();
+	
+	StringVector result;
+	result.reserve(files->size()*2);
+	for (int i = 0; i < (int)files->size(); ++i)
+	{
+		const std::string& filename = (*files)[i];
+		result.push_back(filename);
+		
+		char fileExt[MB_MAX_PATH];
+		mbPathGetFileExtension(fileExt, filename.c_str());
+		const char* sourceFileExtensions[] = {"cpp", "c", "m", "mm", NULL};
+		for (const char** sourceExtCursor = sourceFileExtensions; *sourceExtCursor; ++sourceExtCursor)
+		{
+			if (!stricmp(*sourceExtCursor, fileExt))
+			{
+				const char* candidateExt[] = {"h", "inl", NULL};
+				for (const char** candidateExtCursor = candidateExt; *candidateExtCursor; ++candidateExtCursor)
+				{
+					char candidateRelativeName[MB_MAX_PATH];
+					mbPathReplaceFileExtension(candidateRelativeName, filename.c_str(), *candidateExtCursor);
+
+					char candidateFilename[MB_MAX_PATH];
+					sprintf(candidateFilename, "%s/%s", ctx->currentMetaMakeDirAbs.c_str(), candidateRelativeName);
+					if (mbFileExists(candidateFilename))
+					{
+						MB_LOGINFO("Automatically adding header file %s", candidateRelativeName);
+						result.push_back(candidateRelativeName);
+					}
+				}
+			}
+		}
+	}
+	
+	*files = result;
+}
+
 void AppState::Process()
 {
 	if (makeSetup)
@@ -49,6 +128,10 @@ void AppState::Process()
 MetaBuilderBlockBase::MetaBuilderBlockBase(MetaBuilderBlockBase* parent)
 {
 	m_parent = parent;
+	if (m_parent)
+	{
+		m_parent->m_children.push_back(this);
+	}
 }
 
 MetaBuilderBlockBase::~MetaBuilderBlockBase()
@@ -57,34 +140,110 @@ MetaBuilderBlockBase::~MetaBuilderBlockBase()
 
 void MetaBuilderBlockBase::Process()
 {
+	std::map<std::string, StringVector>::iterator it = m_stringGroups.find(STRINGGROUP_FILES);
+	if (it != m_stringGroups.end())
+	{
+		AddHeadersAutomatically(&it->second);
+	}
+	
+	for (int i = 0; i < m_children.size(); ++i)
+	{
+		m_children[i]->Process();
+	}
+}
+
+void MetaBuilderBlockBase::SetName(const char* name)
+{
+	m_name = name;
+}
+
+const std::string& MetaBuilderBlockBase::GetName() const
+{
+	return m_name;
 }
 
 Config* MetaBuilderBlockBase::AcquireConfig(const char* configName)
 {
-	for (int i = 0; i < (int)m_configs.size(); ++i)
-	{
-		Config* config = m_configs[i];
-		if (config->name == configName)
-			return config;
-	}
+	Config* config = GetConfig(configName);
+	if (config)
+		return config;
 
-    Config* config = new Config(this);
+	config = new Config(this);
     config->name = configName;
-	m_configs.push_back(config);
 	return config;
 }
 
-const ConfigVector& MetaBuilderBlockBase::GetConfigs() const
+void MetaBuilderBlockBase::GetConfigs(ConfigVector* result) const
 {
-	return m_configs;
+	for (int i = 0; i < (int)m_children.size(); ++i)
+	{
+		MetaBuilderBlockBase* child = m_children[i];
+		if (child->Type() == E_BlockType_Config)
+		{
+			result->push_back((Config*)child);
+		}
+	}
 }
 
-Config* MetaBuilderBlockBase::GetConfig(const char* configName)
+Config* MetaBuilderBlockBase::GetConfig(const char* name)
 {
-	for (int i = 0; i < (int)m_configs.size(); ++i)
+	for (int i = 0; i < (int)m_children.size(); ++i)
 	{
-		if (m_configs[i]->name == configName)
-			return m_configs[i];
+		MetaBuilderBlockBase* child = m_children[i];
+		if (child->Type() == E_BlockType_Config && child->GetName() == name)
+			return (Config*)child;
+	}
+	
+	return NULL;
+}
+
+const Config* MetaBuilderBlockBase::GetConfig(const char* name) const
+{
+	return const_cast<MetaBuilderBlockBase*>(this)->GetConfig(name);
+}
+
+PlatformBlock* MetaBuilderBlockBase::AcquirePlatformBlock(const char* name)
+{
+	PlatformBlock* b = GetPlatformBlock(name);
+	if (b)
+		return b;
+
+	b = new PlatformBlock(this);
+    b->m_name = name;
+	return b;
+}
+
+void MetaBuilderBlockBase::GetPlatformBlocks(PlatformBlockVector* result) const
+{
+	for (int i = 0; i < (int)m_children.size(); ++i)
+	{
+		MetaBuilderBlockBase* child = m_children[i];
+		if (child->Type() == E_BlockType_Platform)
+		{
+			result->push_back((PlatformBlock*)child);
+		}
+	}
+}
+
+PlatformBlock* MetaBuilderBlockBase::GetPlatformBlock(const char* configName)
+{
+	for (int i = 0; i < (int)m_children.size(); ++i)
+	{
+		MetaBuilderBlockBase* child = m_children[i];
+		if (child->Type() == E_BlockType_Config && child->GetName() == configName)
+			return (PlatformBlock*)child;
+	}
+	
+	return NULL;
+}
+
+const PlatformBlock* MetaBuilderBlockBase::GetPlatformBlock(const char* configName) const
+{
+	for (int i = 0; i < (int)m_children.size(); ++i)
+	{
+		MetaBuilderBlockBase* child = m_children[i];
+		if (child->Type() == E_BlockType_Config && child->GetName() == configName)
+			return (PlatformBlock*)child;
 	}
 	
 	return NULL;
@@ -95,29 +254,106 @@ MetaBuilderBlockBase* MetaBuilderBlockBase::GetParent()
 	return m_parent;
 }
 
-void MetaBuilderBlockBase::AddDefines(const StringVector& defines)
+void MetaBuilderBlockBase::AddFiles(const StringVector& files)
 {
-	for (size_t i = 0; i < defines.size(); ++i)
-	{
-		m_defines.push_back(defines[i]);
-	}
+	StringVector* existing = AcquireStringGroup(STRINGGROUP_FILES);
+	mbJoinArrays(existing, files);
 };
 
-void MetaBuilderBlockBase::GetDefines(StringVector* result, const char* configName) 
+void MetaBuilderBlockBase::GetFiles(StringVector* result/*, const char* configName*/) const
 {
-	for (size_t i = 0; i < m_defines.size(); ++i)
+	const StringVector* existing = GetStringGroup(STRINGGROUP_FILES);
+	if (existing)
 	{
-		result->push_back(m_defines[i]);
+		mbJoinArrays(result, *existing);
+	}
+	
+	/*
+	if (configName)
+	{
+		Config* config = GetConfig(configName);
+		if (config->GetName() == configName)
+		{
+			config->GetFiles(result, NULL);
+		}
+	}
+	*/
+}
+
+void MetaBuilderBlockBase::AddResources(const StringVector& resources)
+{
+	StringVector* existing = AcquireStringGroup(STRINGGROUP_RESOURCES);
+	mbJoinArrays(existing, resources);
+};
+
+void MetaBuilderBlockBase::GetResources(StringVector* result/*, const char* configName*/) const
+{
+	const StringVector* existing = GetStringGroup(STRINGGROUP_RESOURCES);
+	if (existing)
+	{
+		mbJoinArrays(result, *existing);
+	}
+	
+	/*
+	if (configName)
+	{
+		Config* config = GetConfig(configName);
+		if (config->GetName() == configName)
+		{
+			config->GetResources(result, NULL);
+		}
+	}
+	*/
+}
+
+void MetaBuilderBlockBase::AddFrameworks(const StringVector& frameworks)
+{
+	StringVector* existing = AcquireStringGroup(STRINGGROUP_FRAMEWORKS);
+	mbJoinArrays(existing, frameworks);
+};
+
+void MetaBuilderBlockBase::GetFrameworks(StringVector* result/*, const char* configName*/) const
+{
+	const StringVector* existing = GetStringGroup(STRINGGROUP_FRAMEWORKS);
+	if (existing)
+	{
+		mbJoinArrays(result, *existing);
+	}
+	
+	/*
+	if (configName)
+	{
+		Config* config = GetConfig(configName);
+		if (config->GetName() == configName)
+		{
+			config->GetFrameworks(result, NULL);
+		}
+	}
+	*/
+}
+
+void MetaBuilderBlockBase::AddDefines(const StringVector& defines)
+{
+	StringVector* existing = AcquireStringGroup(STRINGGROUP_DEFINES);
+	mbJoinArrays(existing, defines);
+};
+
+void MetaBuilderBlockBase::GetDefines(StringVector* result, const char* configName) const
+{
+	const StringVector* existing = GetStringGroup(STRINGGROUP_DEFINES);
+	if (existing)
+	{
+		mbJoinArrays(result, *existing);
 	}
 	
 	if (configName)
 	{
-		for (size_t i = 0; i < m_configs.size(); ++i)
+		const Config* config = GetConfig(configName);
+		if (config)
 		{
-			if (m_configs[i]->name == configName)
+			if (config->GetName() == configName)
 			{
-				m_configs[i]->GetDefines(result, NULL);
-				break;
+				config->GetDefines(result, NULL);
 			}
 		}
 	}
@@ -125,27 +361,26 @@ void MetaBuilderBlockBase::GetDefines(StringVector* result, const char* configNa
 
 void MetaBuilderBlockBase::AddIncludeDirs(const StringVector& includeDirs)
 {
-	for (size_t i = 0; i < includeDirs.size(); ++i)
-	{
-		m_includedirs.push_back(includeDirs[i]);
-	}
+	StringVector* existing = AcquireStringGroup(STRINGGROUP_INCLUDEDIRS);
+	mbJoinArrays(existing, includeDirs);
 };
 
-void MetaBuilderBlockBase::GetIncludeDirs(StringVector* result, const char* configName)
+void MetaBuilderBlockBase::GetIncludeDirs(StringVector* result, const char* configName) const
 {
-	for (size_t i = 0; i < m_includedirs.size(); ++i)
+	const StringVector* existing = GetStringGroup(STRINGGROUP_INCLUDEDIRS);
+	if (existing)
 	{
-		result->push_back(m_includedirs[i]);
+		mbJoinArrays(result, *existing);
 	}
 	
 	if (configName)
 	{
-		for (size_t i = 0; i < m_configs.size(); ++i)
+		const Config* config = GetConfig(configName);
+		if (config)
 		{
-			if (m_configs[i]->name == configName)
+			if (config->GetName() == configName)
 			{
-				m_configs[i]->GetIncludeDirs(result, NULL);
-				break;
+				config->GetIncludeDirs(result, NULL);
 			}
 		}
 	}
@@ -153,27 +388,27 @@ void MetaBuilderBlockBase::GetIncludeDirs(StringVector* result, const char* conf
 
 void MetaBuilderBlockBase::AddLibDirs(const StringVector& libDirs)
 {
-	for (int i = 0; i < (int)libDirs.size(); ++i)
-	{
-		m_librarydirs.push_back(libDirs[i]);
-	}
+	StringVector* existing = AcquireStringGroup(STRINGGROUP_LIBDIRS);
+	mbJoinArrays(existing, libDirs);
+
 };
 
-void MetaBuilderBlockBase::GetLibDirs(StringVector* result, const char* configName)
+void MetaBuilderBlockBase::GetLibDirs(StringVector* result, const char* configName) const
 {
-	for (size_t i = 0; i < m_librarydirs.size(); ++i)
+	const StringVector* existing = GetStringGroup(STRINGGROUP_LIBDIRS);
+	if (existing)
 	{
-		result->push_back(m_librarydirs[i]);
+		mbJoinArrays(result, *existing);
 	}
 	
 	if (configName)
 	{
-		for (size_t i = 0; i < m_configs.size(); ++i)
+		const Config* config = GetConfig(configName);
+		if (config)
 		{
-			if (m_configs[i]->name == configName)
+			if (config->GetName() == configName)
 			{
-				m_configs[i]->GetLibDirs(result, NULL);
-				break;
+				config->GetLibDirs(result, NULL);
 			}
 		}
 	}
@@ -181,41 +416,68 @@ void MetaBuilderBlockBase::GetLibDirs(StringVector* result, const char* configNa
 
 void MetaBuilderBlockBase::AddLibs(const StringVector& libs)
 {
-	for (int i = 0; i < (int)libs.size(); ++i)
-	{
-		m_libs.push_back(libs[i]);
-	}
+	StringVector* existing = AcquireStringGroup(STRINGGROUP_LIBS);
+	mbJoinArrays(existing, libs);
 };
 
-void MetaBuilderBlockBase::GetLibs(StringVector* result, const char* configName) 
+void MetaBuilderBlockBase::GetLibs(StringVector* result, const char* configName) const
 {
-	for (size_t i = 0; i < m_libs.size(); ++i)
+	const StringVector* existing = GetStringGroup(STRINGGROUP_LIBS);
+	if (existing)
 	{
-		result->push_back(m_libs[i]);
+		mbJoinArrays(result, *existing);
 	}
 	
 	if (configName)
 	{
-		for (size_t i = 0; i < m_configs.size(); ++i)
+		const Config* config = GetConfig(configName);
+		if (config)
 		{
-			if (m_configs[i]->name == configName)
+			if (config->GetName() == configName)
 			{
-				m_configs[i]->GetLibs(result, NULL);
-				break;
+				config->GetLibs(result, NULL);
 			}
 		}
 	}
 }
 
+StringVector* MetaBuilderBlockBase::AcquireStringGroup(const char* groupName)
+{
+	std::map<std::string, StringVector>::iterator it = m_stringGroups.find(groupName);
+	
+	if (it == m_stringGroups.end())
+	{
+		//Insert new vector as one does not exist already for this platform.
+		std::pair<std::map<std::string, StringVector>::iterator, bool> result =
+			m_stringGroups.insert(std::make_pair(groupName, StringVector()));
+		
+		it = result.first;
+	}
+	
+	return &it->second;
+}
+
+const StringVector* MetaBuilderBlockBase::GetStringGroup(const char* groupName) const
+{
+	std::map<std::string, StringVector>::const_iterator it = m_stringGroups.find(groupName);
+	
+	if (it == m_stringGroups.end())
+	{
+		return NULL;
+	}
+	
+	return &it->second;
+}
+
 void MetaBuilderBlockBase::SetOption(const std::string& group, const std::string& key, const std::string& value)
 {
-	std::map<std::string, KeyValueMap>::iterator it = m_groupOptions.find(group);
+	std::map<std::string, KeyValueMap>::iterator it = m_keyValueGroups.find(group);
 	
-	if (it == m_groupOptions.end())
+	if (it == m_keyValueGroups.end())
 	{
 		//Insert new vector as one does not exist already for this platform.
 		std::pair<std::map<std::string, KeyValueMap>::iterator, bool> result =
-			m_groupOptions.insert(std::make_pair(group, KeyValueMap()));
+			m_keyValueGroups.insert(std::make_pair(group, KeyValueMap()));
 		
 		it = result.first;
 	}
@@ -226,15 +488,17 @@ void MetaBuilderBlockBase::SetOption(const std::string& group, const std::string
 
 void MetaBuilderBlockBase::GetOptions(std::map<std::string, KeyValueMap>* result, const std::string* configName) const
 {
-	mbMergeOptions(result, m_groupOptions);
+	mbMergeOptions(result, m_keyValueGroups);
 	
 	if (configName)
 	{
-		for (size_t i = 0; i < m_configs.size(); ++i)
+		ConfigVector configs;
+		GetConfigs(&configs);
+		for (int i = 0; i < (int)configs.size(); ++i)
 		{
-			if (m_configs[i]->name == *configName)
+			if (configs[i]->name == *configName)
 			{
-				m_configs[i]->GetOptions(result, NULL);
+				configs[i]->GetOptions(result, NULL);
 				break;
 			}
 		}
@@ -249,21 +513,22 @@ void MetaBuilderBlockBase::AddExeDirs(const StringVector& exeDirs)
 	}
 }
 
-void MetaBuilderBlockBase::GetExeDirs(StringVector* result, const char* configName)
+void MetaBuilderBlockBase::GetExeDirs(StringVector* result, const char* configName) const
 {
-	for (size_t i = 0; i < m_exeDirs.size(); ++i)
+	const StringVector* existing = GetStringGroup(STRINGGROUP_EXEDIRS);
+	if (existing)
 	{
-		result->push_back(m_exeDirs[i]);
+		mbJoinArrays(result, *existing);
 	}
 	
 	if (configName)
 	{
-		for (size_t i = 0; i < m_configs.size(); ++i)
+		const Config* config = GetConfig(configName);
+		if (config)
 		{
-			if (m_configs[i]->name == configName)
+			if (config->GetName() == configName)
 			{
-				m_configs[i]->GetExeDirs(result, NULL);
-				break;
+				config->GetExeDirs(result, NULL);
 			}
 		}
 	}
@@ -401,9 +666,9 @@ static int luaFuncSetOption(lua_State* l)
 static int luaFuncCheckPlatform(lua_State* l)
 {
     const char* testPlatform = lua_tostring(l, 1);
-	for (int i = 0; i < (int)mbGetActiveContext()->metabase->currentPlatforms.size(); ++i)
+	for (int i = 0; i < (int)mbGetActiveContext()->metabase->supportedPlatforms.size(); ++i)
 	{
-		const std::string& test = mbGetActiveContext()->metabase->currentPlatforms[i];
+		const std::string& test = mbGetActiveContext()->metabase->supportedPlatforms[i];
 		if (test == testPlatform)
 		{
 			lua_pushboolean(l, 1);
@@ -807,6 +1072,67 @@ void mbLuaGetDefines(StringVector* defines, lua_State* lua, E_BlockType blockTyp
     }
 }
 
+static int luaFuncFiles(lua_State* l)
+{
+    MetaBuilderBlockBase* b = mbGetActiveContext()->ActiveBlock();
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector inputFiles;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* filename = lua_tostring(l, -1);
+		inputFiles.push_back(filename);
+    }
+	
+	StringVector filteredList;
+	FilterFiles(&filteredList, inputFiles);
+	b->AddFiles(filteredList);
+		
+    return 0;
+}
+
+static int luaFuncFrameworks(lua_State* l)
+{
+    MetaBuilderBlockBase* b = mbGetActiveContext()->ActiveBlock();
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector inputFiles;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* filename = lua_tostring(l, -1);
+		inputFiles.push_back(filename);
+    }
+	
+	b->AddFrameworks(inputFiles);
+	
+    return 0;
+}
+
+static int luaFuncResources(lua_State* l)
+{
+    MetaBuilderBlockBase* b = mbGetActiveContext()->ActiveBlock();
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 2);
+    
+	StringVector tableContents;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* tmp = lua_tostring(l, -1);
+		tableContents.push_back(tmp);
+    }
+	b->AddResources(tableContents);
+	
+    return 0;
+}
+
 void mbCommonLuaRegister(lua_State* l)
 {
     lua_pushcfunction(l, luaFuncGlobalImport);
@@ -832,6 +1158,15 @@ void mbCommonLuaRegister(lua_State* l)
 
     lua_pushcfunction(l, luaFuncExeDirs);
     lua_setglobal(l, "exedirs");
+	
+    lua_pushcfunction(l, luaFuncFiles);
+    lua_setglobal(l, "files");
+
+    lua_pushcfunction(l, luaFuncFrameworks);
+    lua_setglobal(l, "frameworks");
+
+    lua_pushcfunction(l, luaFuncResources);
+    lua_setglobal(l, "resources");
 }
 
 void mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
@@ -1041,3 +1376,4 @@ bool mbCreateDirChain(const char* osDir_)
     
     return _mbaCreateDir(osDir);
 }
+

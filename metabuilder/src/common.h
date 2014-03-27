@@ -26,17 +26,18 @@ extern "C"
 enum E_BlockType
 {
     E_BlockType_MakeSetup,
-    E_BlockType_Platform,
     E_BlockType_Config,
     E_BlockType_Metabase,
     E_BlockType_Solution,
-    E_BlockType_Target
+    E_BlockType_Target,
+	E_BlockType_Platform
 };
 
 class Metabase;
 class Solution;
 class Config;
 class MakeSetup;
+class PlatformBlock;
 
 struct CmdSetup
 {
@@ -81,8 +82,9 @@ public:
 	bool		isProcessingPrimaryMakefile;
 };
 
-typedef std::vector<std::string> StringVector;
-typedef std::vector<Config*> ConfigVector;
+typedef std::vector<std::string>	StringVector;
+typedef std::vector<Config*>		ConfigVector;
+typedef std::vector<PlatformBlock*>	PlatformBlockVector;
 
 struct KeyValue
 {
@@ -105,49 +107,73 @@ public:
     virtual E_BlockType			Type() const = 0;
 	
 	virtual void				Process();
+	
+	void						SetName(const char* name);
+	const std::string&			GetName() const;
+	
+	void						AddFiles(const StringVector& files);
+	void						GetFiles(StringVector* result) const;
+
+	void						AddResources(const StringVector& files);
+	void						GetResources(StringVector* result) const;
+
+	void						AddFrameworks(const StringVector& files);
+	void						GetFrameworks(StringVector* result) const;
 
 	void						AddDefines(const StringVector& defines);
-	void						GetDefines(StringVector* result, const char* configName);
+	void						GetDefines(StringVector* result, const char* configName) const;
 	
 	void						AddLibs(const StringVector& libs);
-	void						GetLibs(StringVector* result, const char* configName);
+	void						GetLibs(StringVector* result, const char* configName) const;
 
 	void						AddSharedLibs(const StringVector& libs);
-	void						GetSharedLibs(StringVector* result, const char* configName);
+	void						GetSharedLibs(StringVector* result, const char* configName) const;
 
 	void						AddIncludeDirs(const StringVector& libs);
-	void						GetIncludeDirs(StringVector* result, const char* configName);
+	void						GetIncludeDirs(StringVector* result, const char* configName) const;
 
 	void						AddLibDirs(const StringVector& libs);
-	void						GetLibDirs(StringVector* result, const char* configName);
+	void						GetLibDirs(StringVector* result, const char* configName) const;
 
 	void						SetOption(const std::string& group, const std::string& key, const std::string& value);
 	void						GetOptions(std::map<std::string, KeyValueMap>* result, const std::string* configName) const;
 
 	void						AddExeDirs(const StringVector& defines);
-	void						GetExeDirs(StringVector* result, const char* configName);
+	void						GetExeDirs(StringVector* result, const char* configName) const;
 				
-	Config*						AcquireConfig(const char* configName);
-	const ConfigVector&			GetConfigs() const;
-	Config*						GetConfig(const char* configName);
+	Config*						AcquireConfig(const char* name);
+	void						GetConfigs(ConfigVector* configs) const;
+	Config*						GetConfig(const char* name);
+	const Config*				GetConfig(const char* name) const;
+
+	PlatformBlock*				AcquirePlatformBlock(const char* name);
+	void						GetPlatformBlocks(PlatformBlockVector* blocks) const;
+	PlatformBlock*				GetPlatformBlock(const char* name);
+	const PlatformBlock*		GetPlatformBlock(const char* name) const;
 	
 	MetaBuilderBlockBase*		GetParent();
 	
 protected:
+	StringVector*				AcquireStringGroup(const char* groupName);
+	const StringVector*			GetStringGroup(const char* groupName) const;
+//	void						SetString(const std::string& group, const std::string& str);
+//	void						GetString(StringVector* result, const std::string* configName) const;
+
 	MetaBuilderBlockBase*		m_parent;
 	
-	StringVector				m_defines;
-	StringVector				m_libs;
-	StringVector				m_includedirs;
-	StringVector				m_librarydirs;
+	std::string					m_name;
+	
+	std::map<std::string, StringVector>
+								m_stringGroups;
 	
 	//Key-value pairs stored per group
 	std::map<std::string, KeyValueMap>
-								m_groupOptions;
+								m_keyValueGroups;
 				
 	StringVector				m_exeDirs;								
 
-	ConfigVector				m_configs;
+	std::vector<MetaBuilderBlockBase*>
+								m_children;
 };
 
 class MetaBuilderContext
@@ -253,6 +279,7 @@ bool				mbCreateDirChain(const char* osDir_);
 #include "target.h"
 #include "solution.h"
 #include "metabase.h"
+#include "platformblock.h"
 #include "writer.h"
 #include "writer_msvc.h"
 #include "writer_xcode.h"
