@@ -22,7 +22,7 @@ static int luaFuncMetabase(lua_State* lua)
 	assert(activeBlock == NULL);
     
     Metabase* generator = new Metabase(activeBlock);
-    generator->name = generatorName;
+    generator->SetName(generatorName);
 	mbGetActiveContext()->metabase = generator;
     
     mbGetActiveContext()->PushActiveBlock(generator);

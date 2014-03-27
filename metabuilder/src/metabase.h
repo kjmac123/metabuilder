@@ -10,7 +10,6 @@ public:
 	
     virtual E_BlockType Type() const;
 	
-    std::string         name;
 	StringVector		supportedPlatforms;
 		
 	std::string			writerLua;

@@ -30,6 +30,17 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	
 	opt.add(
             "", // Default.
+            0, // Required?
+            0, // Number of args expected.
+            0, // Delimiter if expecting multiple args.
+            "Display usage instructions\n", // Help description.
+            "-v",     // Flag token.
+            "-verbose",  // Flag token.
+            "--verbose" // Flag token.
+            );
+				
+	opt.add(
+            "", // Default.
             true, // Required?
             1, // Number of args expected.
             0, // Delimiter if expecting multiple args.
@@ -100,6 +111,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	opt.get("--gen")->getString(appOptions->_generator);
 	opt.get("--metabase")->getString(appOptions->_metabaseDir);
 	opt.get("--outdir")->getString(appOptions->_makeOutputDir);
+	appOptions->verbose = opt.isSet("-v");
 }
 
 //////////////////////////////////////////////////////////////////////////////////

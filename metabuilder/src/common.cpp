@@ -81,7 +81,10 @@ static void AddHeadersAutomatically(StringVector* files)
 					sprintf(candidateFilename, "%s/%s", ctx->currentMetaMakeDirAbs.c_str(), candidateRelativeName);
 					if (mbFileExists(candidateFilename))
 					{
-						MB_LOGINFO("Automatically adding header file %s", candidateRelativeName);
+						if (mbGetAppState()->cmdSetup.verbose)
+						{
+							MB_LOGINFO("Automatically adding header file %s", candidateRelativeName);
+						}
 						result.push_back(candidateRelativeName);
 					}
 				}
@@ -169,7 +172,7 @@ Config* MetaBuilderBlockBase::AcquireConfig(const char* configName)
 		return config;
 
 	config = new Config(this);
-    config->name = configName;
+    config->m_name = configName;
 	return config;
 }
 
@@ -496,7 +499,7 @@ void MetaBuilderBlockBase::GetOptions(std::map<std::string, KeyValueMap>* result
 		GetConfigs(&configs);
 		for (int i = 0; i < (int)configs.size(); ++i)
 		{
-			if (configs[i]->name == *configName)
+			if (configs[i]->GetName() == *configName)
 			{
 				configs[i]->GetOptions(result, NULL);
 				break;
@@ -1210,6 +1213,7 @@ void mbLuaDump(lua_State* l)
 
 void mbMergeOptions(std::map<std::string, KeyValueMap>* result,	const std::map<std::string, KeyValueMap>& groupOptionMap)
 {
+	int test = groupOptionMap.size();
 	for (std::map<std::string, KeyValueMap>::const_iterator it = groupOptionMap.begin(); it != groupOptionMap.end(); ++it)
 	{
 		const std::string& inputGroupName = it->first;
@@ -1377,3 +1381,15 @@ bool mbCreateDirChain(const char* osDir_)
     return _mbaCreateDir(osDir);
 }
 
+void mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroups)
+{
+	for (std::map<std::string, KeyValueMap>::const_iterator it = kvGroups.begin(); it != kvGroups.end(); ++it)
+	{
+		MB_LOGINFO("%s count: %i", it->first.c_str(), it->second.size());
+		const KeyValueMap& kvm = it->second;
+		for (KeyValueMap::const_iterator it2 = kvm.begin(); it2 != kvm.end(); ++it2)
+		{
+			MB_LOGINFO("  %s", it2->first.c_str());
+		}
+	}
+}

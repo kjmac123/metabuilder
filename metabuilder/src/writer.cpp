@@ -297,6 +297,8 @@ void mbBuildFlatStringListGetExeDirs(
 
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)
 {
+	//	mbDebugDumpKeyValueGroups(options);
+
 	lua_createtable(l, 0, 0);
 	{
 		int jOptionGroup = 0;
@@ -332,6 +334,11 @@ static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValu
 			lua_setfield(l, -2, groupName.c_str());
 		}
 	}
+	
+//	static int test = 0;
+//	char buf[128];
+//	sprintf(buf, "options_%i", test++);
+//	lua_setfield(l, -2, buf);
 	lua_setfield(l, -2, "options");
 }
 
@@ -421,8 +428,8 @@ static void mbWriterWriteConfigTable(lua_State* l, Metabase* metabase, Solution*
 		solution,
 		target,
 		&configName);
+		
 	mbWriterSetOptions(l, options);
-
 }
 
 void mbWriterDo(MetaBuilderContext* ctx)
@@ -456,7 +463,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				
 		{
 			char buf[MB_MAX_PATH];
-			sprintf(buf, "%s/%s/%s", appState->makeOutputDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->name.c_str());
+			sprintf(buf, "%s/%s/%s", appState->makeOutputDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->GetName().c_str());
 			lua_pushstring(l, buf);
 			lua_setfield(l, -2, "makeoutputdirabs");
 			
@@ -485,6 +492,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 			NULL,
 			NULL);
 		mbWriterSetOptions(l, options);
+		
+		lua_pushboolean(l, appState->cmdSetup.verbose);
+		lua_setfield(l, -2, "verbose");
 		
 		lua_setglobal(l, "writer_global");
 	}
@@ -553,10 +563,10 @@ void mbWriterDo(MetaBuilderContext* ctx)
 						lua_createtable(l, 0, 0);
 						{
 							//Set config name
-							lua_pushstring(l, config->name.c_str());
+							lua_pushstring(l, config->GetName().c_str());
 							lua_setfield(l, -2, "name");
 						
-							mbWriterWriteConfigTable(l, metabase, solution, target, config->name);
+							mbWriterWriteConfigTable(l, metabase, solution, target, config->GetName());
 						}
 						lua_rawseti(l, -2, jConfig+1);
 					}

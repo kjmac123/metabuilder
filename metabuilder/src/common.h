@@ -48,6 +48,7 @@ struct CmdSetup
     std::string _generator;
 	std::string _metabaseDir;
 	std::string _makeOutputDir;
+	bool		verbose;
 };
 
 struct GeneratorMapping
@@ -273,6 +274,9 @@ void				mbRemoveDuplicates(StringVector* strings);
 void				mbRemoveDuplicatesAndSort(StringVector* strings);
 
 bool				mbCreateDirChain(const char* osDir_);
+
+void				mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroups);
+
 
 #include "makesetup.h"
 #include "config.h"

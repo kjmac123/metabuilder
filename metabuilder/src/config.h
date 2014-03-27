@@ -7,8 +7,6 @@ public:
 	Config(MetaBuilderBlockBase* parent);
 	
     virtual E_BlockType		Type() const;
-				
-    std::string         name;
 
 protected:
 };
