@@ -3,13 +3,15 @@
 
 #include "common.h"
 
-class Solution : public MetaBuilderBlockBase
+class Solution : public MakeBlock
 {
 public:
-	Solution(MetaBuilderBlockBase* parent);
+	Solution();
+	virtual ~Solution();
 	
     virtual E_BlockType Type() const;
-	
+	virtual bool		IsA(E_BlockType t) const;
+		
 	virtual void Process();
 			
     std::string         intDir;

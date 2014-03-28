@@ -62,8 +62,7 @@ static void BuildUniqueStringList(
 }
 
 
-Target::Target(MetaBuilderBlockBase* parent)
-: MetaBuilderBlockBase(parent)
+Target::Target()
 {
 }
 
@@ -72,34 +71,18 @@ E_BlockType Target::Type() const
 	return E_BlockType_Target;
 }
 
-void Target::Process()
+bool Target::IsA(E_BlockType t) const
 {
-	MetaBuilderBlockBase::Process();
-}
-/*
-void Target::AddFiles(const StringVector& files)
-{
-	mbJoinArrays(&m_files, files);
+	if (MakeBlock::IsA(t))
+		return true;
+
+	return t == E_BlockType_Target;
 }
 
-void Target::AddPlatformFiles(const StringVector& files, const char* platformName)
+void Target::Process()
 {
-	StringVector* platformFiles;
-	std::map<std::string, StringVector>::iterator it = m_platformFiles.find(platformName);
-	if (it != m_platformFiles.end())
-	{
-		platformFiles = &it->second;
-	}
-	else
-	{
-		std::pair<std::map<std::string, StringVector>::iterator, bool> result =
-			m_platformFiles.insert(std::pair<std::string, StringVector>(platformName, StringVector()));
-		platformFiles = &result.first->second;
-	}
-	
-	mbJoinArrays(platformFiles, files);
+	Block::Process();
 }
-*/
 
 void Target::GetPlatformFiles(StringVector* result, const char* platformName) const
 {
@@ -107,67 +90,72 @@ void Target::GetPlatformFiles(StringVector* result, const char* platformName) co
 
 	if (platformName)
 	{
-		const PlatformBlock* platformBlock = GetPlatformBlock(platformName);
-		if (platformBlock)
+		const PlatformParam* platform = GetPlatformParam(platformName);
+		if (platform)
 		{
-			platformBlock->GetFiles(result);
+			platform->GetFiles(result);
 		}
 	}
 	else
 	{
-		PlatformBlockVector platformBlocks;
-		GetPlatformBlocks(&platformBlocks);
-		for (int i = 0; i < platformBlocks.size(); ++i)
+		PlatformParamVector platforms;
+		GetPlatformParams(&platforms, true);
+		for (int i = 0; i < platforms.size(); ++i)
 		{
-			platformBlocks[i]->GetFiles(result);
+			platforms[i]->GetFiles(result);
 		}
 	}
 }
 
 void Target::GetPlatformFrameworks(StringVector* result, const char* platformName)
 {
+/*
 	GetFrameworks(result);
 
 	if (platformName)
 	{
-		const PlatformBlock* platformBlock = GetPlatformBlock(platformName);
-		if (platformBlock)
+		const PlatformParam* platform = GetPlatformParam(platformName);
+		if (platform)
 		{
-			platformBlock->GetFrameworks(result);
+			platform->GetFrameworks(result);
 		}
 	}
 	else
 	{
-		PlatformBlockVector platformBlocks;
-		GetPlatformBlocks(&platformBlocks);
-		for (int i = 0; i < platformBlocks.size(); ++i)
+		PlatformParamVector platforms;
+		GetPlatformParams(&platforms);
+		for (int i = 0; i < platforms.size(); ++i)
 		{
-			platformBlocks[i]->GetFrameworks(result);
+			platforms[i]->GetFrameworks(result);
 		}
 	}
+	*/
 }
+
 
 void Target::GetPlatformResources(StringVector* result, const char* platformName)
 {
+/*
 	GetResources(result);
 
 	if (platformName)
 	{
-		const PlatformBlock* platformBlock = GetPlatformBlock(platformName);
-		if (platformBlock)
+		const PlatformParam* platform = GetPlatformParam(platformName);
+		if (platform)
 		{
-			platformBlock->GetResources(result);
+			platform->GetResources(result);
 		}
 	}
 	else
 	{
-		PlatformBlockVector platformBlocks;
-		GetPlatformBlocks(&platformBlocks);
-		for (int i = 0; i < platformBlocks.size(); ++i)
+		PlatformParamVector platforms;
+		GetPlatformParams(&platforms);
+		for (int i = 0; i < platforms.size(); ++i)
 		{
-			platformBlocks[i]->GetResources(result);
+			platforms[i]->GetResources(result);
 		}
 	}
+	*/
 }
 
 static int luaFuncTarget(lua_State* l)
@@ -183,7 +171,8 @@ static int luaFuncTarget(lua_State* l)
     const char* name = lua_tostring(l, 1);
     
 	//Create new target instance.
-    Target* target = new Target(solution);
+    Target* target = new Target();
+	solution->AddChild(target);
     target->SetName(name);
     
 	solution->targetVector.push_back(target);

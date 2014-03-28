@@ -9,27 +9,25 @@ struct TargetDepends
 	std::string libMakefile;
 };
 
-class Target : public MetaBuilderBlockBase
+class Target : public MakeBlock
 {
 public:
-	Target(MetaBuilderBlockBase* parent);
+						Target();
 	
     virtual E_BlockType	Type() const;
+	virtual bool		IsA(E_BlockType t) const;	
 	
 	virtual void		Process();
 		
 	void				GetPlatformFiles(StringVector* files, const char* platformName) const;
 	void				GetPlatformFrameworks(StringVector* frameworks, const char* platformName);
 	void				GetPlatformResources(StringVector* resources, const char* platformName);
-
+	
 	std::string         targetType;
 
     std::vector<TargetDepends>
 						depends;
-						/*
-	std::map<std::string, StringVector> platformFrameworks;
-	std::map<std::string, StringVector> platformResources;
-*/	
+
 	std::string			pch;
 			
 protected:

@@ -25,19 +25,26 @@ extern "C"
 
 enum E_BlockType
 {
+	E_BlockType_Block,
     E_BlockType_MakeSetup,
-    E_BlockType_Config,
+    E_BlockType_ConfigParam,
     E_BlockType_Metabase,
     E_BlockType_Solution,
     E_BlockType_Target,
-	E_BlockType_Platform
+	E_BlockType_PlatformParam,
+	E_BlockType_MakeBlock,
+	E_BlockType_Param,
+	E_BlockType_SDKParam,
 };
 
+class Block;
 class Metabase;
 class Solution;
-class Config;
+class ConfigParam;
 class MakeSetup;
-class PlatformBlock;
+class PlatformParam;
+class ParamBlock;
+class SDKParam;
 
 struct CmdSetup
 {
@@ -83,9 +90,11 @@ public:
 	bool		isProcessingPrimaryMakefile;
 };
 
-typedef std::vector<std::string>	StringVector;
-typedef std::vector<Config*>		ConfigVector;
-typedef std::vector<PlatformBlock*>	PlatformBlockVector;
+typedef std::vector<std::string>		StringVector;
+typedef std::vector<ParamBlock*>		ParamVector;
+typedef std::vector<ConfigParam*>		ConfigParamVector;
+typedef std::vector<SDKParam*>			SDKParamVector;
+typedef std::vector<PlatformParam*>		PlatformParamVector;
 
 struct KeyValue
 {
@@ -98,84 +107,7 @@ typedef std::map<std::string, std::string> KeyValueMap;
 
 typedef void (*PostLoadInitFunc)(lua_State*);
 
-//Generic operations add information to the current context via this interface.
-class MetaBuilderBlockBase
-{
-public:
-								MetaBuilderBlockBase(MetaBuilderBlockBase* parent);
-	virtual						~MetaBuilderBlockBase();
 
-    virtual E_BlockType			Type() const = 0;
-	
-	virtual void				Process();
-	
-	void						SetName(const char* name);
-	const std::string&			GetName() const;
-	
-	void						AddFiles(const StringVector& files);
-	void						GetFiles(StringVector* result) const;
-
-	void						AddResources(const StringVector& files);
-	void						GetResources(StringVector* result) const;
-
-	void						AddFrameworks(const StringVector& files);
-	void						GetFrameworks(StringVector* result) const;
-
-	void						AddDefines(const StringVector& defines);
-	void						GetDefines(StringVector* result, const char* configName) const;
-	
-	void						AddLibs(const StringVector& libs);
-	void						GetLibs(StringVector* result, const char* configName) const;
-
-	void						AddSharedLibs(const StringVector& libs);
-	void						GetSharedLibs(StringVector* result, const char* configName) const;
-
-	void						AddIncludeDirs(const StringVector& libs);
-	void						GetIncludeDirs(StringVector* result, const char* configName) const;
-
-	void						AddLibDirs(const StringVector& libs);
-	void						GetLibDirs(StringVector* result, const char* configName) const;
-
-	void						SetOption(const std::string& group, const std::string& key, const std::string& value);
-	void						GetOptions(std::map<std::string, KeyValueMap>* result, const std::string* configName) const;
-
-	void						AddExeDirs(const StringVector& defines);
-	void						GetExeDirs(StringVector* result, const char* configName) const;
-				
-	Config*						AcquireConfig(const char* name);
-	void						GetConfigs(ConfigVector* configs) const;
-	Config*						GetConfig(const char* name);
-	const Config*				GetConfig(const char* name) const;
-
-	PlatformBlock*				AcquirePlatformBlock(const char* name);
-	void						GetPlatformBlocks(PlatformBlockVector* blocks) const;
-	PlatformBlock*				GetPlatformBlock(const char* name);
-	const PlatformBlock*		GetPlatformBlock(const char* name) const;
-	
-	MetaBuilderBlockBase*		GetParent();
-	
-protected:
-	StringVector*				AcquireStringGroup(const char* groupName);
-	const StringVector*			GetStringGroup(const char* groupName) const;
-//	void						SetString(const std::string& group, const std::string& str);
-//	void						GetString(StringVector* result, const std::string* configName) const;
-
-	MetaBuilderBlockBase*		m_parent;
-	
-	std::string					m_name;
-	
-	std::map<std::string, StringVector>
-								m_stringGroups;
-	
-	//Key-value pairs stored per group
-	std::map<std::string, KeyValueMap>
-								m_keyValueGroups;
-				
-	StringVector				m_exeDirs;								
-
-	std::vector<MetaBuilderBlockBase*>
-								m_children;
-};
 
 class MetaBuilderContext
 {
@@ -183,12 +115,12 @@ public:
 	MetaBuilderContext();
 	~MetaBuilderContext();
 	
-    MetaBuilderBlockBase*    ActiveBlock() const
+    Block*    ActiveBlock() const
     {
         return activeBlockStack.size() > 0 ? activeBlockStack.top() : NULL;
     }
 
-    void PushActiveBlock(MetaBuilderBlockBase* block)
+    void PushActiveBlock(Block* block)
     {
         activeBlockStack.push(block);
     }
@@ -198,13 +130,10 @@ public:
         activeBlockStack.pop();
     }
 
-    std::string                             currentMetaMakeDirAbs;
-		  
-	Metabase*								metabase;
-
-    Solution*                               solution;
-	
-    std::stack<MetaBuilderBlockBase*>       activeBlockStack;
+    std::string					currentMetaMakeDirAbs;
+	Metabase*					metabase;
+    Solution*					solution;
+    std::stack<Block*>			activeBlockStack;
 };
 
 AppState*			mbGetAppState();
@@ -262,6 +191,8 @@ void				mbStringReplace(std::string& str, const std::string& oldStr, const std::
 
 void				mbSetPlatformName(const char* name);
 void				mbLuaDump(lua_State* l);
+
+void				mbMergeStringGroups(std::map<std::string, StringVector>* result, const std::map<std::string, StringVector>& stringGroup);
 void				mbMergeOptions(std::map<std::string, KeyValueMap>* result,	const std::map<std::string, KeyValueMap>& groupOptionMap);
 
 U32					mbRandomU32();
@@ -270,20 +201,25 @@ void				mbCheckExpectedBlock(E_BlockType blockExpected, const char* cmdName);
 
 //No duplicates removed
 void				mbJoinArrays(StringVector* a, const StringVector& b);
+void				mbMergeArrays(StringVector* a, const StringVector& b);
 void				mbRemoveDuplicates(StringVector* strings);
 void				mbRemoveDuplicatesAndSort(StringVector* strings);
 
 bool				mbCreateDirChain(const char* osDir_);
 
 void				mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroups);
+void				mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups);
 
 
+#include "block.h"
 #include "makesetup.h"
-#include "config.h"
+#include "configparam.h"
 #include "target.h"
 #include "solution.h"
 #include "metabase.h"
-#include "platformblock.h"
+#include "platformparam.h"
+#include "sdkparam.h"
+#include "flatten.h"
 #include "writer.h"
 #include "writer_msvc.h"
 #include "writer_xcode.h"

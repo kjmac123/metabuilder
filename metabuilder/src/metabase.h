@@ -3,12 +3,13 @@
 
 #include "common.h"
 
-class Metabase : public MetaBuilderBlockBase
+class Metabase : public MakeBlock
 {
 public:
-	Metabase(MetaBuilderBlockBase* parent);
+	Metabase();
 	
     virtual E_BlockType Type() const;
+	virtual bool		IsA(E_BlockType t) const;		
 	
 	StringVector		supportedPlatforms;
 		

@@ -2,14 +2,25 @@
 
 #include "common.h"
 
-Solution::Solution(MetaBuilderBlockBase* parent)
-: MetaBuilderBlockBase(parent)
+Solution::Solution()
+{
+}
+
+Solution::~Solution()
 {
 }
 
 E_BlockType Solution::Type() const
 {
 	return E_BlockType_Solution;
+}
+
+bool Solution::IsA(E_BlockType t) const
+{
+	if (MakeBlock::IsA(t))
+		return true;
+
+	return t == E_BlockType_Solution;
 }
 
 void Solution::Process()
@@ -32,10 +43,11 @@ static int luaFuncSolution(lua_State* lua)
         mbExitError();
     }
 	
-	MetaBuilderBlockBase* activeBlock = mbGetActiveContext()->ActiveBlock();
+	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
 	assert(!activeBlock);
     
-	mbGetActiveContext()->solution = new Solution(mbGetActiveContext()->metabase);
+	mbGetActiveContext()->solution = new Solution();
+	mbGetActiveContext()->metabase->AddChild(mbGetActiveContext()->solution);
     mbGetActiveContext()->solution->SetName(name);
 
 	AppState* appState = mbGetAppState();

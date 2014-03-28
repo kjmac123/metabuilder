@@ -2,14 +2,21 @@
 
 #include "common.h"
 
-MakeSetup::MakeSetup(MetaBuilderBlockBase* parent)
-: MetaBuilderBlockBase(parent)
+MakeSetup::MakeSetup()
 {
 }
 
 E_BlockType MakeSetup::Type() const
 {
 	return E_BlockType_MakeSetup;
+}
+
+bool MakeSetup::IsA(E_BlockType t) const
+{
+	if (Block::IsA(t))
+		return true;
+
+	return t == E_BlockType_MakeSetup;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------

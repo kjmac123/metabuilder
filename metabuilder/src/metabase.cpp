@@ -2,8 +2,7 @@
 
 #include "common.h"
 
-Metabase::Metabase(MetaBuilderBlockBase* parent)
-: MetaBuilderBlockBase(parent)
+Metabase::Metabase()
 {
 }
 
@@ -12,16 +11,28 @@ E_BlockType Metabase::Type() const
 	return E_BlockType_Metabase;
 }
 
+bool Metabase::IsA(E_BlockType t) const
+{
+	if (MakeBlock::IsA(t))
+		return true;
+
+	return t == E_BlockType_Metabase;
+}
+
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 static int luaFuncMetabase(lua_State* lua)
 {
 	const char* generatorName = lua_tostring(lua, 1);
 	
-	MetaBuilderBlockBase* activeBlock = mbGetActiveContext()->ActiveBlock();
+	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
 	assert(activeBlock == NULL);
     
-    Metabase* generator = new Metabase(activeBlock);
+    Metabase* generator = new Metabase();
+	if (activeBlock)
+	{
+		activeBlock->AddChild(generator);
+	}
     generator->SetName(generatorName);
 	mbGetActiveContext()->metabase = generator;
     

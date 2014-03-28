@@ -184,7 +184,7 @@ void luaRegisterWriterFuncs(lua_State* l)
     lua_pushcfunction(l, luaFuncCopyFile);
     lua_setglobal(l, "copyfile");
 }
-
+/*¢
 static void mbFlattenConfigOptions(
 	std::map<std::string, KeyValueMap>* result,
 	Metabase* generator,
@@ -202,11 +202,11 @@ static void mbFlattenConfigOptions(
 
 void mbBuildFlatStringListDefines(
 	StringVector* strings,
-	MetaBuilderBlockBase* block_,
+	Block* block_,
 	const char* configName)
 {
-	std::vector<MetaBuilderBlockBase*> blocks;
-	for (MetaBuilderBlockBase* block = block_; block; block = block->GetParent())
+	std::vector<Block*> blocks;
+	for (Block* block = block_; block; block = block->GetParent())
 	{
 		blocks.push_back(block);
 	}
@@ -218,14 +218,16 @@ void mbBuildFlatStringListDefines(
 	
 	mbRemoveDuplicates(strings);
 }
+*/
 
+/*
 void mbBuildFlatStringListGetIncludeDirs(
 	StringVector* strings,
-	MetaBuilderBlockBase* block_,
+	Block* block_,
 	const char* configName)
 {
-	std::vector<MetaBuilderBlockBase*> blocks;
-	for (MetaBuilderBlockBase* block = block_; block; block = block->GetParent())
+	std::vector<Block*> blocks;
+	for (Block* block = block_; block; block = block->GetParent())
 	{
 		blocks.push_back(block);
 	}
@@ -240,11 +242,11 @@ void mbBuildFlatStringListGetIncludeDirs(
 
 void mbBuildFlatStringListGetLibDirs(
 	StringVector* strings,
-	MetaBuilderBlockBase* block_,
+	Block* block_,
 	const char* configName)
 {
-	std::vector<MetaBuilderBlockBase*> blocks;
-	for (MetaBuilderBlockBase* block = block_; block; block = block->GetParent())
+	std::vector<Block*> blocks;
+	for (Block* block = block_; block; block = block->GetParent())
 	{
 		blocks.push_back(block);
 	}
@@ -259,11 +261,11 @@ void mbBuildFlatStringListGetLibDirs(
 
 void mbBuildFlatStringListGetLibs(
 	StringVector* strings,
-	MetaBuilderBlockBase* block_,
+	Block* block_,
 	const char* configName)
 {
-	std::vector<MetaBuilderBlockBase*> blocks;
-	for (MetaBuilderBlockBase* block = block_; block; block = block->GetParent())
+	std::vector<Block*> blocks;
+	for (Block* block = block_; block; block = block->GetParent())
 	{
 		blocks.push_back(block);
 	}
@@ -278,11 +280,11 @@ void mbBuildFlatStringListGetLibs(
 
 void mbBuildFlatStringListGetExeDirs(
 	StringVector* strings,
-	MetaBuilderBlockBase* block_,
+	Block* block_,
 	const char* configName)
 {
-	std::vector<MetaBuilderBlockBase*> blocks;
-	for (MetaBuilderBlockBase* block = block_; block; block = block->GetParent())
+	std::vector<Block*> blocks;
+	for (Block* block = block_; block; block = block->GetParent())
 	{
 		blocks.push_back(block);
 	}
@@ -294,7 +296,7 @@ void mbBuildFlatStringListGetExeDirs(
 
 	mbRemoveDuplicatesAndSort(strings);
 }
-
+*/
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)
 {
 	//	mbDebugDumpKeyValueGroups(options);
@@ -335,43 +337,20 @@ static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValu
 		}
 	}
 	
-//	static int test = 0;
-//	char buf[128];
-//	sprintf(buf, "options_%i", test++);
-//	lua_setfield(l, -2, buf);
 	lua_setfield(l, -2, "options");
 }
 
-static void mbWriterWriteConfigTable(lua_State* l, Metabase* metabase, Solution* solution, Target* target, 	const std::string& configName)
+static void mbWriterWriteConfigTable(lua_State* l, const FlatConfig& flatConfig)
 {
-	//Flatten macros
-	StringVector defines;
-	mbBuildFlatStringListDefines(&defines,	target,	configName.c_str());
-
-	//Flatten include dirs
-	StringVector includeDirs;
-	mbBuildFlatStringListGetIncludeDirs(&includeDirs, target, configName.c_str());
-
-	//Flatten lib dirs
-	StringVector libsDirs;
-	mbBuildFlatStringListGetLibDirs(&libsDirs, target, configName.c_str());
-
-	//Flatten libs
-	StringVector libs;
-	mbBuildFlatStringListGetLibs(&libs,	target, configName.c_str());
-
-	//Flatten exe dirs
-	StringVector exeDirs;
-	mbBuildFlatStringListGetExeDirs(&exeDirs, target, configName.c_str());
-
+/*
 	//Set macros
-	int nDefines = (int)defines.size();
+	int nDefines = (int)flatConfig.defines.size();
 	lua_createtable(l, 0, nDefines);
 	
 	{
 		for (int kDefine = 0; kDefine < nDefines; ++kDefine)
 		{	
-			lua_pushstring(l, defines[kDefine].c_str());
+			lua_pushstring(l, flatConfig.defines[kDefine].c_str());
 			lua_rawseti(l, -2, kDefine+1);
 		}
 	}
@@ -380,7 +359,7 @@ static void mbWriterWriteConfigTable(lua_State* l, Metabase* metabase, Solution*
 	//Includes
 	lua_createtable(l, 0, 0);
 	{
-		for (int jDir = 0; jDir < (int)includeDirs.size(); ++jDir)
+		for (int jDir = 0; jDir < (int)flatConfig.includeDirs.size(); ++jDir)
 		{
 			lua_pushstring(l, includeDirs[jDir].c_str());
 			lua_rawseti(l, -2, jDir+1);
@@ -391,7 +370,7 @@ static void mbWriterWriteConfigTable(lua_State* l, Metabase* metabase, Solution*
 	//Lib dirs
 	lua_createtable(l, 0, 0);
 	{
-		for (int jDir = 0; jDir < (int)libsDirs.size(); ++jDir)
+		for (int jDir = 0; jDir < (int)flatConfig.libsDirs.size(); ++jDir)
 		{
 			lua_pushstring(l, libsDirs[jDir].c_str());
 			lua_rawseti(l, -2, jDir+1);
@@ -402,7 +381,7 @@ static void mbWriterWriteConfigTable(lua_State* l, Metabase* metabase, Solution*
 	//Libs
 	lua_createtable(l, 0, 0);
 	{
-		for (int jLib = 0; jLib < (int)libs.size(); ++jLib)
+		for (int jLib = 0; jLib < (int)flatConfig.libs.size(); ++jLib)
 		{
 			lua_pushstring(l, libs[jLib].c_str());
 			lua_rawseti(l, -2, jLib+1);
@@ -413,13 +392,15 @@ static void mbWriterWriteConfigTable(lua_State* l, Metabase* metabase, Solution*
 	//Exe dirs
 	lua_createtable(l, 0, 0);
 	{
-		for (int jExeDir = 0; jExeDir < (int)exeDirs.size(); ++jExeDir)
+		for (int jExeDir = 0; jExeDir < (int)flatConfig.exeDirs.size(); ++jExeDir)
 		{
 			lua_pushstring(l, exeDirs[jExeDir].c_str());
 			lua_rawseti(l, -2, jExeDir+1);
 		}
 	}
 	lua_setfield(l, -2, "exedirs");
+	
+	mbFlatten
 
 	//Options
 	std::map<std::string, KeyValueMap> options;
@@ -430,6 +411,7 @@ static void mbWriterWriteConfigTable(lua_State* l, Metabase* metabase, Solution*
 		&configName);
 		
 	mbWriterSetOptions(l, options);
+	*/
 }
 
 void mbWriterDo(MetaBuilderContext* ctx)
@@ -484,15 +466,14 @@ void mbWriterDo(MetaBuilderContext* ctx)
 
 		lua_pushstring(l, appState->outDir.c_str());
 		lua_setfield(l, -2, "outdir");
-				
-		std::map<std::string, KeyValueMap> options;
-		mbFlattenConfigOptions(&options,
-			metabase,
-			NULL,
-			NULL,
-			NULL);
-		mbWriterSetOptions(l, options);
 		
+		//Write out the set of options associated with our metabase node.
+		{
+			std::map<std::string, KeyValueMap> options;
+			metabase->GetOptions(&options, NULL);
+			mbWriterSetOptions(l, options);
+		}
+	
 		lua_pushboolean(l, appState->cmdSetup.verbose);
 		lua_setfield(l, -2, "verbose");
 		
@@ -551,28 +532,113 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				}
 
 				//Configs
-				ConfigVector configs;
-				target->GetConfigs(&configs);
-				int nConfigs = (int)configs.size();
-				lua_createtable(l, 0, 0);
 				{
-					for (int jConfig = 0; jConfig < nConfigs; ++jConfig)
+					StringVector configNames;
 					{
-						Config* config = configs[jConfig];
-						
-						lua_createtable(l, 0, 0);
+						ConfigParamVector configs;
+						target->GetParams((ParamVector*)&configs, E_BlockType_ConfigParam, true);
+						for (int jConfig = 0; jConfig < (int)configs.size(); ++jConfig)
 						{
-							//Set config name
-							lua_pushstring(l, config->GetName().c_str());
-							lua_setfield(l, -2, "name");
-						
-							mbWriterWriteConfigTable(l, metabase, solution, target, config->GetName());
+							configNames.push_back(configs[jConfig]->GetName());
 						}
-						lua_rawseti(l, -2, jConfig+1);
 					}
+
+					lua_createtable(l, 0, 0);
+					{
+						for (int jConfig = 0; jConfig < (int)configNames.size(); ++jConfig)
+						{
+							const char* name = configNames[jConfig].c_str();
+													
+							FlatConfig flatConfig;
+							mbFlattenTargetForConfig(&flatConfig, target, name);
+							
+							lua_createtable(l, 0, 0);
+							{
+								//Set config name
+								lua_pushstring(l, flatConfig.name.c_str());
+								lua_setfield(l, -2, "name");
+							
+								//FIX THIS
+//								mbWriterWriteConfigTable(l, metabase, solution, target, config->GetName());
+							}
+							lua_rawseti(l, -2, jConfig+1);
+						}
+					}
+					lua_setfield(l, -2, "configs");
 				}
-				lua_setfield(l, -2, "configs");
 				
+				//SDK configs
+				{
+					StringVector sdkConfigNames;
+					{
+						SDKParamVector sdkConfigs;
+						target->GetParams((ParamVector*)&sdkConfigs, E_BlockType_SDKParam, true);
+						for (int jConfig = 0; jConfig < (int)sdkConfigs.size(); ++jConfig)
+						{
+							sdkConfigNames.push_back(sdkConfigs[jConfig]->GetName());
+						}
+					}
+									
+					lua_createtable(l, 0, 0);
+					{
+						for (int jConfig = 0; jConfig < (int)sdkConfigNames.size(); ++jConfig)
+						{
+							const char* name = sdkConfigNames[jConfig].c_str();
+							FlatSDKConfig flatConfig;
+							mbFlattenTargetForSDKConfig(&flatConfig, target, name);
+							
+							lua_createtable(l, 0, 0);
+							{
+								//Set config name
+								lua_pushstring(l, flatConfig.name.c_str());
+								lua_setfield(l, -2, "name");
+
+								lua_pushstring(l, flatConfig.mainConfigName.c_str());
+								lua_setfield(l, -2, "mainConfigName");
+							
+								//FIX THIS
+//								mbWriterWriteConfigTable(l, metabase, solution, target, config->GetName());
+							}
+							lua_rawseti(l, -2, jConfig+1);
+						}
+					}
+					lua_setfield(l, -2, "sdkconfigs");
+				}
+				/*
+				//SDK configs
+				{
+					SDKParamVector sdkConfigs;
+					target->GetParams((ParamVector*)&sdkConfigs, E_BlockType_SDKParam);
+					int nConfigs = (int)sdkConfigs.size();
+					lua_createtable(l, 0, 0);
+					{
+						for (int jConfig = 0; jConfig < nConfigs; ++jConfig)
+						{
+							SDKParam* config = sdkConfigs[jConfig];
+//							config->Dump();
+							
+							lua_createtable(l, 0, 0);
+							{
+								//Set config name
+								lua_pushstring(l, config->GetName().c_str());
+								lua_setfield(l, -2, "name");
+								
+								lua_pushstring(l, config->GetName().c_str());
+								lua_setfield(l, -2, "mainconfigname");
+
+								FlatSDKConfig flatSDKConfig;
+								mbFlattenTargetForSDKConfig(&flatSDKConfig, target, config->GetName().c_str());
+							
+								//FIX THS
+//								mbWriterWriteConfigTable(l, metabase, solution, target, config->GetName());
+							}
+							lua_rawseti(l, -2, jConfig+1);
+						}
+					}
+					lua_setfield(l, -2, "sdkconfigs");
+				}
+				*/
+
 				//Files
 				lua_createtable(l, 0, 0);
 				{

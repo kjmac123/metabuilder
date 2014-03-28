@@ -1,12 +1,13 @@
 #ifndef MAKESETUP_H
 #define MAKESETUP_H
 
-class MakeSetup : public MetaBuilderBlockBase
+class MakeSetup : public Block
 {
 public:
-	MakeSetup(MetaBuilderBlockBase* parent);
+	MakeSetup();
 	
     virtual E_BlockType		Type() const;
+	virtual bool			IsA(E_BlockType t) const;		
 				
 	std::string				_metabaseDir;
     std::string				_intDir;

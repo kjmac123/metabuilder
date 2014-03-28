@@ -2,24 +2,31 @@
 
 #include "common.h"
 
-Config::Config(MetaBuilderBlockBase* parent)
-: MetaBuilderBlockBase(parent)
+ConfigParam::ConfigParam()
 {
 }
 
-E_BlockType Config::Type() const
+E_BlockType ConfigParam::Type() const
 {
-	return E_BlockType_Config;
+	return E_BlockType_ConfigParam;
+}
+
+bool ConfigParam::IsA(E_BlockType t) const
+{
+	if (ParamBlock::IsA(t))
+		return true;
+
+	return t == E_BlockType_ConfigParam;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 static int luaFuncConfig(lua_State* l)
 {
-	MetaBuilderBlockBase* activeBlock = mbGetActiveContext()->ActiveBlock();
+	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
 
     const char* name = lua_tostring(l, 1);
-	Config* config = activeBlock->AcquireConfig(name);
+	ConfigParam* config = activeBlock->AcquireConfigParam(name);
     
 	//Config becomes new active block
     mbGetActiveContext()->PushActiveBlock(config);
@@ -32,7 +39,7 @@ static int luaFuncConfigEnd(lua_State* lua)
 	return 0;
 }
 
-void mbConfigLuaRegister(lua_State* l)
+void mbConfigParamLuaRegister(lua_State* l)
 {
     lua_pushcfunction(l, luaFuncConfig);
     lua_setglobal(l, "config");

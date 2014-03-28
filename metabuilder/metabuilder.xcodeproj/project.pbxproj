@@ -13,10 +13,10 @@
 		BE11DC7D18BB950B008C869D /* common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC7918BB950B008C869D /* common.cpp */; };
 		BE11DC7E18BB950B008C869D /* metabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC7A18BB950B008C869D /* metabase.cpp */; };
 		BE11DC8018BB950B008C869D /* solution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC7C18BB950B008C869D /* solution.cpp */; };
-		BE11DC8718BB9713008C869D /* config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC8518BB9713008C869D /* config.cpp */; };
+		BE11DC8718BB9713008C869D /* configparam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC8518BB9713008C869D /* configparam.cpp */; };
 		BE11DC8A18BB971A008C869D /* target.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC8818BB971A008C869D /* target.cpp */; };
 		BE1E5DC118C753C9003A4CFB /* writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE1E5DBF18C753C9003A4CFB /* writer.cpp */; };
-		BE4F100418E42D58009DA1CF /* platformblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE4F100218E42D58009DA1CF /* platformblock.cpp */; };
+		BE4F100418E42D58009DA1CF /* platformparam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE4F100218E42D58009DA1CF /* platformparam.cpp */; };
 		BE72F53218DB155D0017B474 /* platform_osx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE72F53118DB155D0017B474 /* platform_osx.cpp */; };
 		BE72F53518DB48DD0017B474 /* writer_msvc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE72F53318DB48DD0017B474 /* writer_msvc.cpp */; };
 		BE854F2718CA24B4008EAFCD /* writer_xcode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE854F2518CA24B4008EAFCD /* writer_xcode.cpp */; };
@@ -53,6 +53,9 @@
 		BEAD3ACE178B6209005E695D /* lundump.c in Sources */ = {isa = PBXBuildFile; fileRef = BEAD3AA8178B6209005E695D /* lundump.c */; };
 		BEAD3ACF178B6209005E695D /* lvm.c in Sources */ = {isa = PBXBuildFile; fileRef = BEAD3AAA178B6209005E695D /* lvm.c */; };
 		BEAD3AD0178B6209005E695D /* lzio.c in Sources */ = {isa = PBXBuildFile; fileRef = BEAD3AAC178B6209005E695D /* lzio.c */; };
+		BEF971E218E4D93B002A53FB /* sdkparam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEF971E018E4D93B002A53FB /* sdkparam.cpp */; };
+		BEF971E518E4DA07002A53FB /* block.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEF971E318E4DA07002A53FB /* block.cpp */; };
+		BEF971E818E4DC89002A53FB /* flatten.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEF971E618E4DC89002A53FB /* flatten.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -79,14 +82,14 @@
 		BE11DC8118BB957E008C869D /* common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		BE11DC8218BB957E008C869D /* metabase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metabase.h; sourceTree = "<group>"; };
 		BE11DC8418BB957E008C869D /* solution.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = solution.h; sourceTree = "<group>"; };
-		BE11DC8518BB9713008C869D /* config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = config.cpp; sourceTree = "<group>"; };
-		BE11DC8618BB9713008C869D /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		BE11DC8518BB9713008C869D /* configparam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = configparam.cpp; sourceTree = "<group>"; };
+		BE11DC8618BB9713008C869D /* configparam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = configparam.h; sourceTree = "<group>"; };
 		BE11DC8818BB971A008C869D /* target.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = target.cpp; sourceTree = "<group>"; };
 		BE11DC8918BB971A008C869D /* target.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = target.h; sourceTree = "<group>"; };
 		BE1E5DBF18C753C9003A4CFB /* writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = writer.cpp; sourceTree = "<group>"; };
 		BE1E5DC018C753C9003A4CFB /* writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = writer.h; sourceTree = "<group>"; };
-		BE4F100218E42D58009DA1CF /* platformblock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = platformblock.cpp; sourceTree = "<group>"; };
-		BE4F100318E42D58009DA1CF /* platformblock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platformblock.h; sourceTree = "<group>"; };
+		BE4F100218E42D58009DA1CF /* platformparam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = platformparam.cpp; sourceTree = "<group>"; };
+		BE4F100318E42D58009DA1CF /* platformparam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platformparam.h; sourceTree = "<group>"; };
 		BE72F52E18DB14C30017B474 /* core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = core.h; sourceTree = "<group>"; };
 		BE72F53018DB14F20017B474 /* platform_windows.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = platform_windows.cpp; path = Windows/platform_windows.cpp; sourceTree = "<group>"; };
 		BE72F53118DB155D0017B474 /* platform_osx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = platform_osx.cpp; path = src/platform/OSX/platform_osx.cpp; sourceTree = SOURCE_ROOT; };
@@ -155,6 +158,12 @@
 		BEAD3AAC178B6209005E695D /* lzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lzio.c; sourceTree = "<group>"; };
 		BEAD3AAD178B6209005E695D /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lzio.h; sourceTree = "<group>"; };
 		BED6B7C918D6F2BB0089F811 /* notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = notes.txt; sourceTree = "<group>"; };
+		BEF971E018E4D93B002A53FB /* sdkparam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sdkparam.cpp; sourceTree = "<group>"; };
+		BEF971E118E4D93B002A53FB /* sdkparam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sdkparam.h; sourceTree = "<group>"; };
+		BEF971E318E4DA07002A53FB /* block.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = block.cpp; path = src/block.cpp; sourceTree = SOURCE_ROOT; };
+		BEF971E418E4DA07002A53FB /* block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = block.h; path = src/block.h; sourceTree = SOURCE_ROOT; };
+		BEF971E618E4DC89002A53FB /* flatten.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = flatten.cpp; sourceTree = "<group>"; };
+		BEF971E718E4DC89002A53FB /* flatten.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flatten.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -225,19 +234,25 @@
 			isa = PBXGroup;
 			children = (
 				BE854F7A18D0A5B4008EAFCD /* platform */,
+				BEF971E318E4DA07002A53FB /* block.cpp */,
+				BEF971E418E4DA07002A53FB /* block.h */,
 				BE11DC7918BB950B008C869D /* common.cpp */,
 				BE11DC8118BB957E008C869D /* common.h */,
-				BE11DC8518BB9713008C869D /* config.cpp */,
-				BE11DC8618BB9713008C869D /* config.h */,
+				BE11DC8518BB9713008C869D /* configparam.cpp */,
+				BE11DC8618BB9713008C869D /* configparam.h */,
 				BE72F52E18DB14C30017B474 /* core.h */,
 				BE0083AD18E09D8700F3E12F /* core.cpp */,
+				BEF971E618E4DC89002A53FB /* flatten.cpp */,
+				BEF971E718E4DC89002A53FB /* flatten.h */,
 				BE0083A518DDEF8D00F3E12F /* makesetup.cpp */,
 				BE0083A618DDEF8D00F3E12F /* makesetup.h */,
 				BE11DC7A18BB950B008C869D /* metabase.cpp */,
 				BE11DC8218BB957E008C869D /* metabase.h */,
 				BEAD3A6F178B618F005E695D /* main.cpp */,
-				BE4F100218E42D58009DA1CF /* platformblock.cpp */,
-				BE4F100318E42D58009DA1CF /* platformblock.h */,
+				BE4F100218E42D58009DA1CF /* platformparam.cpp */,
+				BE4F100318E42D58009DA1CF /* platformparam.h */,
+				BEF971E018E4D93B002A53FB /* sdkparam.cpp */,
+				BEF971E118E4D93B002A53FB /* sdkparam.h */,
 				BE11DC7C18BB950B008C869D /* solution.cpp */,
 				BE11DC8418BB957E008C869D /* solution.h */,
 				BE11DC8818BB971A008C869D /* target.cpp */,
@@ -378,14 +393,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BE4F100418E42D58009DA1CF /* platformblock.cpp in Sources */,
+				BE4F100418E42D58009DA1CF /* platformparam.cpp in Sources */,
 				BE1E5DC118C753C9003A4CFB /* writer.cpp in Sources */,
 				BEAD3A71178B618F005E695D /* main.cpp in Sources */,
 				BE0083A718DDEF8D00F3E12F /* makesetup.cpp in Sources */,
 				BEAD3AAF178B6209005E695D /* lapi.c in Sources */,
+				BEF971E518E4DA07002A53FB /* block.cpp in Sources */,
 				BEAD3AB0178B6209005E695D /* lauxlib.c in Sources */,
 				BEAD3AB1178B6209005E695D /* lbaselib.c in Sources */,
 				BEAD3AB2178B6209005E695D /* lbitlib.c in Sources */,
+				BEF971E218E4D93B002A53FB /* sdkparam.cpp in Sources */,
 				BEAD3AB3178B6209005E695D /* lcode.c in Sources */,
 				BEAD3AB4178B6209005E695D /* lcorolib.c in Sources */,
 				BEAD3AB5178B6209005E695D /* lctype.c in Sources */,
@@ -393,7 +410,7 @@
 				BEAD3AB6178B6209005E695D /* ldblib.c in Sources */,
 				BEAD3AB7178B6209005E695D /* ldebug.c in Sources */,
 				BEAD3AB8178B6209005E695D /* ldo.c in Sources */,
-				BE11DC8718BB9713008C869D /* config.cpp in Sources */,
+				BE11DC8718BB9713008C869D /* configparam.cpp in Sources */,
 				BEAD3AB9178B6209005E695D /* ldump.c in Sources */,
 				BE11DC8018BB950B008C869D /* solution.cpp in Sources */,
 				BEAD3ABA178B6209005E695D /* lfunc.c in Sources */,
@@ -417,6 +434,7 @@
 				BEAD3AC8178B6209005E695D /* lstrlib.c in Sources */,
 				BEAD3AC9178B6209005E695D /* ltable.c in Sources */,
 				BEAD3ACA178B6209005E695D /* ltablib.c in Sources */,
+				BEF971E818E4DC89002A53FB /* flatten.cpp in Sources */,
 				BE0083AE18E09D8700F3E12F /* core.cpp in Sources */,
 				BE11DC7D18BB950B008C869D /* common.cpp in Sources */,
 				BE11DC8A18BB971A008C869D /* target.cpp in Sources */,

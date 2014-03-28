@@ -119,7 +119,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 int main(int argc, const char * argv[])
 {
 	AppState* appState = mbGetAppState();
-	appState->makeSetup = new MakeSetup(NULL);
+	appState->makeSetup = new MakeSetup();
 
 	ParseArgs(&appState->cmdSetup, argc, (const char**)argv);
 
@@ -156,8 +156,9 @@ int main(int argc, const char * argv[])
 			mbMetabaseLuaRegister(l);
 			mbSolutionLuaRegister(l);
 			mbTargetLuaRegister(l);
-			mbConfigLuaRegister(l);
-			mbPlatformBlockLuaRegister(l);
+			mbConfigParamLuaRegister(l);
+			mbPlatformParamLuaRegister(l);
+			mbSDKParamLuaRegister(l);
 			
 			if (!mbGetAppState()->isProcessingPrimaryMakefile)
 			{
