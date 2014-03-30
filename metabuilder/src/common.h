@@ -25,6 +25,7 @@ extern "C"
 
 enum E_BlockType
 {
+	E_BlockType_Unknown,
 	E_BlockType_Block,
     E_BlockType_MakeSetup,
     E_BlockType_ConfigParam,
@@ -33,8 +34,7 @@ enum E_BlockType
     E_BlockType_Target,
 	E_BlockType_PlatformParam,
 	E_BlockType_MakeBlock,
-	E_BlockType_Param,
-	E_BlockType_SDKParam,
+	E_BlockType_Param
 };
 
 class Block;
@@ -44,7 +44,6 @@ class ConfigParam;
 class MakeSetup;
 class PlatformParam;
 class ParamBlock;
-class SDKParam;
 
 struct CmdSetup
 {
@@ -93,7 +92,6 @@ public:
 typedef std::vector<std::string>		StringVector;
 typedef std::vector<ParamBlock*>		ParamVector;
 typedef std::vector<ConfigParam*>		ConfigParamVector;
-typedef std::vector<SDKParam*>			SDKParamVector;
 typedef std::vector<PlatformParam*>		PlatformParamVector;
 
 struct KeyValue
@@ -218,7 +216,6 @@ void				mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroup
 #include "solution.h"
 #include "metabase.h"
 #include "platformparam.h"
-#include "sdkparam.h"
 #include "flatten.h"
 #include "writer.h"
 #include "writer_msvc.h"

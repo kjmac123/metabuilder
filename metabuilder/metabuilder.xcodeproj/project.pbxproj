@@ -53,7 +53,6 @@
 		BEAD3ACE178B6209005E695D /* lundump.c in Sources */ = {isa = PBXBuildFile; fileRef = BEAD3AA8178B6209005E695D /* lundump.c */; };
 		BEAD3ACF178B6209005E695D /* lvm.c in Sources */ = {isa = PBXBuildFile; fileRef = BEAD3AAA178B6209005E695D /* lvm.c */; };
 		BEAD3AD0178B6209005E695D /* lzio.c in Sources */ = {isa = PBXBuildFile; fileRef = BEAD3AAC178B6209005E695D /* lzio.c */; };
-		BEF971E218E4D93B002A53FB /* sdkparam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEF971E018E4D93B002A53FB /* sdkparam.cpp */; };
 		BEF971E518E4DA07002A53FB /* block.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEF971E318E4DA07002A53FB /* block.cpp */; };
 		BEF971E818E4DC89002A53FB /* flatten.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEF971E618E4DC89002A53FB /* flatten.cpp */; };
 /* End PBXBuildFile section */
@@ -158,8 +157,6 @@
 		BEAD3AAC178B6209005E695D /* lzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lzio.c; sourceTree = "<group>"; };
 		BEAD3AAD178B6209005E695D /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lzio.h; sourceTree = "<group>"; };
 		BED6B7C918D6F2BB0089F811 /* notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = notes.txt; sourceTree = "<group>"; };
-		BEF971E018E4D93B002A53FB /* sdkparam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sdkparam.cpp; sourceTree = "<group>"; };
-		BEF971E118E4D93B002A53FB /* sdkparam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sdkparam.h; sourceTree = "<group>"; };
 		BEF971E318E4DA07002A53FB /* block.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = block.cpp; path = src/block.cpp; sourceTree = SOURCE_ROOT; };
 		BEF971E418E4DA07002A53FB /* block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = block.h; path = src/block.h; sourceTree = SOURCE_ROOT; };
 		BEF971E618E4DC89002A53FB /* flatten.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = flatten.cpp; sourceTree = "<group>"; };
@@ -251,8 +248,6 @@
 				BEAD3A6F178B618F005E695D /* main.cpp */,
 				BE4F100218E42D58009DA1CF /* platformparam.cpp */,
 				BE4F100318E42D58009DA1CF /* platformparam.h */,
-				BEF971E018E4D93B002A53FB /* sdkparam.cpp */,
-				BEF971E118E4D93B002A53FB /* sdkparam.h */,
 				BE11DC7C18BB950B008C869D /* solution.cpp */,
 				BE11DC8418BB957E008C869D /* solution.h */,
 				BE11DC8818BB971A008C869D /* target.cpp */,
@@ -402,7 +397,6 @@
 				BEAD3AB0178B6209005E695D /* lauxlib.c in Sources */,
 				BEAD3AB1178B6209005E695D /* lbaselib.c in Sources */,
 				BEAD3AB2178B6209005E695D /* lbitlib.c in Sources */,
-				BEF971E218E4D93B002A53FB /* sdkparam.cpp in Sources */,
 				BEAD3AB3178B6209005E695D /* lcode.c in Sources */,
 				BEAD3AB4178B6209005E695D /* lcorolib.c in Sources */,
 				BEAD3AB5178B6209005E695D /* lctype.c in Sources */,

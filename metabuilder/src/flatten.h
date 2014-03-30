@@ -11,14 +11,6 @@ struct FlatConfig
 	void Dump();
 };
 
-struct FlatSDKConfig : FlatConfig
-{
-	std::string mainConfigName;
-	
-	void Dump();	
-};
-
-void mbFlattenTargetForConfig(FlatConfig* result, Target* target, const char* configName);
-void mbFlattenTargetForSDKConfig(FlatSDKConfig* result, Target* target, const char* sdkConfigName);
+void mbFlattenTargetForWriter(FlatConfig* result, Target* target, const char* platformName, const char* configName);
 
 #endif

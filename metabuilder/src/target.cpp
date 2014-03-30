@@ -99,7 +99,7 @@ void Target::GetPlatformFiles(StringVector* result, const char* platformName) co
 	else
 	{
 		PlatformParamVector platforms;
-		GetPlatformParams(&platforms, true);
+		GetPlatformParams(&platforms, NULL, true);
 		for (int i = 0; i < platforms.size(); ++i)
 		{
 			platforms[i]->GetFiles(result);
@@ -109,7 +109,6 @@ void Target::GetPlatformFiles(StringVector* result, const char* platformName) co
 
 void Target::GetPlatformFrameworks(StringVector* result, const char* platformName)
 {
-/*
 	GetFrameworks(result);
 
 	if (platformName)
@@ -123,19 +122,17 @@ void Target::GetPlatformFrameworks(StringVector* result, const char* platformNam
 	else
 	{
 		PlatformParamVector platforms;
-		GetPlatformParams(&platforms);
+		GetPlatformParams(&platforms, NULL, true);
 		for (int i = 0; i < platforms.size(); ++i)
 		{
 			platforms[i]->GetFrameworks(result);
 		}
 	}
-	*/
 }
 
 
 void Target::GetPlatformResources(StringVector* result, const char* platformName)
 {
-/*
 	GetResources(result);
 
 	if (platformName)
@@ -149,13 +146,12 @@ void Target::GetPlatformResources(StringVector* result, const char* platformName
 	else
 	{
 		PlatformParamVector platforms;
-		GetPlatformParams(&platforms);
+		GetPlatformParams(&platforms, NULL, true);
 		for (int i = 0; i < platforms.size(); ++i)
 		{
 			platforms[i]->GetResources(result);
 		}
 	}
-	*/
 }
 
 static int luaFuncTarget(lua_State* l)
@@ -238,32 +234,6 @@ static void AddPlatformSpecificStrings(std::map<std::string, StringVector>* plat
         platformFiles.push_back(tmp);
     }
 }
-/*
-static int luaFuncTargetPlatformFiles(lua_State* l)
-{
-	const char* platformName = lua_tostring(l, 1);
-	
-    luaL_checktype(l, 2, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 2);
-    
-	StringVector unfilteredList;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 2, i);
-        const char* tmp = lua_tostring(l, -1);
-        unfilteredList.push_back(tmp);
-    }
-	
-	StringVector filteredList;
-	FilterFiles(&filteredList, unfilteredList);
-		
-    Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-	target->AddPlatformFiles(filteredList, platformName);
-	
-    return 0;
-}
-*/
-
 
 static int luaFuncTargetDepends(lua_State* l)
 {

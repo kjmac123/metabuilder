@@ -158,7 +158,6 @@ int main(int argc, const char * argv[])
 			mbTargetLuaRegister(l);
 			mbConfigParamLuaRegister(l);
 			mbPlatformParamLuaRegister(l);
-			mbSDKParamLuaRegister(l);
 			
 			if (!mbGetAppState()->isProcessingPrimaryMakefile)
 			{

@@ -11,6 +11,23 @@
 #define STRINGGROUP_RESOURCES				"resources"
 #define STRINGGROUP_FRAMEWORKS				"frameworks"
 
+static const char* g_stringGroups[] = {
+	STRINGGROUP_FILES,
+	STRINGGROUP_DEFINES,
+	STRINGGROUP_INCLUDEDIRS,
+	STRINGGROUP_LIBDIRS,
+	STRINGGROUP_LIBS,
+	STRINGGROUP_EXEDIRS,
+	STRINGGROUP_RESOURCES,
+	STRINGGROUP_FRAMEWORKS,
+	NULL
+};
+
+const char** mbGetStringGroupNames()
+{
+	return g_stringGroups;
+}
+
 static void AddHeadersAutomatically(StringVector* files) 
 {
 	MetaBuilderContext* ctx = mbGetMainContext();
@@ -87,6 +104,9 @@ void Block::Dump() const
 	
 	MB_LOGINFO("m_stringGroups:");
 	mbDebugDumpGroups(m_stringGroups);
+
+	MB_LOGINFO("m_keyValueGroups:");
+	mbDebugDumpKeyValueGroups(m_keyValueGroups);
 	
 	MB_LOGINFO("END dumping %s", m_name.c_str());
 }
@@ -99,6 +119,19 @@ void Block::SetName(const char* name)
 const std::string& Block::GetName() const
 {
 	return m_name;
+}
+
+const char* Block::GetParentConfig() const
+{
+	for (const Block* block = this; block; block = block->m_parent)
+	{
+		if (block && block->Type() == E_BlockType_ConfigParam)
+		{
+			return block->GetName().c_str();
+		}
+	 }
+	 
+	 return NULL;
 }
 
 void Block::AddChild(Block* block)
@@ -122,24 +155,13 @@ void Block::AddFiles(const StringVector& files)
 	mbJoinArrays(existing, files);
 };
 
-void Block::GetFiles(StringVector* result/*, const char* configName*/) const
+void Block::GetFiles(StringVector* result) const
 {
 	const StringVector* existing = GetStringGroup(STRINGGROUP_FILES);
 	if (existing)
 	{
 		mbJoinArrays(result, *existing);
 	}
-	
-	/*
-	if (configName)
-	{
-		ConfigParam* config = GetConfigParam(configName);
-		if (config->GetName() == configName)
-		{
-			config->GetFiles(result, NULL);
-		}
-	}
-	*/
 }
 
 void Block::AddResources(const StringVector& resources)
@@ -148,24 +170,13 @@ void Block::AddResources(const StringVector& resources)
 	mbJoinArrays(existing, resources);
 };
 
-void Block::GetResources(StringVector* result/*, const char* configName*/) const
+void Block::GetResources(StringVector* result) const
 {
 	const StringVector* existing = GetStringGroup(STRINGGROUP_RESOURCES);
 	if (existing)
 	{
 		mbJoinArrays(result, *existing);
 	}
-	
-	/*
-	if (configName)
-	{
-		ConfigParam* config = GetConfigParam(configName);
-		if (config->GetName() == configName)
-		{
-			config->GetResources(result, NULL);
-		}
-	}
-	*/
 }
 
 void Block::AddFrameworks(const StringVector& frameworks)
@@ -174,7 +185,6 @@ void Block::AddFrameworks(const StringVector& frameworks)
 	mbJoinArrays(existing, frameworks);
 };
 
-/*
 void Block::GetFrameworks(StringVector* result) const
 {
 	const StringVector* existing = GetStringGroup(STRINGGROUP_FRAMEWORKS);
@@ -182,132 +192,34 @@ void Block::GetFrameworks(StringVector* result) const
 	{
 		mbJoinArrays(result, *existing);
 	}
-	*/
-	/*
-	if (configName)
-	{
-		ConfigParam* config = GetConfigParam(configName);
-		if (config->GetName() == configName)
-		{
-			config->GetFrameworks(result, NULL);
-		}
-	}
-	*/
-//}
+}
 
 void Block::AddDefines(const StringVector& defines)
 {
 	StringVector* existing = AcquireStringGroup(STRINGGROUP_DEFINES);
 	mbJoinArrays(existing, defines);
 };
-/*
-void Block::GetDefines(StringVector* result, const char* configName) const
-{
-	const StringVector* existing = GetStringGroup(STRINGGROUP_DEFINES);
-	if (existing)
-	{
-		mbJoinArrays(result, *existing);
-	}
-	
-	if (configName)
-	{
-		const ConfigParam* config = GetConfigParam(configName);
-		if (config)
-		{
-			if (config->GetName() == configName)
-			{
-				config->GetDefines(result, NULL);
-			}
-		}
-	}
-}
-*/
 
 void Block::AddIncludeDirs(const StringVector& includeDirs)
 {
 	StringVector* existing = AcquireStringGroup(STRINGGROUP_INCLUDEDIRS);
 	mbJoinArrays(existing, includeDirs);
 };
-/*
-void Block::GetIncludeDirs(StringVector* result, const char* configName) const
-{
-	const StringVector* existing = GetStringGroup(STRINGGROUP_INCLUDEDIRS);
-	if (existing)
-	{
-		mbJoinArrays(result, *existing);
-	}
-	
-	if (configName)
-	{
-		const ConfigParam* config = GetConfigParam(configName);
-		if (config)
-		{
-			if (config->GetName() == configName)
-			{
-				config->GetIncludeDirs(result, NULL);
-			}
-		}
-	}
-}
-*/
+
 void Block::AddLibDirs(const StringVector& libDirs)
 {
 	StringVector* existing = AcquireStringGroup(STRINGGROUP_LIBDIRS);
 	mbJoinArrays(existing, libDirs);
 
 };
-/*
-void Block::GetLibDirs(StringVector* result, const char* configName) const
-{
-	const StringVector* existing = GetStringGroup(STRINGGROUP_LIBDIRS);
-	if (existing)
-	{
-		mbJoinArrays(result, *existing);
-	}
-	
-	if (configName)
-	{
-		const ConfigParam* config = GetConfigParam(configName);
-		if (config)
-		{
-			if (config->GetName() == configName)
-			{
-				config->GetLibDirs(result, NULL);
-			}
-		}
-	}
-}
-*/
+
 void Block::AddLibs(const StringVector& libs)
 {
 	StringVector* existing = AcquireStringGroup(STRINGGROUP_LIBS);
 	mbJoinArrays(existing, libs);
 };
 
-/*
-void Block::GetLibs(StringVector* result, const char* configName) const
-{
-	const StringVector* existing = GetStringGroup(STRINGGROUP_LIBS);
-	if (existing)
-	{
-		mbJoinArrays(result, *existing);
-	}
-	
-	if (configName)
-	{
-		const ConfigParam* config = GetConfigParam(configName);
-		if (config)
-		{
-			if (config->GetName() == configName)
-			{
-				config->GetLibs(result, NULL);
-			}
-		}
-	}
-}
-*/
-
-const std::vector<ParamBlock*> Block::GetParamBlocks() const
+const std::vector<ParamBlock*>& Block::GetParamBlocks() const
 {
 	return m_childParams;
 }
@@ -340,7 +252,7 @@ const StringVector* Block::GetStringGroup(const char* groupName) const
 	return &it->second;
 }
 
-void Block::GetStringGroups(std::map<std::string, StringVector>* result, const char* configName) const
+void Block::GetStringGroups(std::map<std::string, StringVector>* result) const
 {
 	mbMergeStringGroups(result, m_stringGroups);
 }
@@ -362,7 +274,7 @@ void Block::SetOption(const std::string& group, const std::string& key, const st
 	kvmap[key] = value;
 }
 
-void Block::GetOptions(std::map<std::string, KeyValueMap>* result, const char* configName) const
+void Block::GetOptions(std::map<std::string, KeyValueMap>* result) const
 {
 	mbMergeOptions(result, m_keyValueGroups);
 }
@@ -373,30 +285,6 @@ void Block::AddExeDirs(const StringVector& exeDirs)
 	mbJoinArrays(existing, exeDirs);
 
 }
-/*
-void Block::GetExeDirs(StringVector* result, const char* configName) const
-{
-	const StringVector* existing = GetStringGroup(STRINGGROUP_EXEDIRS);
-	if (existing)
-	{
-		mbJoinArrays(result, *existing);
-	}
-	
-	if (configName)
-	{
-		const ConfigParam* config = GetConfigParam(configName);
-		if (config)
-		{
-			if (config->GetName() == configName)
-			{
-				config->GetExeDirs(result, NULL);
-			}
-		}
-	}
-}
-*/
-
-
 
 ConfigParam* Block::AcquireConfigParam(const char* configName)
 {
@@ -405,18 +293,6 @@ ConfigParam* Block::AcquireConfigParam(const char* configName)
 		return config;
 
 	config = new ConfigParam();
-	AddChild(config);
-    config->m_name = configName;
-	return config;
-}
-
-SDKParam* Block::AcquireSDKParam(const char* configName)
-{
-	SDKParam* config = (SDKParam*)GetParam(E_BlockType_SDKParam, configName);
-	if (config)
-		return config;
-
-	config = new SDKParam();
 	AddChild(config);
     config->m_name = configName;
 	return config;
@@ -435,15 +311,23 @@ PlatformParam* Block::AcquirePlatformParam(const char* configName)
 }
 
 
-void Block::GetParams(ParamVector* result, E_BlockType t, bool recurseChildParams) const
+void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformName, const char* configName, bool recurseChildParams) const
 {
 	for (int i = 0; i < (int)m_childParams.size(); ++i)
 	{
 		Block* child = m_childParams[i];
-		if (child->Type() == t)
-		{
-			result->push_back((ParamBlock*)child);
-		}
+		E_BlockType childType = child->Type();
+		
+		if (t != E_BlockType_Unknown && childType != t)
+			continue;
+			
+		if (childType == E_BlockType_PlatformParam && platformName && child->GetName() != platformName)
+			continue;
+
+		if (childType == E_BlockType_ConfigParam && configName && child->GetName() != configName)
+			continue;
+
+		result->push_back((ParamBlock*)child);
 	}
 	
 	if (recurseChildParams)
@@ -451,10 +335,11 @@ void Block::GetParams(ParamVector* result, E_BlockType t, bool recurseChildParam
 		for (int i = 0; i < (int)m_childParams.size(); ++i)
 		{
 			Block* child = m_childParams[i];
-			child->GetParams(result, t, recurseChildParams);
+			child->GetParams(result, t, platformName, configName, recurseChildParams);
 		}
 	}
 }
+
 
 ParamBlock* Block::GetParam(E_BlockType t, const char* name)
 {
@@ -472,44 +357,6 @@ const ParamBlock* Block::GetParam(E_BlockType t, const char* name) const
 {
 	return const_cast<Block*>(this)->GetParam(t, name);
 }
-/*
-void Block::GetPlatformParams(PlatformParamVector* result) const
-{
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
-	{
-		Block* child = m_childParams[i];
-		if (child->Type() == E_BlockType_PlatformParam)
-		{
-			result->push_back((PlatformParam*)child);
-		}
-	}
-}
-
-PlatformParam* Block::GetPlatformParam(const char* configName)
-{
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
-	{
-		Block* child = m_childParams[i];
-		if (child->Type() == E_BlockType_PlatformParam && child->GetName() == configName)
-			return (PlatformParam*)child;
-	}
-	
-	return NULL;
-}
-
-const PlatformParam* Block::GetPlatformParam(const char* configName) const
-{
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
-	{
-		Block* child = m_childParams[i];
-		if (child->Type() == E_BlockType_PlatformParam && child->GetName() == configName)
-			return (PlatformParam*)child;
-	}
-	
-	return NULL;
-}
-*/
-
 
 MakeBlock::MakeBlock()
 {
