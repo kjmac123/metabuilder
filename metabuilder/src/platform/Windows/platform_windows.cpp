@@ -32,6 +32,12 @@ bool _mbaCreateDir(const char* osDir)
     return true;
 }
 
+bool mbaCreateLink(const char*, const char*)
+{
+	mbExitError();
+	return false;
+}
+
 void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)
 {
     outFilePath[0] = 0;
