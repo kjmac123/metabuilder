@@ -30,9 +30,6 @@
     <ClCompile Include="src\common.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\config.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -165,12 +162,21 @@
     <ClCompile Include="src\platform\platform.cpp">
       <Filter>src\platform</Filter>
     </ClCompile>
+    <ClCompile Include="src\block.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\configparam.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\flatten.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platformparam.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\config.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\metabase.h">
@@ -279,6 +285,18 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\makesetup.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\block.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\configparam.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\flatten.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platformparam.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
