@@ -83,6 +83,15 @@ static int luaFuncGetFileType(lua_State* l)
 	lua_pushstring(l, result);
 	return 1;
 }
+
+static int luaFuncReportOutputFile(lua_State* l)
+{
+    const char* filepath = lua_tostring(l, 1);
+	MB_LOGINFO("Wrote file %s", filepath);
+	
+	return 0;
+}
+
 #if 0
 static int luaFuncGetRelativeDirTo(lua_State* l)
 {
@@ -180,6 +189,9 @@ void luaRegisterWriterFuncs(lua_State* l)
 	
     lua_pushcfunction(l, luaFuncCopyFile);
     lua_setglobal(l, "copyfile");
+
+    lua_pushcfunction(l, luaFuncReportOutputFile);
+    lua_setglobal(l, "reportoutputfile");
 }
 
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)
@@ -463,55 +475,6 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					lua_setfield(l, -2, "frameworks");
 				}
 				
-/*
-				//Files
-				lua_createtable(l, 0, 0);
-				{
-					std::set<std::string> uniqueFiles;
-					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
-					{
-						StringVector files;
-						target->FlattenFiles(&files, ctx->metabase->supportedPlatforms[jPlatform].c_str());
-						for (int jFile = 0; jFile < (int)files.size(); ++jFile)
-						{
-							uniqueFiles.insert(files[jFile]);
-						}
-					}
-										
-					//Write out a flat list of unique files to build.
-					int jFile = 0;
-					for (std::set<std::string>::iterator it = uniqueFiles.begin(); it != uniqueFiles.end(); ++it, ++jFile)
-					{
-						const char* str = it->c_str();
-						lua_pushstring(l, str);
-						lua_rawseti(l, -2, jFile+1);
-					}
-				}
-				lua_setfield(l, -2, "files");
-
-				//Frameworks
-				std::set<std::string> uniqueFrameworks;
-				for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
-				{
-					StringVector frameworks;
-					target->FlattenFrameworks(&frameworks, ctx->metabase->supportedPlatforms[jPlatform].c_str());
-					for (int jFile = 0; jFile < (int)frameworks.size(); ++jFile)
-					{
-						uniqueFrameworks.insert(frameworks[jFile]);
-					}
-				}
-				lua_createtable(l, 0, 0);
-				{
-					int jFile = 0;
-					for (std::set<std::string>::iterator it = uniqueFrameworks.begin(); it != uniqueFrameworks.end(); ++it, ++jFile)
-					{
-						const char* str = it->c_str();
-						lua_pushstring(l, str);
-						lua_rawseti(l, -2, jFile+1);
-					}
-				}
-				lua_setfield(l, -2, "frameworks");
-*/
 				//Resources
 				{
 					StringVector uniqueResources;

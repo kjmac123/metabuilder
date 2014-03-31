@@ -174,7 +174,6 @@ int main(int argc, const char * argv[])
 			lua_close(l);
 		}
 		mbPopActiveContext();
-		mbDestroyContext(ctx);
 		
 		appState->isProcessingPrimaryMakefile = false;
 	}
@@ -182,10 +181,18 @@ int main(int argc, const char * argv[])
 	const std::list<MetaBuilderContext*>& contexts = mbGetContexts();
 	for (std::list<MetaBuilderContext*>::const_reverse_iterator it = contexts.rbegin(); it != contexts.rend(); ++it)
 	{
-		mbWriterDo(*it);
+		MetaBuilderContext* ctx = *it;
+		mbWriterDo(ctx);
     }
+
+	for (std::list<MetaBuilderContext*>::const_iterator it = contexts.begin(); it != contexts.end(); it = contexts.begin())
+	{
+		MetaBuilderContext* ctx = *it;
+		mbDestroyContext(ctx);
+	}
+	
 	mbPopDir();
 	
-    MB_LOGINFO("Metabuilder completed successfully!\n");
+    MB_LOGINFO("Project generation complete. %i projects written", makeFiles.size());
     return 0;
 }
