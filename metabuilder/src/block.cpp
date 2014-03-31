@@ -127,7 +127,26 @@ const char* Block::GetParentConfig() const
 	{
 		if (block && block->Type() == E_BlockType_ConfigParam)
 		{
-			return block->GetName().c_str();
+			if (block->m_name.length() == 0)
+				return NULL;
+			
+			return block->m_name.c_str();
+		}
+	 }
+	 
+	 return NULL;
+}
+
+const char* Block::GetParentPlatform() const
+{
+	for (const Block* block = this; block; block = block->m_parent)
+	{
+		if (block && block->Type() == E_BlockType_PlatformParam)
+		{
+			if (block->m_name.length() == 0)
+				return NULL;
+			
+			return block->m_name.c_str();
 		}
 	 }
 	 
@@ -310,31 +329,70 @@ PlatformParam* Block::AcquirePlatformParam(const char* configName)
 	return config;
 }
 
-
+//When a config or param is specified, then not only will this include content specific to that platform or config, but also all generic platform or config data
 void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformName, const char* configName, bool recurseChildParams) const
 {
+	std::vector<Block*> childrenToProcess;
+	
 	for (int i = 0; i < (int)m_childParams.size(); ++i)
 	{
 		Block* child = m_childParams[i];
+				
 		E_BlockType childType = child->Type();
 		
 		if (t != E_BlockType_Unknown && childType != t)
 			continue;
-			
-		if (childType == E_BlockType_PlatformParam && platformName && child->GetName() != platformName)
-			continue;
+		
+		if (childType == E_BlockType_PlatformParam)
+		{
+			if (platformName)
+			{
+				//If we've specified that we want to include only the given platform, and the name of this platform
+				//block does not match this then skip this node.
+				if (child->GetName() != platformName)
+					continue;
+			}
+			else
+			{
+				//Specifying null indicates we want all blocks. To exclude platform specific blocks, pass in "" as the platform
+			}
+		}
 
-		if (childType == E_BlockType_ConfigParam && configName && child->GetName() != configName)
-			continue;
+		if (childType == E_BlockType_ConfigParam)
+		{
+			if (configName)
+			{
+				//If we've specified that we want to include only the given config, and the name of this config
+				//block does not match this then skip this node.
+				if (child->GetName() != configName)
+					continue;
+			}
+			else
+			{
+				//Specifying null indicates we want all blocks. To exclude config specific blocks, pass in "" as the config
+			}
+		}
+		
+		if (platformName)
+		{
+			const char* childPlatform = child->GetParentPlatform();
+			assert(!childPlatform || strcmp(platformName, childPlatform) == 0);
+		}
+		if (configName)
+		{
+			const char* childConfig = child->GetParentConfig();
+			assert(!childConfig || strcmp(configName, childConfig) == 0);
+		}
 
+		childrenToProcess.push_back(child);
 		result->push_back((ParamBlock*)child);
 	}
 	
 	if (recurseChildParams)
 	{
-		for (int i = 0; i < (int)m_childParams.size(); ++i)
+		for (int i = 0; i < (int)childrenToProcess.size(); ++i)
 		{
-			Block* child = m_childParams[i];
+			Block* child = childrenToProcess[i];
 			child->GetParams(result, t, platformName, configName, recurseChildParams);
 		}
 	}

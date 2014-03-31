@@ -21,6 +21,7 @@ public:
 	const std::string&			GetName() const;
 	
 	const char*					GetParentConfig() const;
+	const char*					GetParentPlatform() const;
 	
 	void						AddFiles(const StringVector& files);
 	void						GetFiles(StringVector* result) const;
