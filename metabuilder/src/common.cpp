@@ -69,6 +69,8 @@ MetaBuilderContext::~MetaBuilderContext()
 			break;
 		}
 	}
+	
+	delete metabase;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -86,6 +88,11 @@ const StringVector& mbGetMakeFiles()
 MetaBuilderContext* mbCreateContext()
 {
 	return new MetaBuilderContext;
+}
+
+void mbDestroyContext(MetaBuilderContext* ctx)
+{
+	delete ctx;
 }
 
 MetaBuilderContext* mbGetMainContext()

@@ -357,6 +357,10 @@ Block::Block()
 
 Block::~Block()
 {
+	for (int i = 0; i < m_childParams.size(); ++i)
+	{
+		delete m_childParams[i];
+	}
 }
 
 bool Block::IsA(E_BlockType t) const
@@ -686,6 +690,10 @@ MakeBlock::MakeBlock()
 
 MakeBlock::~MakeBlock()
 {
+	for (int i = 0; i < m_childMakeBlocks.size(); ++i)
+	{
+		delete m_childMakeBlocks[i];
+	}
 }
 
 bool MakeBlock::IsA(E_BlockType t) const

@@ -72,6 +72,11 @@ public:
 		makeSetup = NULL;
 	}
 	
+	~AppState()
+	{
+		delete makeSetup;
+	}
+	
 	void Process();
 	
 	std::string mainSolutionName;
@@ -145,6 +150,7 @@ void				mbAddMakeFile(const char* makefile);
 const StringVector&	mbGetMakeFiles();
 
 MetaBuilderContext* mbCreateContext();
+void				mbDestroyContext(MetaBuilderContext* ctx);
 MetaBuilderContext* mbGetMainContext();
 MetaBuilderContext* mbGetActiveContext();
 void				mbPushActiveContext(MetaBuilderContext* ctx);

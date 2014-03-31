@@ -139,7 +139,6 @@ int main(int argc, const char * argv[])
 	for (int i = 0; i < (int)makeFiles.size(); ++i)
 	{
 		MetaBuilderContext* ctx = mbCreateContext();
-		
 		mbPushActiveContext(ctx);		
 		{
 			{
@@ -175,6 +174,7 @@ int main(int argc, const char * argv[])
 			lua_close(l);
 		}
 		mbPopActiveContext();
+		mbDestroyContext(ctx);
 		
 		appState->isProcessingPrimaryMakefile = false;
 	}
