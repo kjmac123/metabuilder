@@ -46,10 +46,7 @@ static void AddHeadersAutomatically(StringVector* files)
 					sprintf(candidateFilename, "%s/%s", ctx->currentMetaMakeDirAbs.c_str(), candidateRelativeName);
 					if (mbFileExists(candidateFilename))
 					{
-						if (mbGetAppState()->cmdSetup.verbose)
-						{
-							MB_LOGDEBUG("Automatically adding header file %s", candidateRelativeName);
-						}
+						MB_LOGDEBUG("Automatically adding header file %s", candidateRelativeName);
 						result.push_back(candidateRelativeName);
 					}
 				}
@@ -712,6 +709,11 @@ void MakeBlock::AddChild(Block* block)
 void MakeBlock::Process()
 {
 	Block::Process();
+	
+	for (int i = 0; i < m_childMakeBlocks.size(); ++i)
+	{
+		m_childMakeBlocks[i]->Process();
+	}
 }
 	
 void MakeBlock::Dump() const
