@@ -14,14 +14,17 @@ class Target : public MakeBlock
 public:
 						Target();
 	
-    virtual E_BlockType	Type() const;
+    virtual E_BlockType	GetType() const;
 	virtual bool		IsA(E_BlockType t) const;	
 	
 	virtual void		Process();
-		
-	void				GetPlatformFiles(StringVector* files, const char* platformName) const;
-	void				GetPlatformFrameworks(StringVector* frameworks, const char* platformName);
-	void				GetPlatformResources(StringVector* resources, const char* platformName);
+	
+	//Config and platform specific
+	void				Flatten(FlatConfig* result, const char* platformName, const char* configName) const;
+	//Non config specific
+	void				FlattenFiles(StringVector* files, const char* platformName) const;
+	void				FlattenFrameworks(StringVector* frameworks, const char* platformName) const;
+	void				FlattenResources(StringVector* resources, const char* platformName) const;
 	
 	std::string         targetType;
 
@@ -31,6 +34,7 @@ public:
 	std::string			pch;
 			
 protected:
+	void				FlattenStringGroup(StringVector* result, const char* stringGroup, const char* platformName) const;
 };
 
 typedef std::vector<Target*> TargetVector;

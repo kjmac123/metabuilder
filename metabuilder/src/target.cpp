@@ -66,7 +66,7 @@ Target::Target()
 {
 }
 
-E_BlockType Target::Type() const
+E_BlockType Target::GetType() const
 {
 	return E_BlockType_Target;
 }
@@ -84,54 +84,64 @@ void Target::Process()
 	Block::Process();
 }
 
-void Target::GetPlatformFiles(StringVector* result, const char* platformName) const
+void Target::FlattenFiles(StringVector* result, const char* platformName) const
 {
-	GetFiles(result);
-
-	if (platformName)
-	{
-		const PlatformParam* platform = GetPlatformParam(platformName);
-		if (platform)
-		{
-			platform->GetFiles(result);
-		}
-	}
-	else
-	{
-		PlatformParamVector platforms;
-		GetPlatformParams(&platforms, NULL, true);
-		for (int i = 0; i < platforms.size(); ++i)
-		{
-			platforms[i]->GetFiles(result);
-		}
-	}
+	FlattenStringGroup(result, STRINGGROUP_FILES, platformName);
 }
 
-void Target::GetPlatformFrameworks(StringVector* result, const char* platformName)
+void Target::FlattenFrameworks(StringVector* result, const char* platformName) const
 {
-	GetFrameworks(result);
-
-	if (platformName)
-	{
-		const PlatformParam* platform = GetPlatformParam(platformName);
-		if (platform)
-		{
-			platform->GetFrameworks(result);
-		}
-	}
-	else
-	{
-		PlatformParamVector platforms;
-		GetPlatformParams(&platforms, NULL, true);
-		for (int i = 0; i < platforms.size(); ++i)
-		{
-			platforms[i]->GetFrameworks(result);
-		}
-	}
+	FlattenStringGroup(result, STRINGGROUP_FRAMEWORKS, platformName);
 }
 
+void Target::FlattenResources(StringVector* result, const char* platformName) const
+{
+	FlattenStringGroup(result, STRINGGROUP_RESOURCES, platformName);
+}
 
-void Target::GetPlatformResources(StringVector* result, const char* platformName)
+void Target::Flatten(FlatConfig* result, const char* platformName, const char* configName) const
+{
+	MB_LOGDEBUG("Flattening Target %s platform %s config %s", GetName().c_str(), platformName ? platformName : "{ALL}", configName ? configName : "{ALL}");
+	//TODO - move this
+	if (configName)
+	{
+		result->name = configName;
+	}
+	
+	//Build a list so that we can traverse our hierarchy top to bottom.
+	ParamVector params;
+	
+	std::vector<const Block*> blocks;
+	for (const Block* block = this; block; block = block->GetParent())
+	{
+		blocks.push_back(block);
+		
+		for (int i = 0; i < blocks.size(); ++i)
+		{
+			block->GetParams(&params, E_BlockType_Unknown, platformName, configName, true);
+		}
+	}
+
+	//Merge non config specifc params
+	for (int iBlock = (int)blocks.size()-1; iBlock >= 0; --iBlock)
+	{
+		const Block* block = blocks[iBlock];
+		MB_LOGDEBUG("Merging block %s", block->GetName().c_str());
+		block->FlattenThis(result);
+	}
+
+	//Merge config specific params
+	for (int iBlock = (int)params.size()-1; iBlock >= 0; --iBlock)
+	{
+		const Block* block = params[iBlock];
+		MB_LOGDEBUG("Merging config block %s parent config %s", block->GetName().c_str(), block->GetParentPlatform() ? block->GetParentPlatform() : "none");
+		block->FlattenThis(result);
+	}
+	
+	result->Dump();
+}
+
+void Target::FlattenStringGroup(StringVector* result, const char* stringGroup, const char* platformName) const
 {
 	MetaBuilderContext* ctx = mbGetActiveContext();
 	
@@ -139,20 +149,20 @@ void Target::GetPlatformResources(StringVector* result, const char* platformName
 	for (int iPlatform = 0; iPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++iPlatform)
 	{
 		const char* platformName = ctx->metabase->supportedPlatforms[iPlatform].c_str();
-		mbFlattenTargetForWriter(&f, this, platformName, NULL);
+		Flatten(&f, platformName, NULL);
 	}
 	
-	std::map<std::string, StringVector>::iterator it = f.stringGroups.find(STRINGGROUP_RESOURCES);
+	std::map<std::string, StringVector>::iterator it = f.stringGroups.find(stringGroup);
 	if (it == f.stringGroups.end())
 		return;
 	
 	const StringVector& strings = it->second;
-	mbJoinArrays(result, strings);
+	mbJoinArrays(result, strings);	
 }
 
 static int luaFuncTarget(lua_State* l)
 {
-    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->Type() != E_BlockType_Solution)
+    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->GetType() != E_BlockType_Solution)
     {
         MB_LOGERROR("ERROR: must be within solution block");
         mbExitError();

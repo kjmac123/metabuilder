@@ -6,7 +6,7 @@ Metabase::Metabase()
 {
 }
 
-E_BlockType Metabase::Type() const
+E_BlockType Metabase::GetType() const
 {
 	return E_BlockType_Metabase;
 }
@@ -49,7 +49,7 @@ static int luaFuncMetabaseEnd(lua_State* lua)
 
 static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
 {
-    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->Type() != E_BlockType_Metabase)
+    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->GetType() != E_BlockType_Metabase)
     {
         MB_LOGERROR("must be within solution block");
         mbExitError();
@@ -74,7 +74,7 @@ static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
 static int luaFuncMetabaseWriter(lua_State* lua)
 {
 
-    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->Type() != E_BlockType_Metabase)
+    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->GetType() != E_BlockType_Metabase)
     {
         MB_LOGERROR("must be within solution block");
         mbExitError();

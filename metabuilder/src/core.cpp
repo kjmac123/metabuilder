@@ -32,6 +32,11 @@ void _mbLogInfof(const char* fmt, ...)
 	PLATFORM_FORMAT_LOG_MESSAGE(mbaLogInfo, 0);
 }
 
+void _mbLogDebugf(const char* fmt, ...)
+{
+	PLATFORM_FORMAT_LOG_MESSAGE(mbaLogDebug, 0);
+}
+
 void _mbLogErrorfLF(const char* fmt, ...)
 {
 	PLATFORM_FORMAT_LOG_MESSAGE_LF(mbaLogError, 0);
@@ -42,4 +47,7 @@ void _mbLogInfofLF(const char* fmt, ...)
 	PLATFORM_FORMAT_LOG_MESSAGE_LF(mbaLogInfo, 0);
 }
 
-
+void _mbLogDebugfLF(const char* fmt, ...)
+{
+	PLATFORM_FORMAT_LOG_MESSAGE_LF(mbaLogDebug, 0);
+}

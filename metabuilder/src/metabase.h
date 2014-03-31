@@ -8,7 +8,7 @@ class Metabase : public MakeBlock
 public:
 	Metabase();
 	
-    virtual E_BlockType Type() const;
+    virtual E_BlockType GetType() const;
 	virtual bool		IsA(E_BlockType t) const;		
 	
 	StringVector		supportedPlatforms;

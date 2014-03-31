@@ -6,7 +6,7 @@ ConfigParam::ConfigParam()
 {
 }
 
-E_BlockType ConfigParam::Type() const
+E_BlockType ConfigParam::GetType() const
 {
 	return E_BlockType_ConfigParam;
 }

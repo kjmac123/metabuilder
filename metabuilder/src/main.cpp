@@ -118,6 +118,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 
 int main(int argc, const char * argv[])
 {
+	MB_LOGINFO("Metabuilder");
 	AppState* appState = mbGetAppState();
 	appState->makeSetup = new MakeSetup();
 
@@ -153,6 +154,7 @@ int main(int argc, const char * argv[])
 
 			mbMakeSetupLuaRegister(l);
 			mbCommonLuaRegister(l);
+			mbBlockLuaRegister(l);
 			mbMetabaseLuaRegister(l);
 			mbSolutionLuaRegister(l);
 			mbTargetLuaRegister(l);
@@ -184,6 +186,6 @@ int main(int argc, const char * argv[])
     }
 	mbPopDir();
 	
-    MB_LOGINFO("\nDone!\n");
+    MB_LOGINFO("Metabuilder completed successfully!\n");
     return 0;
 }

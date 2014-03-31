@@ -34,7 +34,7 @@ bool _mbaCreateDir(const char* osDir)
         return false;
     }
     
-//    MB_LOGINFO("Created dir %s\n", osDir);
+//    MB_LOGDEBUG("Created dir %s\n", osDir);
     return true;
 }
 
@@ -225,5 +225,12 @@ void mbaLogInfo(const char* str)
 	printf("%s", str);
 }
 
+void mbaLogDebug(const char* str)
+{
+	if (mbGetAppState()->cmdSetup.verbose)
+	{
+		printf("%s", str);
+	}
+}
 
 #endif

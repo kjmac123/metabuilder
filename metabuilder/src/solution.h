@@ -9,7 +9,7 @@ public:
 	Solution();
 	virtual ~Solution();
 	
-    virtual E_BlockType Type() const;
+    virtual E_BlockType GetType() const;
 	virtual bool		IsA(E_BlockType t) const;
 		
 	virtual void Process();

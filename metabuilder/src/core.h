@@ -27,14 +27,17 @@ typedef double F64;
 
 #define MB_LOGERROR(...)				_mbLogErrorfLF(__VA_ARGS__)
 #define MB_LOGINFO(...)					_mbLogInfofLF(__VA_ARGS__)
+#define MB_LOGDEBUG(...)				_mbLogDebugfLF(__VA_ARGS__)
 
 #define MB_CHECKERROR(test, ...)		{ if (!test) { _LogInfofLF(__VA_ARGS__); } }
 #define MB_CHECKEXPECTEDBLOCK(blockExpected, cmdName) mbCheckExpectedBlock(blockExpected, cmdName);
 
 void _mbLogErrorf(const char* fmt, ...);
-void _mbLogInfof(const char* fmt, ...);
 void _mbLogErrorfLF(const char* fmt, ...);
+void _mbLogInfof(const char* fmt, ...);
 void _mbLogInfofLF(const char* fmt, ...);
+void _mbLogDebugf(const char* fmt, ...);
+void _mbLogDebugfLF(const char* fmt, ...);
 
 #include "platform/platform.h"
 

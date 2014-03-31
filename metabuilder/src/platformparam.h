@@ -6,7 +6,7 @@ class PlatformParam : public ParamBlock
 public:
 	PlatformParam();
 	
-    virtual E_BlockType		Type() const;
+    virtual E_BlockType		GetType() const;
 	virtual bool			IsA(E_BlockType t) const;
 	
 protected:

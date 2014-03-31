@@ -10,7 +10,7 @@ Solution::~Solution()
 {
 }
 
-E_BlockType Solution::Type() const
+E_BlockType Solution::GetType() const
 {
 	return E_BlockType_Solution;
 }

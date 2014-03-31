@@ -15,37 +15,6 @@ static std::stack<std::string>				g_doFileCurrentDirStack;
 
 
 
-static void FilterFiles(StringVector* result, const StringVector& input)
-{
-	for (int i = 0; i < (int)input.size(); ++i)
-	{
-		const std::string& inputFilepath = input[i];
-
-		//Look for wildcard
-		if (inputFilepath.find('*') != std::string::npos)
-		{
-			const char* excludeDirs = NULL;
-			const char* delimiter = "|excludedirs=";
-			char* tmp = (char*)strstr(inputFilepath.c_str(), delimiter);
-			if (tmp)
-			{
-				excludeDirs = tmp + strlen(delimiter);
-				*tmp = '\0';
-			}
-
-			std::string dir = mbPathGetDir(inputFilepath);	
-
-			std::string filename = mbPathGetFilename(inputFilepath);
-			mbaBuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
-		}
-		else
-		{
-			result->push_back(inputFilepath);
-		}
-	}
-}
-
-
 
 void AppState::Process()
 {
@@ -153,31 +122,6 @@ static int luaFuncGlobalImport(lua_State* lua)
     return 0;
 }
 
-static int luaFuncDefines(lua_State* lua)
-{
-    Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
-    {
-        MB_LOGERROR("must be set within a block!");
-        mbExitError();
-    }
-    
-    luaL_checktype(lua, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(lua, 1);
-    
-    StringVector defines;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(lua, 1, i);
-        const char* tmp = lua_tostring(lua, -1);
-        defines.push_back(tmp);
-    }
-    block->AddDefines(defines);
-    
-    return 0;
-}
-
-
 static int report (lua_State *L, int status) {
   const char *msg;
   if (status) {
@@ -189,25 +133,7 @@ static int report (lua_State *L, int status) {
   return status;
 }
 
-static int luaFuncSetOption(lua_State* l)
-{
-	Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
-    {
-        MB_LOGERROR("must be within block");
-        mbExitError();
-    }
-	
-    const char* group = lua_tostring(l, 1);
-    const char* key = lua_tostring(l, 2);
-	const char* value = lua_tostring(l, 3);
-	if (!value)
-	{
-		value = "";
-	}
-	block->SetOption(group, key, value);
-	return 0;
-}
+
 
 static int luaFuncCheckPlatform(lua_State* l)
 {
@@ -226,102 +152,7 @@ static int luaFuncCheckPlatform(lua_State* l)
 	return 1;
 }
 
-static int luaFuncLibs(lua_State* l)
-{
-	Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
-    {
-        MB_LOGERROR("must be within block");
-        mbExitError();
-    }
-	
-    luaL_checktype(l, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 1);
-    
-	StringVector strings;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 1, i);
-        const char* str = lua_tostring(l, -1);
-        strings.push_back(str);
-    }
-	block->AddLibs(strings);
-		
-    return 0;
-}
 
-static int luaFuncIncludeDir(lua_State* l)
-{
-	Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
-    {
-        MB_LOGERROR("must be within block");
-        mbExitError();
-    }
-
-	
-    luaL_checktype(l, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 1);
-    
-	StringVector strings;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 1, i);
-        const char* dir = lua_tostring(l, -1);
-        strings.push_back(dir);
-    }
-	block->AddIncludeDirs(strings);
-		
-    return 0;
-}
-
-static int luaFuncLibDir(lua_State* l)
-{
-	Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
-    {
-        MB_LOGERROR("must be within block");
-        mbExitError();
-    }
-	
-    luaL_checktype(l, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 1);
-    
-	StringVector strings;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 1, i);
-        const char* dir = lua_tostring(l, -1);
-        strings.push_back(dir);
-    }
-	block->AddLibDirs(strings);
-		
-    return 0;
-}
-
-static int luaFuncExeDirs(lua_State* l)
-{
-	Block* block = mbGetActiveContext()->ActiveBlock();	
-    if (!block)
-    {
-        MB_LOGERROR("must be within block");
-        mbExitError();
-    }
-	
-    luaL_checktype(l, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 1);
-    
-	StringVector strings;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 1, i);
-        const char* dir = lua_tostring(l, -1);
-        strings.push_back(dir);
-    }
-	block->AddExeDirs(strings);
-		
-    return 0;
-}
 
 void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc initFunc)
 {
@@ -371,7 +202,7 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc ini
             // get the top of the stack as the error and pop it off
             const char* str = lua_tostring(l, lua_gettop(l));
             lua_pop(l, 1);
-            MB_LOGINFO("%s", str);
+            MB_LOGERROR("%s", str);
         }
 		mbExitError();
 	}
@@ -381,7 +212,7 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc ini
 
 void mbExitError()
 {
-	MB_LOGINFO("Exiting with error.");
+	MB_LOGERROR("Exiting with error.");
     _exit(1);    
 }
 
@@ -599,85 +430,7 @@ void mbPopDir()
 
 
 
-void mbLuaGetDefines(StringVector* defines, lua_State* lua, E_BlockType blockTypeExpected)
-{
-    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->Type() != blockTypeExpected)
-    {
-        MB_LOGINFO("ERROR: must be within expected block");
-        mbExitError();
-    }
-	   
-    luaL_checktype(lua, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(lua, 1);
-    
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(lua, 1, i);
-        const char* tmp = lua_tostring(lua, -1);
-        defines->push_back(tmp);
-    }
-}
 
-static int luaFuncFiles(lua_State* l)
-{
-    Block* b = mbGetActiveContext()->ActiveBlock();
-	
-    luaL_checktype(l, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 1);
-    
-	StringVector inputFiles;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 1, i);
-        const char* filename = lua_tostring(l, -1);
-		inputFiles.push_back(filename);
-    }
-	
-	StringVector filteredList;
-	FilterFiles(&filteredList, inputFiles);
-	b->AddFiles(filteredList);
-		
-    return 0;
-}
-
-static int luaFuncFrameworks(lua_State* l)
-{
-    Block* b = mbGetActiveContext()->ActiveBlock();
-	
-    luaL_checktype(l, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 1);
-    
-	StringVector inputFiles;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 1, i);
-        const char* filename = lua_tostring(l, -1);
-		inputFiles.push_back(filename);
-    }
-	
-	b->AddFrameworks(inputFiles);
-	
-    return 0;
-}
-
-static int luaFuncResources(lua_State* l)
-{
-    Block* b = mbGetActiveContext()->ActiveBlock();
-	
-    luaL_checktype(l, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 1);
-    
-	StringVector tableContents;
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 1, i);
-        const char* tmp = lua_tostring(l, -1);
-		tableContents.push_back(tmp);
-    }
-	b->AddResources(tableContents);
-	
-    return 0;
-}
 
 void mbCommonLuaRegister(lua_State* l)
 {
@@ -686,33 +439,6 @@ void mbCommonLuaRegister(lua_State* l)
 
     lua_pushcfunction(l, luaFuncCheckPlatform);
     lua_setglobal(l, "checkplatform");
-	
-    lua_pushcfunction(l, luaFuncSetOption);
-    lua_setglobal(l, "option");
-	
-    lua_pushcfunction(l, luaFuncDefines);
-    lua_setglobal(l, "defines");
-	
-    lua_pushcfunction(l, luaFuncIncludeDir);
-    lua_setglobal(l, "includedirs");
-
-    lua_pushcfunction(l, luaFuncLibDir);
-    lua_setglobal(l, "libdirs");
-	
-    lua_pushcfunction(l, luaFuncLibs);
-    lua_setglobal(l, "libs");
-
-    lua_pushcfunction(l, luaFuncExeDirs);
-    lua_setglobal(l, "exedirs");
-	
-    lua_pushcfunction(l, luaFuncFiles);
-    lua_setglobal(l, "files");
-
-    lua_pushcfunction(l, luaFuncFrameworks);
-    lua_setglobal(l, "frameworks");
-
-    lua_pushcfunction(l, luaFuncResources);
-    lua_setglobal(l, "resources");
 }
 
 void mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
@@ -737,21 +463,21 @@ void mbLuaDump(lua_State* l)
         int t = lua_type(l, i);
         switch (t) {
             case LUA_TSTRING:
-                MB_LOGINFO("string: '%s'", lua_tostring(l, i));
+                MB_LOGDEBUG("string: '%s'", lua_tostring(l, i));
                 break;
             case LUA_TBOOLEAN:
-                MB_LOGINFO("boolean %s",lua_toboolean(l, i) ? "true" : "false");
+                MB_LOGDEBUG("boolean %s",lua_toboolean(l, i) ? "true" : "false");
                 break;
             case LUA_TNUMBER:
-                MB_LOGINFO("number: %g", lua_tonumber(l, i));
+                MB_LOGDEBUG("number: %g", lua_tonumber(l, i));
                 break;
             default:
-                MB_LOGINFO("%s", lua_typename(l, t));
+                MB_LOGDEBUG("%s", lua_typename(l, t));
                 break;
         }
-        MB_LOGINFO("  ");
+        MB_LOGDEBUG("  ");
     }
-    MB_LOGINFO("");
+    MB_LOGDEBUG("");
 }
 
 void mbMergeStringGroups(std::map<std::string, StringVector>* result, const std::map<std::string, StringVector>& stringGroup)
@@ -852,7 +578,7 @@ U32 mbRandomU32(mbRandomContext& ctx)
 
 void mbCheckExpectedBlock(E_BlockType blockExpected, const char* cmdName)
 {
-    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->Type() != blockExpected)
+    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->GetType() != blockExpected)
     {
 		MB_LOGERROR("Operation %s is not permitted within the current block type.", cmdName);
         mbExitError();
@@ -955,11 +681,11 @@ void mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroup
 {
 	for (std::map<std::string, KeyValueMap>::const_iterator it = kvGroups.begin(); it != kvGroups.end(); ++it)
 	{
-		MB_LOGINFO("%s (option group) count: %i", it->first.c_str(), it->second.size());
+		MB_LOGDEBUG("%s (option group) count: %i", it->first.c_str(), it->second.size());
 		const KeyValueMap& kvm = it->second;
 		for (KeyValueMap::const_iterator it2 = kvm.begin(); it2 != kvm.end(); ++it2)
 		{
-			MB_LOGINFO("  %s : %s", it2->first.c_str(), it2->second.c_str());
+			MB_LOGDEBUG("  %s : %s", it2->first.c_str(), it2->second.c_str());
 		}
 	}
 }
@@ -968,11 +694,11 @@ void mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups)
 {
 	for (std::map<std::string, StringVector>::const_iterator it = stringGroups.begin(); it != stringGroups.end(); ++it)
 	{
-		MB_LOGINFO("%s (string group) count: %i", it->first.c_str(), it->second.size());
+		MB_LOGDEBUG("%s (string group) count: %i", it->first.c_str(), it->second.size());
 		const StringVector& stringVector = it->second;
 		for (StringVector::const_iterator it2 = stringVector.begin(); it2 != stringVector.end(); ++it2)
 		{
-			MB_LOGINFO("  %s", it2->c_str());
+			MB_LOGDEBUG("  %s", it2->c_str());
 		}
 	}
 }

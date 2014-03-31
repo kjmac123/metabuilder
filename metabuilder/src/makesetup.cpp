@@ -6,7 +6,7 @@ MakeSetup::MakeSetup()
 {
 }
 
-E_BlockType MakeSetup::Type() const
+E_BlockType MakeSetup::GetType() const
 {
 	return E_BlockType_MakeSetup;
 }

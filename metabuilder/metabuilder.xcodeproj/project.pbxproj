@@ -54,7 +54,6 @@
 		BEAD3ACF178B6209005E695D /* lvm.c in Sources */ = {isa = PBXBuildFile; fileRef = BEAD3AAA178B6209005E695D /* lvm.c */; };
 		BEAD3AD0178B6209005E695D /* lzio.c in Sources */ = {isa = PBXBuildFile; fileRef = BEAD3AAC178B6209005E695D /* lzio.c */; };
 		BEF971E518E4DA07002A53FB /* block.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEF971E318E4DA07002A53FB /* block.cpp */; };
-		BEF971E818E4DC89002A53FB /* flatten.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEF971E618E4DC89002A53FB /* flatten.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -156,11 +155,8 @@
 		BEAD3AAB178B6209005E695D /* lvm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lvm.h; sourceTree = "<group>"; };
 		BEAD3AAC178B6209005E695D /* lzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lzio.c; sourceTree = "<group>"; };
 		BEAD3AAD178B6209005E695D /* lzio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lzio.h; sourceTree = "<group>"; };
-		BED6B7C918D6F2BB0089F811 /* notes.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = notes.txt; sourceTree = "<group>"; };
 		BEF971E318E4DA07002A53FB /* block.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = block.cpp; path = src/block.cpp; sourceTree = SOURCE_ROOT; };
 		BEF971E418E4DA07002A53FB /* block.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = block.h; path = src/block.h; sourceTree = SOURCE_ROOT; };
-		BEF971E618E4DC89002A53FB /* flatten.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = flatten.cpp; sourceTree = "<group>"; };
-		BEF971E718E4DC89002A53FB /* flatten.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flatten.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -239,8 +235,6 @@
 				BE11DC8618BB9713008C869D /* configparam.h */,
 				BE72F52E18DB14C30017B474 /* core.h */,
 				BE0083AD18E09D8700F3E12F /* core.cpp */,
-				BEF971E618E4DC89002A53FB /* flatten.cpp */,
-				BEF971E718E4DC89002A53FB /* flatten.h */,
 				BE0083A518DDEF8D00F3E12F /* makesetup.cpp */,
 				BE0083A618DDEF8D00F3E12F /* makesetup.h */,
 				BE11DC7A18BB950B008C869D /* metabase.cpp */,
@@ -258,7 +252,6 @@
 				BE72F53418DB48DD0017B474 /* writer_msvc.h */,
 				BE854F2518CA24B4008EAFCD /* writer_xcode.cpp */,
 				BE854F2618CA24B4008EAFCD /* writer_xcode.h */,
-				BED6B7C918D6F2BB0089F811 /* notes.txt */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -428,7 +421,6 @@
 				BEAD3AC8178B6209005E695D /* lstrlib.c in Sources */,
 				BEAD3AC9178B6209005E695D /* ltable.c in Sources */,
 				BEAD3ACA178B6209005E695D /* ltablib.c in Sources */,
-				BEF971E818E4DC89002A53FB /* flatten.cpp in Sources */,
 				BE0083AE18E09D8700F3E12F /* core.cpp in Sources */,
 				BE11DC7D18BB950B008C869D /* common.cpp in Sources */,
 				BE11DC8A18BB971A008C869D /* target.cpp in Sources */,

@@ -216,7 +216,6 @@ void				mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroup
 #include "solution.h"
 #include "metabase.h"
 #include "platformparam.h"
-#include "flatten.h"
 #include "writer.h"
 #include "writer_msvc.h"
 #include "writer_xcode.h"

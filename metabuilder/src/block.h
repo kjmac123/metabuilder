@@ -10,13 +10,26 @@
 #define STRINGGROUP_RESOURCES				"resources"
 #define STRINGGROUP_FRAMEWORKS				"frameworks"
 
+const char**	mbGetStringGroupNames();
+void			mbBlockLuaRegister(lua_State* l);
+
+struct FlatConfig
+{
+	std::string name;
+	
+	std::map<std::string, StringVector>	stringGroups;
+	std::map<std::string, KeyValueMap>	options;
+	
+	void Dump();
+};
+
 class Block
 {
 public:
 								Block();
 	virtual						~Block();
 
-    virtual E_BlockType			Type() const = 0;
+    virtual E_BlockType			GetType() const = 0;
 	virtual bool				IsA(E_BlockType t) const;
 	
 	virtual void				Process();
@@ -25,6 +38,7 @@ public:
 
 	virtual void				AddChild(Block* block);
 	Block*						GetParent();
+	const Block*				GetParent() const;
 
 	void						SetName(const char* name);
 	const std::string&			GetName() const;
@@ -33,28 +47,16 @@ public:
 	const char*					GetParentPlatform() const;
 	
 	void						AddFiles(const StringVector& files);
-	void						GetFiles(StringVector* result) const;
-
 	void						AddResources(const StringVector& files);
-	void						GetResources(StringVector* result) const;
-
 	void						AddFrameworks(const StringVector& files);
-	void						GetFrameworks(StringVector* result) const;
-	
 	void						AddDefines(const StringVector& defines);
-	
 	void						AddLibs(const StringVector& libs);
-
 	void						AddIncludeDirs(const StringVector& libs);
-
 	void						AddLibDirs(const StringVector& libs);
-
-	void						GetStringGroups(std::map<std::string, StringVector>* result) const;
+	void						AddExeDirs(const StringVector& defines);
 
 	void						SetOption(const std::string& group, const std::string& key, const std::string& value);
 	void						GetOptions(std::map<std::string, KeyValueMap>* result) const;
-
-	void						AddExeDirs(const StringVector& defines);
 	
 	ConfigParam*				AcquireConfigParam(const char* name);
 	PlatformParam*				AcquirePlatformParam(const char* name);
@@ -65,12 +67,8 @@ public:
 	
 	const std::vector<ParamBlock*>&
 								GetParamBlocks() const;
-
-	void						GetPlatformParams(PlatformParamVector* result, const char* platformName, bool recurseChildParams) const { return GetParams((ParamVector*)result, E_BlockType_PlatformParam, platformName, NULL, recurseChildParams); }
-	
-	const PlatformParam*		GetPlatformParam(const char* name) const { return (PlatformParam*)GetParam(E_BlockType_PlatformParam, name); }
-	const ConfigParam*			GetConfigParam(const char* name) const { return (ConfigParam*)GetParam(E_BlockType_ConfigParam, name); }
 				
+	void						FlattenThis(FlatConfig* result) const;	
 protected:
 	StringVector*				AcquireStringGroup(const char* groupName);
 	const StringVector*			GetStringGroup(const char* groupName) const;
@@ -123,7 +121,5 @@ public:
 	
 	virtual void				Dump() const;	
 };
-
-const char** mbGetStringGroupNames();
 
 #endif

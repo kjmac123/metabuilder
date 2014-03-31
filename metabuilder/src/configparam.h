@@ -6,7 +6,7 @@ class ConfigParam : public ParamBlock
 public:
 	ConfigParam();
 	
-    virtual E_BlockType		Type() const;
+    virtual E_BlockType		GetType() const;
 	virtual bool			IsA(E_BlockType t) const;
 	
 protected:

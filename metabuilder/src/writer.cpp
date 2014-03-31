@@ -106,7 +106,7 @@ static int luaFuncCopyFile(lua_State* l)
     const char* toFilename = lua_tostring(l, 2);
 	if (!fromFilename || !toFilename)
 	{
-		MB_LOGINFO("Failed to copy file. Insufficient args");
+		MB_LOGERROR("Failed to copy file. Insufficient args");
 		mbExitError();
 		return 0;
 	}
@@ -114,14 +114,14 @@ static int luaFuncCopyFile(lua_State* l)
 	FILE* fromFile = fopen(fromFilename, "rb");
 	if (!fromFile)
 	{
-        MB_LOGINFO("cannot open file %s", fromFilename);
+        MB_LOGERROR("cannot open file %s", fromFilename);
         mbExitError();
 	}
 	
 	FILE* toFile = fopen(toFilename, "wb");
 	if (!toFile)
 	{
-        MB_LOGINFO("cannot open file %s", toFilename);
+        MB_LOGERROR("cannot open file %s", toFilename);
         mbExitError();
 	}
 	
@@ -139,7 +139,7 @@ static int luaFuncCopyFile(lua_State* l)
 		{
 			fclose(toFile);
 			fclose(fromFile);
-			MB_LOGINFO("Failed to read from file %s", fromFilename);
+			MB_LOGERROR("Failed to read from file %s", fromFilename);
 			mbExitError();
 		}
 		
@@ -148,7 +148,7 @@ static int luaFuncCopyFile(lua_State* l)
 		{
 			fclose(toFile);
 			fclose(fromFile);
-			MB_LOGINFO("Failed to copy to file %s", toFilename);
+			MB_LOGERROR("Failed to copy to file %s", toFilename);
 			mbExitError();
 		}
 		
@@ -361,12 +361,13 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector allFiles;
 					
-					target->GetPlatformFiles(&allFiles, NULL);
+					target->FlattenFiles(&allFiles, NULL);
 					
 					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 					{
-						target->GetPlatformResources(&allFiles, ctx->metabase->supportedPlatforms[jPlatform].c_str());
-						target->GetPlatformFrameworks(&allFiles, ctx->metabase->supportedPlatforms[jPlatform].c_str());
+						const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+						target->FlattenResources(&allFiles, platformName);
+						target->FlattenFrameworks(&allFiles, platformName);
 					}
 
 					lua_createtable(l, 0, 0);
@@ -405,7 +406,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 							for (int kPlatform = 0; kPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++kPlatform)
 							{
 								const char* platformName = ctx->metabase->supportedPlatforms[kPlatform].c_str();
-								mbFlattenTargetForWriter(&flatConfig, target, platformName, configName);
+								target->Flatten(&flatConfig, platformName, configName);
 							}
 							
 							lua_createtable(l, 0, 0);
@@ -415,7 +416,54 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					}
 					lua_setfield(l, -2, "configs");
 				}
+				
+				//Files
+				{
+					StringVector uniqueFiles;
+					{
+						for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						{
+							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+							target->FlattenFiles(&uniqueFiles, platformName);
+						}
+						mbRemoveDuplicatesAndSort(&uniqueFiles);
+					}
+					lua_createtable(l, 0, 0);
+					{
+						for (int jFile = 0; jFile < (int)uniqueFiles.size(); ++jFile)
+						{
+							const char* str = uniqueFiles[jFile].c_str();
+							lua_pushstring(l, str);
+							lua_rawseti(l, -2, jFile+1);
+						}
+					}
+					lua_setfield(l, -2, "files");
+				}
 
+				//Frameworks
+				{
+					StringVector uniqueFrameworks;
+					{
+						for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						{
+							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+							target->FlattenFrameworks(&uniqueFrameworks, platformName);
+						}
+						mbRemoveDuplicatesAndSort(&uniqueFrameworks);
+					}
+					lua_createtable(l, 0, 0);
+					{
+						for (int jFile = 0; jFile < (int)uniqueFrameworks.size(); ++jFile)
+						{
+							const char* str = uniqueFrameworks[jFile].c_str();
+							lua_pushstring(l, str);
+							lua_rawseti(l, -2, jFile+1);
+						}
+					}
+					lua_setfield(l, -2, "frameworks");
+				}
+				
+/*
 				//Files
 				lua_createtable(l, 0, 0);
 				{
@@ -423,7 +471,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 					{
 						StringVector files;
-						target->GetPlatformFiles(&files, ctx->metabase->supportedPlatforms[jPlatform].c_str());
+						target->FlattenFiles(&files, ctx->metabase->supportedPlatforms[jPlatform].c_str());
 						for (int jFile = 0; jFile < (int)files.size(); ++jFile)
 						{
 							uniqueFiles.insert(files[jFile]);
@@ -446,7 +494,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 				{
 					StringVector frameworks;
-					target->GetPlatformFrameworks(&frameworks, ctx->metabase->supportedPlatforms[jPlatform].c_str());
+					target->FlattenFrameworks(&frameworks, ctx->metabase->supportedPlatforms[jPlatform].c_str());
 					for (int jFile = 0; jFile < (int)frameworks.size(); ++jFile)
 					{
 						uniqueFrameworks.insert(frameworks[jFile]);
@@ -463,14 +511,15 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					}
 				}
 				lua_setfield(l, -2, "frameworks");
-				
+*/
 				//Resources
 				{
 					StringVector uniqueResources;
 					{
 						for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 						{
-							target->GetPlatformResources(&uniqueResources, ctx->metabase->supportedPlatforms[jPlatform].c_str());
+							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+							target->FlattenResources(&uniqueResources, platformName);
 						}
 						mbRemoveDuplicatesAndSort(&uniqueResources);
 					}

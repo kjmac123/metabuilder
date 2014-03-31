@@ -27,7 +27,8 @@ void		mbaFileSetWorkingDir(const std::string& path);
 std::string	mbaFileGetWorkingDir();
 std::string	mbaFileGetAbsPath(const std::string& path);
 
-void		mbaLogInfo(const char* str);
 void		mbaLogError(const char* str);
+void		mbaLogInfo(const char* str);
+void		mbaLogDebug(const char* str);
 
 #endif

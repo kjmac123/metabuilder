@@ -6,7 +6,7 @@ PlatformParam::PlatformParam()
 {
 }
 
-E_BlockType PlatformParam::Type() const
+E_BlockType PlatformParam::GetType() const
 {
 	return E_BlockType_PlatformParam;
 }

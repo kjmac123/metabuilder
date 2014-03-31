@@ -14,10 +14,9 @@ static const char* g_stringGroups[] = {
 	NULL
 };
 
-const char** mbGetStringGroupNames()
-{
-	return g_stringGroups;
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Free functions
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void AddHeadersAutomatically(StringVector* files) 
 {
@@ -49,7 +48,7 @@ static void AddHeadersAutomatically(StringVector* files)
 					{
 						if (mbGetAppState()->cmdSetup.verbose)
 						{
-							MB_LOGINFO("Automatically adding header file %s", candidateRelativeName);
+							MB_LOGDEBUG("Automatically adding header file %s", candidateRelativeName);
 						}
 						result.push_back(candidateRelativeName);
 					}
@@ -60,6 +59,299 @@ static void AddHeadersAutomatically(StringVector* files)
 	
 	*files = result;
 }
+
+
+static void ProcessWildcards(StringVector* result, const StringVector& input)
+{
+	for (int i = 0; i < (int)input.size(); ++i)
+	{
+		const std::string& inputFilepath = input[i];
+
+		//Look for wildcard
+		if (inputFilepath.find('*') != std::string::npos)
+		{
+			const char* excludeDirs = NULL;
+			const char* delimiter = "|excludedirs=";
+			char* tmp = (char*)strstr(inputFilepath.c_str(), delimiter);
+			if (tmp)
+			{
+				excludeDirs = tmp + strlen(delimiter);
+				*tmp = '\0';
+			}
+
+			std::string dir = mbPathGetDir(inputFilepath);	
+
+			std::string filename = mbPathGetFilename(inputFilepath);
+			mbaBuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
+		}
+		else
+		{
+			result->push_back(inputFilepath);
+		}
+	}
+}
+
+static int luaFuncSetOption(lua_State* l)
+{
+	Block* block = mbGetActiveContext()->ActiveBlock();
+    if (!block)
+    {
+        MB_LOGERROR("must be within block");
+        mbExitError();
+    }
+	
+    const char* group = lua_tostring(l, 1);
+    const char* key = lua_tostring(l, 2);
+	const char* value = lua_tostring(l, 3);
+	if (!value)
+	{
+		value = "";
+	}
+	block->SetOption(group, key, value);
+	return 0;
+}
+
+static int luaFuncDefines(lua_State* lua)
+{
+    Block* block = mbGetActiveContext()->ActiveBlock();
+    if (!block)
+    {
+        MB_LOGERROR("must be set within a block!");
+        mbExitError();
+    }
+    
+    luaL_checktype(lua, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(lua, 1);
+    
+    StringVector defines;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(lua, 1, i);
+        const char* tmp = lua_tostring(lua, -1);
+        defines.push_back(tmp);
+    }
+    block->AddDefines(defines);
+    
+    return 0;
+}
+
+static int luaFuncLibs(lua_State* l)
+{
+	Block* block = mbGetActiveContext()->ActiveBlock();
+    if (!block)
+    {
+        MB_LOGERROR("must be within block");
+        mbExitError();
+    }
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector strings;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* str = lua_tostring(l, -1);
+        strings.push_back(str);
+    }
+	block->AddLibs(strings);
+		
+    return 0;
+}
+
+static int luaFuncIncludeDir(lua_State* l)
+{
+	Block* block = mbGetActiveContext()->ActiveBlock();
+    if (!block)
+    {
+        MB_LOGERROR("must be within block");
+        mbExitError();
+    }
+
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector strings;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* dir = lua_tostring(l, -1);
+        strings.push_back(dir);
+    }
+	block->AddIncludeDirs(strings);
+		
+    return 0;
+}
+
+static int luaFuncLibDir(lua_State* l)
+{
+	Block* block = mbGetActiveContext()->ActiveBlock();
+    if (!block)
+    {
+        MB_LOGERROR("must be within block");
+        mbExitError();
+    }
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector strings;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* dir = lua_tostring(l, -1);
+        strings.push_back(dir);
+    }
+	block->AddLibDirs(strings);
+		
+    return 0;
+}
+
+static int luaFuncExeDirs(lua_State* l)
+{
+	Block* block = mbGetActiveContext()->ActiveBlock();	
+    if (!block)
+    {
+        MB_LOGERROR("must be within block");
+        mbExitError();
+    }
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector strings;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* dir = lua_tostring(l, -1);
+        strings.push_back(dir);
+    }
+	block->AddExeDirs(strings);
+		
+    return 0;
+}
+
+static int luaFuncFiles(lua_State* l)
+{
+    Block* b = mbGetActiveContext()->ActiveBlock();
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector inputFiles;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* filename = lua_tostring(l, -1);
+		inputFiles.push_back(filename);
+    }
+	
+	StringVector filteredList;
+	ProcessWildcards(&filteredList, inputFiles);
+	b->AddFiles(filteredList);
+		
+    return 0;
+}
+
+static int luaFuncFrameworks(lua_State* l)
+{
+    Block* b = mbGetActiveContext()->ActiveBlock();
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector inputFiles;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* filename = lua_tostring(l, -1);
+		inputFiles.push_back(filename);
+    }
+	
+	b->AddFrameworks(inputFiles);
+	
+    return 0;
+}
+
+static int luaFuncResources(lua_State* l)
+{
+    Block* b = mbGetActiveContext()->ActiveBlock();
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector tableContents;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* tmp = lua_tostring(l, -1);
+		tableContents.push_back(tmp);    }
+	
+	
+	StringVector filteredList;
+	ProcessWildcards(&filteredList, tableContents);
+	b->AddResources(filteredList);
+	
+    return 0;
+}
+
+const char** mbGetStringGroupNames()
+{
+	return g_stringGroups;
+}
+
+void mbBlockLuaRegister(lua_State* l)
+{
+    lua_pushcfunction(l, luaFuncSetOption);
+    lua_setglobal(l, "option");
+	
+    lua_pushcfunction(l, luaFuncDefines);
+    lua_setglobal(l, "defines");
+	
+    lua_pushcfunction(l, luaFuncIncludeDir);
+    lua_setglobal(l, "includedirs");
+
+    lua_pushcfunction(l, luaFuncLibDir);
+    lua_setglobal(l, "libdirs");
+	
+    lua_pushcfunction(l, luaFuncLibs);
+    lua_setglobal(l, "libs");
+
+    lua_pushcfunction(l, luaFuncExeDirs);
+    lua_setglobal(l, "exedirs");
+	
+    lua_pushcfunction(l, luaFuncFiles);
+    lua_setglobal(l, "files");
+
+    lua_pushcfunction(l, luaFuncFrameworks);
+    lua_setglobal(l, "frameworks");
+
+    lua_pushcfunction(l, luaFuncResources);
+    lua_setglobal(l, "resources");
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//FlatConfig
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void FlatConfig::Dump()
+{
+	MB_LOGDEBUG("FlatConfig Dumping %s", name.c_str());
+	
+	MB_LOGDEBUG("stringGroups:");
+	mbDebugDumpGroups(stringGroups);
+
+	MB_LOGDEBUG("options:");
+	mbDebugDumpKeyValueGroups(options);
+	
+	MB_LOGDEBUG("END dumping %s", name.c_str());
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Block
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Block::Block()
 {
@@ -91,15 +383,15 @@ void Block::Process()
 
 void Block::Dump() const
 {
-	MB_LOGINFO("Dumping %s", m_name.c_str());
+	MB_LOGDEBUG("Dumping %s", m_name.c_str());
 	
-	MB_LOGINFO("m_stringGroups:");
+	MB_LOGDEBUG("m_stringGroups:");
 	mbDebugDumpGroups(m_stringGroups);
 
-	MB_LOGINFO("m_keyValueGroups:");
+	MB_LOGDEBUG("m_keyValueGroups:");
 	mbDebugDumpKeyValueGroups(m_keyValueGroups);
 	
-	MB_LOGINFO("END dumping %s", m_name.c_str());
+	MB_LOGDEBUG("END dumping %s", m_name.c_str());
 }
 
 void Block::SetName(const char* name)
@@ -116,7 +408,7 @@ const char* Block::GetParentConfig() const
 {
 	for (const Block* block = this; block; block = block->m_parent)
 	{
-		if (block && block->Type() == E_BlockType_ConfigParam)
+		if (block && block->GetType() == E_BlockType_ConfigParam)
 		{
 			if (block->m_name.length() == 0)
 				return NULL;
@@ -132,7 +424,7 @@ const char* Block::GetParentPlatform() const
 {
 	for (const Block* block = this; block; block = block->m_parent)
 	{
-		if (block && block->Type() == E_BlockType_PlatformParam)
+		if (block && block->GetType() == E_BlockType_PlatformParam)
 		{
 			if (block->m_name.length() == 0)
 				return NULL;
@@ -159,20 +451,16 @@ Block* Block::GetParent()
 	return m_parent;
 }
 
+const Block* Block::GetParent() const
+{
+	return m_parent;
+}
+
 void Block::AddFiles(const StringVector& files)
 {
 	StringVector* existing = AcquireStringGroup(STRINGGROUP_FILES);
 	mbJoinArrays(existing, files);
 };
-
-void Block::GetFiles(StringVector* result) const
-{
-	const StringVector* existing = GetStringGroup(STRINGGROUP_FILES);
-	if (existing)
-	{
-		mbJoinArrays(result, *existing);
-	}
-}
 
 void Block::AddResources(const StringVector& resources)
 {
@@ -180,29 +468,11 @@ void Block::AddResources(const StringVector& resources)
 	mbJoinArrays(existing, resources);
 };
 
-void Block::GetResources(StringVector* result) const
-{
-	const StringVector* existing = GetStringGroup(STRINGGROUP_RESOURCES);
-	if (existing)
-	{
-		mbJoinArrays(result, *existing);
-	}
-}
-
 void Block::AddFrameworks(const StringVector& frameworks)
 {
 	StringVector* existing = AcquireStringGroup(STRINGGROUP_FRAMEWORKS);
 	mbJoinArrays(existing, frameworks);
 };
-
-void Block::GetFrameworks(StringVector* result) const
-{
-	const StringVector* existing = GetStringGroup(STRINGGROUP_FRAMEWORKS);
-	if (existing)
-	{
-		mbJoinArrays(result, *existing);
-	}
-}
 
 void Block::AddDefines(const StringVector& defines)
 {
@@ -260,11 +530,6 @@ const StringVector* Block::GetStringGroup(const char* groupName) const
 	}
 	
 	return &it->second;
-}
-
-void Block::GetStringGroups(std::map<std::string, StringVector>* result) const
-{
-	mbMergeStringGroups(result, m_stringGroups);
 }
 
 void Block::SetOption(const std::string& group, const std::string& key, const std::string& value)
@@ -329,7 +594,7 @@ void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformNa
 	{
 		Block* child = m_childParams[i];
 				
-		E_BlockType childType = child->Type();
+		E_BlockType childType = child->GetType();
 		
 		if (t != E_BlockType_Unknown && childType != t)
 			continue;
@@ -395,7 +660,7 @@ ParamBlock* Block::GetParam(E_BlockType t, const char* name)
 	for (int i = 0; i < (int)m_childParams.size(); ++i)
 	{
 		Block* child = m_childParams[i];
-		if (child->Type() == t && child->GetName() == name)
+		if (child->GetType() == t && child->GetName() == name)
 			return (ParamBlock*)child;
 	}
 	
@@ -406,6 +671,17 @@ const ParamBlock* Block::GetParam(E_BlockType t, const char* name) const
 {
 	return const_cast<Block*>(this)->GetParam(t, name);
 }
+
+void Block::FlattenThis(FlatConfig* result) const
+{
+	//Add param strings and options from block to result.
+	mbMergeStringGroups(&result->stringGroups, m_stringGroups);
+	GetOptions(&result->options);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//MakeBlock
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MakeBlock::MakeBlock()
 {
@@ -443,7 +719,9 @@ void MakeBlock::Dump() const
 	Block::Dump();
 }
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//ParamBlock
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ParamBlock::ParamBlock()
 {
@@ -470,3 +748,5 @@ void ParamBlock::Dump() const
 {
 	Block::Dump();
 }
+
+
