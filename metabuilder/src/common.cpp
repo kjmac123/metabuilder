@@ -665,7 +665,7 @@ static int luaFuncResources(lua_State* l)
     Block* b = mbGetActiveContext()->ActiveBlock();
 	
     luaL_checktype(l, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 2);
+    int tableLen =  luaL_len(l, 1);
     
 	StringVector tableContents;
     for (int i = 1; i <= tableLen; ++i)

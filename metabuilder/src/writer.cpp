@@ -465,27 +465,26 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				lua_setfield(l, -2, "frameworks");
 				
 				//Resources
-				std::set<std::string> uniqueResources;
-				for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 				{
-					StringVector resources;
-					target->GetPlatformResources(&resources, ctx->metabase->supportedPlatforms[jPlatform].c_str());
-					for (int jFile = 0; jFile < (int)uniqueResources.size(); ++jFile)
+					StringVector uniqueResources;
 					{
-						uniqueResources.insert(resources[jFile]);
+						for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						{
+							target->GetPlatformResources(&uniqueResources, ctx->metabase->supportedPlatforms[jPlatform].c_str());
+						}
+						mbRemoveDuplicatesAndSort(&uniqueResources);
 					}
-				}
-				lua_createtable(l, 0, 0);
-				{
-					int jFile = 0;
-					for (std::set<std::string>::iterator it = uniqueResources.begin(); it != uniqueResources.end(); ++it, ++jFile)
+					lua_createtable(l, 0, 0);
 					{
-						const char* str = it->c_str();
-						lua_pushstring(l, str);
-						lua_rawseti(l, -2, jFile+1);
+						for (int jFile = 0; jFile < (int)uniqueResources.size(); ++jFile)
+						{
+							const char* str = uniqueResources[jFile].c_str();
+							lua_pushstring(l, str);
+							lua_rawseti(l, -2, jFile+1);
+						}
 					}
+					lua_setfield(l, -2, "resources");
 				}
-				lua_setfield(l, -2, "resources");
 				
 				//Depends
 				lua_createtable(l, 0, 0);

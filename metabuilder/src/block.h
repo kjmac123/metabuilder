@@ -1,6 +1,15 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#define STRINGGROUP_FILES					"files"
+#define STRINGGROUP_DEFINES					"defines"
+#define STRINGGROUP_INCLUDEDIRS				"includedirs"
+#define STRINGGROUP_LIBDIRS					"libdirs"
+#define STRINGGROUP_LIBS					"libs"
+#define STRINGGROUP_EXEDIRS					"exedirs"
+#define STRINGGROUP_RESOURCES				"resources"
+#define STRINGGROUP_FRAMEWORKS				"frameworks"
+
 class Block
 {
 public:

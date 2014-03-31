@@ -133,25 +133,21 @@ void Target::GetPlatformFrameworks(StringVector* result, const char* platformNam
 
 void Target::GetPlatformResources(StringVector* result, const char* platformName)
 {
-	GetResources(result);
-
-	if (platformName)
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	
+	FlatConfig f;
+	for (int iPlatform = 0; iPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++iPlatform)
 	{
-		const PlatformParam* platform = GetPlatformParam(platformName);
-		if (platform)
-		{
-			platform->GetResources(result);
-		}
+		const char* platformName = ctx->metabase->supportedPlatforms[iPlatform].c_str();
+		mbFlattenTargetForWriter(&f, this, platformName, NULL);
 	}
-	else
-	{
-		PlatformParamVector platforms;
-		GetPlatformParams(&platforms, NULL, true);
-		for (int i = 0; i < platforms.size(); ++i)
-		{
-			platforms[i]->GetResources(result);
-		}
-	}
+	
+	std::map<std::string, StringVector>::iterator it = f.stringGroups.find(STRINGGROUP_RESOURCES);
+	if (it == f.stringGroups.end())
+		return;
+	
+	const StringVector& strings = it->second;
+	mbJoinArrays(result, strings);
 }
 
 static int luaFuncTarget(lua_State* l)

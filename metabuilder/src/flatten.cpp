@@ -25,7 +25,11 @@ static void mbFlattenMakeBlock(FlatConfig* result, Block* block)
 void mbFlattenTargetForWriter(FlatConfig* result, Target* target, const char* platformName, const char* configName)
 {
 	MB_LOGINFO("Flattening Target %s platform %s config %s", target->GetName().c_str(), platformName ? platformName : "{ALL}", configName ? configName : "{ALL}");
-	result->name = configName;
+	//TODO - move this
+	if (configName)
+	{
+		result->name = configName;
+	}
 	
 	//Build a list so that we can traverse our hierarchy top to bottom.
 	ParamVector params;
