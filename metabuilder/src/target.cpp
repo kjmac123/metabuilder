@@ -146,11 +146,7 @@ void Target::FlattenStringGroup(StringVector* result, const char* stringGroup, c
 	MetaBuilderContext* ctx = mbGetActiveContext();
 	
 	FlatConfig f;
-	for (int iPlatform = 0; iPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++iPlatform)
-	{
-		const char* platformName = ctx->metabase->supportedPlatforms[iPlatform].c_str();
-		Flatten(&f, platformName, NULL);
-	}
+	Flatten(&f, platformName, NULL);
 	
 	std::map<std::string, StringVector>::iterator it = f.stringGroups.find(stringGroup);
 	if (it == f.stringGroups.end())

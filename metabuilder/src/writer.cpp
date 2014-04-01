@@ -369,30 +369,27 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				lua_pushstring(l, target->pch.c_str());
 				lua_setfield(l, -2, "pch");
 				
-				//All regular files across all platforms for this target
 				{
 					StringVector allFiles;
 					
 					target->FlattenFiles(&allFiles, NULL);
 					
-					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
-					{
-						const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
-						target->FlattenResources(&allFiles, platformName);
-						target->FlattenFrameworks(&allFiles, platformName);
-					}
+					target->FlattenResources(&allFiles, NULL);
+					target->FlattenFrameworks(&allFiles, NULL);
 
 					lua_createtable(l, 0, 0);
 					{
 						for (int jFile = 0; jFile < (int)allFiles.size(); ++jFile)
 						{
 							const std::string& filepath = allFiles[jFile];
+//							MB_LOGINFO(filepath.c_str());
 							
 							lua_pushstring(l, filepath.c_str());
 							lua_rawseti(l, -2, jFile+1);
 						}
 					}
 					lua_setfield(l, -2, "allfiles");
+					
 				}
 
 				//Configs
