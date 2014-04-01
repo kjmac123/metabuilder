@@ -14,7 +14,16 @@ static std::list<MetaBuilderContext*>		g_contextStack;
 static std::stack<std::string>				g_doFileCurrentDirStack;
 
 
-
+AppState::AppState()
+{
+	isProcessingPrimaryMakefile = false;
+	makeSetup = NULL;
+}
+	
+AppState::~AppState()
+{
+	delete makeSetup;
+}
 
 void AppState::Process()
 {

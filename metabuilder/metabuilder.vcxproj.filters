@@ -168,9 +168,6 @@
     <ClCompile Include="src\configparam.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\flatten.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\platformparam.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -291,9 +288,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\configparam.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\flatten.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\platformparam.h">
