@@ -1,6 +1,8 @@
 #include "metabuilder_pch.h"
 #include <stdarg.h> 
 
+#include "common.h"
+
 #define PLATFORM_FORMAT_LOG_MESSAGE(fn, level)  \
 	char buf[16*1024]; \
     va_list ap; \
@@ -49,5 +51,8 @@ void _mbLogInfofLF(const char* fmt, ...)
 
 void _mbLogDebugfLF(const char* fmt, ...)
 {
-	PLATFORM_FORMAT_LOG_MESSAGE_LF(mbaLogDebug, 0);
+	if (mbGetAppState()->cmdSetup.verbose)
+	{
+		PLATFORM_FORMAT_LOG_MESSAGE_LF(mbaLogDebug, 0);
+	}
 }

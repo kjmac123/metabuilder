@@ -155,4 +155,10 @@ void mbaLogInfo(const char* str)
 	printf("%s", str);
 }
 
+void mbaLogDebug(const char* str)
+{
+	OutputDebugString(str);
+	printf("%s", str);
+}
+
 #endif

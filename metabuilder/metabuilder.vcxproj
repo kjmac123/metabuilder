@@ -47,7 +47,6 @@
     <ClCompile Include="src\common.cpp" />
     <ClCompile Include="src\configparam.cpp" />
     <ClCompile Include="src\core.cpp" />
-    <ClCompile Include="src\flatten.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makesetup.cpp" />
     <ClCompile Include="src\metabase.cpp" />
@@ -92,7 +91,6 @@
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\configparam.h" />
     <ClInclude Include="src\core.h" />
-    <ClInclude Include="src\flatten.h" />
     <ClInclude Include="src\makesetup.h" />
     <ClInclude Include="src\metabase.h" />
     <ClInclude Include="src\metabuilder_pch.h" />

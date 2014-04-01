@@ -66,16 +66,8 @@ struct GeneratorMapping
 class AppState
 {
 public:
-	AppState()
-	{
-		isProcessingPrimaryMakefile = false;
-		makeSetup = NULL;
-	}
-	
-	~AppState()
-	{
-		delete makeSetup;
-	}
+	AppState();	
+	~AppState();
 	
 	void Process();
 	
