@@ -227,10 +227,7 @@ void mbaLogInfo(const char* str)
 
 void mbaLogDebug(const char* str)
 {
-	if (mbGetAppState()->cmdSetup.verbose)
-	{
-		printf("%s", str);
-	}
+	printf("%s", str);
 }
 
 #endif
