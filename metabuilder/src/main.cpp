@@ -193,6 +193,6 @@ int main(int argc, const char * argv[])
 	
 	mbPopDir();
 	
-    MB_LOGINFO("Project generation complete. %i projects written", makeFiles.size());
+    MB_LOGINFO("Project generation complete.");
     return 0;
 }
