@@ -95,6 +95,10 @@ function Util_FileNormaliseUnix(filepath)
 end
 
 function Util_GetKVValue(keyValueList, key)
+	if keyValueList == nil then
+		return nil
+	end
+	
 	for i = 1, #keyValueList do
 		local keyValue = split(keyValueList[i], "=")
 		if keyValue[1] == key then

@@ -2,44 +2,77 @@ package.path = package.path .. ";" .. writer_global.metabasedirabs .. "/?.lua"
 local inspect = require('inspect')
 local util = require('utility')
 
-print(inspect(writer_solution))
+if writer_global.verbose then 
+	print("writer_global:\n")
+	print(inspect(writer_global))
+	print("\n")
+	print("writer_solution:\n")
+	print(inspect(writer_solution))
+end
 
-g_currentTarget = writer_solution.targets[1]
 
 --Map relative to absolute path
 g_filePathMap = {}
 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 function GetFullFilePath(filepath)
 	local newfilepath = g_filePathMap[filepath]
 	if newfilepath == nil then
-		return Util_FileConvertToAbsolute(g_filePathMap, writer_global.currentmetamakedirabs, filepath)
+		return Util_FileConvertToAbsolute({g_filePathMap}, writer_global.currentmetamakedirabs, filepath)
 	end
 
 	return newfilepath
 end
 
---[[ FILE WRITING ]] --------------------------------------------------------------------------------
+function GetWorkspaceDir(currentTargetName, configName)
+	return writer_global.makeoutputdirabs .. "/" .. currentTargetName .. "/" .. configName
+end
 
-function WriteApplicationMk(configName)
-	local config = nil
-	for iConfig = 1, #g_currentTarget.configs do
-		if  g_currentTarget.configs[iConfig].name == configName then
-			config = g_currentTarget.configs[iConfig]
-		end
+function GetJNIDir(currentTargetName, configName)
+	return GetWorkspaceDir(currentTargetName, configName) .. "/jni"
+end
+
+function CreateLinks(currentTarget, config)
+	local templateDir = Util_GetKVValue(config.options._ndk, "templatedir")
+	if templateDir == nil then
+		--TODO proper error here
+		print("Template dir not specified")
+		os.exit(1)
 	end
+	templateDir = GetFullFilePath(templateDir)
+
+	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
+	mkdir(workspaceDir)
+
+	--print(templateDir)
+	--print(workspaceDir)
+	mklink(templateDir .. "/build.xml",									workspaceDir .. "/build.xml")
+	mklink(templateDir .. "/AndroidManifest.xml",						workspaceDir .. "/AndroidManifest.xml")
+	mklink(templateDir .. "/assets",									workspaceDir .. "/assets")
+	mklink(templateDir .. "/res",										workspaceDir .. "/res")
+	mklink(templateDir .. "/src",										workspaceDir .. "/src")
+end
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+--FILE WRITING
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+function WriteApplicationMk(currentTarget, config)
 
 --	if config == nil then
 		--TODO ERROR HERE
 --		return
 
-	local jniDir = writer_global.makeoutputdirabs .. "/" .. g_currentTarget.name .. "/" .. configName .. "/jni"
+	local jniDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
 	mkdir(jniDir)
 
-	file = io.open(jniDir .. "/Application.mk", "w")
+	local makeFilename = jniDir .. "/Application.mk"
+	local file = io.open(makeFilename, "w")
 
-	file:write("APP_MODULES := " .. g_currentTarget.name .. " ")
-	for i = 1, #g_currentTarget.depends do
-		local dependency = g_currentTarget.depends[i]
+	file:write("APP_MODULES := " .. currentTarget.name .. " ")
+	for i = 1, #currentTarget.depends do
+		local dependency = currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 
 		file:write(filename .. " ")
@@ -56,34 +89,36 @@ function WriteApplicationMk(configName)
 		end
 	end
 	file:close()
+	reportoutputfile(makeFilename)
 end
 
-function WriteAndroidMk(configName)
-	local config = nil
-	for iConfig = 1, #g_currentTarget.configs do
-		if  g_currentTarget.configs[iConfig].name == configName then
-			config = g_currentTarget.configs[iConfig]
-		end
-	end
+function WriteAndroidMk(currentTarget, config)
 
 --	if config == nil then
 		--TODO ERROR HERE
 --		return
 
-	local jniDir = writer_global.makeoutputdirabs .. "/" .. g_currentTarget.name .. "/" .. configName .. "/jni"
+	local jniDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
 	mkdir(jniDir)
-	file = io.open(jniDir .. "/Android.mk", "w")
 
-	for i = 1, #g_currentTarget.depends do
-		local dependency = g_currentTarget.depends[i]
+	local makeFilename = jniDir .. "/Android.mk"
+	local file = io.open(makeFilename, "w")
+
+	for i = 1, #currentTarget.depends do
+		local dependency = currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 
-		file:write("include ../../../" .. filename .. "/" .. configName .. "/jni/Android.mk\n")
+		file:write("SOURCE_ROOT := " .. jniDir .. "\n")
+		file:write("include $(SOURCE_ROOT)/../../../" .. filename .. "/" .. config.name .. "/jni/Android.mk\n")
+		--file:write("include ../../../" .. filename .. "/" .. config.name .. "/jni/Android.mk\n")
+--		local includeFile = jniDir .. "/../../../" .. filename .. "/" .. config.name .. "/jni/Android.mk"
+--		file:write("include " .. includeFile .. "\n")
+
 		file:write("include $(CLEAR_VARS)\n\n")
 	end
 
 	--file:write("MY_LOCAL_PATH := $(call my-dir)\n")
-	file:write("MY_GENERAL_FLAGS := \\\n")
+	file:write("MY_GENERAL_FLAGS := -Wno-unused-variable -Wno-unused-value \\\n")
 
 	--Write cflags
 	if config.options.cflags ~= nil then
@@ -119,21 +154,7 @@ function WriteAndroidMk(configName)
 		-- TODO error
 	end
 
-	--[[
-	for i = 1, #g_currentTarget.depends do
-		local dependency = g_currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
-		local f = filename .. ".a"
-
-
-		--f = writer_global.makeoutputdirabs .. "/" .. filename .. "/" .. configName .. "/obj/local/" .. abi
-		f = writer_global.makeoutputdirabs .. "/" .. g_currentTarget.name .. "/" .. configName .. "/obj/local/" .. abi
-		
-		file:write("	-L" .. f .. " \\\n")
-	end
-	]]
-
-	f = writer_global.makeoutputdirabs .. "/" .. g_currentTarget.name .. "/" .. configName .. "/obj/local/" .. abi	
+	f = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi	
 	file:write("	-L" .. f .. " \\\n")
 	file:write("\n")
 
@@ -162,8 +183,8 @@ function WriteAndroidMk(configName)
 	end
 
 	file:write("MY_LOCAL_SRC_FILES := \\\n")
-	for i = 1, #g_currentTarget.files do
-		local f = g_currentTarget.files[i]
+	for i = 1, #currentTarget.files do
+		local f = currentTarget.files[i]
 		local ext = Util_FileExtension(f)
 		if ext == "c" or ext == "cpp" then
 		    file:write("	$(SOURCE_ROOT)/" .. f .. "\\\n")
@@ -173,20 +194,20 @@ function WriteAndroidMk(configName)
 
 	file:write("include $(CLEAR_VARS)\n")
 	file:write("LOCAL_PATH := $(MY_LOCAL_PATH)\n")
-	file:write("LOCAL_MODULE := " .. g_currentTarget.name .. "\n")
+	file:write("LOCAL_MODULE := " .. currentTarget.name .. "\n")
 	file:write("LOCAL_C_INCLUDES := $(MY_LOCAL_C_INCLUDES)\n")
 	file:write("LOCAL_CPPFLAGS := $(MY_LOCAL_CPPFLAGS)\n")
 	file:write("LOCAL_CFLAGS := $(MY_LOCAL_CFLAGS)\n")
 	file:write("LOCAL_SRC_FILES := $(MY_LOCAL_SRC_FILES)\n")
 	file:write("\n")
 
-	if g_currentTarget.targetType == "app" then
+	if currentTarget.targetType == "app" then
 		
 		file:write("LOCAL_LDLIBS :=  $(MY_LIB_SEARCH_PATHS) $(MY_LIBS) -llog -landroid -lEGL -lGLESv2 -lOpenSLES \\\n")
 
 		-- Link with required projects. Must be a better way than this, making better use of the android make system rather than linking 'manually'
-		for i = 1, #g_currentTarget.depends do
-			local dependency = g_currentTarget.depends[i]
+		for i = 1, #currentTarget.depends do
+			local dependency = currentTarget.depends[i]
 			local path, filename, ext = Util_FilePathDecompose(dependency)
 
 			local abi = Util_GetKVValue(config.options.ndkoptions, "APP_ABI")
@@ -199,7 +220,7 @@ function WriteAndroidMk(configName)
 				filename = "lib" .. filename
 			end			
 
-			file:write("	-l:" .. writer_global.makeoutputdirabs .. "/" .. g_currentTarget.name .. "/" .. configName .. "/obj/local/" .. abi .. "/" .. filename .. ".a \\\n")
+			file:write("	-l:" .. writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi .. "/" .. filename .. ".a \\\n")
 		end
 
 		-- Link with static libs
@@ -229,36 +250,45 @@ function WriteAndroidMk(configName)
 		end
 		file:write("\n")
 
---[[
-		file:write("LOCAL_STATIC_LIBRARIES := \\\n")
-
-		-- Link with static libs
-		for i = 1, #staticLibs do
-			local f = staticLibs[i]
-			file:write("	" .. f .. " \\\n")
+		file:write("LOCAL_STATIC_LIBRARIES := ")
+		
+		--dependency info
+		for i = 1, #currentTarget.depends do
+			local dependency = currentTarget.depends[i]
+			local path, filename, ext = Util_FilePathDecompose(dependency)
+			file:write(filename .. " ")
 		end
-
-		file:write("\n")
-]]
+		file:write("\n")		
 
 		file:write("include $(BUILD_SHARED_LIBRARY)\n")
-	elseif g_currentTarget.targetType == "staticlib" then
+	elseif currentTarget.targetType == "staticlib" then
 		file:write("include $(BUILD_STATIC_LIBRARY)\n")
 	else
 		--TODO - error here
 	end
 
 	file:close()
+	reportoutputfile(makeFilename)
 end
 
-function WriteJNI(configName)
-	WriteApplicationMk(configName)
-	WriteAndroidMk(configName)
+function WriteJNI(currentTarget, config)
+	--links to template folder required for apps, but not libraries
+	if currentTarget.targetType == "app" then
+		CreateLinks(currentTarget, config)
+	end
+
+	WriteApplicationMk(currentTarget, config)
+	WriteAndroidMk(currentTarget, config)
 end
 
-for i = 1, #g_currentTarget.configs do
-	--print(inspect(g_currentTarget))
-	local config = g_currentTarget.configs[i]
-	WriteJNI(config.name)
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+--MAIN
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+local currentTarget = writer_solution.targets[1]
+
+for i = 1, #currentTarget.configs do
+	local config = currentTarget.configs[i]
+	WriteJNI(currentTarget, config)
 end
 

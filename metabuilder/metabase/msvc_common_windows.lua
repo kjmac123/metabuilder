@@ -3,11 +3,6 @@ import "platform_windows.lua"
 
 writer "writer_msvc.lua"
 
-option("msvccompile", "MultiProcessorCompilation", "true")
-option("msvccompile", "MinimalRebuild", "false")
-option("msvccompile", "WarningLevel", "Level3")
-option("msvccompile", "IntrinsicFunctions", "true")
-
 libs 
 {
 	"kernel32.lib",
@@ -24,7 +19,17 @@ libs
 	"odbccp32.lib",
 }
 
+option("msvc", "platform", "Win32")
+
+option("msvcgeneral", "CharacterSet", "Unicode")
+
+option("msvccompile", "MultiProcessorCompilation", "true")
+option("msvccompile", "MinimalRebuild", "false")
+option("msvccompile", "WarningLevel", "Level3")
+option("msvccompile", "IntrinsicFunctions", "true")
+
 config "Debug"
+	option("msvccompile", "Optimization", "Disabled")
 	option("msvclink", "GenerateDebugInformation", "true")
 config_end()
 

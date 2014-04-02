@@ -6,9 +6,13 @@ local inspect = require('inspect')
 
 local util = require('utility')
 
-print(inspect(writer_global))
-print("\n")
-print(inspect(writer_solution))
+if writer_global.verbose then 
+	print("writer_global:\n")
+	print(inspect(writer_global))
+	print("\n")
+	print("writer_solution:\n")
+	print(inspect(writer_solution))
+end
 
 g_currentTarget = writer_solution.targets[1]
 
@@ -117,11 +121,14 @@ function InitFolders(folderList, fileList)
 
 	for i = 1, #fileList do
 		local f = fileList[i]
+		--print(f)
 		local path, filename, ext = Util_FilePathDecompose(f)
 
 		--remove trailing slash
 		local path = string.sub(path, 1, -2)
 
+		--print(path .. " from file " .. filename)
+		
 		InitFolder(folderList, path, filename)
 	end
 
@@ -138,8 +145,8 @@ function BuildFileGroups(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGrou
 		fileIncludedInBuild[f] = true
 	end
 
-	for i = 1, #currentTarget.allfiles do
-		local f = currentTarget.allfiles[i]
+	for i = 1, #currentTarget.allsourcefiles do
+		local f = currentTarget.allsourcefiles[i]
 		local fIncludedInBuild = fileIncludedInBuild[f]
 		if fIncludedInBuild == nil then
 			fIncludedInBuild = false
@@ -165,7 +172,17 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 	msvcregisterprojectid(currentTarget.name, projectID)
 
 	mkdir(writer_global.makeoutputdirabs)
-	local file = io.open(writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".vcxproj", "w")
+
+	local msvcPlatform = Util_GetKVValue(writer_global.options.msvc, "platform")
+	if msvcPlatform == nil then
+		-- TODO error
+		os.exit(1)
+	end
+	
+	local vcxprojName = writer_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj";
+	vcxprojName = Util_FileNormaliseWindows(vcxprojName)
+	print("Writing " .. vcxprojName .. "\n")
+	local file = io.open(vcxprojName, "w")
 
 	local pchFileBaseName = nil
 	local pchSourceFile = nil
@@ -183,29 +200,50 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 
 	for iConfig = 1, #currentTarget.configs do
 		local config = currentTarget.configs[iConfig]
-		file:write("    <ProjectConfiguration Include=\"" .. config.name .. "|Win32\">\n")
+		file:write("    <ProjectConfiguration Include=\"" .. config.name .. "|" .. msvcPlatform .. "\">\n")
 		file:write("      <Configuration>" .. config.name .. "</Configuration>\n")
-		file:write("      <Platform>Win32</Platform>\n")
+		file:write("      <Platform>" .. msvcPlatform .. "</Platform>\n")
 		file:write("    </ProjectConfiguration>\n")
 	end
 	file:write("  </ItemGroup>\n")
 
 	file:write("  <PropertyGroup Label=\"Globals\">\n")
 	file:write("    <ProjectGuid>{" .. projectID .. "}</ProjectGuid>\n")
-	file:write("    <Keyword>Win32Proj</Keyword>\n")
+	if msvcPlatform == "Win32" then
+		file:write("    <Keyword>Win32Proj</Keyword>\n")
+	end
 	file:write("    <RootNamespace>metabuilder</RootNamespace>\n")
 	file:write("  </PropertyGroup>\n")
 	file:write("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n")
 	for iConfig = 1, #currentTarget.configs do
 		local config = currentTarget.configs[iConfig]
-		file:write("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\" Label=\"Configuration\">\n")
+		file:write("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\" Label=\"Configuration\">\n")
 		if currentTarget.targetType == "app" then
 			file:write("    <ConfigurationType>Application</ConfigurationType>\n")
 		elseif currentTarget.targetType == "staticlib" then 		
 			file:write("    <ConfigurationType>StaticLibrary</ConfigurationType>\n")
 		end
 		--file:write("    <UseDebugLibraries>true</UseDebugLibraries>\n")
-		file:write("    <CharacterSet>Unicode</CharacterSet>\n")
+
+		if config.options.msvcgeneral ~= nil then
+			for jOption = 1, #config.options.msvcgeneral do
+				local keyValue = split(config.options.msvcgeneral[jOption], "=")
+				local key = keyValue[1]
+				local value = keyValue[2]
+
+				file:write("      <" .. key .. ">" .. value .. "</" .. key .. ">\n")
+			end
+		end
+		
+		if config.options.msvcconfigrawxml ~= nil then
+			for jOption = 1, #config.options.msvcconfigrawxml do
+				local keyValue = config.options.msvcconfigrawxml[jOption]
+				file:write(keyValue)
+			end
+		end
+		
+		file:write("\n")
+		
 		file:write("  </PropertyGroup>\n")
 	end
 	file:write("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n")
@@ -218,25 +256,25 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 	for iConfig = 1, #currentTarget.configs do
 		local config = currentTarget.configs[iConfig]
 
-		file:write("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">\n")
+		file:write("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">\n")
 		file:write("    <LinkIncremental>false</LinkIncremental>\n") --incremental linking is only ever a source of pain (and corrupt files)
 	    file:write("    <ExecutablePath>")
 		for jExeDir = 1, #config.exedirs do
 			file:write(GetFullFilePath(config.exedirs[jExeDir]) .. ";")
 		end
 		file:write("$(ExecutablePath)</ExecutablePath>\n")
-	    file:write("    <OutDir>" .. GetFullFilePath(writer_global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
-	    file:write("    <IntDir>" .. GetFullFilePath(writer_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
-	    --file:write("    <TargetName>$(ProjectName)_$(Configuration)</Targ	etName>\n")
+	    file:write("    <IntDir>" .. Util_FileNormaliseWindows(writer_global.makeoutputdirabs .."\\" .. writer_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
+	    file:write("    <OutDir>" .. Util_FileNormaliseWindows(writer_global.makeoutputdirabs .."\\" .. writer_global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
+	    file:write("    <TargetName>$(ProjectName)_$(Configuration)</TargetName>\n")
 		file:write("  </PropertyGroup>\n")
 
-		file:write("  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">\n")
+		file:write("  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">\n")
 		file:write("    <Import Project=\"$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props\" Condition=\"exists('$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props')\" Label=\"LocalAppDataPlatform\" />\n")
 		file:write("  </ImportGroup>\n")
 
-		file:write("  <ItemDefinitionGroup Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">\n")
+		file:write("  <ItemDefinitionGroup Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">\n")
 		file:write("    <ClCompile>\n")
-
+		
  		if pchSourceFile ~= nil then 		
 			file:write("      <PrecompiledHeader>Use</PrecompiledHeader>\n")
 			file:write("      <PrecompiledHeaderFile>" .. pchHeaderFile .. "</PrecompiledHeaderFile>\n")
@@ -298,12 +336,30 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 			end
 		end
 		file:write("    </Link>\n")
+		
+		if config.options.msvcrawxml ~= nil then
+			for jOption = 1, #config.options.msvcrawxml do
+				local keyValue = config.options.msvcrawxml[jOption]
+				file:write(keyValue)
+			end
+		end
+		
+		file:write("\n")
 
 		if #CompileShaderGroup > 0 then		
 			file:write("    <CompilerShader/>\n")
 --			file:write("      <AdditionalOptions>/LD %(AdditionalOptions)</AdditionalOptions>\n")
 --			file:write("    </CompilerShader>\n")	
 		end
+		
+		--Post build event
+		file:write("    <PostBuildEvent>\n")
+		local postbuild = Util_GetKVValue(config.options.msvc, "postbuild")
+		if postbuild ~= nil then
+			file:write("	  <Command>" .. postbuild .. "</Command>\n")
+		end
+		file:write("    </PostBuildEvent>\n")
+		
 		file:write("  </ItemDefinitionGroup>\n")
 	end
 
@@ -314,18 +370,24 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		local fIncludedInBuild = ClCompileGroup[i][2]
 
 		file:write("    <ClCompile Include=\"" .. GetFullFilePath(f) .. "\">\n")
+		
+		for iConfig = 1, #currentTarget.configs do
+			local config = currentTarget.configs[iConfig]
+			file:write("      <CompileAs Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Default</CompileAs>\n")
+		end
+		
 		--If we're using a pch and this is the pch file
 		if pchSourceFile ~= nil and f == pchSourceFile then 
 			--For each config ensure we create the pch
 			for iConfig = 1, #currentTarget.configs do
 				local config = currentTarget.configs[iConfig]
-				file:write("      <PrecompiledHeader Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">Create</PrecompiledHeader>\n")
+				file:write("      <PrecompiledHeader Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Create</PrecompiledHeader>\n")
 			end
 		else
 			for iConfig = 1, #currentTarget.configs do
 				local config = currentTarget.configs[iConfig]
 				if fIncludedInBuild == false then 
-					file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">true</ExcludedFromBuild>\n")
+					file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">true</ExcludedFromBuild>\n")
 				end
 			end
 		end
@@ -343,7 +405,7 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		for iConfig = 1, #currentTarget.configs do
 			local config = currentTarget.configs[iConfig]
 			if fIncludedInBuild == false then 
-				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">true</ExcludedFromBuild>\n")
+				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">true</ExcludedFromBuild>\n")
 			end
 		end		
 		file:write("    </ClInclude>\n")
@@ -360,7 +422,7 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		for iConfig = 1, #currentTarget.configs do
 			local config = currentTarget.configs[iConfig]
 			if fIncludedInBuild == false then 
-				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">true</ExcludedFromBuild>\n")
+				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">true</ExcludedFromBuild>\n")
 			end
 		end
 		file:write("    </None>\n")		
@@ -377,14 +439,14 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		for iConfig = 1, #currentTarget.configs do
 			local config = currentTarget.configs[iConfig]
 			if fIncludedInBuild == false then 
-				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">true</ExcludedFromBuild>\n")
+				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">true</ExcludedFromBuild>\n")
 			else
 				--TODO: something more robust than the below. Sensible file extensions sound good.
 				local profile = "vs_3_0"
 				if string.find(f, "Ps.hlsl") ~= nil then
 					profile = "ps_3_0"
 				end
-				file:write("      <TargetProfile Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">" .. profile .. "</TargetProfile>\n")
+				file:write("      <TargetProfile Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">" .. profile .. "</TargetProfile>\n")
 			end
 		end
 		file:write("    </CompilerShader>\n")		
@@ -399,7 +461,7 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		file:write("    <ClCompile Include=\"" .. path .. "/" .. filename .. ".cpp\">\n")
 		for iConfig = 1, #currentTarget.configs do
 			local config = currentTarget.configs[iConfig]
-			file:write("      <PrecompiledHeader Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|Win32'\">Create</PrecompiledHeader>\n")
+			file:write("      <PrecompiledHeader Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Create</PrecompiledHeader>\n")
 		end
 		file:write("    </ClCompile>\n")
 		file:write("  </ItemGroup>\n")
@@ -436,25 +498,38 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 	file:write("</Project>\n")
 
 	file:close()
+	reportoutputfile(vcxprojName)
+end
+
+function FormatFilterPath(path)
+	while string.find(path, "..\\") == 1 do
+		path = string.sub(path, 4, length)
+	end
+	
+	return path
 end
 
 function WriterVcxProjFilters(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, CompileShaderGroup)
-	local file = io.open(writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".vcxproj.filters", "w")
+	local vcxProjFiltersFilename = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".vcxproj.filters"
+	local file = io.open(vcxProjFiltersFilename, "w")
 
 	file:write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 	file:write("<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
 
 	local folders = {}
-	InitFolders(folders, currentTarget.allfiles)
+	InitFolders(folders, currentTarget.allsourcefiles)
 
 	--Write out filter folders
 	file:write("  <ItemGroup>\n")
 	for k, v in pairs(folders) do 
 		local folder = v
-		if folder.shortName ~= "" then
-			file:write("    <Filter Include=\"" .. Util_FileNormaliseWindows(folder.relativePath).. "\">\n")
-			file:write("      <UniqueIdentifier>{" .. folder.id .. "}</UniqueIdentifier>\n")
-			file:write("    </Filter>\n")
+		if folder.shortName ~= "" then 
+			local formattedPath = FormatFilterPath(Util_FileNormaliseWindows(folder.relativePath))
+			if formattedPath ~= "." then
+				file:write("    <Filter Include=\"" .. formattedPath .. "\">\n")
+				file:write("      <UniqueIdentifier>{" .. folder.id .. "}</UniqueIdentifier>\n")
+				file:write("    </Filter>\n")
+			end
 		end
 	end
 	file:write("  </ItemGroup>\n")
@@ -468,7 +543,7 @@ function WriterVcxProjFilters(currentTarget, ClCompileGroup, ClIncludeGroup, Non
 		local path = Util_FilePath(filename)
 		path = Util_FileTrimTrailingSlash(path)
 		path = Util_FileNormaliseWindows(path)
-		file:write("      <Filter>" .. path .. "</Filter>\n")
+		file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
 		file:write("    </ClCompile>\n")		
 	end
 	file:write("  </ItemGroup>\n")
@@ -482,21 +557,21 @@ function WriterVcxProjFilters(currentTarget, ClCompileGroup, ClIncludeGroup, Non
 		local path = Util_FilePath(filename)
 		path = Util_FileTrimTrailingSlash(path)
 		path = Util_FileNormaliseWindows(path)
-		file:write("      <Filter>" .. path .. "</Filter>\n")
+		file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
 		file:write("    </ClInclude>\n")		
 	end
 	file:write("  </ItemGroup>\n")
 
 	--Write out none build files
 	file:write("  <ItemGroup>\n")
-	for iFile = 1, #ClIncludeGroup do
-		filename = ClIncludeGroup[iFile][1]
+	for iFile = 1, #NoneGroup do
+		filename = NoneGroup[iFile][1]
 
 		file:write("    <None Include=\"" .. Util_FileNormaliseWindows(GetFullFilePath(filename)) .. "\">\n")
 		local path = Util_FilePath(filename)
 		path = Util_FileTrimTrailingSlash(path)
 		path = Util_FileNormaliseWindows(path)
-		file:write("      <Filter>" .. path .. "</Filter>\n")
+		file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
 		file:write("    </None>\n")		
 	end
 	file:write("  </ItemGroup>\n")
@@ -510,7 +585,7 @@ function WriterVcxProjFilters(currentTarget, ClCompileGroup, ClIncludeGroup, Non
 		local path = Util_FilePath(filename)
 		path = Util_FileTrimTrailingSlash(path)
 		path = Util_FileNormaliseWindows(path)
-		file:write("      <Filter>" .. path .. "</Filter>\n")
+		file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
 		file:write("    </CompilerShader>\n")		
 	end
 	file:write("  </ItemGroup>\n")	
@@ -518,24 +593,32 @@ function WriterVcxProjFilters(currentTarget, ClCompileGroup, ClIncludeGroup, Non
 	file:write("</Project>\n")
 
 	file:close()
+	reportoutputfile(vcxProjFiltersFilename)
 end
 
 function WriteSolution(currentTarget)
-	if writer_solution.msvc_version == nil then
+	if writer_solution.msvcversion == nil then
 		-- TODO ERROR HERE
 	end
 
-	local msvcVersion = "2010"
+	local msvcVersion = Util_GetKVValue(writer_global.options.msvc, "version")
+	local msvcPlatform = Util_GetKVValue(writer_global.options.msvc, "platform")
+	--if msvcPlatform == nil then
+		-- TODO error
+	--end
+
 	local msvcFormatVersion = "11.00" -- Default to 2010 format
-	if writer_solution.msvc_version == "2012" then
+
+	--print(inspect(writer_global.options))
+	if msvcVersion == "2012" then
 		msvcFormatVersion = "12.00"
-		msvcVersion = writer_global.options.msvc_version
 	end
 
-	file = io.open(writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".sln", "w")
+	local slnFilename = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".sln"
+	local file = io.open(slnFilename, "w")
 
 	file:write("Microsoft Visual Studio Solution File, Format Version " .. msvcFormatVersion .. "\n")
-	file:write("# Visual C++ Express " .. msvcVersion .. "\n")
+	file:write("# MetaBuilder " .. msvcVersion .. "\n")
 
 	--Create a list of project GUID and name pairs. We'll need this to form the contents of our solution.
 	projectList = {}
@@ -581,7 +664,7 @@ function WriteSolution(currentTarget)
 	file:write("	GlobalSection(SolutionConfigurationPlatforms) = preSolution\n")
 	for iConfig = 1, #currentTarget.configs do
 		local config = currentTarget.configs[iConfig]
-		file:write("		" .. config.name .. "|Win32 = " .. config.name .. "|Win32\n")
+		file:write("		" .. config.name .. "|" .. msvcPlatform .. " = " .. config.name .. "|" .. msvcPlatform .. "\n")
 	end
 	file:write("	EndGlobalSection\n")
 	file:write("	GlobalSection(ProjectConfigurationPlatforms) = postSolution\n")
@@ -591,8 +674,8 @@ function WriteSolution(currentTarget)
 
 		for jConfig = 1, #currentTarget.configs do
 			local config = currentTarget.configs[jConfig]
-			file:write("		{" .. projectID .. "}." .. config.name .. "|Win32.ActiveCfg = " .. config.name .. "|Win32\n")
-			file:write("		{" .. projectID .. "}." .. config.name .. "|Win32.Build.0 = " .. config.name .. "|Win32\n")
+			file:write("		{" .. projectID .. "}." .. config.name .. "|" .. msvcPlatform .. ".ActiveCfg = " .. config.name .. "|" .. msvcPlatform .. "\n")
+			file:write("		{" .. projectID .. "}." .. config.name .. "|" .. msvcPlatform .. ".Build.0 = " .. config.name .. "|" .. msvcPlatform .. "\n")
 		end
 	end
 	file:write("	EndGlobalSection\n")
@@ -602,6 +685,7 @@ function WriteSolution(currentTarget)
 	file:write("EndGlobal\n")
 
 	file:close()
+	reportoutputfile(slnFilename)
 end
 
 --[[ MAIN ]]

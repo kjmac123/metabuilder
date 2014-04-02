@@ -1,4 +1,4 @@
-platform
+supportedplatforms
 {
 	"Android",
 	"POSIX",
