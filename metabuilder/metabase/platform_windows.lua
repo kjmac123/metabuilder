@@ -1,8 +1,7 @@
-platform 
+supportedplatforms 
 {
-	"Windows",
 	"NT",
-	"D3D", --Will need to allow overriding of this in the app at some point if we're to allow OpenGL/GLES emulation usage on PC
+	"Windows",
 }
 
 defines 

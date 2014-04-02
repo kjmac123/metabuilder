@@ -1,8 +1,15 @@
-package.path = package.path .. ";" .. writer_global.metabasedir .. "/?.lua"
+package.path = package.path .. ";" .. writer_global.metabasedirabs .. "/?.lua"
 local inspect = require('inspect')
 local util = require('utility')
 
-print(inspect(writer_solution))
+if writer_global.verbose then 
+	print("writer_global:\n")
+	print(inspect(writer_global))
+	print("\n")
+	print("writer_solution:\n")
+	print(inspect(writer_solution))
+end
+
 
 g_mainGroupID = "BE854ED918CA1112008EAFCD"
 
@@ -22,6 +29,7 @@ g_PBXTargetProxy				= {} -- Maps dependency name -> ID
 g_ProductGroupIDs				= {} -- Maps dependency name -> ID
 
 g_currentTarget = writer_solution.targets[1]
+
 --used to refer to the product we're building here externally
 g_externalProductID = xcodegenerateid()
 g_pbxNativeTargetID = xcodegenerateid()
@@ -44,7 +52,7 @@ g_PBXNativeTargetConfigIDs = {}
 
 
 function GetLastKnownFileType(filepath)
-	local ext = GetFileExtension(filepath)
+	local ext = Util_FileExtension(filepath)
 	local lastKnownType = g_lastKnownFileTypeMap[ext]
 	if lastKnownType == nil then
 		local filetype = getfiletype(filepath)
@@ -70,7 +78,7 @@ end
 function GetFullFilePath(filepath)
 	local newfilepath = g_filePathMap[filepath]
 	if newfilepath == nil then
-		return writer_solution.makefiledir .. "/" .. filepath
+		return writer_global.currentmetamakedirabs .. "/" .. filepath
 	end
 
 	return newfilepath
@@ -93,7 +101,7 @@ function InitFolder(folderList, path, filename)
 		table.insert(pathComponents, 1, "")
 	end
 
-	local fullProjectRelativeFilePath = PathJoin(path,filename)
+	local fullProjectRelativeFilePath = Util_FilePathJoin(path,filename)
 
 	local currentPath = ""
 	local currentParentID = g_mainGroupID
@@ -173,7 +181,7 @@ function InitFolders(folderList, fileList)
 
 	for i = 1, #fileList do
 		local f = fileList[i]
-		local path, filename, ext = DecomposePath(f)
+		local path, filename, ext = Util_FilePathDecompose(f)
 
 		--remove trailing slash
 		local path = string.sub(path, 1, -2)
@@ -279,6 +287,7 @@ function WritePBXGroup()
 			file:write("		BE854EE418CA1337008EAFCD /* Resources */ = {\n")
 			file:write("			isa = PBXGroup;\n")
 			file:write("			children = (\n")
+	
 			for i = 1, #folder.childIDs do
 				local f = folder.childIDs[i]
 				file:write("				" .. f .. ",\n")
@@ -310,7 +319,7 @@ end
 -- Create file type map
 	g_lastKnownFileTypeMap["m"]			= "sourcecode.c.objc"
 	g_lastKnownFileTypeMap["mm"]		= "sourcecode.cpp.objcpp"
-	g_lastKnownFileTypeMap["c"]			= "sourcecode.c"
+	g_lastKnownFileTypeMap["c"]			= "sourcecode.c.c"
 	g_lastKnownFileTypeMap["cpp"]		= "sourcecode.cpp.cpp"
 	g_lastKnownFileTypeMap["h"]			= "sourcecode.c.h"
 	g_lastKnownFileTypeMap["framework"]	= "wrapper.framework"
@@ -330,6 +339,62 @@ end
 	g_lastKnownFileTypeMap["xcodeproj"]	= "wrapper.pb-project"
 
 	--'folder' is also a valid last known type
+
+function BuildListPerSDK(stringList)
+	local stringListsPerSDK = {}
+	local sdkNames = {}
+
+	for i = 1, #stringList do
+		local str = stringList[i]
+
+		local sdk
+		local stringWithoutSDK
+
+		local sdkStartIndex = string.find(str, "%[sdk=")
+		if sdkStartIndex then
+			sdkEndIndex = string.find(str, "]")
+			sdk = string.sub(str, sdkStartIndex, sdkEndIndex)
+			stringWithoutSDK = string.sub(str, 1, sdkStartIndex-1)
+			--print("Found SDK specific string " .. stringWithoutSDK .. " SDK " .. sdk)
+		else
+			sdk = ""
+			stringWithoutSDK = str
+		end
+
+		--Find table to insert data for this SDK into
+		local stringListForSDK = stringListsPerSDK[sdk]
+		if stringListForSDK == nil then
+			--Create new destination table if none exists
+			stringListForSDK = {}
+			stringListsPerSDK[sdk] = stringListForSDK
+			table.insert(sdkNames, sdk)
+		end
+		table.insert(stringListForSDK, stringWithoutSDK)
+	end
+
+	--Duplicate common strings per SDK
+	local commonStrings = stringListsPerSDK[""]
+--	print(inspect(commonStrings))
+	if commonStrings ~= nil then 
+		for i = 1, #sdkNames do
+			local sdk = sdkNames[i]
+			local sdkStringList = stringListsPerSDK[sdk]
+
+			if sdk ~= "" then
+--				print(sdk)
+				for j = 1, #commonStrings do
+					local commonString = commonStrings[j]
+					local sdkCommonString = commonString
+					table.insert(sdkStringList, sdkCommonString)
+				end
+			end
+		end
+	end
+
+--	print(inspect(stringListsPerSDK))
+	return stringListsPerSDK, sdkNames
+end
+
 
 function WriteXCBuildConfigurations()
 	file:write("/* Begin XCBuildConfiguration section */\n")
@@ -385,12 +450,30 @@ function WriteXCBuildConfigurations()
 		end
 		file:write("				);\n")
 
+--[[
 		file:write("				LIBRARY_SEARCH_PATHS = (\n")
 		file:write("					\"$(inherited)\",\n")
 		for j = 1, #config.libdirs do
 			file:write("					\"" .. GetFullFilePath(config.libdirs[j]) .. "\",\n")
 		end
-		file:write("				);\n")
+		file:write("				);\n\n")
+
+]]
+
+		local stringListsPerSDK, sdkNames = BuildListPerSDK(config.libdirs)
+		for iSDK = 1, #sdkNames do
+			local sdk =  sdkNames[iSDK]
+			local strings = stringListsPerSDK[sdk]
+			if sdk == "" then 
+				file:write("				LIBRARY_SEARCH_PATHS = (\n")
+			else
+				file:write("				\"LIBRARY_SEARCH_PATHS" .. sdk .. "\" = (\n")
+			end
+			for jString = 1, #strings do
+				file:write("					\"" .. GetFullFilePath(strings[jString]) .. "\",\n")
+			end
+			file:write("				);\n\n")
+		end
 
 		file:write("			};\n")
 		file:write("			name = " .. config.name .. ";\n")
@@ -406,16 +489,38 @@ function WriteXCBuildConfigurations()
 		file:write("			buildSettings = {\n")
 		file:write("				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;\n")
 		file:write("				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;\n")
-		file:write("				GCC_PRECOMPILE_PREFIX_HEADER = YES;\n")
-		file:write("				GCC_PREFIX_HEADER = \"" .. GetFullFilePath(g_currentTarget.pch) .. "\";\n")
-		if g_currentTarget.targetType == "app" then 		
-			file:write("				INFOPLIST_FILE = \"" .. GetFullFilePath(g_mainPListFilename) .. "\";\n")
+
+		-- Prefix PCH support
+--		if g_currentTarget.pch ~= nil and g_currentTarget.pch ~= "" then
+--			print(g_currentTarget.name .. " PCH " .. g_currentTarget.pch)
+--			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = YES;\n")
+--			file:write("				GCC_PREFIX_HEADER = \"" .. GetFullFilePath(g_currentTarget.pch) .. "\";\n")
+--		else
+			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = NO;\n")
+--		end
+
+		do
+			local infoplist = Util_GetKVValue(config.options._xcode, "infoplist")
+			if infoplist ~= nil then 
+				file:write("				INFOPLIST_FILE = \"" .. GetFullFilePath(infoplist) .. "\";\n")
+			end
 		end
-		file:write("				OTHER_LDFLAGS = \"-ObjC ")
-		for j = 1, #config.libs do
-			file:write(config.libs[j] .. " ")
+
+		local stringListsPerSDK, sdkNames = BuildListPerSDK(config.libs)
+		for iSDK = 1, #sdkNames do
+			local sdk =  sdkNames[iSDK]
+			local strings = stringListsPerSDK[sdk]
+			if sdk == "" then 
+				file:write("				OTHER_LDFLAGS = (\n")
+			else
+				file:write("				\"OTHER_LDFLAGS" .. sdk .. "\" = (\n")
+			end
+			for jString = 1, #strings do
+				file:write("					\"" .. strings[jString] .. "\",\n")
+			end
+			file:write("				);\n\n")
 		end
-		file:write("\";\n")
+
 		file:write("				PRODUCT_NAME = \"$(TARGET_NAME)\";\n")
 		if g_currentTarget.targetType == "app" then 
 			file:write("				WRAPPER_EXTENSION = app;\n")
@@ -529,7 +634,7 @@ end
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
 	
-	local path, filename, ext = DecomposePath(dependency)
+	local path, filename, ext = Util_FilePathDecompose(dependency)
 
 	--store relative filepath
 	g_PBXFileRefIDMap[dependency]				= xcodegenerateid()
@@ -543,15 +648,11 @@ for i = 1, #g_currentTarget.depends do
 
 	--Xcode projects written adjacent to each other
 	local dependencyXcodeproj = dependency .. ".xcodeproj"
-	local dependencyPhysicalFilePath = writer_global.writerdir .. "/" .. filename .. ".xcodeproj"
+	local dependencyPhysicalFilePath = writer_global.makeoutputdirabs .. "/" .. filename .. ".xcodeproj"
+
 	g_filePathMap[dependency] = dependencyPhysicalFilePath
 	g_filePathMap[dependencyPhysicalFilePath] = dependencyPhysicalFilePath
 end
-
---[[ HARD WIRED FILES ]] --------------------------------------------------------------------------------
-
-g_mainPListFilename = "Info.plist"
---g_mainPListLocFilename = "en.lproj/InfoPlist.strings"
 
 --[[ CREATE FOLDER TREE ]] --------------------------------------------------------------------------------
 
@@ -560,7 +661,7 @@ g_mainPListFilename = "Info.plist"
 		local sourceFileList = {}
 		for i = 1, #g_currentTarget.allfiles do
 			local f = g_currentTarget.allfiles[i]
-			if GetFileListType(f) == "Source" then
+			if GetFileListType(f) == "Source" or GetFileListType(f) == "Unknown" then
 				table.insert(sourceFileList, f)
 			end
 		end
@@ -581,11 +682,19 @@ g_mainPListFilename = "Info.plist"
 
 --[[ FILE WRITING ]] --------------------------------------------------------------------------------
 
-g_projectoutputfile = writer_global.writerdir .. "/" .. writer_solution.name .. ".xcodeproj"
+g_projectoutputfile = writer_global.makeoutputdirabs .. "/" .. writer_solution.name .. ".xcodeproj"
 
+--print("Creating project dir " .. g_projectoutputfile)
 mkdir(g_projectoutputfile)
 
-file = io.open(g_projectoutputfile .. "/project.pbxproj", "w")
+local pbxprojFilename = g_projectoutputfile .. "/project.pbxproj"
+
+--print("Writing pbxproj " .. pbxprojFilename)
+file = io.open(pbxprojFilename, "w")
+if file == nil then
+	--TODO - error
+end
+
 file:write(
 "// !$*UTF8*$!					\
 {								\
@@ -617,7 +726,7 @@ end
 -- Link with required projects
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
-	local path, filename, ext = DecomposePath(dependency)
+	local path, filename, ext = Util_FilePathDecompose(dependency)
 	local f = filename .. ".a"
 	file:write("		" .. g_PBXBuildFileIDMap[dependency] .. " /* " .. f .. " */ = {isa = PBXBuildFile; fileRef = " .. g_PBXReferenceProxyIDMap[dependency] .. "; };\n")
 end
@@ -628,7 +737,7 @@ file:write("/* Begin PBXContainerItemProxy section */\n")
 
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
-	local path, filename, ext = DecomposePath(dependency)
+	local path, filename, ext = Util_FilePathDecompose(dependency)
 	local f = filename .. ".xcodeproj"
 
 	file:write("		" .. g_PBXContainerItemProxyIDMap[dependency] .. " /* PBXContainerItemProxy */ = {\n")
@@ -665,14 +774,14 @@ file:write("		" .. g_externalProductID .. " /* " .. g_currentTargetFilenameWithE
 --All files, regardless of whether they're for this platform or not.
 for i = 1, #g_currentTarget.allfiles do
 	local f = g_currentTarget.allfiles[i]
-	file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(f) .. "; name = " .. GetFileShortname(f) .. "; path = " .. GetFullFilePath(f) .. "; sourceTree = " .. GetSourceTree(f) .. "; };\n")
+	file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(f) .. "; name = " .. Util_FileShortname(f) .. "; path = " .. GetFullFilePath(f) .. "; sourceTree = " .. GetSourceTree(f) .. "; };\n")
 end
 
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
 	local dependencyXcodeproj = dependency .. ".xcodeproj"
 
-	file:write("		" .. g_PBXFileRefIDMap[dependency] 	.. " /* " .. dependency .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(dependencyXcodeproj) .. "; name = " .. GetFileShortname(dependency) .. ".xcodeproj; path = " .. GetFullFilePath(dependency) .. "; sourceTree = " .. GetSourceTree(dependency) .. "; };\n")
+	file:write("		" .. g_PBXFileRefIDMap[dependency] 	.. " /* " .. dependency .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(dependencyXcodeproj) .. "; name = " .. Util_FileShortname(dependency) .. ".xcodeproj; path = " .. GetFullFilePath(dependency) .. "; sourceTree = " .. GetSourceTree(dependency) .. "; };\n")
 end
 
 file:write("/* End PBXFileReference section */\n\n")
@@ -771,7 +880,7 @@ file:write("/* Begin PBXReferenceProxy section */\n")
 
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
-	local path, filename, ext = DecomposePath(dependency)
+	local path, filename, ext = Util_FilePathDecompose(dependency)
 
 	file:write("		" .. g_PBXReferenceProxyIDMap[dependency] .. " /* " .. dependency .. ".a */ = {\n")
 	file:write("			isa = PBXReferenceProxy;\n")
@@ -808,7 +917,7 @@ file:write("			buildActionMask = 2147483647;\n")
 file:write("			files = (\n")
 for i = 1, #g_currentTarget.files do
 	local f = g_currentTarget.files[i]
-	local ext = GetFileExtension(f)
+	local ext = Util_FileExtension(f)
 	
 	if ext == "m" or ext == "mm" or ext == "c" or ext == "cpp" then
 		file:write("				" .. g_PBXBuildFileIDMap[f] 	.. " /* " .. g_currentTarget.files[i] .. " */,\n")
@@ -823,7 +932,7 @@ file:write("/* Begin PBXTargetDependency section */\n")
 
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
-	local shortname = GetFileShortname(dependency)
+	local shortname = Util_FileShortname(dependency)
 
 	file:write("		" .. g_PBXTargetDependencyIDMap[dependency] .. " /* PBXTargetDependency */ = {\n")
 	file:write("			isa = PBXTargetDependency;\n")
@@ -879,3 +988,4 @@ file:write("	rootObject = " .. g_projectObjectID .. " /* Project object */;\n")
 file:write("}\n")
 
 file:close()
+reportoutputfile(pbxprojFilename)

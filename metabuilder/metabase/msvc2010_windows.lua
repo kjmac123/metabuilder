@@ -1,4 +1,5 @@
 metabase "msvc2010_windows"
-	option("msvc_version", "2010")
+	option("msvc", "version", "2010")
+	option("msvcgeneral", "PlatformToolset", "v100")
 	import "msvc_common_windows.lua"
 metabase_end()
