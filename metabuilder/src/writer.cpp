@@ -373,6 +373,19 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					StringVector allFiles;
 					
 					target->FlattenFiles(&allFiles, NULL);
+
+					lua_createtable(l, 0, 0);
+					{
+						for (int jFile = 0; jFile < (int)allFiles.size(); ++jFile)
+						{
+							const std::string& filepath = allFiles[jFile];
+//							MB_LOGINFO(filepath.c_str());
+							
+							lua_pushstring(l, filepath.c_str());
+							lua_rawseti(l, -2, jFile+1);
+						}
+					}
+					lua_setfield(l, -2, "allsourcefiles");
 					
 					target->FlattenResources(&allFiles, NULL);
 					target->FlattenFrameworks(&allFiles, NULL);
