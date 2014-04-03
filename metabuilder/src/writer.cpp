@@ -373,7 +373,8 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					StringVector allFiles;
 					
 					target->FlattenFiles(&allFiles, NULL);
-
+					mbRemoveDuplicatesAndSort(&allFiles);
+						
 					lua_createtable(l, 0, 0);
 					{
 						for (int jFile = 0; jFile < (int)allFiles.size(); ++jFile)
@@ -389,7 +390,8 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					
 					target->FlattenResources(&allFiles, NULL);
 					target->FlattenFrameworks(&allFiles, NULL);
-
+					mbRemoveDuplicatesAndSort(&allFiles);
+					
 					lua_createtable(l, 0, 0);
 					{
 						for (int jFile = 0; jFile < (int)allFiles.size(); ++jFile)
@@ -401,6 +403,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 							lua_rawseti(l, -2, jFile+1);
 						}
 					}
+					
 					lua_setfield(l, -2, "allfiles");
 					
 				}
