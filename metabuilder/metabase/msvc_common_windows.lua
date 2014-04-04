@@ -19,9 +19,13 @@ libs
 	"odbccp32.lib",
 }
 
+option("msvc", "customwriter", "writer_msvc_windows.lua")
+
 option("msvc", "platform", "Win32")
 
-option("msvcgeneral", "CharacterSet", "Unicode")
+option("msvcglobals", "Keyword", "Win32Proj")
+
+option("msvconfiguration", "CharacterSet", "Unicode")
 
 option("msvccompile", "MultiProcessorCompilation", "true")
 option("msvccompile", "MinimalRebuild", "false")
