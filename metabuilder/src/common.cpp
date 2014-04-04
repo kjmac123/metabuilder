@@ -639,11 +639,22 @@ void mbRemoveDuplicates(StringVector* strings_)
 	strings = tmp;
 }
 
+struct StringSortRecord
+{
+	std::string lowerCaseString;
+	std::string originalString;
+};
+
+bool mbCompareNoCase(const StringSortRecord& a, StringSortRecord& b)
+{
+	return a.lowerCaseString < b.lowerCaseString;
+}
+
 void mbRemoveDuplicatesAndSort(StringVector* strings_)
 {
 	StringVector& strings = *strings_;
 	
-	StringVector tmp;
+	std::vector<StringSortRecord> tmp;
 	tmp.reserve(strings.size());
 		
 	std::set<std::string> uniqueStrings;
@@ -654,10 +665,21 @@ void mbRemoveDuplicatesAndSort(StringVector* strings_)
 	
 	for (std::set<std::string>::iterator it = uniqueStrings.begin(); it != uniqueStrings.end(); ++it)
 	{
-		tmp.push_back(*it);
+		const std::string& currentString = *it;
+		
+		tmp.push_back(StringSortRecord());
+		StringSortRecord& r = tmp.back();
+		r.lowerCaseString = currentString;
+		std::transform(r.lowerCaseString.begin(), r.lowerCaseString.end(), r.lowerCaseString.begin(), ::tolower);
+		r.originalString = currentString;
 	}
-	
-	strings = tmp;
+	std::sort(tmp.begin(), tmp.end(), mbCompareNoCase);
+
+	strings.clear();
+	for (int i = 0; i < (int)tmp.size(); ++i)
+	{
+		strings.push_back(tmp[i].originalString);
+	}
 }
 
 bool mbCreateDirChain(const char* osDir_)
