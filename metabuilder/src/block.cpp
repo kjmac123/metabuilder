@@ -251,6 +251,28 @@ static int luaFuncFiles(lua_State* l)
     return 0;
 }
 
+static int luaFuncNoPchFiles(lua_State* l)
+{
+    Block* b = mbGetActiveContext()->ActiveBlock();
+	
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
+    
+	StringVector inputFiles;
+    for (int i = 1; i <= tableLen; ++i)
+    {
+        lua_rawgeti(l, 1, i);
+        const char* filename = lua_tostring(l, -1);
+		inputFiles.push_back(filename);
+    }
+	
+	StringVector filteredList;
+	ProcessWildcards(&filteredList, inputFiles);
+	b->AddNoPchFiles(filteredList);
+		
+    return 0;
+}
+
 static int luaFuncFrameworks(lua_State* l)
 {
     Block* b = mbGetActiveContext()->ActiveBlock();
@@ -320,6 +342,9 @@ void mbBlockLuaRegister(lua_State* l)
 	
     lua_pushcfunction(l, luaFuncFiles);
     lua_setglobal(l, "files");
+
+    lua_pushcfunction(l, luaFuncNoPchFiles);
+    lua_setglobal(l, "nopchfiles");
 
     lua_pushcfunction(l, luaFuncFrameworks);
     lua_setglobal(l, "frameworks");
@@ -460,6 +485,12 @@ const Block* Block::GetParent() const
 void Block::AddFiles(const StringVector& files)
 {
 	StringVector* existing = AcquireStringGroup(STRINGGROUP_FILES);
+	mbJoinArrays(existing, files);
+};
+
+void Block::AddNoPchFiles(const StringVector& files)
+{
+	StringVector* existing = AcquireStringGroup(STRINGGROUP_NOPCHFILES);
 	mbJoinArrays(existing, files);
 };
 

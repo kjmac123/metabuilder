@@ -89,6 +89,11 @@ void Target::FlattenFiles(StringVector* result, const char* platformName) const
 	FlattenStringGroup(result, STRINGGROUP_FILES, platformName);
 }
 
+void Target::FlattenNoPchFiles(StringVector* result, const char* platformName) const
+{
+	FlattenStringGroup(result, STRINGGROUP_NOPCHFILES, platformName);
+}
+
 void Target::FlattenFrameworks(StringVector* result, const char* platformName) const
 {
 	FlattenStringGroup(result, STRINGGROUP_FRAMEWORKS, platformName);

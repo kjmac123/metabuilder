@@ -2,6 +2,7 @@
 #define BLOCK_H
 
 #define STRINGGROUP_FILES					"files"
+#define STRINGGROUP_NOPCHFILES				"nopchfiles"
 #define STRINGGROUP_DEFINES					"defines"
 #define STRINGGROUP_INCLUDEDIRS				"includedirs"
 #define STRINGGROUP_LIBDIRS					"libdirs"
@@ -47,6 +48,7 @@ public:
 	const char*					GetParentPlatform() const;
 	
 	void						AddFiles(const StringVector& files);
+	void						AddNoPchFiles(const StringVector& files);
 	void						AddResources(const StringVector& files);
 	void						AddFrameworks(const StringVector& files);
 	void						AddDefines(const StringVector& defines);
