@@ -7,7 +7,16 @@
 
 #include <set>
 
-static int luaSplit (lua_State *L) {
+static int luaFuncGlobalImport(lua_State* lua)
+{
+    const char* requireFile = lua_tostring(lua, 1);
+
+    mbLuaDoFile(lua, requireFile, NULL);
+    return 0;
+}
+
+static int luaSplit (lua_State *L) 
+{
   const char *s = luaL_checkstring(L, 1);
   const char *sep = luaL_checkstring(L, 2);
   const char *e;
@@ -16,7 +25,8 @@ static int luaSplit (lua_State *L) {
   lua_newtable(L);  /* result */
 
   /* repeat for each separator */
-  while ((e = strchr(s, *sep)) != NULL) {
+  while ((e = strchr(s, *sep)) != NULL) 
+  {
 	lua_pushlstring(L, s, e-s);  /* push substring */
 	lua_rawseti(L, -2, i++);
 	s = e + 1;  /* skip separator */
@@ -25,8 +35,7 @@ static int luaSplit (lua_State *L) {
   /* push last substring */
   lua_pushstring(L, s);
   lua_rawseti(L, -2, i);
-
-  return 1;  /* return the table */
+  return 1;
 }
 
 static int luaFuncMkdir(lua_State* l)
@@ -174,6 +183,9 @@ void luaRegisterWriterFuncs(lua_State* l)
 {
 	mbWriterXcodeLuaRegister(l);
 	mbWriterMSVCLuaRegister(l);
+
+    lua_pushcfunction(l, luaFuncGlobalImport);
+    lua_setglobal(l, "import");
 	
     lua_pushcfunction(l, luaSplit);
     lua_setglobal(l, "split");
@@ -402,7 +414,6 @@ void mbWriterDo(MetaBuilderContext* ctx)
 						}
 					}
 					lua_setfield(l, -2, "allfiles");
-					
 				}
 
 				//Configs
@@ -461,6 +472,30 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					}
 					lua_setfield(l, -2, "files");
 				}
+
+				//No-pch Files
+				{
+					StringVector uniqueFiles;
+					{
+						for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						{
+							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+							target->FlattenNoPchFiles(&uniqueFiles, platformName);
+						}
+						mbRemoveDuplicatesAndSort(&uniqueFiles);
+					}
+					lua_createtable(l, 0, 0);
+					{
+						for (int jFile = 0; jFile < (int)uniqueFiles.size(); ++jFile)
+						{
+							const char* str = uniqueFiles[jFile].c_str();
+							lua_pushstring(l, str);
+							lua_rawseti(l, -2, jFile+1);
+						}
+					}
+					lua_setfield(l, -2, "nopchfiles");
+				}
+
 
 				//Frameworks
 				{
@@ -523,6 +558,17 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				}
 				lua_setfield(l, -2, "depends");
 				
+				//Target options
+				{
+					FlatConfig flatTarget;
+
+					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+					{
+						const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+						target->Flatten(&flatTarget, platformName, NULL);
+					}
+					mbWriterSetOptions(l, flatTarget.options);
+				}
 			}
 			lua_rawseti(l, -2, iTarget+1);
 		}

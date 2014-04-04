@@ -102,9 +102,6 @@
     <ClInclude Include="src\writer_msvc.h" />
     <ClInclude Include="src\writer_xcode.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="src\notes.txt" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{68ACA831-1ACB-4771-AD12-73139445F084}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

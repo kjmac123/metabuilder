@@ -23,6 +23,7 @@ public:
 	void				Flatten(FlatConfig* result, const char* platformName, const char* configName) const;
 	//Non config specific
 	void				FlattenFiles(StringVector* files, const char* platformName) const;
+	void				FlattenNoPchFiles(StringVector* files, const char* platformName) const;
 	void				FlattenFrameworks(StringVector* frameworks, const char* platformName) const;
 	void				FlattenResources(StringVector* resources, const char* platformName) const;
 	

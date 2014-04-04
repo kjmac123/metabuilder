@@ -294,9 +294,4 @@
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="src\notes.txt">
-      <Filter>src</Filter>
-    </None>
-  </ItemGroup>
 </Project>
