@@ -11,6 +11,8 @@ case $host_os in
         ;;
   linux*)
         # Do something specific for linux
+        AC_ARG_WITH([-ldl], [DL_LIB="-ldl"])
+        AC_SUBST([DL_LIB])
         ;;
    *BSD*)
         # Do something specific for BSD

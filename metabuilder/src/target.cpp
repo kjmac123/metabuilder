@@ -148,8 +148,6 @@ void Target::Flatten(FlatConfig* result, const char* platformName, const char* c
 
 void Target::FlattenStringGroup(StringVector* result, const char* stringGroup, const char* platformName) const
 {
-	MetaBuilderContext* ctx = mbGetActiveContext();
-	
 	FlatConfig f;
 	Flatten(&f, platformName, NULL);
 	
