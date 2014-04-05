@@ -1,6 +1,13 @@
 #ifndef MB_CORE_H
 #define MB_CORE_H
 
+#if defined(__APPLE__) && defined(__MACH__)
+	#include <TargetConditionals.h>
+	#if TARGET_OS_MAC == 1
+		#define PLATFORM_OSX
+	#endif
+#endif
+
 typedef unsigned char U8;
 typedef char S8;
 typedef unsigned short U16;
