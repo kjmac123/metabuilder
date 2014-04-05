@@ -5,7 +5,7 @@ AM_CPPFLAGS = \
 -I$(top_srcdir)/../external/ezOptionParser-0.2.1/ \
 -I$(top_srcdir)/../external/lua-5.2.2/src
 
-LDADD = ../external/lua-5.2.2/src/liblua.a
+LDADD = ../external/lua-5.2.2/src/liblua.a $(DL_LIB) -ldl
 
 bin_PROGRAMS = metabuilder
 metabuilder_SOURCES = \
@@ -37,7 +37,8 @@ metabuilder_SOURCES = \
 	src/metabuilder_pch.h \
 	src/target.h \
 	src/platform/platform.cpp \
-	src/platform/OSX/platform_osx.cpp 
+	src/platform/POSIX/platform_posix.cpp 
+	src/platform/Windows/platform_windows.cpp 
 	
 dist_noinst_SCRIPTS = autogen.sh
 
