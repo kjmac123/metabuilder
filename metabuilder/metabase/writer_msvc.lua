@@ -16,6 +16,8 @@ end
 
 g_currentTarget = writer_solution.targets[1]
 
+g_enableHLSL = false
+
 --Map relative to absolute path
 g_filePathMap = {}
 
@@ -28,9 +30,6 @@ g_fileTypeMap["cpp"]		= "ClCompile"
 g_fileTypeMap["h"]			= "ClInclude"
 g_fileTypeMap["hpp"]		= "ClInclude"
 g_fileTypeMap["inl"]		= "ClInclude"
-g_fileTypeMap["hlsl"]		= "CompileShaderGroup"
-g_fileTypeMap["vsh"]		= "CompileShaderGroup"
-g_fileTypeMap["psh"]		= "CompileShaderGroup"
 
 function GetFullFilePath(filepath)
 	return Util_FileNormaliseWindows(Util_FileConvertToAbsolute(g_filePathMap, writer_global.currentmetamakedirabs, filepath))
@@ -137,13 +136,15 @@ end
 
 --[[ FILE WRITING ]] --------------------------------------------------------------------------------
 
-function BuildFileGroups(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, CompileShaderGroup)
+function BuildFileGroups(currentTarget)
 	local fileIncludedInBuild = {}
 
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
 		fileIncludedInBuild[f] = true
 	end
+	
+	local groupMap = {}
 
 	for i = 1, #currentTarget.allsourcefiles do
 		local f = currentTarget.allsourcefiles[i]
@@ -153,21 +154,63 @@ function BuildFileGroups(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGrou
 		end
 
 		fileType = GetFileType(f)
-
-		--For each group store included files and whether they need to be excluded from the build
-		if fileType == "ClCompile" then
-			table.insert(ClCompileGroup, {f, fIncludedInBuild})
-		elseif fileType == "ClInclude" then
-			table.insert(ClIncludeGroup, {f, fIncludedInBuild})
-		elseif fileType == "CompileShaderGroup" then
-			table.insert(CompileShaderGroup, {f, fIncludedInBuild})
-		else
-			table.insert(NoneGroup, {f, fIncludedInBuild})
+ 
+		local group = groupMap[fileType]
+		if group == nil then
+			local newGroup = {fileType=fileType, fileInfo={}}
+			groupMap[fileType] = newGroup
+			group = newGroup
 		end
+		
+		local fileInfo = {filename=f, includedInBuild=fIncludedInBuild}
+		table.insert(group.fileInfo, fileInfo)
 	end	
+	
+	--print(inspect(groupMap))
+	return groupMap
 end
 
-function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, CompileShaderGroup)
+function WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, fileInfo)
+	local f = GetFullFilePath(fileInfo.filename)
+	file:write("   <" .. groupName .. " Include=\"" .. f .. "\">\n")
+end
+
+function WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, fileInfo)
+	for iConfig = 1, #currentTarget.configs do
+		local config = currentTarget.configs[iConfig]
+		local excludedFromBuildStr = nil
+		if fileInfo.includedInBuild then
+			excludedFromBuildStr = "false"
+		else
+			excludedFromBuildStr = "true"
+		end
+		file:write("    <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">" .. excludedFromBuildStr .. "</ExcludedFromBuild>\n")
+	end
+	file:write("   </" .. groupName .. ">\n")
+end
+
+function WriteVcxProjPropertyGroupOptions(file, groupOption)
+	if groupOption ~= nil then
+		for jOption = 1, #groupOption do
+			local keyValue = split(groupOption[jOption], "=")
+			local key = keyValue[1]
+			local value = keyValue[2]
+
+			file:write("      <" .. key .. ">" .. value .. "</" .. key .. ">\n")
+		end
+	end
+end
+
+function WriteVcxProjRawXMLBlocks(file, groupOptionRawXml)
+	if groupOptionRawXml ~= nil then
+		for jOption = 1, #groupOptionRawXml do
+			local keyValue = groupOptionRawXml[jOption]
+			file:write(keyValue)
+		end
+	end
+end
+
+function WriteVcxProj(currentTarget, groupMap)
 	local projectID = msvcgenerateid()
 	msvcregisterprojectid(currentTarget.name, projectID)
 
@@ -181,7 +224,7 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 	
 	local vcxprojName = writer_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj";
 	vcxprojName = Util_FileNormaliseWindows(vcxprojName)
-	print("Writing " .. vcxprojName .. "\n")
+	--print("Writing " .. vcxprojName .. "\n")
 	local file = io.open(vcxprojName, "w")
 
 	local pchFileBaseName = nil
@@ -209,10 +252,12 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 
 	file:write("  <PropertyGroup Label=\"Globals\">\n")
 	file:write("    <ProjectGuid>{" .. projectID .. "}</ProjectGuid>\n")
-	if msvcPlatform == "Win32" then
-		file:write("    <Keyword>Win32Proj</Keyword>\n")
-	end
+				
 	file:write("    <RootNamespace>metabuilder</RootNamespace>\n")
+	
+	WriteVcxProjPropertyGroupOptions(file, writer_global.options.msvcglobals)
+	WriteVcxProjRawXMLBlocks(file, writer_global.options.msvcglobalsrawxml)
+
 	file:write("  </PropertyGroup>\n")
 	file:write("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n")
 	for iConfig = 1, #currentTarget.configs do
@@ -223,32 +268,16 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		elseif currentTarget.targetType == "staticlib" then 		
 			file:write("    <ConfigurationType>StaticLibrary</ConfigurationType>\n")
 		end
-		--file:write("    <UseDebugLibraries>true</UseDebugLibraries>\n")
 
-		if config.options.msvcgeneral ~= nil then
-			for jOption = 1, #config.options.msvcgeneral do
-				local keyValue = split(config.options.msvcgeneral[jOption], "=")
-				local key = keyValue[1]
-				local value = keyValue[2]
-
-				file:write("      <" .. key .. ">" .. value .. "</" .. key .. ">\n")
-			end
-		end
-		
-		if config.options.msvcconfigrawxml ~= nil then
-			for jOption = 1, #config.options.msvcconfigrawxml do
-				local keyValue = config.options.msvcconfigrawxml[jOption]
-				file:write(keyValue)
-			end
-		end
-		
-		file:write("\n")
-		
+		WriteVcxProjPropertyGroupOptions(file, config.options.msvconfiguration)
+		WriteVcxProjRawXMLBlocks(file, config.options.msvconfigurationrawxml)
+				
+		print(inspect(config.options))
 		file:write("  </PropertyGroup>\n")
 	end
 	file:write("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n")
 	file:write("  <ImportGroup Label=\"ExtensionSettings\">\n")
-	if #CompileShaderGroup > 0 then
+	if g_enableHLSL == true then
 	    file:write("    <Import Project=\"hlsl.props\" />\n")
 	end
 	file:write("  </ImportGroup>\n")
@@ -266,6 +295,10 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 	    file:write("    <IntDir>" .. Util_FileNormaliseWindows(writer_global.makeoutputdirabs .."\\" .. writer_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
 	    file:write("    <OutDir>" .. Util_FileNormaliseWindows(writer_global.makeoutputdirabs .."\\" .. writer_global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
 	    file:write("    <TargetName>$(ProjectName)_$(Configuration)</TargetName>\n")
+		
+		WriteVcxProjPropertyGroupOptions(file, config.options.msvcpropertygroup)
+		WriteVcxProjRawXMLBlocks(file, config.options.msvcpropertygrouprawxml)
+		
 		file:write("  </PropertyGroup>\n")
 
 		file:write("  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">\n")
@@ -346,10 +379,8 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		
 		file:write("\n")
 
-		if #CompileShaderGroup > 0 then		
-			file:write("    <CompilerShader/>\n")
---			file:write("      <AdditionalOptions>/LD %(AdditionalOptions)</AdditionalOptions>\n")
---			file:write("    </CompilerShader>\n")	
+		if g_enableHLSL == true then		
+			file:write("    <CompilerShader/>\n")	
 		end
 		
 		--Post build event
@@ -360,75 +391,12 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		end
 		file:write("    </PostBuildEvent>\n")
 		
+		WriteVcxProjPropertyGroupOptions(file, config.options.msvcitemdef)
+		WriteVcxProjRawXMLBlocks(file, config.options.msvcitemdefrawxml)		
+		
 		file:write("  </ItemDefinitionGroup>\n")
 	end
-
-	--ClCompile group
-	file:write("  <ItemGroup>\n")
-	for i = 1, #ClCompileGroup do
-		local f = ClCompileGroup[i][1]
-		local fIncludedInBuild = ClCompileGroup[i][2]
-
-		file:write("    <ClCompile Include=\"" .. GetFullFilePath(f) .. "\">\n")
-		
-		for iConfig = 1, #currentTarget.configs do
-			local config = currentTarget.configs[iConfig]
-			file:write("      <CompileAs Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Default</CompileAs>\n")
-		end
-		
-		--If we're using a pch and this is the pch file
-		if pchSourceFile ~= nil and f == pchSourceFile then 
-			--For each config ensure we create the pch
-			for iConfig = 1, #currentTarget.configs do
-				local config = currentTarget.configs[iConfig]
-				file:write("      <PrecompiledHeader Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Create</PrecompiledHeader>\n")
-			end
-		else
-			for iConfig = 1, #currentTarget.configs do
-				local config = currentTarget.configs[iConfig]
-				if fIncludedInBuild == false then 
-					file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">true</ExcludedFromBuild>\n")
-				end
-			end
-		end
-		file:write("    </ClCompile>\n")
-	end	
-	file:write("  </ItemGroup>\n")
-
-	--ClInclude group
-	file:write("  <ItemGroup>\n")
-	for i = 1, #ClIncludeGroup do
-		local f = ClIncludeGroup[i][1]
-		local fIncludedInBuild = ClIncludeGroup[i][2]
-
-		file:write("    <ClInclude Include=\"" .. GetFullFilePath(f) .. "\">\n")
-		for iConfig = 1, #currentTarget.configs do
-			local config = currentTarget.configs[iConfig]
-			if fIncludedInBuild == false then 
-				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">true</ExcludedFromBuild>\n")
-			end
-		end		
-		file:write("    </ClInclude>\n")
-	end	
-	file:write("  </ItemGroup>\n")
-
-	--None group
-	file:write("  <ItemGroup>\n")
-	for i = 1, #NoneGroup do
-		local f = NoneGroup[i][1]
-		local fIncludedInBuild = NoneGroup[i][2]
-
-		file:write("    <None Include=\"" .. GetFullFilePath(f) .. "\">\n")
-		for iConfig = 1, #currentTarget.configs do
-			local config = currentTarget.configs[iConfig]
-			if fIncludedInBuild == false then 
-				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">true</ExcludedFromBuild>\n")
-			end
-		end
-		file:write("    </None>\n")		
-	end	
-	file:write("  </ItemGroup>\n")	
-
+--[[
 	--Shaders
 	file:write("  <ItemGroup>\n")
 	for i = 1, #CompileShaderGroup do
@@ -451,27 +419,78 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		end
 		file:write("    </CompilerShader>\n")		
 	end	
-	file:write("  </ItemGroup>\n")	
-
-
---[[
-	if pchFile ~= nil then
-		local path, filename, ext = Util_FilePathDecompose(currentTarget.pch)
-		file:write("  <ItemGroup>\n")
-		file:write("    <ClCompile Include=\"" .. path .. "/" .. filename .. ".cpp\">\n")
-		for iConfig = 1, #currentTarget.configs do
-			local config = currentTarget.configs[iConfig]
-			file:write("      <PrecompiledHeader Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Create</PrecompiledHeader>\n")
-		end
-		file:write("    </ClCompile>\n")
-		file:write("  </ItemGroup>\n")
-
-		file:write("  <ItemGroup>\n")
-		file:write("    <ClInclude Include=\"" .. path .. "/" .. filename .. ".h\">\n")
-		file:write("    </ClInclude>\n")
-		file:write("  </ItemGroup>\n")
+	file:write("  </ItemGroup>\n")
+	]]
+	local filesNotUsingPchMap = {}
+	for i = 1, #currentTarget.nopchfiles do
+		local f = currentTarget.nopchfiles[i]
+		filesNotUsingPchMap[f] = 1
 	end
-]]
+
+	--New group writing method which isn't horrid and totally hard-coded
+	--TODO - add function pointer approach for intrinsic types.
+	for groupName, group in pairs(groupMap) do 
+		file:write("  <ItemGroup>\n")
+
+		if groupName == "ClCompile" then
+			for i = 1, #group.fileInfo do
+				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				for iConfig = 1, #currentTarget.configs do
+					local config = currentTarget.configs[iConfig]
+					file:write("      <CompileAs Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Default</CompileAs>\n")
+				end
+				
+				--If we're using a pch and this is the pch file
+				if pchSourceFile ~= nil then
+					local f =  group.fileInfo[i].filename
+					if f == pchSourceFile then 
+						--For each config ensure we create the pch
+						for iConfig = 1, #currentTarget.configs do
+							local config = currentTarget.configs[iConfig]
+							file:write("      <PrecompiledHeader Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Create</PrecompiledHeader>\n")
+						end
+					elseif filesNotUsingPchMap[f] ~= nil then
+						--This file, for whatever reason, is not using the pch
+						for iConfig = 1, #currentTarget.configs do
+							local config = currentTarget.configs[iConfig]
+							file:write("      <PrecompiledHeader Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">NotUsing</PrecompiledHeader>\n")
+						end
+					end
+				end
+
+				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+			end
+		elseif groupName == "ClInclude" then
+			for i = 1, #group.fileInfo do
+				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+			end
+		elseif groupName == "None" then
+			for i = 1, #group.fileInfo do
+				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+			end
+		--elseif groupName == "CompilerShader" then
+		else
+			if GetCustomGroupRule ~= nil then
+				for i = 1, #group.fileInfo do
+					local fileInfo = group.fileInfo[i]
+					local f = GetFullFilePath(fileInfo.filename)
+					local customRuleWriterFunc = GetCustomGroupRule(groupName, fileInfo.filename)
+					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, fileInfo)
+						customRuleWriterFunc(file, currentTarget, msvcPlatform, f)
+					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, fileInfo)
+				end
+			else
+				for i = 1, #group.fileInfo do
+					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				end
+			end
+		end
+
+		file:write("  </ItemGroup>\n")	
+	end
 
 	file:write("  <ItemGroup>\n")
 	for i = 1, #currentTarget.depends do
@@ -486,11 +505,16 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 		file:write("    </ProjectReference>\n")
 	end
 	file:write("  </ItemGroup>\n")
+	
+	--print(inspect(currentTarget.options))
+	WriteVcxProjRawXMLBlocks(file, currentTarget.options.msvcitemgrouprawxml)
 
+	file:write("\n")
+	
 	file:write("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n")
 
 	file:write("  <ImportGroup Label=\"ExtensionTargets\">\n")
-	if #CompileShaderGroup > 0 then
+	if g_enableHLSL == true then
 	    file:write("    <Import Project=\"hlsl.targets\" />\n")
 	end
 	file:write("  </ImportGroup>\n")
@@ -502,29 +526,39 @@ function WriteVcxProj(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, 
 end
 
 function FormatFilterPath(path)
-	while string.find(path, "..\\") == 1 do
+	while string.find(path, "%.%./") == 1 do
 		path = string.sub(path, 4, length)
 	end
-	
-	return path
+
+	path = Util_FileTrimTrailingSlash(path)
+	return Util_FileNormaliseWindows(path)
 end
 
-function WriterVcxProjFilters(currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, CompileShaderGroup)
+function WriterVcxProjFilters(currentTarget, groupMap)
 	local vcxProjFiltersFilename = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".vcxproj.filters"
 	local file = io.open(vcxProjFiltersFilename, "w")
 
 	file:write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 	file:write("<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
 
+	local allfiles = {}
+	for groupName, group in pairs(groupMap) do 
+		for i = 1, #group.fileInfo do
+			local filename = group.fileInfo[i].filename
+			table.insert(allfiles, filename)
+		end
+	end
+	
 	local folders = {}
-	InitFolders(folders, currentTarget.allsourcefiles)
+	InitFolders(folders, allfiles)
 
 	--Write out filter folders
 	file:write("  <ItemGroup>\n")
 	for k, v in pairs(folders) do 
 		local folder = v
+		--print(inspect(folder))
 		if folder.shortName ~= "" then 
-			local formattedPath = FormatFilterPath(Util_FileNormaliseWindows(folder.relativePath))
+			local formattedPath = FormatFilterPath(folder.relativePath)
 			if formattedPath ~= "." then
 				file:write("    <Filter Include=\"" .. formattedPath .. "\">\n")
 				file:write("      <UniqueIdentifier>{" .. folder.id .. "}</UniqueIdentifier>\n")
@@ -533,62 +567,26 @@ function WriterVcxProjFilters(currentTarget, ClCompileGroup, ClIncludeGroup, Non
 		end
 	end
 	file:write("  </ItemGroup>\n")
-
-	--Write out files to be built
+	
 	file:write("  <ItemGroup>\n")
-	for iFile = 1, #ClCompileGroup do
-		filename = ClCompileGroup[iFile][1]
-
-		file:write("    <ClCompile Include=\"" .. Util_FileNormaliseWindows(GetFullFilePath(filename)) .. "\">\n")
-		local path = Util_FilePath(filename)
-		path = Util_FileTrimTrailingSlash(path)
-		path = Util_FileNormaliseWindows(path)
-		file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
-		file:write("    </ClCompile>\n")		
+	for groupName, group in pairs(groupMap) do 
+		for i = 1, #group.fileInfo do
+		
+			local filename = group.fileInfo[i].filename
+	
+			local f = GetFullFilePath(filename)
+			
+			local path = Util_FilePath(filename)
+	--		print(" none " .. fullFilePath)		
+--			path = Util_FileTrimTrailingSlash(path)
+	--		path = Util_FileNormaliseWindows(path)
+		
+			file:write("   <" .. groupName .. " Include=\"" .. Util_FileNormaliseWindows(f) .. "\">\n")
+			file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
+			file:write("   </" .. groupName .. ">\n")				
+		end
 	end
 	file:write("  </ItemGroup>\n")
-
-	--Write out header files
-	file:write("  <ItemGroup>\n")
-	for iFile = 1, #ClIncludeGroup do
-		filename = ClIncludeGroup[iFile][1]
-
-		file:write("    <ClInclude Include=\"" .. Util_FileNormaliseWindows(GetFullFilePath(filename)) .. "\">\n")
-		local path = Util_FilePath(filename)
-		path = Util_FileTrimTrailingSlash(path)
-		path = Util_FileNormaliseWindows(path)
-		file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
-		file:write("    </ClInclude>\n")		
-	end
-	file:write("  </ItemGroup>\n")
-
-	--Write out none build files
-	file:write("  <ItemGroup>\n")
-	for iFile = 1, #NoneGroup do
-		filename = NoneGroup[iFile][1]
-
-		file:write("    <None Include=\"" .. Util_FileNormaliseWindows(GetFullFilePath(filename)) .. "\">\n")
-		local path = Util_FilePath(filename)
-		path = Util_FileTrimTrailingSlash(path)
-		path = Util_FileNormaliseWindows(path)
-		file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
-		file:write("    </None>\n")		
-	end
-	file:write("  </ItemGroup>\n")
-
-	--Write out shaders
-	file:write("  <ItemGroup>\n")
-	for iFile = 1, #CompileShaderGroup do
-		filename = CompileShaderGroup[iFile][1]
-
-		file:write("    <CompilerShader Include=\"" .. Util_FileNormaliseWindows(GetFullFilePath(filename)) .. "\">\n")
-		local path = Util_FilePath(filename)
-		path = Util_FileTrimTrailingSlash(path)
-		path = Util_FileNormaliseWindows(path)
-		file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
-		file:write("    </CompilerShader>\n")		
-	end
-	file:write("  </ItemGroup>\n")	
 
 	file:write("</Project>\n")
 
@@ -690,19 +688,26 @@ end
 
 --[[ MAIN ]]
 
-local ClCompileGroup = {}
-local ClIncludeGroup = {}
-local NoneGroup = {}
-local CompileShaderGroup = {}
-
-BuildFileGroups(g_currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, CompileShaderGroup)
-local enableHLSL = false
-if #CompileShaderGroup > 0 then
-	enableHLSL = true
+local customWriter = Util_GetKVValue(writer_global.options.msvc, "customwriter")
+if customWriter ~= nil then
+	print("Importing custom writer " .. customWriter)
+	import(customWriter)
 end
 
-WriteVcxProj(g_currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, CompileShaderGroup)
-WriterVcxProjFilters(g_currentTarget, ClCompileGroup, ClIncludeGroup, NoneGroup, CompileShaderGroup)
+if GetFileTypeMap ~= nil then
+	g_fileTypeMap = GetFileTypeMap()
+end
+
+local groupMap = BuildFileGroups(g_currentTarget)
+print(inspect(g_fileTypeMap))
+--TODO move out this hack for Windows builds
+if g_fileTypeMap["hlsl"] == "CompilerShader" then
+	print("HLSL support enabled")
+	g_enableHLSL = true
+end
+
+WriteVcxProj(g_currentTarget, groupMap)
+WriterVcxProjFilters(g_currentTarget, groupMap)
 
 --Solutions only required by apps
 if g_currentTarget.targetType == "app" then
@@ -710,7 +715,7 @@ if g_currentTarget.targetType == "app" then
 end
 
 	--Copy helper files
-	if enableHLSL then
+	if g_enableHLSL then
 		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.lc",		writer_global.makeoutputdirabs .. "/hlsl.lc")
 		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.props",		writer_global.makeoutputdirabs .. "/hlsl.props")
 		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.targets",	writer_global.makeoutputdirabs .. "/hlsl.targets")
