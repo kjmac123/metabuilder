@@ -88,7 +88,7 @@ function WriteMakeFile(currentTarget, config)
 	file:write("arflags = $\n")
 	if config.options.arflags ~= nil then
 		for i = 1, #config.options.arflags do
-			file:write(config.options.arflags[i] .. " $\n")
+			file:write("  " .. config.options.arflags[i] .. " $\n")
 		end
 	end	
 	file:write("\n")
@@ -98,7 +98,7 @@ function WriteMakeFile(currentTarget, config)
 		file:write("rule cxx\n")
 		file:write("  depfile = $out.d\n")
 		file:write("  deps = gcc\n")
-		file:write("  command = g++ -MMD -MF $out.d $cflags -c $in -o $out\n")
+		file:write("  command = gcc -MMD -MF $out.d $cflags -c $in -o $out\n")
 		file:write("\n")
 		file:write("rule ar\n")
 		--c = create archive
