@@ -14,12 +14,16 @@
 
 #include "stdio.h"
 
+#ifndef LUA_AS_CPP
 extern "C"
 {
+#endif
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
+#ifndef LUA_AS_CPP
 }
+#endif
 
 #include "core.h"
 
