@@ -8,6 +8,13 @@ solution "helloworld"
 	target "helloworld"
 		target_type "app"
 
+		depends("hellolib",	"../hellolib/metabuilder.lua")
+		
+		includedirs 
+		{ 
+			"../hellolib",
+		}
+
 		files
 		{
 			"main.cpp"
