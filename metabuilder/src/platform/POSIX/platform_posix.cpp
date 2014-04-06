@@ -210,6 +210,7 @@ std::string mbaFileGetWorkingDir()
 
 std::string mbaFileGetAbsPath(const std::string& path)
 {
+	printf("heere %i\n", MB_MAX_PATH);
     char storage[MB_MAX_PATH];
 	realpath(path.c_str(), storage);
 	return storage;

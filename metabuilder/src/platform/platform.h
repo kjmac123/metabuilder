@@ -1,7 +1,7 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-#ifdef PLATFORM_OSX
+#ifdef PLATFORM_POSIX
 #define MB_MAX_PATH PATH_MAX
 #elif PLATFORM_WINDOWS
 #define MB_MAX_PATH 260
