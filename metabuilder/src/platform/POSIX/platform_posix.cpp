@@ -1,6 +1,6 @@
 #include "metabuilder_pch.h"
 
-#ifdef PLATFORM_OSX
+#ifdef PLATFORM_POSIX
 
 #include "../../common.h"
 

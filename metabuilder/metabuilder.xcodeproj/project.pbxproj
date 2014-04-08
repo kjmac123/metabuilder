@@ -15,9 +15,9 @@
 		BE11DC8018BB950B008C869D /* solution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC7C18BB950B008C869D /* solution.cpp */; };
 		BE11DC8718BB9713008C869D /* configparam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC8518BB9713008C869D /* configparam.cpp */; };
 		BE11DC8A18BB971A008C869D /* target.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE11DC8818BB971A008C869D /* target.cpp */; };
+		BE1C683018F0B63000A9DC2A /* platform_posix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE1C682F18F0B63000A9DC2A /* platform_posix.cpp */; };
 		BE1E5DC118C753C9003A4CFB /* writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE1E5DBF18C753C9003A4CFB /* writer.cpp */; };
 		BE4F100418E42D58009DA1CF /* platformparam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE4F100218E42D58009DA1CF /* platformparam.cpp */; };
-		BE72F53218DB155D0017B474 /* platform_osx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE72F53118DB155D0017B474 /* platform_osx.cpp */; };
 		BE72F53518DB48DD0017B474 /* writer_msvc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE72F53318DB48DD0017B474 /* writer_msvc.cpp */; };
 		BE854F2718CA24B4008EAFCD /* writer_xcode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE854F2518CA24B4008EAFCD /* writer_xcode.cpp */; };
 		BEAD3A71178B618F005E695D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEAD3A6F178B618F005E695D /* main.cpp */; };
@@ -84,13 +84,13 @@
 		BE11DC8618BB9713008C869D /* configparam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = configparam.h; sourceTree = "<group>"; };
 		BE11DC8818BB971A008C869D /* target.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = target.cpp; sourceTree = "<group>"; };
 		BE11DC8918BB971A008C869D /* target.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = target.h; sourceTree = "<group>"; };
+		BE1C682F18F0B63000A9DC2A /* platform_posix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = platform_posix.cpp; path = POSIX/platform_posix.cpp; sourceTree = "<group>"; };
 		BE1E5DBF18C753C9003A4CFB /* writer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = writer.cpp; sourceTree = "<group>"; };
 		BE1E5DC018C753C9003A4CFB /* writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = writer.h; sourceTree = "<group>"; };
 		BE4F100218E42D58009DA1CF /* platformparam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = platformparam.cpp; sourceTree = "<group>"; };
 		BE4F100318E42D58009DA1CF /* platformparam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platformparam.h; sourceTree = "<group>"; };
 		BE72F52E18DB14C30017B474 /* core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = core.h; sourceTree = "<group>"; };
 		BE72F53018DB14F20017B474 /* platform_windows.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = platform_windows.cpp; path = Windows/platform_windows.cpp; sourceTree = "<group>"; };
-		BE72F53118DB155D0017B474 /* platform_osx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = platform_osx.cpp; path = src/platform/OSX/platform_osx.cpp; sourceTree = SOURCE_ROOT; };
 		BE72F53318DB48DD0017B474 /* writer_msvc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = writer_msvc.cpp; sourceTree = "<group>"; };
 		BE72F53418DB48DD0017B474 /* writer_msvc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = writer_msvc.h; sourceTree = "<group>"; };
 		BE854F2518CA24B4008EAFCD /* writer_xcode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = writer_xcode.cpp; sourceTree = "<group>"; };
@@ -178,6 +178,14 @@
 			name = ezOptionParser;
 			sourceTree = "<group>";
 		};
+		BE1C682E18F0B62800A9DC2A /* POSIX */ = {
+			isa = PBXGroup;
+			children = (
+				BE1C682F18F0B63000A9DC2A /* platform_posix.cpp */,
+			);
+			name = POSIX;
+			sourceTree = "<group>";
+		};
 		BE72F52F18DB14E20017B474 /* Windows */ = {
 			isa = PBXGroup;
 			children = (
@@ -189,21 +197,12 @@
 		BE854F7A18D0A5B4008EAFCD /* platform */ = {
 			isa = PBXGroup;
 			children = (
-				BE854F7E18D0A5FA008EAFCD /* OSX */,
+				BE1C682E18F0B62800A9DC2A /* POSIX */,
 				BE72F52F18DB14E20017B474 /* Windows */,
 				BE854F8218D0A61D008EAFCD /* platform.h */,
 				BE0083AB18E09CA300F3E12F /* platform.cpp */,
 			);
 			path = platform;
-			sourceTree = "<group>";
-		};
-		BE854F7E18D0A5FA008EAFCD /* OSX */ = {
-			isa = PBXGroup;
-			children = (
-				BE72F53118DB155D0017B474 /* platform_osx.cpp */,
-			);
-			name = OSX;
-			path = iOS;
 			sourceTree = "<group>";
 		};
 		BEAD3A59178B6143005E695D = {
@@ -411,7 +410,6 @@
 				BEAD3AC1178B6209005E695D /* loadlib.c in Sources */,
 				BE0083AC18E09CA300F3E12F /* platform.cpp in Sources */,
 				BEAD3AC2178B6209005E695D /* lobject.c in Sources */,
-				BE72F53218DB155D0017B474 /* platform_osx.cpp in Sources */,
 				BE854F2718CA24B4008EAFCD /* writer_xcode.cpp in Sources */,
 				BEAD3AC3178B6209005E695D /* lopcodes.c in Sources */,
 				BEAD3AC4178B6209005E695D /* loslib.c in Sources */,
@@ -423,6 +421,7 @@
 				BEAD3ACA178B6209005E695D /* ltablib.c in Sources */,
 				BE0083AE18E09D8700F3E12F /* core.cpp in Sources */,
 				BE11DC7D18BB950B008C869D /* common.cpp in Sources */,
+				BE1C683018F0B63000A9DC2A /* platform_posix.cpp in Sources */,
 				BE11DC8A18BB971A008C869D /* target.cpp in Sources */,
 				BEAD3ACB178B6209005E695D /* ltm.c in Sources */,
 				BEAD3ACE178B6209005E695D /* lundump.c in Sources */,
@@ -456,7 +455,6 @@
 					"DEBUG=1",
 					"$(inherited)",
 					"LUA_USE_MACOSX=1",
-					PLATFORM_OSX,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -491,7 +489,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = PLATFORM_OSX;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -509,6 +507,11 @@
 		BEAD3A6C178B6143005E695D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					"LUA_USE_MACOSX=1",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -516,6 +519,7 @@
 		BEAD3A6D178B6143005E695D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
