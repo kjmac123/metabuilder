@@ -3,6 +3,24 @@
 Debug/
 Release/
 Master/
+*.o
+*.a
+*.d
+*.m4
+*.cache
+config.guess
+config.h*
+config.log
+config.status
+config.sub
+configure
+depcomp
+install-sh
+missing
+.deps/
+.dirstamp
+stamp-h1
+
 
 xcshareddata/
 

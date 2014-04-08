@@ -6,6 +6,7 @@
 
 #include <set>
 #include <list>
+#include <algorithm>
 
 static AppState								g_appState;
 static StringVector							g_makefiles;
@@ -229,7 +230,7 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc ini
 void mbExitError()
 {
 	MB_LOGERROR("Exiting with error.");
-    _exit(1);    
+    exit(1);
 }
 
 std::string mbPathJoin(const std::string& a, const std::string& b)
@@ -639,13 +640,14 @@ void mbRemoveDuplicates(StringVector* strings_)
 	strings = tmp;
 }
 
+
 struct StringSortRecord
 {
 	std::string lowerCaseString;
 	std::string originalString;
 };
 
-bool mbCompareNoCase(const StringSortRecord& a, StringSortRecord& b)
+bool mbCompareNoCase(const StringSortRecord& a, const StringSortRecord& b)
 {
 	return a.lowerCaseString < b.lowerCaseString;
 }
@@ -662,17 +664,18 @@ void mbRemoveDuplicatesAndSort(StringVector* strings_)
 	{
 		uniqueStrings.insert(strings[i]);
 	}
-	
+
 	for (std::set<std::string>::iterator it = uniqueStrings.begin(); it != uniqueStrings.end(); ++it)
 	{
 		const std::string& currentString = *it;
-		
+
 		tmp.push_back(StringSortRecord());
 		StringSortRecord& r = tmp.back();
 		r.lowerCaseString = currentString;
 		std::transform(r.lowerCaseString.begin(), r.lowerCaseString.end(), r.lowerCaseString.begin(), ::tolower);
 		r.originalString = currentString;
 	}
+
 	std::sort(tmp.begin(), tmp.end(), mbCompareNoCase);
 
 	strings.clear();

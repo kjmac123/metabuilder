@@ -1,6 +1,19 @@
 #ifndef MB_CORE_H
 #define MB_CORE_H
 
+#if defined(__APPLE__) && defined(__MACH__)
+	#include <TargetConditionals.h>
+	#if TARGET_OS_MAC == 1
+		#define PLATFORM_OSX
+		#define PLATFORM_POSIX
+	#endif
+#endif
+
+#if defined(__linux__)
+	#define PLATFORM_LINUX
+	#define PLATFORM_POSIX
+#endif
+
 typedef unsigned char U8;
 typedef char S8;
 typedef unsigned short U16;
@@ -12,16 +25,21 @@ typedef long long S64;
 typedef float F32;
 typedef double F64;
 
-#ifdef PLATFORM_OSX
+#if defined(PLATFORM_OSX) || defined(PLATFORM_POSIX)
 #include <unistd.h>
+#elif defined(PLATFORM_POSIX)
+#include <strings.h>
 #endif
 
 #define MB_LUA_STACK_MAX 900000
 
-#include <string>
-#include <vector>
+#include <string.h>
+#include <stdlib.h>
 
-#ifdef PLATFORM_OSX
+#include <vector>
+#include <string>
+
+#if defined(PLATFORM_OSX) || defined(PLATFORM_LINUX)
 #define stricmp strcasecmp
 #endif
 
