@@ -34,7 +34,7 @@ static void AddHeadersAutomatically(StringVector* files)
 		const char* sourceFileExtensions[] = {"cpp", "c", "m", "mm", NULL};
 		for (const char** sourceExtCursor = sourceFileExtensions; *sourceExtCursor; ++sourceExtCursor)
 		{
-			if (!_stricmp(*sourceExtCursor, fileExt))
+			if (!stricmp(*sourceExtCursor, fileExt))
 			{
 				const char* candidateExt[] = {"h", "inl", NULL};
 				for (const char** candidateExtCursor = candidateExt; *candidateExtCursor; ++candidateExtCursor)

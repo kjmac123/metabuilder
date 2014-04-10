@@ -43,7 +43,7 @@ static int luaFuncGetProjectID(lua_State* l)
 		}
 	}
 	
-	MB_LOGERROR("failed to find project %s", targetName);
+	MB_LOGERROR("failed to find project %s", targetName.c_str());
 	mbExitError();
 	return 0;
 }
