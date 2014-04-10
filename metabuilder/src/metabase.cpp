@@ -21,9 +21,10 @@ bool Metabase::IsA(E_BlockType t) const
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-static int luaFuncMetabase(lua_State* lua)
+static int luaFuncMetabase(lua_State* l)
 {
-	const char* generatorName = lua_tostring(lua, 1);
+	std::string generatorName;
+	mbLuaToStringExpandMacros(&generatorName, l, 1);
 	
 	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
 	assert(activeBlock == NULL);
@@ -33,7 +34,7 @@ static int luaFuncMetabase(lua_State* lua)
 	{
 		activeBlock->AddChild(generator);
 	}
-    generator->SetName(generatorName);
+	generator->SetName(generatorName.c_str());
 	mbGetActiveContext()->metabase = generator;
     
     mbGetActiveContext()->PushActiveBlock(generator);
@@ -60,18 +61,17 @@ static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-        const char* platform = lua_tostring(l, -1);
-		gen->supportedPlatforms.push_back(platform);
+		gen->supportedPlatforms.push_back(std::string());
+		mbLuaToStringExpandMacros(&gen->supportedPlatforms.back(), l, -1);
     }
 		
 	return 0;
 }
 
-static int luaFuncMetabaseWriter(lua_State* lua)
+static int luaFuncMetabaseWriter(lua_State* l)
 {
 
     if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->GetType() != E_BlockType_Metabase)
@@ -81,7 +81,8 @@ static int luaFuncMetabaseWriter(lua_State* lua)
     }
     
     Metabase* gen = (Metabase*)mbGetActiveContext()->ActiveBlock();
-	const char* writer = lua_tostring(lua, 1);
+	std::string writer;
+	mbLuaToStringExpandMacros(&writer, l, 1);
 	gen->writerLua = writer;
 	
 	return 0;

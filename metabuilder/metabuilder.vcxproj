@@ -51,8 +51,8 @@
     <ClCompile Include="src\makesetup.cpp" />
     <ClCompile Include="src\metabase.cpp" />
     <ClCompile Include="src\platformparam.cpp" />
-    <ClCompile Include="src\platform\OSX\platform_osx.cpp" />
     <ClCompile Include="src\platform\platform.cpp" />
+    <ClCompile Include="src\platform\POSIX\platform_posix.cpp" />
     <ClCompile Include="src\platform\Windows\platform_windows.cpp" />
     <ClCompile Include="src\solution.cpp" />
     <ClCompile Include="src\target.cpp" />

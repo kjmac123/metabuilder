@@ -7,6 +7,7 @@
 #include <set>
 #include <list>
 #include <algorithm>
+#include <sstream>
 
 static AppState								g_appState;
 static StringVector							g_makefiles;
@@ -14,6 +15,7 @@ static std::list<MetaBuilderContext*>		g_contexts; //Has memory ownership of con
 static std::list<MetaBuilderContext*>		g_contextStack;
 static std::stack<std::string>				g_doFileCurrentDirStack;
 
+static std::map<std::string, std::string>	g_macroMap;
 
 AppState::AppState()
 {
@@ -132,29 +134,65 @@ const std::list<MetaBuilderContext*>& mbGetContexts()
 
 static int luaFuncGlobalImport(lua_State* lua)
 {
-    const char* requireFile = lua_tostring(lua, 1);
-
-    mbLuaDoFile(lua, requireFile, NULL);
-
+	std::string requireFile;
+	mbLuaToStringExpandMacros(&requireFile, lua, 1);
+	mbLuaDoFile(lua, requireFile.c_str(), NULL);
     return 0;
 }
 
-static int report (lua_State *L, int status) {
+int luaFuncAddMacro(lua_State* lua)
+{
+	const char* key = lua_tostring(lua, 1);
+	const char* value = lua_tostring(lua, 2);
+	
+	if (!key || !value)
+	{
+		//TODO - error handling
+		MB_LOGERROR("Must specify both a key and value when adding a macro");
+		mbExitError();
+	}
+
+	if (mbGetAppState()->cmdSetup.verbose)
+	{
+		MB_LOGINFO("Setting global macro %s with a value of %s", key, value);
+	}
+	g_macroMap[key] = value;
+
+	return 0;
+}
+
+int luaFuncExpandMacro(lua_State* l)
+{
+	const char* str = lua_tostring(l, 1);
+
+	std::string expandedString;
+	mbExpandMacros(&expandedString, str);
+
+	lua_pushstring(l, expandedString.c_str());
+	return 1;
+}
+
+static int report (lua_State *L, int status) 
+{
   const char *msg;
-  if (status) {
-    msg = lua_tostring(L, -1);
-    if (msg == NULL) msg = "(error with no message)";
-    fprintf(stderr, "status=%d, %s\n", status, msg);
-    lua_pop(L, 1);
-  }
-  return status;
+  if (status) 
+  {
+		msg = lua_tostring(L, -1);
+		if (msg == NULL)
+			msg = "(error with no message)";
+
+		fprintf(stderr, "status=%d, %s\n", status, msg);
+		lua_pop(L, 1);
+	}
+	return status;
 }
 
 
 
 static int luaFuncCheckPlatform(lua_State* l)
 {
-    const char* testPlatform = lua_tostring(l, 1);
+    std::string testPlatform;
+	mbLuaToStringExpandMacros(&testPlatform, l, 1);
 	for (int i = 0; i < (int)mbGetActiveContext()->metabase->supportedPlatforms.size(); ++i)
 	{
 		const std::string& test = mbGetActiveContext()->metabase->supportedPlatforms[i];
@@ -456,6 +494,12 @@ void mbCommonLuaRegister(lua_State* l)
 
     lua_pushcfunction(l, luaFuncCheckPlatform);
     lua_setglobal(l, "checkplatform");
+
+	lua_pushcfunction(l, luaFuncAddMacro);
+	lua_setglobal(l, "globalmacro");
+
+	lua_pushcfunction(l, luaFuncExpandMacro);
+	lua_setglobal(l, "expandmacro");
 }
 
 void mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
@@ -742,4 +786,37 @@ void mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups)
 			MB_LOGDEBUG("  %s", it2->c_str());
 		}
 	}
+}
+
+void mbExpandMacros(std::string* result, const char* str)
+{
+	char macro[1024];
+
+	const char* srcCursor = str;
+
+	*result = str;
+
+	//Only process each macro if we know our string contains at least one.
+	if (strstr(str, "$${"))
+	{
+		for (std::map<std::string, std::string>::const_iterator it = g_macroMap.begin(); it != g_macroMap.end(); ++it)
+		{
+			const std::string& key= it->first;
+			const std::string& value = it->second;
+
+			sprintf(macro, "$${%s}", key.c_str());
+
+			mbStringReplace(*result, macro, value);
+		}
+	}
+}
+
+const char* mbLuaToStringExpandMacros(std::string* result, lua_State* l, int stackPos)
+{
+	const char* str = lua_tostring(l, stackPos);
+	if (!str)
+		return NULL;
+
+	mbExpandMacros(result, str);
+	return result->c_str();
 }

@@ -34,7 +34,7 @@ static void AddHeadersAutomatically(StringVector* files)
 		const char* sourceFileExtensions[] = {"cpp", "c", "m", "mm", NULL};
 		for (const char** sourceExtCursor = sourceFileExtensions; *sourceExtCursor; ++sourceExtCursor)
 		{
-			if (!stricmp(*sourceExtCursor, fileExt))
+			if (!_stricmp(*sourceExtCursor, fileExt))
 			{
 				const char* candidateExt[] = {"h", "inl", NULL};
 				for (const char** candidateExtCursor = candidateExt; *candidateExtCursor; ++candidateExtCursor)
@@ -60,9 +60,13 @@ static void AddHeadersAutomatically(StringVector* files)
 
 static void ProcessWildcards(StringVector* result, const StringVector& input)
 {
+	int initialResultCount = result->size();
+	std::string baseDir = mbPathGetDir(mbGetAppState()->mainMetaMakeFileAbs);
+
 	for (int i = 0; i < (int)input.size(); ++i)
 	{
-		const std::string& inputFilepath = input[i];
+		//std::string inputFilepath = baseDir + "/" + input[i];
+		std::string inputFilepath = input[i];
 
 		//Look for wildcard
 		if (inputFilepath.find('*') != std::string::npos)
@@ -76,10 +80,16 @@ static void ProcessWildcards(StringVector* result, const StringVector& input)
 				*tmp = '\0';
 			}
 
-			std::string dir = mbPathGetDir(inputFilepath);	
-
+			std::string dir = mbPathGetDir(inputFilepath);
 			std::string filename = mbPathGetFilename(inputFilepath);
+			//dir = mbaFileGetAbsPath(dir);
 			mbaBuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
+
+			if (result->size() == initialResultCount)
+			{
+				MB_LOGERROR("No files found matching dir %s and filter %s",  dir.c_str(), filename.c_str());
+				mbExitError();
+			}
 		}
 		else
 		{
@@ -97,18 +107,16 @@ static int luaFuncSetOption(lua_State* l)
         mbExitError();
     }
 	
-    const char* group = lua_tostring(l, 1);
-    const char* key = lua_tostring(l, 2);
-	const char* value = lua_tostring(l, 3);
-	if (!value)
-	{
-		value = "";
-	}
-	block->SetOption(group, key, value);
+	std::string group, key, value;
+	mbLuaToStringExpandMacros(&group, l, 1);
+    mbLuaToStringExpandMacros(&key, l, 2);
+	mbLuaToStringExpandMacros(&value, l, 3);
+
+	block->SetOption(group.c_str(), key.c_str(), value.c_str());
 	return 0;
 }
 
-static int luaFuncDefines(lua_State* lua)
+static int luaFuncDefines(lua_State* l)
 {
     Block* block = mbGetActiveContext()->ActiveBlock();
     if (!block)
@@ -117,17 +125,17 @@ static int luaFuncDefines(lua_State* lua)
         mbExitError();
     }
     
-    luaL_checktype(lua, 1, LUA_TTABLE);
-    int tableLen =  luaL_len(lua, 1);
+    luaL_checktype(l, 1, LUA_TTABLE);
+    int tableLen =  luaL_len(l, 1);
     
-    StringVector defines;
+    StringVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
-        lua_rawgeti(lua, 1, i);
-        const char* tmp = lua_tostring(lua, -1);
-        defines.push_back(tmp);
+        lua_rawgeti(l, 1, i);
+		strings.push_back(std::string());
+		mbLuaToStringExpandMacros(&strings.back(), l, -1);
     }
-    block->AddDefines(defines);
+    block->AddDefines(strings);
     
     return 0;
 }
@@ -148,8 +156,8 @@ static int luaFuncLibs(lua_State* l)
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-        const char* str = lua_tostring(l, -1);
-        strings.push_back(str);
+		strings.push_back(std::string());
+		mbLuaToStringExpandMacros(&strings.back(), l, -1);
     }
 	block->AddLibs(strings);
 		
@@ -172,9 +180,9 @@ static int luaFuncIncludeDir(lua_State* l)
 	StringVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
-        lua_rawgeti(l, 1, i);
-        const char* dir = lua_tostring(l, -1);
-        strings.push_back(dir);
+		lua_rawgeti(l, 1, i);
+		strings.push_back(std::string());
+		mbLuaToStringExpandMacros(&strings.back(), l, -1);
     }
 	block->AddIncludeDirs(strings);
 		
@@ -197,8 +205,8 @@ static int luaFuncLibDir(lua_State* l)
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-        const char* dir = lua_tostring(l, -1);
-        strings.push_back(dir);
+		strings.push_back(std::string());
+		mbLuaToStringExpandMacros(&strings.back(), l, -1);
     }
 	block->AddLibDirs(strings);
 		
@@ -221,8 +229,8 @@ static int luaFuncExeDirs(lua_State* l)
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-        const char* dir = lua_tostring(l, -1);
-        strings.push_back(dir);
+		strings.push_back(std::string());
+		mbLuaToStringExpandMacros(&strings.back(), l, -1);
     }
 	block->AddExeDirs(strings);
 		
@@ -236,16 +244,16 @@ static int luaFuncFiles(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector inputFiles;
+	StringVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-        const char* filename = lua_tostring(l, -1);
-		inputFiles.push_back(filename);
+		strings.push_back(std::string());
+		mbLuaToStringExpandMacros(&strings.back(), l, -1);
     }
 	
 	StringVector filteredList;
-	ProcessWildcards(&filteredList, inputFiles);
+	ProcessWildcards(&filteredList, strings);
 	b->AddFiles(filteredList);
 		
     return 0;
@@ -258,16 +266,16 @@ static int luaFuncNoPchFiles(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector inputFiles;
+	StringVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-        const char* filename = lua_tostring(l, -1);
-		inputFiles.push_back(filename);
+		strings.push_back(std::string());
+		mbLuaToStringExpandMacros(&strings.back(), l, -1);
     }
 	
 	StringVector filteredList;
-	ProcessWildcards(&filteredList, inputFiles);
+	ProcessWildcards(&filteredList, strings);
 	b->AddNoPchFiles(filteredList);
 		
     return 0;
@@ -280,15 +288,15 @@ static int luaFuncFrameworks(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector inputFiles;
+	StringVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-        const char* filename = lua_tostring(l, -1);
-		inputFiles.push_back(filename);
+		strings.push_back(std::string());
+		mbLuaToStringExpandMacros(&strings.back(), l, -1);
     }
 	
-	b->AddFrameworks(inputFiles);
+	b->AddFrameworks(strings);
 	
     return 0;
 }
@@ -300,18 +308,17 @@ static int luaFuncResources(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector tableContents;
+	StringVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-        const char* tmp = lua_tostring(l, -1);
-		tableContents.push_back(tmp);    }
-	
+		strings.push_back(std::string());
+		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+	}
 	
 	StringVector filteredList;
-	ProcessWildcards(&filteredList, tableContents);
+	ProcessWildcards(&filteredList, strings);
 	b->AddResources(filteredList);
-	
     return 0;
 }
 
@@ -382,7 +389,7 @@ Block::Block()
 
 Block::~Block()
 {
-	for (int i = 0; i < m_childParams.size(); ++i)
+	for (int i = 0; i < (int)m_childParams.size(); ++i)
 	{
 		delete m_childParams[i];
 	}
@@ -401,7 +408,7 @@ void Block::Process()
 		AddHeadersAutomatically(&it->second);
 	}
 	
-	for (int i = 0; i < m_childParams.size(); ++i)
+	for (int i = 0; i < (int)m_childParams.size(); ++i)
 	{
 		m_childParams[i]->Process();
 	}
@@ -721,7 +728,7 @@ MakeBlock::MakeBlock()
 
 MakeBlock::~MakeBlock()
 {
-	for (int i = 0; i < m_childMakeBlocks.size(); ++i)
+	for (int i = 0; i < (int)m_childMakeBlocks.size(); ++i)
 	{
 		delete m_childMakeBlocks[i];
 	}
@@ -749,7 +756,7 @@ void MakeBlock::Process()
 {
 	Block::Process();
 	
-	for (int i = 0; i < m_childMakeBlocks.size(); ++i)
+	for (int i = 0; i < (int)m_childMakeBlocks.size(); ++i)
 	{
 		m_childMakeBlocks[i]->Process();
 	}

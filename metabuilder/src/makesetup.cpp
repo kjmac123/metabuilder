@@ -23,7 +23,8 @@ bool MakeSetup::IsA(E_BlockType t) const
 
 static int luaFuncMakeSetup(lua_State* l)
 {
-    const char* metabase = lua_tostring(l, 1);
+    std::string metabase;
+	mbLuaToStringExpandMacros(&metabase, l, 1);
 
 	MakeSetup* makeSetup = mbGetAppState()->makeSetup;
 	//Only process for primary make file
@@ -53,9 +54,10 @@ static int luaFuncMakeSetupEnd(lua_State* l)
 	return 0;
 }
 
-static int luaFuncMakeSetupIntermediateDir(lua_State* lua)
+static int luaFuncMakeSetupIntermediateDir(lua_State* l)
 {
-    const char* intermediateDir = lua_tostring(lua, 1);
+    std::string intermediateDir;
+	mbLuaToStringExpandMacros(&intermediateDir, l, 1);
     
     if (mbGetActiveContext()->ActiveBlock() != mbGetAppState()->makeSetup)
     {
@@ -67,9 +69,10 @@ static int luaFuncMakeSetupIntermediateDir(lua_State* lua)
     return 0;
 }
 
-static int luaFuncMakeSetupOutputDir(lua_State* lua)
+static int luaFuncMakeSetupOutputDir(lua_State* l)
 {
-    const char* outputDir = lua_tostring(lua, 1);
+	std::string outputDir;
+	mbLuaToStringExpandMacros(&outputDir, l, 1);
     
     if (mbGetActiveContext()->ActiveBlock() != mbGetAppState()->makeSetup)
     {

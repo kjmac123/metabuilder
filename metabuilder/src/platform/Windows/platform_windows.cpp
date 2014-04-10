@@ -32,9 +32,26 @@ bool _mbaCreateDir(const char* osDir)
     return true;
 }
 
-bool mbaCreateLink(const char*, const char*)
+bool mbaCreateLink(const char* src, const char* dst)
 {
-	mbExitError();
+	/*
+	//mklink /h file3.txt file.txt
+	//>mklink /j c:\linktest\b c:\linktest\a
+
+	//remove existing
+
+	if (mbaGetFileType(src)
+	{
+	}
+
+	if (!result)
+	{
+		mbExitError();
+	}
+//	DWORD lastErr = GetLastError();
+
+	return result;
+	*/
 	return false;
 }
 
@@ -70,59 +87,96 @@ E_FileType mbaGetFileType(const std::string& filepath)
 
 bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir)
 {
-    WIN32_FIND_DATA fdFile;
-    HANDLE hFind = NULL;
+	//Process dirs
+	{
+		WIN32_FIND_DATA fdFile;
+		HANDLE hFind = NULL;
+		char sPath[2048];
+		sprintf(sPath, "%s\\*.*", osInputDir);
     
-    char sPath[2048];
+		if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
+		{
+			return false;
+		}
     
-    //Specify a file mask. *.* = We want everything!
-    sprintf(sPath, "%s\\%s", osInputDir, includeFilePattern);
-    
-    if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
-    {
-        printf("Path not found: [%s]\n", osInputDir);
-        return false;
-    }
-    
-    do
-    {
-        //Find first file will always return "."
-        //    and ".." as the first two directories.
-        if(strcmp(fdFile.cFileName, ".") != 0
-           && strcmp(fdFile.cFileName, "..") != 0)
-        {
-            //Build up our file path using the passed in
-            //  [sDir] and the file/foldername we just found:
-            sprintf(sPath, "%s\\%s", osInputDir, fdFile.cFileName);
-            
-            //Is the entity a File or Folder?
-            if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-            {
-				if (strcmp(fdFile.cFileName, excludeDir) != 0)
-				{
-					mbaBuildFileListRecurse(fileList, sPath, includeFilePattern, excludeDir);
-				}
-            }
-            else
+		do
+		{
+			//Find first file will always return "."
+			//    and ".." as the first two directories.
+			if(strcmp(fdFile.cFileName, ".") != 0
+			   && strcmp(fdFile.cFileName, "..") != 0)
 			{
-				//Ignore hidden unix files.
-				if (fdFile.cFileName[0] == '.')
-					continue;
+				//Build up our file path using the passed in
+				//  [sDir] and the file/foldername we just found:
+				sprintf(sPath, "%s\\%s", osInputDir, fdFile.cFileName);
             
-				char* fp = sPath;
-				if (strstr(fp, "./") == fp)
+				//Is the entity a File or Folder?
+				if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
-					fp += 2;
+					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
+					{
+						mbaBuildFileListRecurse(fileList, sPath, includeFilePattern, excludeDir);
+					}
 				}
-				char buf[MB_MAX_PATH];
-				mbNormaliseFilePath(buf,fp);
-				fileList->push_back(buf);
-            }
-        }
-    }
-    while(FindNextFile(hFind, &fdFile)); //Find the next file.
+			}
+		}
+		while(FindNextFile(hFind, &fdFile)); //Find the next file.
+
+		FindClose(hFind);
+	}
     
-    FindClose(hFind);
+	//Process files
+	{
+		WIN32_FIND_DATA fdFile;
+		HANDLE hFind = NULL;
+		char sPath[2048];
+		sprintf(sPath, "%s\\%s", osInputDir, includeFilePattern);
+    
+		if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
+		{
+			return false;
+		}
+    
+		do
+		{
+			//Find first file will always return "."
+			//    and ".." as the first two directories.
+			if(strcmp(fdFile.cFileName, ".") != 0
+			   && strcmp(fdFile.cFileName, "..") != 0)
+			{
+				//Build up our file path using the passed in
+				//  [sDir] and the file/foldername we just found:
+				sprintf(sPath, "%s\\%s", osInputDir, fdFile.cFileName);
+            
+				//Is the entity a File or Folder?
+				if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				{
+					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
+					{
+						mbaBuildFileListRecurse(fileList, sPath, includeFilePattern, excludeDir);
+					}
+				}
+				else
+				{
+					//Ignore hidden unix files.
+					if (fdFile.cFileName[0] == '.')
+						continue;
+            
+					char* fp = sPath;
+					if (strstr(fp, "./") == fp)
+					{
+						fp += 2;
+					}
+					char buf[MB_MAX_PATH];
+					mbNormaliseFilePath(buf,fp);
+					fileList->push_back(buf);
+				}
+			}
+		}
+		while(FindNextFile(hFind, &fdFile)); //Find the next file.
+
+	    FindClose(hFind);
+	}
     return true;
 }
 

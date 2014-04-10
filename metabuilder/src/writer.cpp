@@ -7,42 +7,44 @@
 
 #include <set>
 
-static int luaFuncGlobalImport(lua_State* lua)
+static int luaFuncGlobalImport(lua_State* l)
 {
-    const char* requireFile = lua_tostring(lua, 1);
+    std::string requireFile;
+	mbLuaToStringExpandMacros(&requireFile, l, 1);
 
-    mbLuaDoFile(lua, requireFile, NULL);
+    mbLuaDoFile(l, requireFile, NULL);
     return 0;
 }
 
-static int luaSplit (lua_State *L) 
+static int luaSplit (lua_State* l) 
 {
-  const char *s = luaL_checkstring(L, 1);
-  const char *sep = luaL_checkstring(L, 2);
+  const char *s = luaL_checkstring(l, 1);
+  const char *sep = luaL_checkstring(l, 2);
   const char *e;
   int i = 1;
 
-  lua_newtable(L);  /* result */
+  lua_newtable(l); 
 
-  /* repeat for each separator */
+  //for each separator
   while ((e = strchr(s, *sep)) != NULL) 
   {
-	lua_pushlstring(L, s, e-s);  /* push substring */
-	lua_rawseti(L, -2, i++);
-	s = e + 1;  /* skip separator */
+		lua_pushlstring(l, s, e-s);  //push substring
+		lua_rawseti(l, -2, i++);
+		s = e + 1;  //skip separator
   }
 
-  /* push last substring */
-  lua_pushstring(L, s);
-  lua_rawseti(L, -2, i);
+  //push last substring
+  lua_pushstring(l, s);
+  lua_rawseti(l, -2, i);
   return 1;
 }
 
 static int luaFuncMkdir(lua_State* l)
 {
-    const char* path = lua_tostring(l, 1);
+    std::string path;
+	mbLuaToStringExpandMacros(&path, l, 1);
 	
-	if (!mbCreateDirChain(path))
+	if (!mbCreateDirChain(path.c_str()))
 	{
 		mbExitError();
 	}
@@ -52,16 +54,16 @@ static int luaFuncMkdir(lua_State* l)
 
 static int luaFuncMklink(lua_State* l)
 {
-    const char* src = lua_tostring(l, 1);
-    const char* dst = lua_tostring(l, 2);
-	
-	if (!src || !dst)
+    std::string src, dst;
+	if (!mbLuaToStringExpandMacros(&src, l, 1) || !mbLuaToStringExpandMacros(&dst, l, 2))
 	{
+		MB_LOGERROR("Must specify both source and destination when creating link");
 		mbExitError();
 	}
 		
-	if (!mbaCreateLink(src, dst))
+	if (!mbaCreateLink(src.c_str(), dst.c_str()))
 	{
+		MB_LOGERROR("Failed to create link %s->%s", src.c_str(), dst.c_str());
 		mbExitError();
 	}
 	
@@ -95,8 +97,9 @@ static int luaFuncGetFileType(lua_State* l)
 
 static int luaFuncReportOutputFile(lua_State* l)
 {
-    const char* filepath = lua_tostring(l, 1);
-	MB_LOGINFO("Wrote file %s", filepath);
+    std::string filepath;
+	mbLuaToStringExpandMacros(&filepath, l, 1);
+	MB_LOGINFO("Wrote file %s", filepath.c_str());
 	
 	return 0;
 }
@@ -104,8 +107,8 @@ static int luaFuncReportOutputFile(lua_State* l)
 #if 0
 static int luaFuncGetRelativeDirTo(lua_State* l)
 {
-    const char* from = lua_tostring(l, 1);
-    const char* to = lua_tostring(l, 2);
+    const char* from = mbLuaToStringExpandMacros(l, 1);
+    const char* to = mbLuaToStringExpandMacros(l, 2);
 
 	std::string result;
 	if (mbPathRelativeDirTo(&result, from, to))
@@ -120,26 +123,26 @@ static int luaFuncGetRelativeDirTo(lua_State* l)
 
 static int luaFuncCopyFile(lua_State* l)
 {
-    const char* fromFilename = lua_tostring(l, 1);
-    const char* toFilename = lua_tostring(l, 2);
-	if (!fromFilename || !toFilename)
+	std::string fromFilename, toFilename;
+	
+	if (!mbLuaToStringExpandMacros(&fromFilename, l, 1) || !mbLuaToStringExpandMacros(&toFilename, l, 2))
 	{
 		MB_LOGERROR("Failed to copy file. Insufficient args");
 		mbExitError();
 		return 0;
 	}
 
-	FILE* fromFile = fopen(fromFilename, "rb");
+	FILE* fromFile = fopen(fromFilename.c_str(), "rb");
 	if (!fromFile)
 	{
-        MB_LOGERROR("cannot open file %s", fromFilename);
+        MB_LOGERROR("cannot open file %s", fromFilename.c_str());
         mbExitError();
 	}
 	
-	FILE* toFile = fopen(toFilename, "wb");
+	FILE* toFile = fopen(toFilename.c_str(), "wb");
 	if (!toFile)
 	{
-        MB_LOGERROR("cannot open file %s", toFilename);
+        MB_LOGERROR("cannot open file %s", toFilename.c_str());
         mbExitError();
 	}
 	
@@ -189,6 +192,12 @@ void luaRegisterWriterFuncs(lua_State* l)
 	
     lua_pushcfunction(l, luaSplit);
     lua_setglobal(l, "split");
+
+	lua_pushcfunction(l, luaFuncAddMacro);
+	lua_setglobal(l, "globalmacro");
+
+	lua_pushcfunction(l, luaFuncExpandMacro);
+	lua_setglobal(l, "expandmacro");
 	
     lua_pushcfunction(l, luaFuncMkdir);
     lua_setglobal(l, "mkdir");

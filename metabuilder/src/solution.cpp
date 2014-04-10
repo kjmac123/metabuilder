@@ -33,9 +33,10 @@ void Solution::Process()
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-static int luaFuncSolution(lua_State* lua)
+static int luaFuncSolution(lua_State* l)
 {
-    const char* name = lua_tostring(lua, 1);
+    std::string name;
+	mbLuaToStringExpandMacros(&name, l, 1);
     
     if (mbGetActiveContext()->solution)
     {
@@ -48,7 +49,7 @@ static int luaFuncSolution(lua_State* lua)
     
 	mbGetActiveContext()->solution = new Solution();
 	mbGetActiveContext()->metabase->AddChild(mbGetActiveContext()->solution);
-    mbGetActiveContext()->solution->SetName(name);
+	mbGetActiveContext()->solution->SetName(name.c_str());
 
 	AppState* appState = mbGetAppState();
 	if (appState->isProcessingPrimaryMakefile)

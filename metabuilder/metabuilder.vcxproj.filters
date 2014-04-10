@@ -22,8 +22,8 @@
     <Filter Include="external\lua\src">
       <UniqueIdentifier>{46ac46b1-44a5-4c4f-aa2d-22d0d8175067}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\platform\OSX">
-      <UniqueIdentifier>{f3c533be-6773-48fe-96a7-c3856d3b3eb6}</UniqueIdentifier>
+    <Filter Include="src\platform\POSIX">
+      <UniqueIdentifier>{707232b7-6a6f-4316-9002-5ea2455d4cb1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -47,9 +47,6 @@
     </ClCompile>
     <ClCompile Include="src\writer_xcode.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\Windows\platform_windows.cpp">
-      <Filter>src\platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="..\external\lua-5.2.2\src\lundump.c">
       <Filter>external\lua\src</Filter>
@@ -147,9 +144,6 @@
     <ClCompile Include="..\external\lua-5.2.2\src\lvm.c">
       <Filter>external\lua\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\OSX\platform_osx.cpp">
-      <Filter>src\platform\OSX</Filter>
-    </ClCompile>
     <ClCompile Include="src\writer_msvc.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -170,6 +164,12 @@
     </ClCompile>
     <ClCompile Include="src\platformparam.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\POSIX\platform_posix.cpp">
+      <Filter>src\platform\POSIX</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform\Windows\platform_windows.cpp">
+      <Filter>src\platform\POSIX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -121,7 +121,7 @@ void Target::Flatten(FlatConfig* result, const char* platformName, const char* c
 	{
 		blocks.push_back(block);
 		
-		for (int i = 0; i < blocks.size(); ++i)
+		for (int i = 0; i < (int)blocks.size(); ++i)
 		{
 			block->GetParams(&params, E_BlockType_Unknown, platformName, configName, true);
 		}
@@ -169,12 +169,13 @@ static int luaFuncTarget(lua_State* l)
     
     Solution* solution = (Solution*)mbGetActiveContext()->ActiveBlock();
 
-    const char* name = lua_tostring(l, 1);
+    std::string name;
+	mbLuaToStringExpandMacros(&name, l, 1);
     
 	//Create new target instance.
     Target* target = new Target();
 	solution->AddChild(target);
-    target->SetName(name);
+	target->SetName(name.c_str());
     
 	solution->targetVector.push_back(target);
 
@@ -193,28 +194,21 @@ static int luaFuncTargetEnd(lua_State* lua)
 static int luaFuncTargetType(lua_State* l)
 {
     Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-
-    const char* targetType = lua_tostring(l, 1);
-    
-    target->targetType = targetType;
-
+    mbLuaToStringExpandMacros(&target->targetType, l, 1);
     return 0;
 }
 
 static int luaFuncTargetPCH(lua_State* l)
 {
     Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-
-    const char* pch = lua_tostring(l, 1);
-    
-    target->pch = pch;
-
+    const char* pch = mbLuaToStringExpandMacros(&target->pch , l, 1);
     return 0;
 }
 
 static void AddPlatformSpecificStrings(std::map<std::string, StringVector>* platformStringMap, lua_State* l)
 {
-	const char* platformName = lua_tostring(l, 1);
+	std::string platformName;
+	mbLuaToStringExpandMacros(&platformName, l, 1);
 	
 	std::map<std::string, StringVector>::iterator it = platformStringMap->find(platformName);
 	
@@ -235,24 +229,20 @@ static void AddPlatformSpecificStrings(std::map<std::string, StringVector>* plat
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 2, i);
-        const char* tmp = lua_tostring(l, -1);
-        platformFiles.push_back(tmp);
+		platformFiles.push_back(std::string());
+		mbLuaToStringExpandMacros(&platformFiles.back(), l, -1);
     }
 }
 
 static int luaFuncTargetDepends(lua_State* l)
 {
     Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-    const char* libTargetName = lua_tostring(l, 1);
-	const char* libMakefile = lua_tostring(l, 2);
-	
 	target->depends.push_back(TargetDepends());
-	target->depends.back().libTargetName = libTargetName;
-	target->depends.back().libMakefile = libMakefile;
+	mbLuaToStringExpandMacros(&target->depends.back().libTargetName, l, 1);	// libTargetName;
+	mbLuaToStringExpandMacros(&target->depends.back().libMakefile, l, 2);	// libMakefile;
 	
 	//Record this makefile, we'll process it later.
-	mbAddMakeFile(libMakefile);
-
+	mbAddMakeFile(target->depends.back().libMakefile.c_str());
     return 0;
 }
 
