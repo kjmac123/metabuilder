@@ -160,7 +160,7 @@ static int luaFuncCopyFile(lua_State* l)
 		{
 			fclose(toFile);
 			fclose(fromFile);
-			MB_LOGERROR("Failed to read from file %s", fromFilename);
+			MB_LOGERROR("Failed to read from file %s", fromFilename.c_str());
 			mbExitError();
 		}
 		
@@ -169,7 +169,7 @@ static int luaFuncCopyFile(lua_State* l)
 		{
 			fclose(toFile);
 			fclose(fromFile);
-			MB_LOGERROR("Failed to copy to file %s", toFilename);
+			MB_LOGERROR("Failed to copy to file %s", toFilename.c_str());
 			mbExitError();
 		}
 		
