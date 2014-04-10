@@ -210,6 +210,10 @@ bool				mbCreateDirChain(const char* osDir_);
 void				mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroups);
 void				mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups);
 
+int					luaFuncAddMacro(lua_State* lua);
+int					luaFuncExpandMacro(lua_State* lua);
+void				mbExpandMacros(std::string* result, const char* str);
+const char*			mbLuaToStringExpandMacros(std::string* result, lua_State* l, int stackPos);
 
 #include "block.h"
 #include "makesetup.h"

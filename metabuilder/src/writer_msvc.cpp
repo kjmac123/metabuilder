@@ -23,19 +23,16 @@ int luaFuncWriterMSVCGenerateID(lua_State* l)
 
 static int luaFuncRegisterProjectID(lua_State* l)
 {
-    const char* target = lua_tostring(l, 1);
-    const char* id = lua_tostring(l, 2);
-		
 	g_externalProjectReference.push_back(KeyValue());
-	g_externalProjectReference.back().key = target;
-	g_externalProjectReference.back().value = id;
-	
+	mbLuaToStringExpandMacros(&g_externalProjectReference.back().key, l, 1);	// target;
+	mbLuaToStringExpandMacros(&g_externalProjectReference.back().value, l, 2);	// id;
 	return 0;
 }
 
 static int luaFuncGetProjectID(lua_State* l)
 {
-    const char* targetName = lua_tostring(l, 1);
+    std::string targetName;
+	mbLuaToStringExpandMacros(&targetName, l, 1);
 	
 	for (int i = 0; i < (int)g_externalProjectReference.size(); ++i)
 	{

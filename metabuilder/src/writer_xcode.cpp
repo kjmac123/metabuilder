@@ -20,31 +20,24 @@ int luaFuncWriterXcodeGenerateID(lua_State* l)
 
 static int luaFuncRegisterExternalPBXFileReferenceExternal(lua_State* l)
 {
-    const char* filename = lua_tostring(l, 1);
-    const char* id = lua_tostring(l, 2);
-		
 	g_externalFileReference.push_back(KeyValue());
-	g_externalFileReference.back().key = filename;
-	g_externalFileReference.back().value = id;
-	
+	mbLuaToStringExpandMacros(&g_externalFileReference.back().key, l, 1);	//filename
+	mbLuaToStringExpandMacros(&g_externalFileReference.back().value, l, 2);	//id
 	return 0;
 }
 
 static int luaFuncRegisterExternalPBXNativeTargetExternal(lua_State* l)
 {
-    const char* target = lua_tostring(l, 1);
-    const char* id = lua_tostring(l, 2);
-		
 	g_externalNativeTarget.push_back(KeyValue());
-	g_externalNativeTarget.back().key = target;
-	g_externalNativeTarget.back().value = id;
-	
+	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().key, l, 1);	//target
+	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().value, l, 2);	//id
 	return 0;
 }
 
 static int luaFuncGetExternalPBXFileReferenceExternal(lua_State* l)
 {
-    const char* filename = lua_tostring(l, 1);
+    std::string filename;
+	mbLuaToStringExpandMacros(&filename, l, 1);
 	
 	for (int i = 0; i < (int)g_externalFileReference.size(); ++i)
 	{
@@ -59,7 +52,8 @@ static int luaFuncGetExternalPBXFileReferenceExternal(lua_State* l)
 
 static int luaFuncGetExternalPBXNativeTargetExternal(lua_State* l)
 {
-    const char* targetName = lua_tostring(l, 1);
+    std::string targetName;
+	mbLuaToStringExpandMacros(&targetName, l, 1);
 	
 	for (int i = 0; i < (int)g_externalNativeTarget.size(); ++i)
 	{
