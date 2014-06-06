@@ -94,10 +94,6 @@ function Util_FileNormaliseUnix(filepath)
 	return string.gsub(filepath, "\\", "/")
 end
 
-function Util_FileReplaceExtension(filepath, oldExt, newExt)
-	return string.gsub(filepath, "." .. oldExt, "." .. newExt)
-end
-
 function Util_GetKVValue(keyValueList, key)
 	if keyValueList == nil then
 		return nil

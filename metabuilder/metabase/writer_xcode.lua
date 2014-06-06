@@ -1,15 +1,4 @@
-package.path = package.path .. ";" .. writer_global.metabasedirabs .. "/?.lua"
-local inspect = require('inspect')
-local util = require('utility')
-
-if writer_global.verbose then 
-	print("writer_global:\n")
-	print(inspect(writer_global))
-	print("\n")
-	print("writer_solution:\n")
-	print(inspect(writer_solution))
-end
-
+import "writer_common.lua"
 
 g_mainGroupID = "BE854ED918CA1112008EAFCD"
 
@@ -450,15 +439,20 @@ function WriteXCBuildConfigurations()
 		end
 		file:write("				);\n")
 
---[[
-		file:write("				LIBRARY_SEARCH_PATHS = (\n")
+
+		file:write("				FRAMEWORK_SEARCH_PATHS = (\n")
 		file:write("					\"$(inherited)\",\n")
-		for j = 1, #config.libdirs do
-			file:write("					\"" .. GetFullFilePath(config.libdirs[j]) .. "\",\n")
+
+		for i = 1, #g_currentTarget.frameworks do
+			local f = g_currentTarget.frameworks[i]
+	
+			local dirCharIndex = string.find(f, "/")
+			if dirCharIndex ~= nil then
+				local frameworkPath = Util_FilePath(f)
+				file:write("					\"" .. GetFullFilePath(frameworkPath) .. "\",\n")
+			end
 		end
 		file:write("				);\n\n")
-
-]]
 
 		local stringListsPerSDK, sdkNames = BuildListPerSDK(config.libdirs)
 		for iSDK = 1, #sdkNames do
@@ -572,10 +566,12 @@ for i = 1, #g_currentTarget.frameworks do
 	
 	g_PBXBuildFileIDMap[f]		= xcodegenerateid()
 
-	-- TODO, support non system frameworks
-	g_filePathMap[f] = "System/Library/Frameworks/" .. f
-
-	g_sourceTreeMap[f] = "SDKROOT"
+	local dirCharIndex = string.find(f, "/")
+	if dirCharIndex == nil then
+		-- TODO, support non system frameworks
+		g_filePathMap[f] = "System/Library/Frameworks/" .. f
+		g_sourceTreeMap[f] = "SDKROOT"
+	end
 end
 
 -- CREATE IDs for static libs
@@ -769,19 +765,19 @@ elseif g_currentTarget.targetType == "staticlib" then
 end
 
 xcoderegisterpbxfilereference_external(g_currentTarget.name, g_externalProductID)
-file:write("		" .. g_externalProductID .. " /* " .. g_currentTargetFilenameWithExt .. " */ = {isa = PBXFileReference; explicitFileType = " .. g_productType .. "; includeInIndex = 0; path = " .. g_currentTargetFilenameWithExt .. "; sourceTree = BUILT_PRODUCTS_DIR; };\n")
+file:write("		" .. g_externalProductID .. " /* " .. g_currentTargetFilenameWithExt .. " */ = {isa = PBXFileReference; explicitFileType = " .. g_productType .. "; includeInIndex = 0; path = \"" .. g_currentTargetFilenameWithExt .. "\"; sourceTree = BUILT_PRODUCTS_DIR; };\n")
 
 --All files, regardless of whether they're for this platform or not.
 for i = 1, #g_currentTarget.allfiles do
 	local f = g_currentTarget.allfiles[i]
-	file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(f) .. "; name = " .. Util_FileShortname(f) .. "; path = " .. GetFullFilePath(f) .. "; sourceTree = " .. GetSourceTree(f) .. "; };\n")
+	file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(f) .. "; name = \"" .. Util_FileShortname(f) .. "\"; path = \"" .. GetFullFilePath(f) .. "\"; sourceTree = " .. GetSourceTree(f) .. "; };\n")
 end
 
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
 	local dependencyXcodeproj = dependency .. ".xcodeproj"
 
-	file:write("		" .. g_PBXFileRefIDMap[dependency] 	.. " /* " .. dependency .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(dependencyXcodeproj) .. "; name = " .. Util_FileShortname(dependency) .. ".xcodeproj; path = " .. GetFullFilePath(dependency) .. "; sourceTree = " .. GetSourceTree(dependency) .. "; };\n")
+	file:write("		" .. g_PBXFileRefIDMap[dependency] 	.. " /* " .. dependency .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(dependencyXcodeproj) .. "; name = \"" .. Util_FileShortname(dependency) .. ".xcodeproj\"; path = \"" .. GetFullFilePath(dependency) .. "\"; sourceTree = " .. GetSourceTree(dependency) .. "; };\n")
 end
 
 file:write("/* End PBXFileReference section */\n\n")

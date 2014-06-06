@@ -1,15 +1,4 @@
-package.path = package.path .. ";" .. writer_global.metabasedirabs .. "/?.lua"
-local inspect = require('inspect')
-local util = require('utility')
-
-if writer_global.verbose then 
-	print("writer_global:\n")
-	print(inspect(writer_global))
-	print("\n")
-	print("writer_solution:\n")
-	print(inspect(writer_solution))
-end
-
+import "writer_common.lua"
 
 --Map relative to absolute path
 g_filePathMap = {}
@@ -118,17 +107,8 @@ function WriteAndroidMk(currentTarget, config)
 	end
 
 	--file:write("MY_LOCAL_PATH := $(call my-dir)\n")
-	file:write("MY_GENERAL_FLAGS := -Wno-unused-variable -Wno-unused-value \\\n")
+	file:write("MY_GENERAL_FLAGS := \\\n")
 
-	--Write cflags
-	if config.options.cflags ~= nil then
-		for jOption = 1, #config.options.cflags do
-			local keyValue = split(config.options.cflags[jOption], "=")
-			local key = keyValue[1]
-
-			file:write("	" .. key .. " \\\n")			
-		end
-	end
 	--Write defines
 	for iDefine = 1, #config.defines do
 		local define = config.defines[iDefine]
@@ -138,6 +118,12 @@ function WriteAndroidMk(currentTarget, config)
 
 	file:write("MY_LOCAL_CPPFLAGS 	:= $(MY_GENERAL_FLAGS)\n")
 	file:write("MY_LOCAL_CFLAGS 	:= $(MY_GENERAL_FLAGS)\n")
+
+	-- Add Neon Support for armeabi-v7a
+	file:write("ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)\n") 
+    file:write("LOCAL_ARM_NEON  := true\n")
+   	file:write("endif # TARGET_ARCH_ABI == armeabi-v7a\n")
+
 
 	file:write("SOURCE_ROOT := " .. writer_global.currentmetamakedirabs .. "\n")
 	file:write("MY_LOCAL_C_INCLUDES := \\\n")
@@ -169,6 +155,18 @@ function WriteAndroidMk(currentTarget, config)
 		else
 			table.insert(staticLibs, f)
 		end
+	end
+
+	--Include static libs
+	for i = 1, #staticLibs do
+		local f = staticLibs[i]
+		local path, filename, ext = Util_FilePathDecompose(f)
+		filename = string.gsub(filename, "%.a", "")
+
+		file:write("include $(CLEAR_VARS)\n")
+		file:write("LOCAL_MODULE            := " .. filename .. "\n")
+		file:write("LOCAL_SRC_FILES         := " .. GetFullFilePath(f) .. "\n")
+		file:write("include $(PREBUILT_STATIC_LIBRARY)\n\n")
 	end
 
 	--Include shared libs
@@ -206,6 +204,7 @@ function WriteAndroidMk(currentTarget, config)
 		file:write("LOCAL_LDLIBS :=  $(MY_LIB_SEARCH_PATHS) $(MY_LIBS) -llog -landroid -lEGL -lGLESv2 -lOpenSLES \\\n")
 
 		-- Link with required projects. Must be a better way than this, making better use of the android make system rather than linking 'manually'
+		--[[
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
 			local path, filename, ext = Util_FilePathDecompose(dependency)
@@ -222,7 +221,8 @@ function WriteAndroidMk(currentTarget, config)
 
 			file:write("	-l:" .. writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi .. "/" .. filename .. ".a \\\n")
 		end
-
+]]
+--[[
 		-- Link with static libs
 		for i = 1, #staticLibs do
 			local f = staticLibs[i]
@@ -238,7 +238,7 @@ function WriteAndroidMk(currentTarget, config)
 
 			file:write("	" .. f .. " \\\n")
 		end
-
+]]
 		file:write("\n")
 
 
@@ -251,12 +251,39 @@ function WriteAndroidMk(currentTarget, config)
 		file:write("\n")
 
 		file:write("LOCAL_STATIC_LIBRARIES := ")
+
+		local libList = {}
 		
-		--dependency info
+
+		for i = 1, #staticLibs do
+			local f = staticLibs[i]
+			local path, filename, ext = Util_FilePathDecompose(f)
+
+--[[
+			if string.find(f, "-l:") == nil then
+				f = "$(SOURCE_ROOT)/" .. f
+			else
+				--temporarily remove prefix so that we can expand the filepath
+				f = string.gsub(f, "-l:", "")
+				f = "$(SOURCE_ROOT)/" .. f
+				f = "-l:" .. f
+			end
+]]
+
+			filename = string.gsub(filename, "%.a", "")
+			table.insert(libList, filename)
+		end
+
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
 			local path, filename, ext = Util_FilePathDecompose(dependency)
-			file:write(filename .. " ")
+			table.insert(libList, filename)
+		end
+		
+
+		for i = 1, #libList do
+			local lib = libList[i]
+			file:write(lib .. " ")
 		end
 		file:write("\n")		
 

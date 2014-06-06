@@ -7,7 +7,10 @@ supportedplatforms
 
 defines 
 { 
+	"PLATFORM_GLES",
 	"PLATFORM_IOS", 
+	"PLATFORM_POSIX", 
+	"DVPLATFORM_IOS", 
 }
 
 config "Debug"

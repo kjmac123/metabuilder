@@ -36,6 +36,16 @@ function WriteCustomRuleVertexShader(file, target, msvcPlatform, inputfilename)
 	WriteCustomRuleShader(file, target, msvcPlatform, inputfilename, "Vertex")
 end
 
+function PostGenerateEvent()
+	--Copy helper files
+	if g_enableHLSL then
+		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.lc",		writer_global.makeoutputdirabs .. "/hlsl.lc")
+		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.props",	writer_global.makeoutputdirabs .. "/hlsl.props")
+		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.targets",	writer_global.makeoutputdirabs .. "/hlsl.targets")
+		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.xml",		writer_global.makeoutputdirabs .. "/hlsl.xml")
+	end
+end
+
 function GetCustomGroupRule(groupName, inputfilename)
 	if string.find(inputfilename, "Ps.hlsl") ~= nil then
 		return WriteCustomRuleFragmentShader
@@ -47,4 +57,10 @@ function GetCustomGroupRule(groupName, inputfilename)
 
 	--print("no custom rule")
 	return nil	
+end
+
+function MSVCCustomPropertySheets(file)
+end
+
+function MSVCCustomGlobal(file)
 end
