@@ -1,18 +1,7 @@
 --Note there's a bug in MSVC 2010 in which property pages stop working if absolute paths are used when including files
 --https://connect.microsoft.com/VisualStudio/feedback/details/635294/using-absolute-path-in-clcompile-item-prevents-property-pages-from-showing
 
-package.path = package.path .. ";" .. writer_global.metabasedirabs .. "/?.lua"
-local inspect = require('inspect')
-
-local util = require('utility')
-
-if writer_global.verbose then 
-	print("writer_global:\n")
-	print(inspect(writer_global))
-	print("\n")
-	print("writer_solution:\n")
-	print(inspect(writer_solution))
-end
+import "writer_common.lua"
 
 g_currentTarget = writer_solution.targets[1]
 
@@ -213,12 +202,13 @@ end
 function WriteVcxProj(currentTarget, groupMap)
 	local projectID = msvcgenerateid()
 	msvcregisterprojectid(currentTarget.name, projectID)
-
+	
 	mkdir(writer_global.makeoutputdirabs)
 
 	local msvcPlatform = Util_GetKVValue(writer_global.options.msvc, "platform")
 	if msvcPlatform == nil then
 		-- TODO error
+		print("unknown platform!")
 		os.exit(1)
 	end
 	
@@ -259,6 +249,7 @@ function WriteVcxProj(currentTarget, groupMap)
 	WriteVcxProjRawXMLBlocks(file, writer_global.options.msvcglobalsrawxml)
 
 	file:write("  </PropertyGroup>\n")
+	MSVCCustomPropertySheets(file)
 	file:write("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n")
 	for iConfig = 1, #currentTarget.configs do
 		local config = currentTarget.configs[iConfig]
@@ -272,7 +263,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		WriteVcxProjPropertyGroupOptions(file, config.options.msvconfiguration)
 		WriteVcxProjRawXMLBlocks(file, config.options.msvconfigurationrawxml)
 				
-		print(inspect(config.options))
+		--print(inspect(config.options))
 		file:write("  </PropertyGroup>\n")
 	end
 	file:write("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n")
@@ -355,7 +346,7 @@ function WriteVcxProj(currentTarget, groupMap)
 				local lib = config.libs[jLib]
 				file:write(lib .. ";")
 			end
-	 	    file:write("%(AdditionalDependencies)</AdditionalDependencies>\n")
+	 	    file:write("</AdditionalDependencies>\n")
  		end
 
 		--Add custom options
@@ -478,7 +469,9 @@ function WriteVcxProj(currentTarget, groupMap)
 					local f = GetFullFilePath(fileInfo.filename)
 					local customRuleWriterFunc = GetCustomGroupRule(groupName, fileInfo.filename)
 					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, fileInfo)
-						customRuleWriterFunc(file, currentTarget, msvcPlatform, f)
+						if customRuleWriterFunc ~= nil then
+							customRuleWriterFunc(file, currentTarget, msvcPlatform, f)
+						end
 					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, fileInfo)
 				end
 			else
@@ -518,7 +511,7 @@ function WriteVcxProj(currentTarget, groupMap)
 	    file:write("    <Import Project=\"hlsl.targets\" />\n")
 	end
 	file:write("  </ImportGroup>\n")
-
+	MSVCCustomGlobal(file)
 	file:write("</Project>\n")
 
 	file:close()
@@ -594,7 +587,7 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 	reportoutputfile(vcxProjFiltersFilename)
 end
 
-function WriteSolution(currentTarget)
+function WriteSolution(projectList, currentTarget)
 	if writer_solution.msvcversion == nil then
 		-- TODO ERROR HERE
 	end
@@ -617,24 +610,6 @@ function WriteSolution(currentTarget)
 
 	file:write("Microsoft Visual Studio Solution File, Format Version " .. msvcFormatVersion .. "\n")
 	file:write("# MetaBuilder " .. msvcVersion .. "\n")
-
-	--Create a list of project GUID and name pairs. We'll need this to form the contents of our solution.
-	projectList = {}
-
-	--Current target.
-	do
-		local projectID = msvcgetprojectid(currentTarget.name)
-		table.insert(projectList, {projectID, currentTarget.name})
-	end
-
-	--Other targets we require.
-	for i = 1, #currentTarget.depends do
-		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
-
-		local projectID = msvcgetprojectid(filename)	
-		table.insert(projectList, {projectID, filename})
-	end
 
 	--Write out solution ref for targets we must link against
 	do
@@ -666,6 +641,7 @@ function WriteSolution(currentTarget)
 	end
 	file:write("	EndGlobalSection\n")
 	file:write("	GlobalSection(ProjectConfigurationPlatforms) = postSolution\n")
+	
 	for iProject = 1, #projectList do
 		local projectID = projectList[iProject][1]
 		local projectName = projectList[iProject][2]
@@ -674,6 +650,9 @@ function WriteSolution(currentTarget)
 			local config = currentTarget.configs[jConfig]
 			file:write("		{" .. projectID .. "}." .. config.name .. "|" .. msvcPlatform .. ".ActiveCfg = " .. config.name .. "|" .. msvcPlatform .. "\n")
 			file:write("		{" .. projectID .. "}." .. config.name .. "|" .. msvcPlatform .. ".Build.0 = " .. config.name .. "|" .. msvcPlatform .. "\n")
+			if CustomSolutionGlobalSectionRule ~= nil then
+				CustomSolutionGlobalSectionRule(file, projectID, config, msvcPlatform)
+			end
 		end
 	end
 	file:write("	EndGlobalSection\n")
@@ -694,12 +673,18 @@ if customWriter ~= nil then
 	import(customWriter)
 end
 
+local customPreGenerateRule = CustomPreGenerateRule
+if customPreGenerateRule ~= nil then
+	print("Applying custom pre generate rule")
+	customPreGenerateRule()
+end
+
 if GetFileTypeMap ~= nil then
 	g_fileTypeMap = GetFileTypeMap()
 end
 
 local groupMap = BuildFileGroups(g_currentTarget)
-print(inspect(g_fileTypeMap))
+--print(inspect(g_fileTypeMap))
 --TODO move out this hack for Windows builds
 if g_fileTypeMap["hlsl"] == "CompilerShader" then
 	print("HLSL support enabled")
@@ -710,14 +695,29 @@ WriteVcxProj(g_currentTarget, groupMap)
 WriterVcxProjFilters(g_currentTarget, groupMap)
 
 --Solutions only required by apps
+local projectList = {}
 if g_currentTarget.targetType == "app" then
-	WriteSolution(g_currentTarget)
+	--Create a list of project GUID and name pairs. We'll need this to form the contents of our solution.
+	
+	--Current target.
+	local projectID = msvcgetprojectid(g_currentTarget.name)
+	table.insert(projectList, {projectID, g_currentTarget.name})
+	
+	--Other targets we require.
+	for i = 1, #g_currentTarget.depends do
+		local dependency = g_currentTarget.depends[i]
+		local path, filename, ext = Util_FilePathDecompose(dependency)
+
+		local projectID = msvcgetprojectid(filename)	
+		table.insert(projectList, {projectID, filename})
+	end
+
+	WriteSolution(projectList, g_currentTarget)
 end
 
-	--Copy helper files
-	if g_enableHLSL then
-		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.lc",		writer_global.makeoutputdirabs .. "/hlsl.lc")
-		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.props",	writer_global.makeoutputdirabs .. "/hlsl.props")
-		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.targets",	writer_global.makeoutputdirabs .. "/hlsl.targets")
-		copyfile(writer_global.metabasedirabs .. "/msvc/hlsl.xml",		writer_global.makeoutputdirabs .. "/hlsl.xml")
-	end
+PostGenerateEvent()
+
+if CustomPostGenerateRule ~= nil then
+	print("Applying custom post generate rule")
+	CustomPostGenerateRule(projectList, g_currentTarget)
+end
