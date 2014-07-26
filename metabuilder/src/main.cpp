@@ -111,7 +111,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	opt.get("--gen")->getString(appOptions->_generator);
 	opt.get("--metabase")->getString(appOptions->_metabaseDir);
 	opt.get("--outdir")->getString(appOptions->_makeOutputDir);
-	appOptions->verbose = opt.isSet("-v");
+	appOptions->verbose = opt.isSet("-v") != 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
