@@ -81,6 +81,7 @@ static void ProcessWildcards(StringVector* result, const StringVector& input)
 			}
 
 			std::string dir = mbPathGetDir(inputFilepath);
+
 			std::string filename = mbPathGetFilename(inputFilepath);
 			//dir = mbaFileGetAbsPath(dir);
 			mbaBuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);

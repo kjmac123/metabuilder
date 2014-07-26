@@ -91,10 +91,9 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 	{
 		WIN32_FIND_DATA fdFile;
 		HANDLE hFind = NULL;
-		char sPath[2048];
-		sprintf(sPath, "%s\\*.*", osInputDir);
+		std::string sPath = mbPathJoin(osInputDir, "*.*");
     
-		if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
+		if((hFind = FindFirstFile(sPath.c_str(), &fdFile)) == INVALID_HANDLE_VALUE)
 		{
 			return false;
 		}
@@ -108,14 +107,14 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 			{
 				//Build up our file path using the passed in
 				//  [sDir] and the file/foldername we just found:
-				sprintf(sPath, "%s\\%s", osInputDir, fdFile.cFileName);
+				sPath = mbPathJoin(osInputDir, fdFile.cFileName);
             
 				//Is the entity a File or Folder?
 				if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
 					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
 					{
-						mbaBuildFileListRecurse(fileList, sPath, includeFilePattern, excludeDir);
+						mbaBuildFileListRecurse(fileList, sPath.c_str(), includeFilePattern, excludeDir);
 					}
 				}
 			}
@@ -129,10 +128,9 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 	{
 		WIN32_FIND_DATA fdFile;
 		HANDLE hFind = NULL;
-		char sPath[2048];
-		sprintf(sPath, "%s\\%s", osInputDir, includeFilePattern);
+		std::string sPath = mbPathJoin(osInputDir, includeFilePattern);
     
-		if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
+		if((hFind = FindFirstFile(sPath.c_str(), &fdFile)) == INVALID_HANDLE_VALUE)
 		{
 			return false;
 		}
@@ -146,14 +144,14 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 			{
 				//Build up our file path using the passed in
 				//  [sDir] and the file/foldername we just found:
-				sprintf(sPath, "%s\\%s", osInputDir, fdFile.cFileName);
+				sPath = mbPathJoin(osInputDir, fdFile.cFileName);
             
 				//Is the entity a File or Folder?
 				if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
 					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
 					{
-						mbaBuildFileListRecurse(fileList, sPath, includeFilePattern, excludeDir);
+						mbaBuildFileListRecurse(fileList, sPath.c_str(), includeFilePattern, excludeDir);
 					}
 				}
 				else
@@ -162,7 +160,7 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 					if (fdFile.cFileName[0] == '.')
 						continue;
             
-					char* fp = sPath;
+					char* fp = (char*)sPath.c_str();
 					if (strstr(fp, "./") == fp)
 					{
 						fp += 2;
