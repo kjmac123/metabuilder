@@ -21,6 +21,11 @@ metabase "ndk_android"
 		option("ndkoptions", "APP_CFLAGS",			myCommonCFlags .. " -O3")
 	config_end()
 
+	config "Profile"
+		option("ndkoptions", "APP_OPTIM",			"release")
+		option("ndkoptions", "APP_CFLAGS",			myCommonCFlags .. " -O3")
+	config_end()
+
 	config "Master"
 		option("ndkoptions", "APP_OPTIM",			"release")
 		option("ndkoptions", "APP_CFLAGS",			myCommonCFlags .." -O3")

@@ -8,6 +8,7 @@ function GetFileTypeMap()
 	fileTypeMap["hlsl"]		= "CompilerShader"
 	fileTypeMap["vsh"]		= "CompilerShader"
 	fileTypeMap["psh"]		= "CompilerShader"
+	fileTypeMap["rc"]		= "ResourceCompile"
 
 	return fileTypeMap;
 end

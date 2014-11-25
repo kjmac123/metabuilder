@@ -10,7 +10,6 @@ defines
 	"PLATFORM_GLES",
 	"PLATFORM_IOS", 
 	"PLATFORM_POSIX", 
-	"DVPLATFORM_IOS", 
 }
 
 config "Debug"
@@ -22,6 +21,12 @@ config "Debug"
 config_end()
 
 config "Release"
+	defines 
+	{ 
+	}
+config_end()
+
+config "Profile"
 	defines 
 	{ 
 	}

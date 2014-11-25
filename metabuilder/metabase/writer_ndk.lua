@@ -111,8 +111,8 @@ function WriteAndroidMk(currentTarget, config)
 
 	--Write defines
 	for iDefine = 1, #config.defines do
-		local define = config.defines[iDefine]
-		file:write("	-D" .. define .. " \\\n")
+		tmp = string.gsub(config.defines[iDefine], "\"", "\\\"")
+		file:write("	-D" .. tmp .. " \\\n")
 	end
 	file:write("\n")
 

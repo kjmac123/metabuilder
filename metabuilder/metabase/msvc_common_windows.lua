@@ -30,6 +30,7 @@ option("msvconfiguration", "CharacterSet", "Unicode")
 option("msvccompile", "MultiProcessorCompilation", "true")
 option("msvccompile", "MinimalRebuild", "false")
 option("msvccompile", "WarningLevel", "Level3")
+option("msvccompile", "TreatWarningAsError", "false")
 option("msvccompile", "IntrinsicFunctions", "true")
 
 config "Debug"
@@ -38,6 +39,16 @@ config "Debug"
 config_end()
 
 config "Release"
+	option("msvccompile", "Optimization", "MaxSpeed")
+	option("msvccompile", "FunctionLevelLinking", "true")
+	option("msvccompile", "IntrinsicFunctions", "true")
+
+	option("msvclink", "GenerateDebugInformation", "true")
+	option("msvclink", "EnableCOMDATFolding", "true")
+	option("msvclink", "OptimizeReferences", "true")
+config_end()
+
+config "Profile"
 	option("msvccompile", "Optimization", "MaxSpeed")
 	option("msvccompile", "FunctionLevelLinking", "true")
 	option("msvccompile", "IntrinsicFunctions", "true")

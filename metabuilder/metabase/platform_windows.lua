@@ -7,8 +7,6 @@ supportedplatforms
 defines 
 { 
 	"PLATFORM_WINDOWS", 
-	"PLATFORM_PC", --legacy
-	"DVPLATFORM_WINDOWS",
 	"WIN32",
 	"_CRT_SECURE_NO_WARNINGS",
 	"_WINDOWS",
@@ -37,6 +35,13 @@ config "Debug"
 config_end()
 
 config "Release"
+	defines 
+	{
+		"NDEBUG",
+	}
+config_end()
+
+config "Profile"
 	defines 
 	{
 		"NDEBUG",

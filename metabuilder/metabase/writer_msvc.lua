@@ -19,9 +19,15 @@ g_fileTypeMap["cpp"]		= "ClCompile"
 g_fileTypeMap["h"]			= "ClInclude"
 g_fileTypeMap["hpp"]		= "ClInclude"
 g_fileTypeMap["inl"]		= "ClInclude"
+g_fileTypeMap["rc"]			= "ResourceCompile"
 
 function GetFullFilePath(filepath)
-	return Util_FileNormaliseWindows(Util_FileConvertToAbsolute(g_filePathMap, writer_global.currentmetamakedirabs, filepath))
+	if string.find(filepath, "##") ~= nil then
+		filepath = string.gsub(filepath, "##", "")
+		return Util_FileNormaliseWindows(filepath)
+	else
+		return Util_FileNormaliseWindows(Util_FileConvertToAbsolute(g_filePathMap, writer_global.currentmetamakedirabs, filepath))
+	end
 end
 
 function GetFileType(filepath)
@@ -607,6 +613,9 @@ function WriteSolution(projectList, currentTarget)
 
 	local slnFilename = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".sln"
 	local file = io.open(slnFilename, "w")
+	if file == nil then
+		print("Failed to open file for writing " .. slnFilename)
+	end
 
 	file:write("Microsoft Visual Studio Solution File, Format Version " .. msvcFormatVersion .. "\n")
 	file:write("# MetaBuilder " .. msvcVersion .. "\n")

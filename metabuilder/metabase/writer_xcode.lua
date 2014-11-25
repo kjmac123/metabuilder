@@ -426,7 +426,8 @@ function WriteXCBuildConfigurations()
 		-- Add defines
 		file:write("				GCC_PREPROCESSOR_DEFINITIONS = (\n")
 		for j = 1, #config.defines do
-			file:write("					\"" .. config.defines[j] .. "\",\n")
+			tmp = string.gsub(config.defines[j], "\"", "\\\\\\\"")
+			file:write("					\"" .. tmp .. "\",\n")
 		end
 		file:write("					\"$(inherited)\",\n")
 		file:write("				);\n")
