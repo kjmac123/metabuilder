@@ -8,8 +8,10 @@ solution "helloworld"
 	target "helloworld"
 		target_type "app"
 
-		depends("hellolib",	"../hellolib/metabuilder.lua")
+		--Additional makefiles for libraries we need to build and link against
 		
+		depends("hellolib",	"../hellolib/metabuilder.lua")
+
 		includedirs 
 		{ 
 			"../hellolib",
@@ -21,24 +23,17 @@ solution "helloworld"
 		}
 
 		config "Debug"
-			defines 
-			{ 
-			}
 		config_end()
 
 		config "Release"
-			defines 
-			{ 
-			}
+		config_end()
+
+		config "Profile"
 		config_end()
 
 		config "Master"
-			defines 
-			{ 
-				--Add custom defines here
-			}
 		config_end()
 		
  	target_end()
 
- solution_end()
+solution_end()

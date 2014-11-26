@@ -254,6 +254,7 @@ function WriteVcxProj(currentTarget, groupMap)
 	WriteVcxProjPropertyGroupOptions(file, writer_global.options.msvcglobals)
 	WriteVcxProjRawXMLBlocks(file, writer_global.options.msvcglobalsrawxml)
 
+	file:write("    <ProjectName>" .. g_currentTarget.name .. "</ProjectName>\n")
 	file:write("  </PropertyGroup>\n")
 	MSVCCustomPropertySheets(file)
 	file:write("  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n")
