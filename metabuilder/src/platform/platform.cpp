@@ -1,4 +1,4 @@
 #include "metabuilder_pch.h"
 
-#include "Platform.h"
+#include "platform.h"
 

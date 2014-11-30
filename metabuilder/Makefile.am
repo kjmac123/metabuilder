@@ -1,11 +1,11 @@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 AM_CPPFLAGS = \
--Isrc \
+-I$(top_srcdir)/src \
 -I$(top_srcdir)/../external/ezOptionParser-0.2.1/ \
 -I$(top_srcdir)/../external/lua-5.2.2/src
 
-LDADD = ../external/lua-5.2.2/src/liblua.a $(DL_LIB) -ldl
+LDADD = $(top_srcdir)/../external/lua-5.2.2/src/liblua.a $(DL_LIB) -ldl
 
 bin_PROGRAMS = metabuilder
 metabuilder_SOURCES = \

@@ -199,19 +199,34 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 
 void mbaFileSetWorkingDir(const std::string& path)
 {
-    chdir(path.c_str());
+    if (chdir(path.c_str()) != 0)
+    {
+		MB_LOGERROR("Failed to change working dir to %s", path.c_str());
+		mbExitError();    	
+    }
 }
 
 std::string mbaFileGetWorkingDir()
 {
     char workingDir[MB_MAX_PATH];
-    return getcwd(workingDir, sizeof(workingDir));
+    if (getcwd(workingDir, sizeof(workingDir)) == NULL)
+    {
+		MB_LOGERROR("Failed to query working dir");
+		mbExitError();
+    }
+
+    return workingDir;
 }
 
 std::string mbaFileGetAbsPath(const std::string& path)
 {
     char storage[MB_MAX_PATH];
-	realpath(path.c_str(), storage);
+	if (realpath(path.c_str(), storage) == NULL)
+    {
+		MB_LOGERROR("Failed to get absolute path for %s", path.c_str());
+		mbExitError();
+    }
+
 	return storage;
 }
 
