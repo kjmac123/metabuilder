@@ -14,3 +14,4 @@ cd ${ROOTDIR}/../external/lua-5.2.2
 make generic
 cd ${ROOTDIR}/tmp/autotools
 make
+cp ${ROOTDIR}/tmp/autotools/metabuilder ${ROOTDIR}/bin
