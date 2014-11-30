@@ -1,19 +1,35 @@
-platform "osx_64"
-	defines { "EXAMPLE_COMMON_MACRO1", "EXAMPLE_COMMON_MACRO2" }
+supportedplatforms
+{
+	"OSX",
+	"POSIX",
+}
 
-	config "Debug"
-		defines { "CFG_DEBUG" }
-	config_end()
+defines 
+{ 
+	"PLATFORM_OSX", 
+	"PLATFORM_POSIX", 
+}
 
-	config "Release"
-	config_end()
+config "Debug"
+	defines 
+	{ 
+	}
+config_end()
 
-	config "Profile"
-	config_end()
+config "Release"
+	defines 
+	{ 
+	}
+config_end()
 
-	config "Master"
-	config_end()
+config "Profile"
+	defines 
+	{ 
+	}
+config_end()
 
-	--an option that is available throughout this platform.
-	--platform_setoption("myplatformoption", "helloworld")
-platform_end()
+config "Master"
+	defines 
+	{ 
+	}
+config_end()
