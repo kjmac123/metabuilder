@@ -21,6 +21,8 @@ libs
 
 option("msvc", "customwriter", "writer_msvc_windows.lua")
 
+option("msvc", "platform", "Win32")
+
 option("msvcglobals", "Keyword", "Win32Proj")
 
 option("msvconfiguration", "CharacterSet", "Unicode")

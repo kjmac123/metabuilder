@@ -1,7 +1,7 @@
 @set local
 @set TOPDIR=%~dp0..\..
 @set MBDIR=metatmp
-@set GEN=msvc2010_windows
+@set GEN=msvc2013_windows_x64
 
 @REM Grab current dir name (not full path)
 @for %%* in (.) do set PROJECTNAME=%%~n*
@@ -10,13 +10,9 @@
 "%TOPDIR%\bin\windows\metabuilder.exe" --input "%~dp0metabuilder.lua" --gen %GEN% --metabase "%TOPDIR%\metabase" --outdir "%MBDIR%"
 @IF %ERRORLEVEL% neq 0 GOTO error
 
-@SET MSVCLOCATION_PRO=%VS100COMNTOOLS%\..\IDE\devenv.exe
-@SET MSVCLOCATION_EXPRESS1=%VS100COMNTOOLS%\..\IDE\wdexpress.exe
-@SET MSVCLOCATION_EXPRESS2=%VS100COMNTOOLS%\..\IDE\VCExpress.exe
+@SET MSVCLOCATION=%VS120COMNTOOLS%\..\IDE\devenv.exe
 
-@IF EXIST "%MSVCLOCATION_PRO%" SET MSVCLOCATION=%MSVCLOCATION_PRO% 
-@IF EXIST "%MSVCLOCATION_EXPRESS1%" SET MSVCLOCATION=%MSVCLOCATION_EXPRESS1% 
-@IF EXIST "%MSVCLOCATION_EXPRESS2%" SET MSVCLOCATION=%MSVCLOCATION_EXPRESS2% 
+@IF EXIST "%MSVCLOCATION%" SET MSVCLOCATION=%MSVCLOCATION% 
 
 start "%GEN%" "%MSVCLOCATION%" "%SOLUTION%"
 GOTO success
