@@ -2,9 +2,9 @@
 <html>
 
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="metabuilder : " />
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="metabuilder : ">
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
@@ -31,37 +31,116 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+        <h1>
+<a id="metabuilder" class="anchor" href="#metabuilder" aria-hidden="true"><span class="octicon octicon-link"></span></a>Metabuilder</h1>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p>A Cross-platform meta project/makefile generator.</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<p>Author: Ken Macleod:
+Email: <a href="mailto:kjmac123@gmail.com">kjmac123@gmail.com</a>
+Twitter: @PanzerGnome</p>
+
+<p>What is Metabuilder?
+Metabuilder is a system for generating project files or makefiles for multiple development environments using a single ‘meta’ makefile. Metabuilder’s makefiles are written in Lua with (I hope) an emphasis on simplicity and ease of maintenance.</p>
+
+<p>The metabuilder system consists of a binary that provides scaffolding for a set of Lua scripts (called the Metabase) that deal with the task of writing out the project files and makefiles that are supported. As a result it is straightforward to extend metabuilder to support additional platforms without any need to recompile code. Just add the required new files into the Metabase.</p>
+
+<p>The version of Metabuilder on Github is able to generate the following project types:
+MSVC 2010, 2012, 2013, 2015 for Windows x86 and x64
+XCode for OSX and iOS. Versions 5 and 6 of Xcode have been tested.
+Android NDK. Currently supported under OSX only. No examples available just yet.</p>
+
+<p>Metabuilder has been used successfully in commercial projects and behind closed doors it has been extended to support the generation of projects for a number of games consoles. This was achieved purely by adding new Metabase files. </p>
+
+<p>Why use a meta-make solution such as Metabuilder?
+When working on large projects targeting several platforms the task of maintaining separate makefiles/MSVC/XCode projects for each platform becomes an extreme burden. It’s difficult to keep projects in sync, whether when adding new files or when modifying configuration options such as preprocessor macros.</p>
+
+<p>Wouldn’t it be better if we could maintain one set of makefiles and generate projects for whatever platforms we require in a single click? Metabuilder offers such a solution.</p>
+
+<p>Aren’t there already similar projects out there?
+The concept of a meta-make approach is not new. CMake and Premake (which also uses Lua) are two examples. Certain ‘make’ alternatives can also themselves generate IDE projects, for example JamPlus.</p>
+
+<p>I didn’t feel that the existing project generation/make solutions I’d encountered offered the ease of use and flexibility I required. Especially when considering the need to support platforms not open to the public.</p>
+
+<p>Metabuilder workflow
+To begin with you’ll need to generate a project for your IDE. You would typically do this with a batch file/shell script in the root of your project that is used to invoke Metabuilder. The Metabuilder examples are set up this way. </p>
+
+<p>When building for MSVC the example batch files generate the project and then launch and load the project into MSVC for you. If you wish to add/remove files from your project you’ll need to update the relevant metabuilder lua file, close MSVC and re-run the generation batch file.</p>
+
+<p>Note that by convention the name of the main metabuilder make file is metabuilder.lua. Metabuilder lua files can of course include other lua files in order to better manage large projects.</p>
+
+<p>To work with XCode on the Mac a shell script is first used to invoke metabuilder and generate the XCode project file. Currently you’ll need to then navigate to and open the generated file, which can be found within the metatmp folder in your project’s root.</p>
+
+<p>Once open in XCode if you need to add/remove files you’ll again need to re-run the initial shell script. However unlike MSVC you don’t need to close XCode as the project changes will be automatically detected and refreshed.</p>
+
+<p>Example Metabuilder make file
+From metabuilder/examples/helloworld/metabuilder.lua</p>
+
+<p>makesetup ""
+    --subdir for intermediate files
+    intdir "int"
+    --subdir for final output files
+    outdir "out"<br>
+makesetup_end()</p>
+
+<p>solution "helloworld"</p>
+
+<pre><code>--Currently metabuilder supports only a single target per solution
+target "helloworld"
+    --this is an application (as opposed to a staticlib for example)
+    target_type "app"
+
+    --Additional makefiles for libraries we need to build and link against
+    depends("hellolib", "../hellolib/metabuilder.lua")
+
+    includedirs 
+    { 
+        "../hellolib",
+    }
+
+    --This is the list of files to build.
+    --Note that for each source file added metabuilder will automatically
+    --add any .h or .inl files found with a matching name
+    files
+    {
+        "main.cpp"
+    }
+
+    --A current metabuilder quirk is that any build configurations you
+    --wish to have must be at least stubbed out like this in all your
+    --make files.
+    --This is because there's no concept of a mapping table to use if
+    --one of your libraries has a 'missing' build configuration.
+    config "Debug"
+    config_end()
+
+    config "Release"
+    config_end()
+
+    config "Profile"
+    config_end()
+
+    config "Master"
+    config_end()
+
+target_end()
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>solution_end()</p>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<p>Example projects
+Please see the metabuilder/examples folder for example projects. In the future documentation for the examples will be added into each folder.</p>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p>Currently the examples are rather simplistic, more involved ones will be added.</p>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<p>The Metabase
+If you wish to modify/examine the Metabase Lua files they can be found in metabuilder/metabase</p>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p>And finally
+This document, and metabuilder itself, remain a work in progress. I’ll try and tidy up and document things as soon as I’m able.
+Documentation for the metabuilder syntax is obviously needed but will take a little time to write up.
+The code for the metabuilder binary is <em>not</em> a shining example of the ultimate in C++ excellence. It was written quickly in order to urgently fill a very real need. With things calming down a little now I should be able to revisit and tidy things up.
+That said very few changes to the C++ code have been necessary after metabuilder started being used ‘for real’ so things can’t be that bad!</p>
       </section>
     </div>
 
