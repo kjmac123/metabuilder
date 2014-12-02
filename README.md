@@ -3,11 +3,11 @@ Metabuilder
 
 A Cross-platform meta project/makefile generator.
 
-Author: Ken Macleod:
-Email: kjmac123@gmail.com
-Twitter: @PanzerGnome
+Author: Ken Macleod:  
+Email: kjmac123@gmail.com  
+Twitter: @PanzerGnome  
 
-What is Metabuilder?
+##What is Metabuilder?
 Metabuilder is a system for generating project files or makefiles for multiple development environments using a single ‘meta’ makefile. Metabuilder’s makefiles are written in Lua with (I hope) an emphasis on simplicity and ease of maintenance.
 
 The metabuilder system consists of a binary that provides scaffolding for a set of Lua scripts (called the Metabase) that deal with the task of writing out the project files and makefiles that are supported. As a result it is straightforward to extend metabuilder to support additional platforms without any need to recompile code. Just add the required new files into the Metabase.
@@ -19,17 +19,17 @@ Android NDK. Currently supported under OSX only. No examples available just yet.
 
 Metabuilder has been used successfully in commercial projects and behind closed doors it has been extended to support the generation of projects for a number of games consoles. This was achieved purely by adding new Metabase files. 
 
-Why use a meta-make solution such as Metabuilder?
+##Why use a meta-make solution such as Metabuilder?
 When working on large projects targeting several platforms the task of maintaining separate makefiles/MSVC/XCode projects for each platform becomes an extreme burden. It’s difficult to keep projects in sync, whether when adding new files or when modifying configuration options such as preprocessor macros.
 
 Wouldn’t it be better if we could maintain one set of makefiles and generate projects for whatever platforms we require in a single click? Metabuilder offers such a solution.
 
-Aren’t there already similar projects out there?
+##Aren’t there already similar projects out there?
 The concept of a meta-make approach is not new. CMake and Premake (which also uses Lua) are two examples. Certain ‘make’ alternatives can also themselves generate IDE projects, for example JamPlus.
 
 I didn’t feel that the existing project generation/make solutions I’d encountered offered the ease of use and flexibility I required. Especially when considering the need to support platforms not open to the public.
 
-Metabuilder workflow
+##Metabuilder workflow
 To begin with you’ll need to generate a project for your IDE. You would typically do this with a batch file/shell script in the root of your project that is used to invoke Metabuilder. The Metabuilder examples are set up this way. 
 
 When building for MSVC the example batch files generate the project and then launch and load the project into MSVC for you. If you wish to add/remove files from your project you’ll need to update the relevant metabuilder lua file, close MSVC and re-run the generation batch file.
@@ -40,7 +40,7 @@ To work with XCode on the Mac a shell script is first used to invoke metabuilder
 
 Once open in XCode if you need to add/remove files you’ll again need to re-run the initial shell script. However unlike MSVC you don’t need to close XCode as the project changes will be automatically detected and refreshed.
 
-Example Metabuilder make file
+##Example Metabuilder make file
 From metabuilder/examples/helloworld/metabuilder.lua
 ```
 	makesetup ""
@@ -96,15 +96,15 @@ From metabuilder/examples/helloworld/metabuilder.lua
 
 ```
 
-Example projects
+##Example projects
 Please see the metabuilder/examples folder for example projects. In the future documentation for the examples will be added into each folder.
 
 Currently the examples are rather simplistic, more involved ones will be added.
 
-The Metabase
+##The Metabase
 If you wish to modify/examine the Metabase Lua files they can be found in metabuilder/metabase
 
-And finally
+##And finally
 This document, and metabuilder itself, remain a work in progress. I’ll try and tidy up and document things as soon as I’m able.
 Documentation for the metabuilder syntax is obviously needed but will take a little time to write up.
 The code for the metabuilder binary is _not_ a shining example of the ultimate in C++ excellence. It was written quickly in order to urgently fill a very real need. With things calming down a little now I should be able to revisit and tidy things up.
