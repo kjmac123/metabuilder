@@ -36,34 +36,45 @@
 
 <p>A Cross-platform meta project/makefile generator.</p>
 
-<p>Author: Ken Macleod:
-Email: <a href="mailto:kjmac123@gmail.com">kjmac123@gmail.com</a>
-Twitter: @PanzerGnome</p>
+<p>Author: Ken Macleod:<br>
+Email: <a href="mailto:kjmac123@gmail.com">kjmac123@gmail.com</a><br>
+Twitter: @PanzerGnome  </p>
 
-<p>What is Metabuilder?
-Metabuilder is a system for generating project files or makefiles for multiple development environments using a single ‘meta’ makefile. Metabuilder’s makefiles are written in Lua with (I hope) an emphasis on simplicity and ease of maintenance.</p>
+<h2>
+<a id="what-is-metabuilder" class="anchor" href="#what-is-metabuilder" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is Metabuilder?</h2>
+
+<p>Metabuilder is a system for generating project files or makefiles for multiple development environments using a single ‘meta’ makefile. Metabuilder’s makefiles are written in Lua with (I hope) an emphasis on simplicity and ease of maintenance.</p>
 
 <p>The metabuilder system consists of a binary that provides scaffolding for a set of Lua scripts (called the Metabase) that deal with the task of writing out the project files and makefiles that are supported. As a result it is straightforward to extend metabuilder to support additional platforms without any need to recompile code. Just add the required new files into the Metabase.</p>
 
-<p>The version of Metabuilder on Github is able to generate the following project types:
-MSVC 2010, 2012, 2013, 2015 for Windows x86 and x64
-XCode for OSX and iOS. Versions 5 and 6 of Xcode have been tested.
-Android NDK. Currently supported under OSX only. No examples available just yet.</p>
+<p>The version of Metabuilder on Github is able to generate the following project types:</p>
+
+<ul>
+<li>MSVC 2010, 2012, 2013, 2015 for Windows x86 and x64</li>
+<li>XCode for OSX and iOS. Versions 5 and 6 of Xcode have been tested.</li>
+<li>Android NDK. Currently supported under OSX only. No examples available just yet.</li>
+</ul>
 
 <p>Metabuilder has been used successfully in commercial projects and behind closed doors it has been extended to support the generation of projects for a number of games consoles. This was achieved purely by adding new Metabase files. </p>
 
-<p>Why use a meta-make solution such as Metabuilder?
-When working on large projects targeting several platforms the task of maintaining separate makefiles/MSVC/XCode projects for each platform becomes an extreme burden. It’s difficult to keep projects in sync, whether when adding new files or when modifying configuration options such as preprocessor macros.</p>
+<h2>
+<a id="why-use-a-meta-make-solution-such-as-metabuilder" class="anchor" href="#why-use-a-meta-make-solution-such-as-metabuilder" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why use a meta-make solution such as Metabuilder?</h2>
+
+<p>When working on large projects targeting several platforms the task of maintaining separate makefiles/MSVC/XCode projects for each platform becomes an extreme burden. It’s difficult to keep projects in sync, whether when adding new files or when modifying configuration options such as preprocessor macros.</p>
 
 <p>Wouldn’t it be better if we could maintain one set of makefiles and generate projects for whatever platforms we require in a single click? Metabuilder offers such a solution.</p>
 
-<p>Aren’t there already similar projects out there?
-The concept of a meta-make approach is not new. CMake and Premake (which also uses Lua) are two examples. Certain ‘make’ alternatives can also themselves generate IDE projects, for example JamPlus.</p>
+<h2>
+<a id="arent-there-already-similar-projects-out-there" class="anchor" href="#arent-there-already-similar-projects-out-there" aria-hidden="true"><span class="octicon octicon-link"></span></a>Aren’t there already similar projects out there?</h2>
+
+<p>The concept of a meta-make approach is not new. CMake and Premake (which also uses Lua) are two examples. Certain ‘make’ alternatives can also themselves generate IDE projects, for example JamPlus.</p>
 
 <p>I didn’t feel that the existing project generation/make solutions I’d encountered offered the ease of use and flexibility I required. Especially when considering the need to support platforms not open to the public.</p>
 
-<p>Metabuilder workflow
-To begin with you’ll need to generate a project for your IDE. You would typically do this with a batch file/shell script in the root of your project that is used to invoke Metabuilder. The Metabuilder examples are set up this way. </p>
+<h2>
+<a id="metabuilder-workflow" class="anchor" href="#metabuilder-workflow" aria-hidden="true"><span class="octicon octicon-link"></span></a>Metabuilder workflow</h2>
+
+<p>To begin with you’ll need to generate a project for your IDE. You would typically do this with a batch file/shell script in the root of your project that is used to invoke Metabuilder. The Metabuilder examples are set up this way. </p>
 
 <p>When building for MSVC the example batch files generate the project and then launch and load the project into MSVC for you. If you wish to add/remove files from your project you’ll need to update the relevant metabuilder lua file, close MSVC and re-run the generation batch file.</p>
 
@@ -73,74 +84,85 @@ To begin with you’ll need to generate a project for your IDE. You would typica
 
 <p>Once open in XCode if you need to add/remove files you’ll again need to re-run the initial shell script. However unlike MSVC you don’t need to close XCode as the project changes will be automatically detected and refreshed.</p>
 
-<p>Example Metabuilder make file
-From metabuilder/examples/helloworld/metabuilder.lua</p>
+<h2>
+<a id="example-metabuilder-make-file" class="anchor" href="#example-metabuilder-make-file" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example Metabuilder make file</h2>
 
-<p>makesetup ""
-    --subdir for intermediate files
-    intdir "int"
-    --subdir for final output files
-    outdir "out"<br>
-makesetup_end()</p>
+<p>From metabuilder/examples/helloworld/metabuilder.lua</p>
 
-<p>solution "helloworld"</p>
+<pre><code>    makesetup ""
+        --subdir for intermediate files
+        intdir "int"
+        --subdir for final output files
+        outdir "out"    
+    makesetup_end()
 
-<pre><code>--Currently metabuilder supports only a single target per solution
-target "helloworld"
-    --this is an application (as opposed to a staticlib for example)
-    target_type "app"
+    solution "helloworld"
 
-    --Additional makefiles for libraries we need to build and link against
-    depends("hellolib", "../hellolib/metabuilder.lua")
+        --Currently metabuilder supports only a single target per solution
+        target "helloworld"
+            --this is an application (as opposed to a staticlib for example)
+            target_type "app"
 
-    includedirs 
-    { 
-        "../hellolib",
-    }
+            --Additional makefiles for libraries we need to build and link against
+            depends("hellolib", "../hellolib/metabuilder.lua")
 
-    --This is the list of files to build.
-    --Note that for each source file added metabuilder will automatically
-    --add any .h or .inl files found with a matching name
-    files
-    {
-        "main.cpp"
-    }
+            includedirs 
+            { 
+                "../hellolib",
+            }
 
-    --A current metabuilder quirk is that any build configurations you
-    --wish to have must be at least stubbed out like this in all your
-    --make files.
-    --This is because there's no concept of a mapping table to use if
-    --one of your libraries has a 'missing' build configuration.
-    config "Debug"
-    config_end()
+            --This is the list of files to build.
+            --Note that for each source file added metabuilder will automatically
+            --add any .h or .inl files found with a matching name
+            files
+            {
+                "main.cpp"
+            }
 
-    config "Release"
-    config_end()
+            --A current metabuilder quirk is that any build configurations you
+            --wish to have must be at least stubbed out like this in all your
+            --make files.
+            --This is because there's no concept of a mapping table to use if
+            --one of your libraries has a 'missing' build configuration.
+            config "Debug"
+            config_end()
 
-    config "Profile"
-    config_end()
+            config "Release"
+            config_end()
 
-    config "Master"
-    config_end()
+            config "Profile"
+            config_end()
 
-target_end()
+            config "Master"
+            config_end()
+
+        target_end()
+
+    solution_end()
+
 </code></pre>
 
-<p>solution_end()</p>
+<h2>
+<a id="example-projects" class="anchor" href="#example-projects" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example projects</h2>
 
-<p>Example projects
-Please see the metabuilder/examples folder for example projects. In the future documentation for the examples will be added into each folder.</p>
+<p>Please see the metabuilder/examples folder for example projects. In the future documentation for the examples will be added into each folder.</p>
 
 <p>Currently the examples are rather simplistic, more involved ones will be added.</p>
 
-<p>The Metabase
-If you wish to modify/examine the Metabase Lua files they can be found in metabuilder/metabase</p>
+<h2>
+<a id="the-metabase" class="anchor" href="#the-metabase" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Metabase</h2>
 
-<p>And finally
-This document, and metabuilder itself, remain a work in progress. I’ll try and tidy up and document things as soon as I’m able.
-Documentation for the metabuilder syntax is obviously needed but will take a little time to write up.
-The code for the metabuilder binary is <em>not</em> a shining example of the ultimate in C++ excellence. It was written quickly in order to urgently fill a very real need. With things calming down a little now I should be able to revisit and tidy things up.
-That said very few changes to the C++ code have been necessary after metabuilder started being used ‘for real’ so things can’t be that bad!</p>
+<p>If you wish to modify/examine the Metabase Lua files they can be found in metabuilder/metabase</p>
+
+<h2>
+<a id="a-few-final-notes" class="anchor" href="#a-few-final-notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>A few final notes</h2>
+
+<ul>
+<li>This document, and metabuilder itself, remain a work in progress. I’ll try and tidy up and document things as soon as I’m able.</li>
+<li>Documentation for the metabuilder syntax is obviously needed but will take a little time to write up.</li>
+<li>The code for the metabuilder binary is <em>not</em> a shining example of the ultimate in C++ excellence. It was written quickly in order to urgently fill a very real need. With things calming down a little now I should be able to revisit and tidy things up.</li>
+<li>That said very few changes to the C++ code have been necessary after metabuilder started being used ‘for real’ so things can’t be that bad!</li>
+</ul>
       </section>
     </div>
 
