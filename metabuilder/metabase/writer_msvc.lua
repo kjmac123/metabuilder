@@ -441,7 +441,8 @@ function WriteVcxProj(currentTarget, groupMap)
 				--If we're using a pch and this is the pch file
 				if pchSourceFile ~= nil then
 					local f =  group.fileInfo[i].filename
-					if f == pchSourceFile then 
+					local path, filename, ext = Util_FilePathDecompose(f)
+					if filename == pchSourceFile then 
 						--For each config ensure we create the pch
 						for iConfig = 1, #currentTarget.configs do
 							local config = currentTarget.configs[iConfig]

@@ -1,3 +1,4 @@
+--setup output directories
 makesetup ""
 	intdir "int"
 	outdir "out"	
@@ -8,11 +9,11 @@ solution "metabuilder"
 	target "metabuilder"
 		target_type "app"
 
+		--build against Lua library
 		depends("lua",	"../external/lua-5.2.2/metabuilder.lua")
 
 		defines
 		{
-			--"LUA_AS_CPP",
 		}
 		
 		includedirs 
@@ -24,23 +25,24 @@ solution "metabuilder"
 
 		files
 		{
-			"src/platformparam.cpp",
-			"src/writer.cpp",
+			"src/platform/platform.cpp",
+			"src/block.cpp",
+			"src/common.cpp",
+			"src/configparam.cpp",
+			"src/core.cpp",
 			"src/main.cpp",
 			"src/makesetup.cpp",
-			"src/block.cpp",
-			"src/writer_msvc.cpp",
-			"src/configparam.cpp",
-			"src/solution.cpp",
 			"src/metabase.cpp",
-			"src/platform/platform.cpp",
-			"src/writer_xcode.cpp",
-			"src/core.cpp",
-			"src/common.cpp",
-			"src/platform/POSIX/platform_posix.cpp",
+			"src/metabuilder_pch.cpp",
+			"src/platformparam.cpp",
+			"src/solution.cpp",
 			"src/target.cpp",
+			"src/writer.cpp",
+			"src/writer_msvc.cpp",
+			"src/writer_xcode.cpp",
 		}
 
+		--build configurations
 		config "Debug"
 			defines 
 			{ 
@@ -52,13 +54,13 @@ solution "metabuilder"
 			{ 
 			}
 		config_end()
+		
+		if checkplatform("Windows") == true then
+			pch "metabuilder_pch"
+		end
 
-		config "Master"
-			defines 
-			{ 
-				--Add custom defines here
-			}
-		config_end()
+		import "metabuilder_posix.lua"
+		import "metabuilder_windows.lua"
 		
  	target_end()
 

@@ -50,6 +50,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\makesetup.cpp" />
     <ClCompile Include="src\metabase.cpp" />
+    <ClCompile Include="src\metabuilder_pch.cpp" />
     <ClCompile Include="src\platformparam.cpp" />
     <ClCompile Include="src\platform\platform.cpp" />
     <ClCompile Include="src\platform\POSIX\platform_posix.cpp" />

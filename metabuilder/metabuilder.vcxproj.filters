@@ -169,7 +169,10 @@
       <Filter>src\platform\POSIX</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\Windows\platform_windows.cpp">
-      <Filter>src\platform\POSIX</Filter>
+      <Filter>src\platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\metabuilder_pch.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

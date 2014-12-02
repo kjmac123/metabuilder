@@ -5,63 +5,6 @@
 
 #include "platform/platform.h"
 
-
-static void BuildUniqueStringList(
-	StringVector* result,
-	StringVector* commonStrings,
-	std::map<std::string, StringVector>* platformStrings,
-	const char* platformName)
-{
-	std::set<std::string> uniqueStrings;
-	
-	if (commonStrings)
-	{
-		int n = (int)commonStrings->size();
-		for (int i = 0; i < n; ++i)
-		{
-			uniqueStrings.insert((*commonStrings)[i]);
-		}
-	}
-
-	if (platformStrings)
-	{
-		//Merge strings for the given platform into the main list.
-		if (platformName)
-		{
-			std::map<std::string, StringVector>::iterator it = platformStrings->find(platformName);
-			if (it != platformStrings->end())
-			{
-				StringVector& platformStrings = it->second;
-				int n = (int)platformStrings.size();
-				for (int i = 0; i < n; ++i)
-				{
-					uniqueStrings.insert(platformStrings[i]);
-				}
-			}
-		}
-		//Copy all platforms
-		else
-		{
-			for (std::map<std::string, StringVector>::iterator it = platformStrings->begin(); it != platformStrings->end(); ++it)
-			{
-				StringVector& platformStrings = it->second;
-				int n = (int)platformStrings.size();
-				for (int i = 0; i < n; ++i)
-				{
-					uniqueStrings.insert(platformStrings[i]);
-				}
-			}
-		}
-	}
-
-	//Convert set to array
-	for (std::set<std::string>::iterator it = uniqueStrings.begin(); it != uniqueStrings.end(); ++it)
-	{
-		result->push_back(*it);
-	}
-}
-
-
 Target::Target()
 {
 }
@@ -185,7 +128,7 @@ static int luaFuncTarget(lua_State* l)
     return 0;
 }
 
-static int luaFuncTargetEnd(lua_State* lua)
+static int luaFuncTargetEnd(lua_State*)
 {
 	mbGetActiveContext()->activeBlockStack.pop();
 	return 0;
@@ -203,35 +146,6 @@ static int luaFuncTargetPCH(lua_State* l)
     Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
     const char* pch = mbLuaToStringExpandMacros(&target->pch , l, 1);
     return 0;
-}
-
-static void AddPlatformSpecificStrings(std::map<std::string, StringVector>* platformStringMap, lua_State* l)
-{
-	std::string platformName;
-	mbLuaToStringExpandMacros(&platformName, l, 1);
-	
-	std::map<std::string, StringVector>::iterator it = platformStringMap->find(platformName);
-	
-	if (it == platformStringMap->end())
-	{
-		//Insert new vector as one does not exist already for this platform.
-		std::pair<std::map<std::string, StringVector>::iterator, bool> result =
-			platformStringMap->insert(std::make_pair(platformName, StringVector()));
-		
-		it = result.first;
-	}
-
-	StringVector& platformFiles = (*it).second;
-	
-    luaL_checktype(l, 2, LUA_TTABLE);
-    int tableLen =  luaL_len(l, 2);
-    
-    for (int i = 1; i <= tableLen; ++i)
-    {
-        lua_rawgeti(l, 2, i);
-		platformFiles.push_back(std::string());
-		mbLuaToStringExpandMacros(&platformFiles.back(), l, -1);
-    }
 }
 
 static int luaFuncTargetDepends(lua_State* l)

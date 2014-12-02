@@ -225,12 +225,12 @@ static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValu
 		for (std::map<std::string, KeyValueMap>::const_iterator optionGroupIt = options.begin(); optionGroupIt != options.end(); ++optionGroupIt, ++jOptionGroup)
 		{
 			const std::string& groupName = optionGroupIt->first;
-			const KeyValueMap& options = optionGroupIt->second;
+			const KeyValueMap& keyValueMap = optionGroupIt->second;
 
 			lua_createtable(l, 0, 0);
 			{
 				int jOption = 0;
-				for (KeyValueMap::const_iterator optionIt = options.begin(); optionIt != options.end(); ++optionIt, ++jOption)
+				for (KeyValueMap::const_iterator optionIt = keyValueMap.begin(); optionIt != keyValueMap.end(); ++optionIt, ++jOption)
 				{
 					const char* key = optionIt->first.c_str();
 					const char* value = optionIt->second.c_str();
