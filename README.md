@@ -13,9 +13,9 @@ Metabuilder is a system for generating project files or makefiles for multiple d
 The metabuilder system consists of a binary that provides scaffolding for a set of Lua scripts (called the Metabase) that deal with the task of writing out the project files and makefiles that are supported. As a result it is straightforward to extend metabuilder to support additional platforms without any need to recompile code. Just add the required new files into the Metabase.
 
 The version of Metabuilder on Github is able to generate the following project types:
-MSVC 2010, 2012, 2013, 2015 for Windows x86 and x64
-XCode for OSX and iOS. Versions 5 and 6 of Xcode have been tested.
-Android NDK. Currently supported under OSX only. No examples available just yet.
+* MSVC 2010, 2012, 2013, 2015 for Windows x86 and x64
+* XCode for OSX and iOS. Versions 5 and 6 of Xcode have been tested.
+* Android NDK. Currently supported under OSX only. No examples available just yet.
 
 Metabuilder has been used successfully in commercial projects and behind closed doors it has been extended to support the generation of projects for a number of games consoles. This was achieved purely by adding new Metabase files. 
 
@@ -104,8 +104,8 @@ Currently the examples are rather simplistic, more involved ones will be added.
 ##The Metabase
 If you wish to modify/examine the Metabase Lua files they can be found in metabuilder/metabase
 
-##And finally
-This document, and metabuilder itself, remain a work in progress. I’ll try and tidy up and document things as soon as I’m able.
-Documentation for the metabuilder syntax is obviously needed but will take a little time to write up.
-The code for the metabuilder binary is _not_ a shining example of the ultimate in C++ excellence. It was written quickly in order to urgently fill a very real need. With things calming down a little now I should be able to revisit and tidy things up.
-That said very few changes to the C++ code have been necessary after metabuilder started being used ‘for real’ so things can’t be that bad!
+##A few final notes
+* This document, and metabuilder itself, remain a work in progress. I’ll try and tidy up and document things as soon as I’m able.
+* Documentation for the metabuilder syntax is obviously needed but will take a little time to write up.
+* The code for the metabuilder binary is _not_ a shining example of the ultimate in C++ excellence. It was written quickly in order to urgently fill a very real need. With things calming down a little now I should be able to revisit and tidy things up.
+* That said very few changes to the C++ code have been necessary after metabuilder started being used ‘for real’ so things can’t be that bad!
