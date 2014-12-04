@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "mylib.h"
+
 int thisIsMyFunctionThereAreManyLikeItButThisOneIsMine(int a)
 {
 	#ifdef METABUILDER

@@ -104,6 +104,17 @@ static int luaFuncReportOutputFile(lua_State* l)
 	return 0;
 }
 
+static int luaFuncFatalError(lua_State* l)
+{
+    const char* str = lua_tostring(l, 1);
+	if (str)
+	{
+		MB_LOGERROR("%s", str);
+	}
+	mbExitError();
+	return 0;
+}
+
 #if 0
 static int luaFuncGetRelativeDirTo(lua_State* l)
 {
@@ -213,6 +224,9 @@ void luaRegisterWriterFuncs(lua_State* l)
 
     lua_pushcfunction(l, luaFuncReportOutputFile);
     lua_setglobal(l, "reportoutputfile");
+
+    lua_pushcfunction(l, luaFuncReportOutputFile);
+    lua_setglobal(l, "mbwriter_fatalerror");
 }
 
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)

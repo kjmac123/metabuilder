@@ -6,7 +6,6 @@ defines
 config "Debug"
 	defines 
 	{ 
-		"DEBUG=1",
 		"BUILD_CONFIG_DEBUG",
 	}
 config_end()
