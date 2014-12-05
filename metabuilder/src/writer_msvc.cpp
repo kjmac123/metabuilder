@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-std::vector<KeyValue> g_externalProjectReference;
+static std::vector<KeyValue> g_externalProjectReference;
 
 int luaFuncWriterMSVCGenerateID(lua_State* l)
 {

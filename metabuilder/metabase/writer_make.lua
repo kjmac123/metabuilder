@@ -14,6 +14,9 @@ end
 --Map relative to absolute path
 g_filePathMap = {}
 
+g_intdir = ""
+g_outdir = ""
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function GetFullFilePath(filepath)
@@ -185,13 +188,14 @@ function WriteMakeFileStaticLibVars(file, currentTarget)
 end
 
 function WriteMakeFileAppTarget(file, currentTarget)
-	file:write(currentTarget.name .. " : $(OBJ) \n")
+	file:write("$(OUTDIR)/" .. currentTarget.name .. " : $(OBJ) \n")
 	file:write("	$(LD) $(LDFLAGS) $(MODULEOBJ) '$<' -o '$@' ;\n")
 end
 
 function WriteMakeFileModuleTarget(file, currentTarget)
-	file:write(currentTarget.name .. " : $(OBJ) \n")
+	file:write("$(OUTDIR)/" .. currentTarget.name .. " : $(OBJ) \n")
 	file:write("	$(LD) $(LDFLAGS) -r $(MODULEOBJ) '$<' -o '$@' ;\n")
+	mbwriter_registertarget(currentTarget.name, Util_FilePathJoin(g_outdir, currentTarget.name))
 end
 
 function WriteMakeFileStaticLibTarget(file, currentTarget)
@@ -199,21 +203,25 @@ function WriteMakeFileStaticLibTarget(file, currentTarget)
 	file:write(compileTargetName .. " : $(OBJ) \n\n")
 	file:write(currentTarget.name .. " : " .. compileTargetName .. " \n")
 	file:write("	$(AR) $(ARFLAGS) " .. currentTarget.name .. ".a ${OBJ}\n")
+	mbwriter_registertarget(currentTarget.name, Util_FilePathJoin(g_outdir, currentTarget.name) .. ".a")
 end
 
 function WriteMakeFile(currentTarget)
 
-	local makeDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name
+	local makeDir = Util_FilePathJoin(writer_global.makeoutputdirabs, currentTarget.name)
 	mkdir(makeDir)
 
-	local makeFilename = makeDir .. "/" .. "Makefile"
+	local makeFilename = Util_FilePathJoin(makeDir, "Makefile")
 	local file = io.open(makeFilename, "w")
 
-	local intdir = writer_global.intdir .. "/" .. currentTarget.name 
-	local outdir = writer_global.outdir  
+	g_intdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.intdir)
+	g_outdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.outdir)
+	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name)
+	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name)
+	print(inspect(writer_global))
 
-	file:write("INTDIR := " .. intdir .. "\n")
-	file:write("OUTDIR := " .. outdir .. "\n")
+	file:write("INTDIR := " .. g_intdir .. "\n")
+	file:write("OUTDIR := " .. g_outdir .. "\n")
 		
 	WriteMakeFileCommonVars(file, currentTarget)
 
@@ -238,7 +246,7 @@ function WriteMakeFile(currentTarget)
 			local obj = string.gsub(filename, ".cpp", ".o")
 			obj  = string.gsub(obj, ".c", ".o")
 			
-			obj = writer_global.intdir .. "/" .. obj
+			obj = "$(INTDIR)/" .. obj
 			
 			table.insert(buildFiles, {objFile=obj, srcFile=filenameAbs, ext=ext})
 		end
@@ -261,9 +269,6 @@ function WriteMakeFile(currentTarget)
 		WriteSourceToObjRule(file, buildFiles[i]);
 	end
 	
---	file:write("\n")
---	file:write("OBJ := $(SRC:.cpp=.o)\n")
---	file:write("OBJ += $(SRC:.c=.o)\n")
 	file:write("\n")
 	
 	--Write out target
@@ -281,27 +286,31 @@ function WriteMakeFile(currentTarget)
 	
 	file:write("MODULEOBJ := \n")
 	
+	--print(inspect(currentTarget))
 	if #currentTarget.depends > 0 then
 		file:write("makemodules : \n")
 
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
 			local path, filename, ext = Util_FilePathDecompose(dependency)
+			local moduleName = string.gsub(dependency, path, "")
+			local moduleLocation = mbwriter_gettarget(moduleName)
 
-			file:write("	$(MAKE) -C " .. path .. " BUILD='$(BUILD)'\\\n\n")
-			file:write("MODULEOBJ += " .. dependency .. "\n")
+			file:write("	$(MAKE) -C " .. path .. " all BUILD='$(BUILD)'\\\n\n")
+			file:write("MODULEOBJ += " .. moduleLocation .. "\n")
 		end
 
 		file:write("all : makemodules \\\n")
 	else
 		file:write("all : ")
 	end
-	file:write("    " .. currentTarget.name .. " \\\n")
+	file:write("    " .. "$(OUTDIR)/" .. currentTarget.name .. " \\\n")
 	file:write("\n\n")
 	file:write("$(OBJ) : | $(INTDIR)\n\n")
 
 	file:write("$(INTDIR):\n")
 	file:write("	mkdir -p $(INTDIR)\n")
+	file:write("	mkdir -p $(OUTDIR)\n")
 	file:write("\n")
 	
 	file:write("%.d: ;\n")

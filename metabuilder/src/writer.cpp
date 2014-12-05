@@ -7,6 +7,8 @@
 
 #include <set>
 
+static std::vector<KeyValue> g_registeredTargets;
+
 static int luaFuncGlobalImport(lua_State* l)
 {
     std::string requireFile;
@@ -193,6 +195,34 @@ static int luaFuncCopyFile(lua_State* l)
 	return 0;
 }
 
+static int luaFuncWriterRegisterTarget(lua_State* l)
+{
+	g_registeredTargets.push_back(KeyValue());
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().key, l, 1);	// target name;
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().value, l, 2);	// target filepath;
+	MB_LOGINFO("Registered target - name: %s location: %s", g_registeredTargets.back().key.c_str(), g_registeredTargets.back().value.c_str());
+	return 0;
+}
+
+static int luaFuncWriterGetTarget(lua_State* l)
+{
+    std::string target;
+	mbLuaToStringExpandMacros(&target, l, 1);
+	
+	for (int i = 0; i < (int)g_registeredTargets.size(); ++i)
+	{
+		if (g_registeredTargets[i].key == target)
+		{
+			lua_pushstring(l, g_registeredTargets[i].value.c_str());
+			return 1;
+		}
+	}
+
+	MB_LOGERROR("Failed to find target %s", target.c_str());
+	mbExitError();
+	return 0;
+}
+
 void luaRegisterWriterFuncs(lua_State* l)
 {
 	mbWriterXcodeLuaRegister(l);
@@ -225,8 +255,14 @@ void luaRegisterWriterFuncs(lua_State* l)
     lua_pushcfunction(l, luaFuncReportOutputFile);
     lua_setglobal(l, "reportoutputfile");
 
-    lua_pushcfunction(l, luaFuncReportOutputFile);
+    lua_pushcfunction(l, luaFuncFatalError);
     lua_setglobal(l, "mbwriter_fatalerror");
+
+    lua_pushcfunction(l, luaFuncWriterRegisterTarget);
+    lua_setglobal(l, "mbwriter_registertarget");
+
+    lua_pushcfunction(l, luaFuncWriterGetTarget);
+    lua_setglobal(l, "mbwriter_gettarget");
 }
 
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)
