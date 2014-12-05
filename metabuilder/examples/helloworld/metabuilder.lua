@@ -9,7 +9,7 @@ solution "helloworld"
 
 	--Currently metabuilder supports only a single target per solution
 	target "helloworld"
-		--this is an application (as opposed to a staticlib for example)
+		--this is an application (as opposed to a module for example)
 		target_type "app"
 
 		--Additional makefiles for libraries we need to build and link against

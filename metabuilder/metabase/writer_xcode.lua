@@ -414,7 +414,7 @@ function WriteXCBuildConfigurations()
 				end
 			end
 		-- Static lib specific compiler options
-		elseif g_currentTarget.targetType == "staticlib" then 
+		elseif g_currentTarget.targetType == "module" or g_currentTarget.targetType == "staticlib" then 
 			if config.options.compiler_staticlib ~= nil then 
 				for j = 1, #config.options.compiler_staticlib do
 					local compilerOption = config.options.compiler_staticlib[j]
@@ -519,7 +519,7 @@ function WriteXCBuildConfigurations()
 		file:write("				PRODUCT_NAME = \"$(TARGET_NAME)\";\n")
 		if g_currentTarget.targetType == "app" then 
 			file:write("				WRAPPER_EXTENSION = app;\n")
-		elseif g_currentTarget.targetType == "staticlib" then
+		elseif g_currentTarget.targetType == "module" or g_currentTarget.targetType == "staticlib" then
 			file:write("				SKIP_INSTALL = YES;\n")
 		end
 		file:write("			};\n")
@@ -761,7 +761,7 @@ file:write("/* Begin PBXFileReference section */\n")
 g_productType = nil
 if g_currentTarget.targetType == "app" then
 	g_productType = "wrapper.application"
-elseif g_currentTarget.targetType == "staticlib" then
+elseif g_currentTarget.targetType == "module" or g_currentTarget.targetType == "staticlib" then
 	g_productType = "archive.ar"
 end
 
@@ -833,7 +833,7 @@ file:write("			productReference = " .. g_externalProductID .. " /* " .. g_curren
 
 if g_currentTarget.targetType == "app" then
 	file:write("			productType = \"com.apple.product-type.application\";\n")
-elseif g_currentTarget.targetType == "staticlib" then
+elseif g_currentTarget.targetType == "module" or g_currentTarget.targetType == "staticlib" then
 	file:write("			productType = \"com.apple.product-type.library.static\";\n")
 end
 file:write("		};\n")

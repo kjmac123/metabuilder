@@ -263,7 +263,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		file:write("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\" Label=\"Configuration\">\n")
 		if currentTarget.targetType == "app" then
 			file:write("    <ConfigurationType>Application</ConfigurationType>\n")
-		elseif currentTarget.targetType == "staticlib" then 		
+		elseif currentTarget.targetType == "staticlib" or currentTarget.targetType == "module" then 		
 			file:write("    <ConfigurationType>StaticLibrary</ConfigurationType>\n")
 		end
 

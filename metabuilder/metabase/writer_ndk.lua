@@ -288,7 +288,7 @@ function WriteAndroidMk(currentTarget, config)
 		file:write("\n")		
 
 		file:write("include $(BUILD_SHARED_LIBRARY)\n")
-	elseif currentTarget.targetType == "staticlib" then
+	elseif currentTarget.targetType == "module" or currentTarget.targetType == "staticlib" then
 		file:write("include $(BUILD_STATIC_LIBRARY)\n")
 	else
 		--TODO - error here

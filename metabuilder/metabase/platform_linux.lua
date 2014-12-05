@@ -14,4 +14,4 @@ platform "linux"
 	config "Master"
 	config_end()
 
-latform_end()
+platform_end()

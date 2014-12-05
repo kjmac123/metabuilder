@@ -28,19 +28,23 @@ end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --FILE WRITING
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-function WriteSourceToObjRule(file, sourceFileExt)
+
+function WriteSourceToObjRule(file, buildFile)
+	
 	local compilerFlags = "$(CPPFLAGS)"
-	if sourceFileExt == "c" then
+	if buildFile.ext == "c" then
 		compilerFlags = compilerFlags .. " $(CFLAGS)"
-	elseif sourceFileExt == "cpp" then
+	elseif buildFile.ext == "cpp" then
 		compilerFlags = compilerFlags .. " $(CXXFLAGS)"
 	else
 		mbwriter_fatalerror("unsupported source file type")
 	end
+	basename = string.gsub(buildFile.objFile, ".o", "")
 
-	file:write("%.o : %." .. sourceFileExt .. " %.d \n")
+	file:write(buildFile.objFile .. " : " .. buildFile.srcFile .. " " .. basename .. ".d \n")
 	file:write("	$(CC) " .. compilerFlags .. " -o '$@' '$<'; \\\n")
 end
+
 
 function WriteMakeFileCommonVars(file, currentTarget)
 	file:write("BUILD := " .. currentTarget.configs[1].name .. "\n\n")
@@ -48,6 +52,7 @@ function WriteMakeFileCommonVars(file, currentTarget)
 
 	for i = 1, #currentTarget.configs do
 		local config = currentTarget.configs[i]
+		--print(inspect(config))
 
 		--CPPFLAGS is commong to C and C++
 		file:write("CPPFLAGS." .. config.name .. " := \\\n")
@@ -81,9 +86,9 @@ function WriteMakeFileCommonVars(file, currentTarget)
 
 		--Preprocessor macros will live in CPPFLAGS
 		file:write("DEFINES." .. config.name .. " := \\\n")
-		if config.options.defines ~= nil then
-			for i = 1, #config.options.defines do
-				file:write("  -D" .. config.options.defines[i] .. " \\\n")
+		if config.defines ~= nil then
+			for i = 1, #config.defines do
+				file:write("  -D" .. config.defines[i] .. " \\\n")
 			end
 		end
 		file:write("\n")
@@ -99,7 +104,7 @@ function WriteMakeFileCommonVars(file, currentTarget)
 		file:write("CPPFLAGS." .. config.name .. " += ${INCLUDES." .. config.name .. "}\n")
 	end
 
-	file:write("CPPFLAGS	:= ${CPPFLAGS.${BUILD}}\n")
+	file:write("CPPFLAGS	:= -MMD -MP ${CPPFLAGS.${BUILD}}\n")
 	file:write("CFLAGS		:= ${CFLAGS.${BUILD}}\n")
 	file:write("CXXFLAGS	:= ${CXXFLAGS.${BUILD}}\n")
 end
@@ -201,17 +206,14 @@ function WriteMakeFile(currentTarget)
 	local makeDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name
 	mkdir(makeDir)
 
-	print(inspect(config))
-
 	local makeFilename = makeDir .. "/" .. "Makefile"
 	local file = io.open(makeFilename, "w")
 
 	local intdir = writer_global.intdir .. "/" .. currentTarget.name 
 	local outdir = writer_global.outdir  
 
-	--file:write("intdir = " .. intdir .. "\n")
-	--file:write("outdir = " .. outdir .. "\n")
-	--file:write("builddir = $intdir\n")
+	file:write("INTDIR := " .. intdir .. "\n")
+	file:write("OUTDIR := " .. outdir .. "\n")
 		
 	WriteMakeFileCommonVars(file, currentTarget)
 
@@ -226,24 +228,42 @@ function WriteMakeFile(currentTarget)
 		mbwriter_fatalerror("unsupported target type")
 	end
 
-    local srcFiles = {}
+    local buildFiles = {}
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
 		local path, filename, ext = Util_FilePathDecompose(f)
 		if ext == "c" or ext == "cpp" then
 			local filenameAbs = GetFullFilePath(f)
-			table.insert(srcFiles, filenameAbs)
+			
+			local obj = string.gsub(filename, ".cpp", ".o")
+			obj  = string.gsub(obj, ".c", ".o")
+			
+			obj = writer_global.intdir .. "/" .. obj
+			
+			table.insert(buildFiles, {objFile=obj, srcFile=filenameAbs, ext=ext})
 		end
 	end
 	file:write("\n")
 	file:write("SRC := \\\n")
-	for i = 1, #srcFiles do
-		file:write("	" .. srcFiles[i] .. " \\\n")
+	for i = 1, #buildFiles do
+		file:write("	" .. buildFiles[i].srcFile .. " \\\n")
+	end
+	file:write("\n")
+	
+	file:write("OBJ := \\\n")
+	for i = 1, #buildFiles do
+		file:write("	" .. buildFiles[i].objFile .. " \\\n")
+	end
+
+	file:write("\n")
+
+	for i = 1, #buildFiles do
+		WriteSourceToObjRule(file, buildFiles[i]);
 	end
 	
-	file:write("\n")
-	file:write("OBJ := $(SRC:.cpp=.o)\n")
-	file:write("OBJ += $(SRC:.c=.o)\n")
+--	file:write("\n")
+--	file:write("OBJ := $(SRC:.cpp=.o)\n")
+--	file:write("OBJ += $(SRC:.c=.o)\n")
 	file:write("\n")
 	
 	--Write out target
@@ -274,16 +294,16 @@ function WriteMakeFile(currentTarget)
 
 		file:write("all : makemodules \\\n")
 	else
-		file:write("all : \\\n")
+		file:write("all : ")
 	end
-	file:write("    " .. currentTarget.name .. "\\\n")
+	file:write("    " .. currentTarget.name .. " \\\n")
 	file:write("\n\n")
+	file:write("$(OBJ) : | $(INTDIR)\n\n")
 
-	WriteSourceToObjRule(file, "cpp");
+	file:write("$(INTDIR):\n")
+	file:write("	mkdir -p $(INTDIR)\n")
 	file:write("\n")
-	WriteSourceToObjRule(file, "c");	
-	file:write("\n")
-
+	
 	file:write("%.d: ;\n")
 	file:write("-include $(SRC:%.cpp=%.d)\n")
 	
