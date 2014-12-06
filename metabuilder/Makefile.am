@@ -37,8 +37,8 @@ metabuilder_SOURCES = \
 	src/metabuilder_pch.h \
 	src/target.h \
 	src/platform/platform.cpp \
-	src/platform/POSIX/platform_posix.cpp 
-	src/platform/Windows/platform_windows.cpp 
+	src/platform/posix/platform_posix.cpp 
+	src/platform/windows/platform_windows.cpp 
 	
 dist_noinst_SCRIPTS = autogen.sh
 
