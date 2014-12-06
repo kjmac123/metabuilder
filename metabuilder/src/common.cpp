@@ -43,18 +43,18 @@ void AppState::Process()
 	if (cmdSetup._metabaseDir.length() > 0)		metabaseDirAbs = cmdSetup._metabaseDir;
 	if (cmdSetup._makeOutputDir.length() > 0)	makeOutputDirAbs = cmdSetup._makeOutputDir;
 
+	if (!mbCreateDirChain(cmdSetup._makeOutputDir.c_str()))
+	{
+		MB_LOGERROR("Failed to create output directory %s", cmdSetup._makeOutputDir.c_str());
+		mbExitError();
+	}
+
 	mainMetaMakeFileAbs = mbaFileGetAbsPath(cmdSetup._inputFile);
 	metabaseDirAbs = mbaFileGetAbsPath(cmdSetup._metabaseDir);
 	makeOutputDirAbs = mbaFileGetAbsPath(cmdSetup._makeOutputDir);
 	mbNormaliseFilePath(&mainMetaMakeFileAbs);
 	mbNormaliseFilePath(&metabaseDirAbs);
 	mbNormaliseFilePath(&makeOutputDirAbs);
-
-	if (!mbCreateDirChain(makeOutputDirAbs.c_str()))
-	{
-		MB_LOGERROR("Failed to create output directory %s", makeOutputDirAbs.c_str());
-		mbExitError();
-	}
 
 	//Set defaults if required.
 	if (intDir.size() == 0)
