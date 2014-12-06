@@ -50,14 +50,20 @@ void AppState::Process()
 	mbNormaliseFilePath(&metabaseDirAbs);
 	mbNormaliseFilePath(&makeOutputDirAbs);
 
+	if (!mbCreateDirChain(makeOutputDirAbs.c_str()))
+	{
+		MB_LOGERROR("Failed to create output directory %s", makeOutputDirAbs.c_str());
+		mbExitError();
+	}
+
 	//Set defaults if required.
 	if (intDir.size() == 0)
 	{
-		intDir = "tmp/int";
+		intDir = "int";
 	}
 	if (outDir.size() == 0)
 	{
-		outDir = "tmp/out";
+		outDir = "out";
 	}
 }
 
