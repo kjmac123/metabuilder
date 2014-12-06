@@ -160,3 +160,7 @@ function Util_GetKVValue(keyValueList, key)
 
 	return nil
 end
+
+function Util_FileQuoted(filepath)
+	return '"' .. filepath .. '"'
+end

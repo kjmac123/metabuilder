@@ -54,7 +54,10 @@ end
 
 
 function WriteMakeFileCommonVars(file, currentTarget)
-	file:write("BUILD := " .. currentTarget.configs[1].name .. "\n\n")
+	file:write("BUILDCONFIG := " .. currentTarget.configs[1].name .. "\n\n")
+	file:write("INTDIR := " .. g_intdir .. "\n")
+	file:write("OUTDIR := " .. g_outdir .. "\n")
+	file:write("\n")
 	file:write("CC := gcc\n")
 	file:write("CXX := g++\n")
 
@@ -106,15 +109,15 @@ function WriteMakeFileCommonVars(file, currentTarget)
 		file:write("INCLUDES." .. config.name .. " := \\\n")
 		for i = 1, #config.includedirs do
 			local includeDir = GetFullFilePath(config.includedirs[i])
-			file:write("  -I" .. includeDir .. " \\\n")
+			file:write("  -I" .. Util_FileQuoted(includeDir) .. " \\\n")
 		end
 		file:write("\n")
 		file:write("CPPFLAGS." .. config.name .. " += ${INCLUDES." .. config.name .. "}\n")
 	end
 
-	file:write("CPPFLAGS	:= -MMD -MP ${CPPFLAGS.${BUILD}}\n")
-	file:write("CFLAGS		:= ${CFLAGS.${BUILD}}\n")
-	file:write("CXXFLAGS	:= ${CXXFLAGS.${BUILD}}\n")
+	file:write("CPPFLAGS	:= -MMD -MP ${CPPFLAGS.${BUILDCONFIG}}\n")
+	file:write("CFLAGS		:= ${CFLAGS.${BUILDCONFIG}}\n")
+	file:write("CXXFLAGS	:= ${CXXFLAGS.${BUILDCONFIG}}\n")
 end
 
 function WriteMakeFileAppVars(file, currentTarget)
@@ -160,7 +163,7 @@ function WriteMakeFileAppVars(file, currentTarget)
 
 		file:write("\n")
 	end
-	file:write("LDFLAGS := ${LDFLAGS.${BUILD}} ${LDLIBS.${BUILD}}\n")
+	file:write("LDFLAGS := ${LDFLAGS.${BUILDCONFIG}} ${LDLIBS.${BUILDCONFIG}}\n")
 end
 
 function WriteMakeFileModuleVars(file, currrentTarget)
@@ -186,7 +189,7 @@ function WriteMakeFileStaticLibVars(file, currentTarget)
 		file:write("\n")
 	end
 
-	file:write("ARFLAGS := ${ARFLAGS.${BUILD}}\n")
+	file:write("ARFLAGS := ${ARFLAGS.${BUILDCONFIG}}\n")
 	
 	file:write("CFLAGS += -c\n")
 	file:write("CXXFLAGS += -c\n")
@@ -221,12 +224,8 @@ function WriteMakeFile(currentTarget)
 
 	g_intdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.intdir)
 	g_outdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.outdir)
-	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name)
-	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name)
-	--print(inspect(writer_global))
-
-	file:write("INTDIR := " .. g_intdir .. "\n")
-	file:write("OUTDIR := " .. g_outdir .. "\n")
+	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "_$(BUILDCONFIG)")
+	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "_$(BUILDCONFIG)")
 		
 	WriteMakeFileCommonVars(file, currentTarget)
 
@@ -240,7 +239,9 @@ function WriteMakeFile(currentTarget)
 	else
 		mbwriter_fatalerror("unsupported target type")
 	end
-
+	
+	file:write("default : all \n\n")
+	
     local buildFiles = {}
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
@@ -289,9 +290,9 @@ function WriteMakeFile(currentTarget)
 	end
 
 	file:write("\n")
-	
+
 	file:write("MODULEOBJ := \n")
-	
+		
 	--print(inspect(currentTarget))
 	if #currentTarget.depends > 0 then
 		file:write("makemodules : \n")
@@ -302,7 +303,7 @@ function WriteMakeFile(currentTarget)
 
 			local moduleLocation = mbwriter_gettarget(filename)
 
-			file:write("	$(MAKE) -C " .. writer_global.makeoutputdirabs .. "/" .. filename .. " all BUILD='$(BUILD)' \n\n")
+			file:write("	$(MAKE) -C " .. writer_global.makeoutputdirabs .. "/" .. filename .. " all BUILDCONFIG='$(BUILDCONFIG)' \n\n")
 			file:write("MODULEOBJ += " .. moduleLocation .. "\n")
 		end
 
