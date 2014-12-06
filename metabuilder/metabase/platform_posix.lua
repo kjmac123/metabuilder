@@ -1,10 +1,9 @@
 supportedplatforms 
 {
-	"Linux",
 	"POSIX",
 }
 
-platform "linux"
+platform "POSIX"
 	config "Debug"
 	config_end()
 
