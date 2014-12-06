@@ -1,7 +1,7 @@
 @set local
 @set TOPDIR=%~dp0..\..
 @set MBDIR=metatmp
-@set GEN=make_gcc_linux
+@set GEN=gnumake_gcc_windows
 
 "%TOPDIR%\bin\windows\metabuilder.exe" --input "%~dp0metabuilder.lua" --gen %GEN% --metabase "%TOPDIR%\metabase" --outdir "%MBDIR%"
 @IF %ERRORLEVEL% neq 0 GOTO error
