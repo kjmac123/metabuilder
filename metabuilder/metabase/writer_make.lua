@@ -34,24 +34,29 @@ end
 
 function WriteSourceToObjRule(file, buildFile)
 	
+	local compiler = ""
 	local compilerFlags = "$(CPPFLAGS)"
 	if buildFile.ext == "c" then
+		compiler = "$(CC)"
 		compilerFlags = compilerFlags .. " $(CFLAGS)"
 	elseif buildFile.ext == "cpp" then
+		compiler = "$(CXX)"
 		compilerFlags = compilerFlags .. " $(CXXFLAGS)"
 	else
 		mbwriter_fatalerror("unsupported source file type")
 	end
-	basename = string.gsub(buildFile.objFile, ".o", "")
+	basename = Util_StringReplace(buildFile.objFile, ".o", "")
 
 	file:write(buildFile.objFile .. " : " .. buildFile.srcFile .. " " .. basename .. ".d \n")
-	file:write("	$(CC) " .. compilerFlags .. " -o '$@' '$<'; \\\n")
+	file:write("	" .. compiler .. " " .. compilerFlags .. " -o '$@' '$<'; \n")
+	file:write("\n")
 end
 
 
 function WriteMakeFileCommonVars(file, currentTarget)
 	file:write("BUILD := " .. currentTarget.configs[1].name .. "\n\n")
-	file:write("CC := g++\n")
+	file:write("CC := gcc\n")
+	file:write("CXX := g++\n")
 
 	for i = 1, #currentTarget.configs do
 		local config = currentTarget.configs[i]
@@ -189,20 +194,20 @@ end
 
 function WriteMakeFileAppTarget(file, currentTarget)
 	file:write("$(OUTDIR)/" .. currentTarget.name .. " : $(OBJ) \n")
-	file:write("	$(LD) $(LDFLAGS) $(MODULEOBJ) '$<' -o '$@' ;\n")
+	file:write("	$(LD) $(LDFLAGS) $(MODULEOBJ) $(OBJ) -o '$@' ;\n")
 end
 
 function WriteMakeFileModuleTarget(file, currentTarget)
 	file:write("$(OUTDIR)/" .. currentTarget.name .. " : $(OBJ) \n")
-	file:write("	$(LD) $(LDFLAGS) -r $(MODULEOBJ) '$<' -o '$@' ;\n")
+	file:write("	$(LD) $(LDFLAGS) -r $(MODULEOBJ) $(OBJ) -o '$@' ;\n")
 	mbwriter_registertarget(currentTarget.name, Util_FilePathJoin(g_outdir, currentTarget.name))
 end
 
 function WriteMakeFileStaticLibTarget(file, currentTarget)
-	local compileTargetName = currentTarget.name .. "_compile"
+	local compileTargetName = "$(OUTDIR)/" .. currentTarget.name .. "_compile"
 	file:write(compileTargetName .. " : $(OBJ) \n\n")
-	file:write(currentTarget.name .. " : " .. compileTargetName .. " \n")
-	file:write("	$(AR) $(ARFLAGS) " .. currentTarget.name .. ".a ${OBJ}\n")
+	file:write("$(OUTDIR)/" .. currentTarget.name .. " : " .. compileTargetName .. " \n")
+	file:write("	$(AR) $(ARFLAGS) $(OUTDIR)/" .. currentTarget.name .. ".a ${OBJ}\n")
 	mbwriter_registertarget(currentTarget.name, Util_FilePathJoin(g_outdir, currentTarget.name) .. ".a")
 end
 
@@ -218,7 +223,7 @@ function WriteMakeFile(currentTarget)
 	g_outdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.outdir)
 	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name)
 	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name)
-	print(inspect(writer_global))
+	--print(inspect(writer_global))
 
 	file:write("INTDIR := " .. g_intdir .. "\n")
 	file:write("OUTDIR := " .. g_outdir .. "\n")
@@ -242,9 +247,10 @@ function WriteMakeFile(currentTarget)
 		local path, filename, ext = Util_FilePathDecompose(f)
 		if ext == "c" or ext == "cpp" then
 			local filenameAbs = GetFullFilePath(f)
+			--local filenameAbsEscaped = escape(filenameAbs
 			
-			local obj = string.gsub(filename, ".cpp", ".o")
-			obj  = string.gsub(obj, ".c", ".o")
+			local obj = Util_StringReplace(filename, ".cpp", ".o")
+			obj  = Util_StringReplace(obj, ".c", ".o")
 			
 			obj = "$(INTDIR)/" .. obj
 			
@@ -293,10 +299,10 @@ function WriteMakeFile(currentTarget)
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
 			local path, filename, ext = Util_FilePathDecompose(dependency)
-			local moduleName = string.gsub(dependency, path, "")
-			local moduleLocation = mbwriter_gettarget(moduleName)
 
-			file:write("	$(MAKE) -C " .. path .. " all BUILD='$(BUILD)'\\\n\n")
+			local moduleLocation = mbwriter_gettarget(filename)
+
+			file:write("	$(MAKE) -C " .. writer_global.makeoutputdirabs .. "/" .. filename .. " all BUILD='$(BUILD)' \n\n")
 			file:write("MODULEOBJ += " .. moduleLocation .. "\n")
 		end
 
@@ -314,7 +320,12 @@ function WriteMakeFile(currentTarget)
 	file:write("\n")
 	
 	file:write("%.d: ;\n")
-	file:write("-include $(SRC:%.cpp=%.d)\n")
+	
+	for i = 1, #buildFiles do
+		local objFile = buildFiles[i].objFile
+		local depFile = Util_StringReplace(objFile, ".o", ".d")
+		file:write("-include " .. depFile .. "\n")
+	end	
 	
 	file:write("\n")
 	file:close()
@@ -329,4 +340,3 @@ end
 local currentTarget = writer_solution.targets[1]
 
 WriteMakeFile(currentTarget)
-

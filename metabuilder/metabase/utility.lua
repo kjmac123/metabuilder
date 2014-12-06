@@ -1,3 +1,54 @@
+function Util_EscapeMagicLuaChars(str)
+	luaMagicChars = {"(", ")",".","%","+","-","*","?","[","]","^","$"}
+
+	strlength = string.len(str)
+	
+	local buf = {}
+	for c in str:gmatch"." do
+		for jMagic = 1, #luaMagicChars do
+			if c == luaMagicChars[jMagic] then
+				table.insert(buf, "%")
+			end
+		end
+		table.insert(buf, c)
+	end
+	
+	result = table.concat(buf)		
+	return result;			
+end
+
+function Util_UnescapeMagicLuaChars(str)
+	luaMagicChars = {"(", ")",".","%","+","-","*","?","[","]","^","$"}
+
+	strlength = string.len(str)
+	
+	local buf = {}
+	for c in str:gmatch"." do
+		local foundEscape = false
+		for jMagic = 1, #luaMagicChars do
+			if c == "%" then
+				foundEscape = true
+			end
+		end
+		
+		if foundEscape == false then
+			table.insert(buf, c)
+		end
+	end
+	
+	result = table.concat(buf)		
+	return result;			
+end
+
+function Util_StringReplace(str, oldStr, newStr)
+	local escapedStr = Util_EscapeMagicLuaChars(str)
+	local escapedOldStr = Util_EscapeMagicLuaChars(oldStr)
+	
+	escapedStr = string.gsub(escapedStr, escapedOldStr, newStr)
+	
+	return Util_UnescapeMagicLuaChars(escapedStr)
+end
+
 function Util_FilePathJoin(path, filename)
 	if path == "" then
 		return filename
@@ -87,11 +138,11 @@ function Util_FileTrimExtension(filepath)
 end	
 
 function Util_FileNormaliseWindows(filepath)
-	return Util_FileTrimTrailingDot(string.gsub(filepath, "/", "\\"))
+	return Util_FileTrimTrailingDot(Util_StringReplace(filepath, "/", "\\"))
 end
 
 function Util_FileNormaliseUnix(filepath)
-	return string.gsub(filepath, "\\", "/")
+	return Util_StringReplace(filepath, "\\", "/")
 end
 
 function Util_GetKVValue(keyValueList, key)
