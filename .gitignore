@@ -3,11 +3,15 @@
 Debug/
 Release/
 Master/
+ipch/
 *.o
 *.a
 *.d
 *.m4
 *.cache
+*.suo
+*.vcxproj.user
+*.sdf
 config.guess
 config.h*
 config.log

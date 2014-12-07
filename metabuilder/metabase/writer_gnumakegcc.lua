@@ -48,7 +48,8 @@ function WriteSourceToObjRule(file, buildFile)
 	basename = Util_StringReplace(buildFile.objFile, ".o", "")
 
 	file:write(buildFile.objFile .. " : " .. buildFile.srcFile .. " " .. basename .. ".d \n")
-	file:write("	" .. compiler .. " " .. compilerFlags .. " -o '$@' '$<'; \n")
+	file:write("	@echo " .. buildFile.srcFile .. "\n")
+	file:write("	@" .. compiler .. " " .. compilerFlags .. " -o '$@' '$<'; \n")
 	file:write("\n")
 end
 
@@ -196,22 +197,28 @@ function WriteMakeFileStaticLibVars(file, currentTarget)
 end
 
 function WriteMakeFileAppTarget(file, currentTarget)
-	file:write("$(OUTDIR)/" .. currentTarget.name .. " : $(OBJ) \n")
-	file:write("	$(LD) $(LDFLAGS) $(MODULEOBJ) $(OBJ) -o '$@' ;\n")
+	local appTarget = "$(OUTDIR)/" .. currentTarget.name
+	file:write(appTarget .. " : $(OBJ) \n")
+	file:write("	@echo Linking " .. appTarget .. "\n")
+	file:write("	@$(LD) $(LDFLAGS) $(MODULEOBJ) $(OBJ) -o '$@' ;\n")
 end
 
 function WriteMakeFileModuleTarget(file, currentTarget)
+	local moduleTarget = Util_FilePathJoin(g_outdir, currentTarget.name)
 	file:write("$(OUTDIR)/" .. currentTarget.name .. " : $(OBJ) \n")
-	file:write("	$(LD) $(LDFLAGS) -r $(MODULEOBJ) $(OBJ) -o '$@' ;\n")
-	mbwriter_registertarget(currentTarget.name, Util_FilePathJoin(g_outdir, currentTarget.name))
+	file:write("	@echo Creating module obj " .. moduleTarget .. "\n")
+	file:write("	@$(LD) $(LDFLAGS) -r $(MODULEOBJ) $(OBJ) -o '$@' ;\n")
+	mbwriter_registertarget(currentTarget.name, moduleTarget)
 end
 
 function WriteMakeFileStaticLibTarget(file, currentTarget)
+	local staticLibTarget = Util_FilePathJoin(g_outdir, currentTarget.name) .. ".a"
 	local compileTargetName = "$(OUTDIR)/" .. currentTarget.name .. "_compile"
 	file:write(compileTargetName .. " : $(OBJ) \n\n")
 	file:write("$(OUTDIR)/" .. currentTarget.name .. " : " .. compileTargetName .. " \n")
-	file:write("	$(AR) $(ARFLAGS) $(OUTDIR)/" .. currentTarget.name .. ".a ${OBJ}\n")
-	mbwriter_registertarget(currentTarget.name, Util_FilePathJoin(g_outdir, currentTarget.name) .. ".a")
+	file:write("	@echo Creating static lib " .. moduleTarget .. "\n")
+	file:write("	@$(AR) $(ARFLAGS) $(OUTDIR)/" .. currentTarget.name .. ".a ${OBJ}\n")
+	mbwriter_registertarget(currentTarget.name, staticLibTarget)
 end
 
 function WriteMakeFile(currentTarget)
@@ -248,7 +255,6 @@ function WriteMakeFile(currentTarget)
 		local path, filename, ext = Util_FilePathDecompose(f)
 		if ext == "c" or ext == "cpp" then
 			local filenameAbs = GetFullFilePath(f)
-			--local filenameAbsEscaped = escape(filenameAbs
 			
 			local obj = Util_StringReplace(filename, ".cpp", ".o")
 			obj  = Util_StringReplace(obj, ".c", ".o")
@@ -320,7 +326,22 @@ function WriteMakeFile(currentTarget)
 	file:write("	mkdir -p $(INTDIR)\n")
 	file:write("	mkdir -p $(OUTDIR)\n")
 	file:write("\n")
-	
+	file:write("clean : \n")
+	file:write("	@echo Cleaning $(INTDIR)\n")
+	file:write("	@rm -f $(INTDIR)/*\n")
+	file:write("	@rmdir $(INTDIR)\n")	
+	file:write("	@echo Cleaning $(OUTDIR)\n")
+	file:write("	@rm -f $(OUTDIR)/*\n")
+	file:write("	@rmdir $(OUTDIR)\n")
+	for i = 1, #currentTarget.depends do
+		local dependency = currentTarget.depends[i]
+		local path, filename, ext = Util_FilePathDecompose(dependency)
+
+		local moduleLocation = mbwriter_gettarget(filename)
+
+		file:write("	$(MAKE) -C " .. writer_global.makeoutputdirabs .. "/" .. filename .. " clean BUILDCONFIG='$(BUILDCONFIG)' \n\n")
+	end
+	file:write("\n")
 	file:write("%.d: ;\n")
 	
 	for i = 1, #buildFiles do
