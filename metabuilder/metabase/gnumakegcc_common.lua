@@ -1,6 +1,6 @@
 import "metabase_common.lua"
 
-writer "writer_make.lua"
+writer "writer_gnumakegcc.lua"
 
 local cppFlagsCommon = "-Wall"
 option("cxxflags",	"-Wall")

@@ -224,8 +224,8 @@ function WriteMakeFile(currentTarget)
 
 	g_intdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.intdir)
 	g_outdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.outdir)
-	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "_$(BUILDCONFIG)")
-	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "_$(BUILDCONFIG)")
+	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/$(BUILDCONFIG)")
+	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/$(BUILDCONFIG)")
 		
 	WriteMakeFileCommonVars(file, currentTarget)
 
@@ -260,6 +260,7 @@ function WriteMakeFile(currentTarget)
 	end
 	file:write("\n")
 	file:write("SRC := \\\n")
+
 	for i = 1, #buildFiles do
 		file:write("	" .. buildFiles[i].srcFile .. " \\\n")
 	end

@@ -698,7 +698,7 @@ local groupMap = BuildFileGroups(g_currentTarget)
 --print(inspect(g_fileTypeMap))
 --TODO move out this hack for Windows builds
 if g_fileTypeMap["hlsl"] == "CompilerShader" then
-	print("HLSL support enabled")
+	--print("HLSL support enabled")
 	g_enableHLSL = true
 end
 
