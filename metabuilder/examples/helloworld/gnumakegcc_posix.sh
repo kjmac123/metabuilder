@@ -5,6 +5,6 @@ TOPDIR=../..
 
 pushd ${SCRIPTDIR}
 pwd
-${TOPDIR}/bin/windows/metabuilder.exe --input metabuilder.lua --gen gnumakegcc_posix --metabase ${TOPDIR}/metabase --outdir metatmp
+${TOPDIR}/bin/metabuilder --input metabuilder.lua --gen gnumakegcc_posix --metabase ${TOPDIR}/metabase --outdir metatmp
 popd
 
