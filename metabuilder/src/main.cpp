@@ -175,6 +175,7 @@ int main(int argc, const char * argv[])
 		}
 		mbPopActiveContext();
 		
+		ctx->isMainMakefile = appState->isProcessingPrimaryMakefile;
 		appState->isProcessingPrimaryMakefile = false;
 	}
 	

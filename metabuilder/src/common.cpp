@@ -73,6 +73,7 @@ MetaBuilderContext::MetaBuilderContext()
 {
 	metabase = NULL;
 	solution = NULL;
+	isMainMakefile = false;
 	
 	g_contexts.push_back(this);
 }

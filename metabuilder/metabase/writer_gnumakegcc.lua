@@ -10,12 +10,33 @@ if writer_global.verbose then
 	print(inspect(writer_solution))
 end
 
+g_firstTargetWritten = false
 
 --Map relative to absolute path
 g_filePathMap = {}
 
 g_intdir = ""
 g_outdir = ""
+
+g_varBUILDCONFIG = ""
+g_varINTDIR = ""
+g_varOUTDIR = ""
+g_varMODULEOBJ = ""
+g_varCFLAGS = ""
+g_varCPPFLAGS = ""
+g_varCXXFLAGS = ""
+g_varINCLUDES = ""
+g_varLIBS = ""
+g_varLDLIBS = ""
+g_varLIBDIRS = ""
+g_varLDFLAGS = ""
+g_varCC = ""
+g_varCXX = ""
+g_varAR = ""
+g_varLD = ""
+g_varSRC = ""
+g_varOBJ = ""
+g_varDEFINES = ""
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,6 +49,32 @@ function GetFullFilePath(filepath)
 	return Util_FileNormaliseUnix(newfilepath)
 end
 
+function InitVars(currentTarget)
+	g_varBUILDCONFIG	= "BUILDCONFIG"
+	g_varINTDIR			= currentTarget.name .. "_INTDIR"
+	g_varOUTDIR			= currentTarget.name .. "_OUTDIR"
+	g_varMODULEOBJ 		= currentTarget.name .. "_MODULEOBJ"
+	g_varCFLAGS 		= currentTarget.name .. "_CFLAGS"
+	g_varCPPFLAGS		= currentTarget.name .. "_CPPFLAGS"
+	g_varCXXFLAGS		= currentTarget.name .. "_CXXFLAGS"
+	g_varINCLUDES		= currentTarget.name .. "_INCLUDES"
+	g_varLIBS			= currentTarget.name .. "_LIBS"
+	g_varLDLIBS			= currentTarget.name .. "_LDLIBS"
+	g_varLIBDIRS		= currentTarget.name .. "_LIBDIRS"
+	g_varLDFLAGS		= currentTarget.name .. "_LDFLAGS"
+	g_varCC				= currentTarget.name .. "_CC"
+	g_varCXX			= currentTarget.name .. "_CXX"
+	g_varAR				= currentTarget.name .. "_AR"
+	g_varLD				= currentTarget.name .. "_LD"
+	g_varSRC			= currentTarget.name .. "_SRC"
+	g_varOBJ			= currentTarget.name .. "_OBJ"
+	g_varDEFINES		= currentTarget.name .. "_DEFINES"
+end
+
+function GetDollarVar(var)
+	return "$(" .. var .. ")"
+end
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --FILE WRITING
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,13 +82,13 @@ end
 function WriteSourceToObjRule(file, buildFile)
 	
 	local compiler = ""
-	local compilerFlags = "$(CPPFLAGS)"
+	local compilerFlags = GetDollarVar(g_varCPPFLAGS)
 	if buildFile.ext == "c" then
-		compiler = "$(CC)"
-		compilerFlags = compilerFlags .. " $(CFLAGS)"
+		compiler = GetDollarVar(g_varCC)
+		compilerFlags = compilerFlags .. " " .. GetDollarVar(g_varCFLAGS)
 	elseif buildFile.ext == "cpp" then
-		compiler = "$(CXX)"
-		compilerFlags = compilerFlags .. " $(CXXFLAGS)"
+		compiler = GetDollarVar(g_varCXX)
+		compilerFlags = compilerFlags .. " " .. GetDollarVar(g_varCXXFLAGS)
 	else
 		mbwriter_fatalerror("unsupported source file type")
 	end
@@ -50,98 +97,99 @@ function WriteSourceToObjRule(file, buildFile)
 	file:write(buildFile.objFile .. " : " .. buildFile.srcFile .. " " .. basename .. ".d \n")
 	file:write("	@echo " .. buildFile.srcFile .. "\n")
 	file:write("	@" .. compiler .. " " .. compilerFlags .. " -o '$@' '$<'; \n")
-	file:write("\n")
 end
 
+function WriteMakeFileGlobalVars(file, currentTarget)
+	file:write("BUILDCONFIG := " .. currentTarget.configs[1].name .. "\n\n")
+end
 
 function WriteMakeFileCommonVars(file, currentTarget)
-	file:write("BUILDCONFIG := " .. currentTarget.configs[1].name .. "\n\n")
-	file:write("INTDIR := " .. g_intdir .. "\n")
-	file:write("OUTDIR := " .. g_outdir .. "\n")
+	file:write(g_varINTDIR .. 		" := " .. g_intdir .. "\n")
+	file:write(g_varOUTDIR .. 		" := " .. g_outdir .. "\n")
 	file:write("\n")
-	file:write("CC := gcc\n")
-	file:write("CXX := g++\n")
+	file:write(g_varCC .. 			" := gcc\n")
+	file:write(g_varCXX ..			" := g++\n")
 
 	for i = 1, #currentTarget.configs do
 		local config = currentTarget.configs[i]
 		--print(inspect(config))
 
 		--CPPFLAGS is commong to C and C++
-		file:write("CPPFLAGS." .. config.name .. " := \\\n")
+		file:write(g_varCPPFLAGS .. "." .. config.name .. " := \\\n")
 		if config.options.cppflags ~= nil then
 			for i = 1, #config.options.cppflags do
 				file:write("  " .. config.options.cppflags[i] .. " \\\n")
 			end
 		end
 		file:write("\n")
-		file:write("CPPFLAGS." .. config.name .. " := ${CPPFLAGS." .. config.name .. "}\n")
+		file:write(g_varCPPFLAGS .. "." .. config.name .. " := $(" .. g_varCPPFLAGS .. "." .. config.name .. ")\n")
 
 		--CFLAGS is for C only
-		file:write("CFLAGS." .. config.name .. " := \\\n")
+		file:write(g_varCFLAGS .. "." .. config.name .. " := \\\n")
 		if config.options.cflags ~= nil then
 			for i = 1, #config.options.cflags do
 				file:write("  " .. config.options.cflags[i] .. " \\\n")
 			end
 		end
 		file:write("\n")
-		file:write("CFLAGS." .. config.name .. " := ${CFLAGS." .. config.name .. "}\n")
+		file:write(g_varCFLAGS .. "." .. config.name .. " := $(" .. g_varCFLAGS .. "." .. config.name .. ")\n")
 
 		--CXXFLAGS is for C++ only
-		file:write("CLAGS." .. config.name .. " := \\\n")
-		if config.options.cflags ~= nil then
-			for i = 1, #config.options.cflags do
-				file:write("  " .. config.options.cflags[i] .. " \\\n")
+		file:write(g_varCXXFLAGS .. "." .. config.name .. " := \\\n")
+		if config.options.cxxflags ~= nil then
+			for i = 1, #config.options.cxxflags do
+				file:write("  " .. config.options.cxxflags[i] .. " \\\n")
 			end
 		end
 		file:write("\n")
-		file:write("CFLAGS." .. config.name .. " := ${CFLAGS." .. config.name .. "}\n")
+		file:write(g_varCXXFLAGS .. "." .. config.name .. " := $(" .. g_varCXXFLAGS .. "." .. config.name .. ")\n")
 
 		--Preprocessor macros will live in CPPFLAGS
-		file:write("DEFINES." .. config.name .. " := \\\n")
+		file:write(g_varDEFINES .. "." .. config.name .. " := \\\n")
 		if config.defines ~= nil then
 			for i = 1, #config.defines do
 				file:write("  -D" .. config.defines[i] .. " \\\n")
 			end
 		end
 		file:write("\n")
-		file:write("CPPFLAGS." .. config.name .. " += ${DEFINES." .. config.name .. "}\n")
+		file:write(g_varCPPFLAGS .. "." .. config.name .. " += $(" .. g_varDEFINES .. "." .. config.name .. ")\n")
 
 		--Out include paths are shared between languages, so store in CPPFLAGS
-		file:write("INCLUDES." .. config.name .. " := \\\n")
+		file:write(g_varINCLUDES .. "." .. config.name .. " := \\\n")
 		for i = 1, #config.includedirs do
 			local includeDir = GetFullFilePath(config.includedirs[i])
 			file:write("  -I" .. Util_FileQuoted(includeDir) .. " \\\n")
 		end
 		file:write("\n")
-		file:write("CPPFLAGS." .. config.name .. " += ${INCLUDES." .. config.name .. "}\n")
+		file:write(g_varCPPFLAGS .. "." .. config.name .. " += $(" .. g_varINCLUDES .. "." .. config.name .. ")\n")
 	end
 
-	file:write("CPPFLAGS	:= -MMD -MP ${CPPFLAGS.${BUILDCONFIG}}\n")
-	file:write("CFLAGS		:= ${CFLAGS.${BUILDCONFIG}}\n")
-	file:write("CXXFLAGS	:= ${CXXFLAGS.${BUILDCONFIG}}\n")
+	file:write(g_varCPPFLAGS .. "	:= -MMD -MP $(" .. g_varCPPFLAGS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ")\n")
+	file:write(g_varCFLAGS ..	"	:= $(" .. g_varCFLAGS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ")\n")
+	file:write(g_varCXXFLAGS .. "	:= $(" .. g_varCXXFLAGS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ")\n")
 end
 
 function WriteMakeFileAppVars(file, currentTarget)
-	file:write("CFLAGS += -c\n")
-	file:write("CXXFLAGS += -c\n")
-	file:write("LD := g++\n")
+	file:write(g_varCFLAGS .. 	" += -c\n")
+	file:write(g_varCXXFLAGS ..	" += -c\n")
+	file:write(g_varLD .. 		" := g++\n")
 	file:write("\n")
 
 	for i = 1, #currentTarget.configs do
 		local config = currentTarget.configs[i]
 
 		--Linker flags
-		file:write("LDFLAGS." .. config.name .. " := \\\n")
+		file:write(g_varLDFLAGS .. "." .. config.name .. " := \\\n")
 		if config.options.ldflags ~= nil then
 			for i = 1, #config.options.ldflags do
 				file:write(config.options.ldflags[i] .. " \\\n")
 			end
 		end
 		file:write("\n")
-		file:write("LDFLAGS." .. config.name .. " += ${LDFLAGS." .. config.name .. "}\n")
+		file:write(g_varLDFLAGS .. "." .. config.name .. " += $(" .. g_varLDFLAGS .. "." .. config.name .. ")\n")
 
 		--Library directories. Will be stored in LDFLAGS
-		file:write("LIBDIRS." .. config.name .. " := \\\n")
+		file:write(g_varLIBDIRS .. "." .. config.name .. " := \\\n")
 		if config.options.libdirs ~= nil then
 			for i = 1, #config.libdirs do
 				local libDir = GetFullFilePath(config.libdirs[i])
@@ -149,10 +197,10 @@ function WriteMakeFileAppVars(file, currentTarget)
 			end
 		end
 		file:write("\n")
-		file:write("LDFLAGS." .. config.name .. " += ${LIBDIRS." .. config.name .. "}\n")
+		file:write(g_varLDFLAGS .. "." .. config.name .. " += $(" .. g_varLIBDIRS .. "." .. config.name .. ")\n")
 		
 		--Libraries
-		file:write("LIBS." .. config.name .. " := \\\n")
+		file:write(g_varLIBS .. "." .. config.name .. " := \\\n")
 		if config.options.libs ~= nil then
 			for i = 1, #currentTarget.libs do
 				local lib = GetFullFilePath(config.libs[i])
@@ -160,28 +208,28 @@ function WriteMakeFileAppVars(file, currentTarget)
 			end
 		end
 		file:write("\n")
-		file:write("LDLIBS." .. config.name .. " += ${LIBS." .. config.name .. "}\n")
+		file:write(g_varLDLIBS .. "." .. config.name .. " += $(" .. g_varLIBS .. "." .. config.name .. ")\n")
 
 		file:write("\n")
 	end
-	file:write("LDFLAGS := ${LDFLAGS.${BUILDCONFIG}} ${LDLIBS.${BUILDCONFIG}}\n")
+	file:write(g_varLDFLAGS .. " := $(" .. g_varLDFLAGS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ") $(" .. g_varLDLIBS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ")\n")
 end
 
 function WriteMakeFileModuleVars(file, currrentTarget)
-	file:write("LD := ld\n")
-	file:write("CFLAGS += -c\n")
-	file:write("CXXFLAGS += -c\n")
-	file:write("LDFLAGS := \n")
+	file:write(g_varLD ..		" := ld\n")
+	file:write(g_varCFLAGS ..	" += -c\n")
+	file:write(g_varCXXFLAGS ..	" += -c\n")
+	file:write(g_varLDFLAGS ..	" := \n")
 end
 
 function WriteMakeFileStaticLibVars(file, currentTarget)
-	file:write("AR := ar\n")
+	file:write(g_varAR .. " := ar\n")
 	file:write("\n")
 
 	for i = 1, #currentTarget.configs do
 		local config = currentTarget.configs[i]
 
-		file:write("ARFLAGS." .. config.name .. " := \\\n")
+		file:write(g_varARFLAGS .. "." .. config.name .. " := \\\n")
 		if config.options.arflags ~= nil then
 			for i = 1, #config.options.arflags do
 				file:write("  " .. config.options.arflags[i] .. " \\\n")
@@ -190,34 +238,34 @@ function WriteMakeFileStaticLibVars(file, currentTarget)
 		file:write("\n")
 	end
 
-	file:write("ARFLAGS := ${ARFLAGS.${BUILDCONFIG}}\n")
+	file:write(g_varARFLAGS .. " := $(" .. g_varARFLAGS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ")\n")
 	
-	file:write("CFLAGS += -c\n")
-	file:write("CXXFLAGS += -c\n")
+	file:write(g_varCFLAGS .. " += -c\n")
+	file:write(g_varCXXFLAGS .. " += -c\n")
 end
 
 function WriteMakeFileAppTarget(file, currentTarget)
-	local appTarget = "$(OUTDIR)/" .. currentTarget.name
-	file:write(appTarget .. " : $(OBJ) \n")
+	local appTarget = GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name
+	file:write(appTarget .. " : " .. GetDollarVar(g_varOBJ) .. "\n")
 	file:write("	@echo Linking " .. appTarget .. "\n")
-	file:write("	@$(LD) $(LDFLAGS) $(MODULEOBJ) $(OBJ) -o '$@' ;\n")
+	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 end
 
 function WriteMakeFileModuleTarget(file, currentTarget)
 	local moduleTarget = Util_FilePathJoin(g_outdir, currentTarget.name)
-	file:write("$(OUTDIR)/" .. currentTarget.name .. " : $(OBJ) \n")
+	file:write(GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. " : ".. GetDollarVar(g_varOBJ) .. "\n")
 	file:write("	@echo Creating module obj " .. moduleTarget .. "\n")
-	file:write("	@$(LD) $(LDFLAGS) -r $(MODULEOBJ) $(OBJ) -o '$@' ;\n")
+	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " -r " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 	mbwriter_registertarget(currentTarget.name, moduleTarget)
 end
 
 function WriteMakeFileStaticLibTarget(file, currentTarget)
 	local staticLibTarget = Util_FilePathJoin(g_outdir, currentTarget.name) .. ".a"
-	local compileTargetName = "$(OUTDIR)/" .. currentTarget.name .. "_compile"
-	file:write(compileTargetName .. " : $(OBJ) \n\n")
-	file:write("$(OUTDIR)/" .. currentTarget.name .. " : " .. compileTargetName .. " \n")
+	local compileTargetName = GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. "_compile"
+	file:write(compileTargetName .. " : " .. GetDollarVar(g_varOBJ) .. " \n\n")
+	file:write(GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. " : " .. compileTargetName .. " \n")
 	file:write("	@echo Creating static lib " .. moduleTarget .. "\n")
-	file:write("	@$(AR) $(ARFLAGS) $(OUTDIR)/" .. currentTarget.name .. ".a ${OBJ}\n")
+	file:write("	@" .. GetDollarVar(g_varAR) .. " .. GetDollarVar(g_varARFLAGS) .. " .. GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. ".a " .. GetDollarVar(g_varOBJ) .. "\n")
 	mbwriter_registertarget(currentTarget.name, staticLibTarget)
 end
 
@@ -225,14 +273,35 @@ function WriteMakeFile(currentTarget)
 
 	local makeDir = Util_FilePathJoin(writer_global.makeoutputdirabs, currentTarget.name)
 	mkdir(makeDir)
-
-	local makeFilename = Util_FilePathJoin(makeDir, "Makefile")
+	
+	local makeFilename = ""
+	if (writer_global.ismainmakefile) then
+		makeFilename = Util_FilePathJoin(makeDir, "Makefile")
+	else
+		makeFilename = Util_FilePathJoin(makeDir, "Makefile.mk")
+	end
+	
 	local file = io.open(makeFilename, "w")
+	
+	InitVars(currentTarget)	
 
 	g_intdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.intdir)
 	g_outdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.outdir)
-	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/$(BUILDCONFIG)")
-	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/$(BUILDCONFIG)")
+	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
+	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
+	
+	--print(inspect(writer_global))
+	--print(inspect(currentTarget))
+
+	--write out content we only require once per makefile
+	if (g_firstTargetWritten == false) then
+		g_firstTargetWritten = true
+
+		--write out content we only require at the start of the main makefile
+		if (writer_global.ismainmakefile) then
+			WriteMakeFileGlobalVars(file, currentTarget)
+		end
+	end
 		
 	WriteMakeFileCommonVars(file, currentTarget)
 
@@ -247,7 +316,10 @@ function WriteMakeFile(currentTarget)
 		mbwriter_fatalerror("unsupported target type")
 	end
 	
-	file:write("default : all \n\n")
+	file:write("\n")
+	if (writer_global.ismainmakefile) then
+		file:write("default : all \n")
+	end
 	
     local buildFiles = {}
 	for i = 1, #currentTarget.files do
@@ -259,20 +331,20 @@ function WriteMakeFile(currentTarget)
 			local obj = Util_StringReplace(filename, ".cpp", ".o")
 			obj  = Util_StringReplace(obj, ".c", ".o")
 			
-			obj = "$(INTDIR)/" .. obj
+			obj = GetDollarVar(g_varINTDIR) .. "/" .. obj
 			
 			table.insert(buildFiles, {objFile=obj, srcFile=filenameAbs, ext=ext})
 		end
 	end
 	file:write("\n")
-	file:write("SRC := \\\n")
+	file:write(g_varSRC .. " := \\\n")
 
 	for i = 1, #buildFiles do
 		file:write("	" .. buildFiles[i].srcFile .. " \\\n")
 	end
 	file:write("\n")
 	
-	file:write("OBJ := \\\n")
+	file:write(g_varOBJ .. " := \\\n")
 	for i = 1, #buildFiles do
 		file:write("	" .. buildFiles[i].objFile .. " \\\n")
 	end
@@ -298,49 +370,59 @@ function WriteMakeFile(currentTarget)
 
 	file:write("\n")
 
-	file:write("MODULEOBJ := \n")
+	file:write(g_varMODULEOBJ .. " := \n")
 		
 	--print(inspect(currentTarget))
-	if #currentTarget.depends > 0 then
-		file:write("makemodules : \n")
-
-		for i = 1, #currentTarget.depends do
-			local dependency = currentTarget.depends[i]
-			local path, filename, ext = Util_FilePathDecompose(dependency)
-
-			local moduleLocation = mbwriter_gettarget(filename)
-
-			file:write("	$(MAKE) -C " .. writer_global.makeoutputdirabs .. "/" .. filename .. " all BUILDCONFIG='$(BUILDCONFIG)' \n\n")
-			file:write("MODULEOBJ += " .. moduleLocation .. "\n")
-		end
-
-		file:write("all : makemodules \\\n")
-	else
-		file:write("all : ")
-	end
-	file:write("    " .. "$(OUTDIR)/" .. currentTarget.name .. " \\\n")
-	file:write("\n\n")
-	file:write("$(OBJ) : | $(INTDIR)\n\n")
-
-	file:write("$(INTDIR):\n")
-	file:write("	mkdir -p $(INTDIR)\n")
-	file:write("	mkdir -p $(OUTDIR)\n")
+	
 	file:write("\n")
-	file:write("clean : \n")
-	file:write("	@echo Cleaning $(INTDIR)\n")
-	file:write("	@rm -f $(INTDIR)/*\n")
-	file:write("	@rmdir $(INTDIR)\n")	
-	file:write("	@echo Cleaning $(OUTDIR)\n")
-	file:write("	@rm -f $(OUTDIR)/*\n")
-	file:write("	@rmdir $(OUTDIR)\n")
+	file:write(GetDollarVar(g_varOBJ) .. " : | " .. GetDollarVar(g_varINTDIR) .. "\n\n")
+	file:write(GetDollarVar(g_varINTDIR) .. ":\n")
+	file:write("	mkdir -p " .. GetDollarVar(g_varINTDIR) .. "\n")
+	file:write("	mkdir -p " .. GetDollarVar(g_varOUTDIR) .. "\n")
+	file:write("\n")
+	
+	--include submakefiles
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 
-		local moduleLocation = mbwriter_gettarget(filename)
-
-		file:write("	$(MAKE) -C " .. writer_global.makeoutputdirabs .. "/" .. filename .. " clean BUILDCONFIG='$(BUILDCONFIG)' \n\n")
+		local submakeLinkTargetAbs = mbwriter_gettarget(filename)
+		local submakefileAbs = writer_global.makeoutputdirabs .. "/" .. filename .. "/Makefile.mk"
+		
+		file:write("include " .. submakefileAbs .. "\n")
+		file:write(g_varMODULEOBJ .. " += " .. submakeLinkTargetAbs .. "\n")
 	end
+	file:write("\n")
+
+	--write 'all' target for current target
+	file:write(".PHONY: all_" .. currentTarget.name .. "\n")	
+	file:write("all_" .. currentTarget.name .. " : ")
+	for i = 1, #currentTarget.depends do
+		local dependency = currentTarget.depends[i]
+		local path, filename, ext = Util_FilePathDecompose(dependency)
+		file:write("all_" .. filename .. " ")
+	end
+	file:write(GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. " ")
+	file:write("\n")
+	file:write("\n")
+
+	--write 'all' target for main makefile
+	if (writer_global.ismainmakefile) then
+		file:write(".PHONY: all\n")	
+		file:write("all : " .. "all_" .. currentTarget.name)
+		file:write("\n")
+	
+		file:write("\n")
+		file:write(".PHONY: clean\n")
+		file:write("clean : \n")
+		file:write("	@echo Cleaning " .. GetDollarVar(g_varINTDIR) .. "\n")
+		file:write("	@rm -f " .. GetDollarVar(g_varINTDIR) .. "/*\n")
+		file:write("	@rmdir " .. GetDollarVar(g_varINTDIR) .. "\n")	
+		file:write("	@echo Cleaning " .. GetDollarVar(g_varOUTDIR) .. "\n")
+		file:write("	@rm -f " .. GetDollarVar(g_varOUTDIR) .. "/*\n")
+		file:write("	@rmdir " .. GetDollarVar(g_varOUTDIR) .. "\n")
+	end
+
 	file:write("\n")
 	file:write("%.d: ;\n")
 	

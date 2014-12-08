@@ -7,7 +7,7 @@
 
 #include <set>
 
-static std::vector<KeyValue> g_registeredTargets;
+static std::vector<KeyValue>	g_registeredTargets;
 
 static int luaFuncGlobalImport(lua_State* l)
 {
@@ -347,7 +347,6 @@ static void mbWriterWriteConfigTable(lua_State* l, const FlatConfig& flatConfig)
 	mbWriterSetOptions(l, flatConfig.options);
 }
 
-
 void mbWriterDo(MetaBuilderContext* ctx)
 {
 	mbPushActiveContext(ctx);
@@ -410,6 +409,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 	
 		lua_pushboolean(l, appState->cmdSetup.verbose);
 		lua_setfield(l, -2, "verbose");
+
+		lua_pushboolean(l, ctx->isMainMakefile);
+		lua_setfield(l, -2, "ismainmakefile");
 		
 		lua_setglobal(l, "writer_global");
 	}
