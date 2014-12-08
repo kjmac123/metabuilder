@@ -12,6 +12,9 @@ end
 
 g_firstTargetWritten = false
 
+--Count the number of times a base name appears so that we can avoid filename clashes
+g_sourceFileBaseNameCounts = {}
+
 --Map relative to absolute path
 g_filePathMap = {}
 
@@ -327,13 +330,24 @@ function WriteMakeFile(currentTarget)
 		local path, filename, ext = Util_FilePathDecompose(f)
 		if ext == "c" or ext == "cpp" then
 			local filenameAbs = GetFullFilePath(f)
+						
+			local fileBaseNameCount = g_sourceFileBaseNameCounts[filename]
+			if (fileBaseNameCount == nil) then
+				g_sourceFileBaseNameCounts[filename] = 0
+				fileBaseNameCount = 0				
+			end
 			
-			local obj = Util_StringReplace(filename, ".cpp", ".o")
-			obj  = Util_StringReplace(obj, ".c", ".o")
-			
+			local obj = Util_StringReplace(filename, ".cpp", "")
+			obj = Util_StringReplace(obj, ".c", "")
 			obj = GetDollarVar(g_varINTDIR) .. "/" .. obj
-			
+			local objWithCount = obj
+			if (fileBaseNameCount > 0) then
+				obj = obj .. "__" .. fileBaseNameCount
+			end
+			obj = obj .. ".o"
+
 			table.insert(buildFiles, {objFile=obj, srcFile=filenameAbs, ext=ext})
+			g_sourceFileBaseNameCounts[filename] = fileBaseNameCount + 1
 		end
 	end
 	file:write("\n")
