@@ -247,29 +247,38 @@ function WriteMakeFileStaticLibVars(file, currentTarget)
 	file:write(g_varCXXFLAGS .. " += -c\n")
 end
 
+function WriteCompileRule(file, currentTarget, extension)
+	local targetName = GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name
+	if (extension ~= nil) then
+		targetName = targetName .. extension
+	end
+	file:write(targetName .. "_compile : " .. GetDollarVar(g_varOBJ) .. " buildmodules_" .. currentTarget.name .. "\n")
+	file:write("\n")
+
+	return targetName
+end
+
 function WriteMakeFileAppTarget(file, currentTarget)
-	local appTarget = GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name
-	file:write(appTarget .. " : " .. GetDollarVar(g_varOBJ) .. "\n")
-	file:write("	@echo Linking " .. appTarget .. "\n")
+	local targetFileName = WriteCompileRule(file, currentTarget)
+	file:write(targetFileName .. " : " .. targetFileName .. "_compile\n")
+	file:write("	@echo Linking " .. targetFileName .. "\n")
 	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 end
 
 function WriteMakeFileModuleTarget(file, currentTarget)
-	local moduleTarget = Util_FilePathJoin(g_outdir, currentTarget.name)
-	file:write(GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. " : ".. GetDollarVar(g_varOBJ) .. "\n")
-	file:write("	@echo Creating module obj " .. moduleTarget .. "\n")
+	local targetFileName = WriteCompileRule(file, currentTarget)
+	file:write(targetFileName .. " : " .. targetFileName .. "_compile\n")
+	file:write("	@echo Creating module obj " .. targetFileName .. "\n")
 	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " -r " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
-	mbwriter_registertarget(currentTarget.name, moduleTarget)
+	mbwriter_registertarget(currentTarget.name, targetFileName)
 end
 
 function WriteMakeFileStaticLibTarget(file, currentTarget)
-	local staticLibTarget = Util_FilePathJoin(g_outdir, currentTarget.name) .. ".a"
-	local compileTargetName = GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. "_compile"
-	file:write(compileTargetName .. " : " .. GetDollarVar(g_varOBJ) .. " \n\n")
-	file:write(GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. " : " .. compileTargetName .. " \n")
+	local targetFileName = WriteCompileRule(file, currentTarget, ".a")
+	file:write(targetFileName .. " : " .. targetFileName .. "_compile\n")
 	file:write("	@echo Creating static lib " .. moduleTarget .. "\n")
-	file:write("	@" .. GetDollarVar(g_varAR) .. " .. GetDollarVar(g_varARFLAGS) .. " .. GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. ".a " .. GetDollarVar(g_varOBJ) .. "\n")
-	mbwriter_registertarget(currentTarget.name, staticLibTarget)
+	file:write("	@" .. GetDollarVar(g_varAR) .. " .. GetDollarVar(g_varARFLAGS) .. " .. targetFileName .. " " .. GetDollarVar(g_varOBJ) .. "\n")
+	mbwriter_registertarget(currentTarget.name, targetFileName)
 end
 
 function WriteMakeFile(currentTarget)
@@ -305,7 +314,26 @@ function WriteMakeFile(currentTarget)
 			WriteMakeFileGlobalVars(file, currentTarget)
 		end
 	end
+	
+	file:write("\n")
+	if (writer_global.ismainmakefile) then
+		file:write("default : all \n")
+	end
 		
+	file:write(g_varMODULEOBJ .. " := \n")
+	--include submakefiles
+	for i = 1, #currentTarget.depends do
+		local dependency = currentTarget.depends[i]
+		local path, filename, ext = Util_FilePathDecompose(dependency)
+
+		local submakeLinkTargetAbs = mbwriter_gettarget(filename)
+		local submakefileAbs = writer_global.makeoutputdirabs .. "/" .. filename .. "/Makefile.mk"
+		
+		file:write("include " .. submakefileAbs .. "\n")
+		file:write(g_varMODULEOBJ .. " += " .. submakeLinkTargetAbs .. "\n")
+	end
+	file:write("\n")
+			
 	WriteMakeFileCommonVars(file, currentTarget)
 
 	--Write out variables for current target type
@@ -318,12 +346,7 @@ function WriteMakeFile(currentTarget)
 	else
 		mbwriter_fatalerror("unsupported target type")
 	end
-	
-	file:write("\n")
-	if (writer_global.ismainmakefile) then
-		file:write("default : all \n")
-	end
-	
+		
     local buildFiles = {}
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
@@ -383,9 +406,7 @@ function WriteMakeFile(currentTarget)
 	end
 
 	file:write("\n")
-
-	file:write(g_varMODULEOBJ .. " := \n")
-		
+	
 	--print(inspect(currentTarget))
 	
 	file:write("\n")
@@ -394,47 +415,51 @@ function WriteMakeFile(currentTarget)
 	file:write("	mkdir -p " .. GetDollarVar(g_varINTDIR) .. "\n")
 	file:write("	mkdir -p " .. GetDollarVar(g_varOUTDIR) .. "\n")
 	file:write("\n")
-	
-	--include submakefiles
-	for i = 1, #currentTarget.depends do
-		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
-
-		local submakeLinkTargetAbs = mbwriter_gettarget(filename)
-		local submakefileAbs = writer_global.makeoutputdirabs .. "/" .. filename .. "/Makefile.mk"
 		
-		file:write("include " .. submakefileAbs .. "\n")
-		file:write(g_varMODULEOBJ .. " += " .. submakeLinkTargetAbs .. "\n")
-	end
-	file:write("\n")
-
-	--write 'all' target for current target
-	file:write(".PHONY: all_" .. currentTarget.name .. "\n")	
-	file:write("all_" .. currentTarget.name .. " : ")
+	file:write(".PHONY: buildmodules_" .. currentTarget.name .. "\n")	
+	file:write("buildmodules_" .. currentTarget.name .. " : ")
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 		file:write("all_" .. filename .. " ")
 	end
+	file:write("\n")
+	file:write("\n")	
+
+	--write 'all' target for current target
+	file:write(".PHONY: all_" .. currentTarget.name .. "\n")	
+	file:write("all_" .. currentTarget.name .. " : ")
 	file:write(GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. " ")
 	file:write("\n")
 	file:write("\n")
 
-	--write 'all' target for main makefile
+	--write 'clean' target for current target
+	file:write(".PHONY: clean_" .. currentTarget.name .. "\n")	
+	file:write("clean_" .. currentTarget.name .. " : ")
+	for i = 1, #currentTarget.depends do
+		local dependency = currentTarget.depends[i]
+		local path, filename, ext = Util_FilePathDecompose(dependency)
+		file:write("clean_" .. filename .. " ")
+	end
+	file:write("\n")
+	file:write("	@echo Cleaning " .. GetDollarVar(g_varINTDIR) .. "\n")
+	file:write("	@rm -f \"" .. GetDollarVar(g_varINTDIR) .. "\"/*\n")
+	file:write("	@if [ -d \"" .. GetDollarVar(g_varINTDIR) .. "\" ]; then rmdir \"" .. GetDollarVar(g_varINTDIR) .. "\";fi\n")
+	file:write("	@echo Cleaning " .. GetDollarVar(g_varOUTDIR) .. "\n")
+	file:write("	@rm -f \"" .. GetDollarVar(g_varOUTDIR) .. "\"/*\n")
+	file:write("	@if [ -d \"" .. GetDollarVar(g_varOUTDIR) .. "\" ]; then rmdir \"" .. GetDollarVar(g_varOUTDIR) .. "\";fi\n")
+	file:write("\n")
+	
 	if (writer_global.ismainmakefile) then
+		--write 'all' target for main makefile
 		file:write(".PHONY: all\n")	
 		file:write("all : " .. "all_" .. currentTarget.name)
 		file:write("\n")
 	
 		file:write("\n")
+		--write 'clean' target for main makefile
 		file:write(".PHONY: clean\n")
-		file:write("clean : \n")
-		file:write("	@echo Cleaning " .. GetDollarVar(g_varINTDIR) .. "\n")
-		file:write("	@rm -f " .. GetDollarVar(g_varINTDIR) .. "/*\n")
-		file:write("	@rmdir " .. GetDollarVar(g_varINTDIR) .. "\n")	
-		file:write("	@echo Cleaning " .. GetDollarVar(g_varOUTDIR) .. "\n")
-		file:write("	@rm -f " .. GetDollarVar(g_varOUTDIR) .. "/*\n")
-		file:write("	@rmdir " .. GetDollarVar(g_varOUTDIR) .. "\n")
+		file:write("clean : clean_" .. currentTarget.name .. "\n")
 	end
 
 	file:write("\n")
