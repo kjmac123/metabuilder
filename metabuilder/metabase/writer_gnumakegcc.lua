@@ -247,35 +247,74 @@ function WriteMakeFileStaticLibVars(file, currentTarget)
 	file:write(g_varCXXFLAGS .. " += -c\n")
 end
 
-function WriteCompileRule(file, currentTarget, extension)
-	local targetName = GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name
-	if (extension ~= nil) then
-		targetName = targetName .. extension
+function GetTargetOutputFilename(currentTarget)
+	local ext = ""
+	--print(inspect(currentTarget))
+	if currentTarget.targetType == "app" then
+		if (currentTarget.options.appfileextension ~= nil) then
+			ext = "." .. currentTarget.options.appfileextension[1]
+		end
+	elseif currentTarget.targetType == "staticlib" then
+		ext = ".a"
+	else
 	end
-	file:write(targetName .. "_compile : " .. GetDollarVar(g_varOBJ) .. " buildmodules_" .. currentTarget.name .. "\n")
+
+	local targetName = GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name
+	if (ext ~= nil) then
+		targetName = targetName .. ext
+	end
+
+	return targetName	
+end
+
+function GetPreLinkFileName(currentTarget)
+	local targetFileName = GetDollarVar(g_varINTDIR) .. "/__" .. currentTarget.name .. "__prelink__"
+	return targetFileName
+end
+
+function WriteCompileRule(file, currentTarget)
+	local targetFileName = GetPreLinkFileName(currentTarget)
+
+	file:write(targetFileName .. " : " .. GetDollarVar(g_varOBJ) .. " ")
+
+	for i = 1, #currentTarget.depends do
+		local dependency = currentTarget.depends[i]
+		local path, filename, ext = Util_FilePathDecompose(dependency)
+		
+		file:write("$(" .. filename .. "_OUTDIR)/" .. filename .. " ")
+	end	
+	file:write("\n")
+	file:write("	@echo Creating prelink obj " .. targetFileName .. "\n")
+	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " -r " .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 	file:write("\n")
 
-	return targetName
+	return targetFileName
 end
 
 function WriteMakeFileAppTarget(file, currentTarget)
-	local targetFileName = WriteCompileRule(file, currentTarget)
-	file:write(targetFileName .. " : " .. targetFileName .. "_compile\n")
+	local targetFileName = GetTargetOutputFilename(currentTarget)
+	local targetPreLinkFileName = WriteCompileRule(file, currentTarget)
+
+	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
 	file:write("	@echo Linking " .. targetFileName .. "\n")
 	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 end
 
 function WriteMakeFileModuleTarget(file, currentTarget)
-	local targetFileName = WriteCompileRule(file, currentTarget)
-	file:write(targetFileName .. " : " .. targetFileName .. "_compile\n")
+	local targetFileName = GetTargetOutputFilename(currentTarget)
+	local targetPreLinkFileName = WriteCompileRule(file, currentTarget)
+
+	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
 	file:write("	@echo Creating module obj " .. targetFileName .. "\n")
 	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " -r " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 	mbwriter_registertarget(currentTarget.name, targetFileName)
 end
 
 function WriteMakeFileStaticLibTarget(file, currentTarget)
-	local targetFileName = WriteCompileRule(file, currentTarget, ".a")
-	file:write(targetFileName .. " : " .. targetFileName .. "_compile\n")
+	local targetFileName = GetTargetOutputFilename(currentTarget)
+	local targetPreLinkFileName = WriteCompileRule(file, currentTarget)
+
+	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
 	file:write("	@echo Creating static lib " .. moduleTarget .. "\n")
 	file:write("	@" .. GetDollarVar(g_varAR) .. " .. GetDollarVar(g_varARFLAGS) .. " .. targetFileName .. " " .. GetDollarVar(g_varOBJ) .. "\n")
 	mbwriter_registertarget(currentTarget.name, targetFileName)
@@ -416,20 +455,10 @@ function WriteMakeFile(currentTarget)
 	file:write("	mkdir -p " .. GetDollarVar(g_varOUTDIR) .. "\n")
 	file:write("\n")
 		
-	file:write(".PHONY: buildmodules_" .. currentTarget.name .. "\n")	
-	file:write("buildmodules_" .. currentTarget.name .. " : ")
-	for i = 1, #currentTarget.depends do
-		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
-		file:write("all_" .. filename .. " ")
-	end
-	file:write("\n")
-	file:write("\n")	
-
 	--write 'all' target for current target
 	file:write(".PHONY: all_" .. currentTarget.name .. "\n")	
 	file:write("all_" .. currentTarget.name .. " : ")
-	file:write(GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name .. " ")
+	file:write(GetTargetOutputFilename(currentTarget) .. " ")
 	file:write("\n")
 	file:write("\n")
 
@@ -453,7 +482,7 @@ function WriteMakeFile(currentTarget)
 	if (writer_global.ismainmakefile) then
 		--write 'all' target for main makefile
 		file:write(".PHONY: all\n")	
-		file:write("all : " .. "all_" .. currentTarget.name)
+		file:write("all : " .. "all_" .. currentTarget.name .. "\n")
 		file:write("\n")
 	
 		file:write("\n")
