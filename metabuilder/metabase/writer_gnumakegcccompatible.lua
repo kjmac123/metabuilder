@@ -231,7 +231,10 @@ function WriteMakeFileAppVars(file, currentTarget)
 end
 
 function WriteMakeFileModuleVars(file, currrentTarget)
-	file:write(g_varLD ..		" := ld\n")
+	if currentTarget.options.ld == nil then
+		mbwriter_fatalerror("No linker set")
+	end
+	file:write(g_varLD .. 		" := " .. currentTarget.options.ld[1] .. "\n")
 	file:write(g_varCFLAGS ..	" += -c\n")
 	file:write(g_varCXXFLAGS ..	" += -c\n")
 	file:write(g_varLDFLAGS ..	" := \n")

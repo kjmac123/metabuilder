@@ -9,7 +9,7 @@ option("ar", "ar")
 option("ld", "clang++")
 
 option("ccflags",	"")
-option("cxxflags",	"-Wall \"-stdlib=libstdc++\" -v")
+option("cxxflags",	"-Wall")
 option("arflags",	"crsT")
 option("ldflags",	"")
 
