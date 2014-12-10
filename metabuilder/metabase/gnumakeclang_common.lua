@@ -4,11 +4,12 @@ writer "writer_gnumakegcccompatible.lua"
 
 local cppFlagsCommon = "-Wall"
 option("cc", "clang")
-option("cxx", "clang")
+option("cxx", "clang++")
 option("ar", "ar")
-option("ld", "clang")
+option("ld", "clang++")
 
-option("cxxflags",	"-Wall")
+option("ccflags",	"")
+option("cxxflags",	"-Wall \"-stdlib=libstdc++\" -v")
 option("arflags",	"crsT")
 option("ldflags",	"")
 
