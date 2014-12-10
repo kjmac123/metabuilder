@@ -326,8 +326,8 @@ function WriteMakeFileModuleTarget(file, currentTarget)
 	local targetPreLinkFileName = WriteCompileRule(file, currentTarget)
 
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
-	file:write("	@echo " .. GetDollarVar(g_varLD) .. " Creating module obj " .. targetFileName .. "\n")
-	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " -r " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
+	file:write("	@echo " .." ld" .. " Creating module obj " .. targetFileName .. "\n")
+	file:write("	@" .. "ld" .. " " .. " -r " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 	mbwriter_registertarget(currentTarget.name, targetFileName)
 end
 
