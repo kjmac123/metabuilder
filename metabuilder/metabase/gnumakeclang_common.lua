@@ -3,10 +3,10 @@ import "metabase_common.lua"
 writer "writer_gnumakegcccompatible.lua"
 
 local cppFlagsCommon = "-Wall"
-option("cc", "gcc")
-option("cxx", "g++")
+option("cc", "clang")
+option("cxx", "clang")
 option("ar", "ar")
-option("ld", "g++")
+option("ld", "clang")
 
 option("cxxflags",	"-Wall")
 option("arflags",	"crsT")

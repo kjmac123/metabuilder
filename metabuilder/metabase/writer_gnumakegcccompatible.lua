@@ -98,7 +98,7 @@ function WriteSourceToObjRule(file, buildFile)
 	basename = Util_StringReplace(buildFile.objFile, ".o", "")
 
 	file:write(buildFile.objFile .. " : " .. buildFile.srcFile .. " " .. basename .. ".d \n")
-	file:write("	@echo " .. buildFile.srcFile .. "\n")
+	file:write("	@echo " .. compiler .. " " .. buildFile.srcFile .. "\n")
 	file:write("	@" .. compiler .. " " .. compilerFlags .. " -o '$@' '$<'; \n")
 end
 
@@ -110,8 +110,17 @@ function WriteMakeFileCommonVars(file, currentTarget)
 	file:write(g_varINTDIR .. 		" := " .. g_intdir .. "\n")
 	file:write(g_varOUTDIR .. 		" := " .. g_outdir .. "\n")
 	file:write("\n")
-	file:write(g_varCC .. 			" := gcc\n")
-	file:write(g_varCXX ..			" := g++\n")
+	if currentTarget.options.cc == nil then
+		mbwriter_fatalerror("No C compiler set")
+	end
+	
+	--print(inspect(currentTarget))
+	
+	file:write(g_varCC .. 			" := " .. currentTarget.options.cc[1] .. "\n")
+	if currentTarget.options.cxx == nil then
+		mbwriter_fatalerror("No C++ compiler set")
+	end	
+	file:write(g_varCXX ..			" := " .. currentTarget.options.cxx[1] .. "\n")
 
 	for i = 1, #currentTarget.configs do
 		local config = currentTarget.configs[i]
@@ -175,7 +184,10 @@ end
 function WriteMakeFileAppVars(file, currentTarget)
 	file:write(g_varCFLAGS .. 	" += -c\n")
 	file:write(g_varCXXFLAGS ..	" += -c\n")
-	file:write(g_varLD .. 		" := g++\n")
+	if currentTarget.options.ld == nil then
+		mbwriter_fatalerror("No linker set")
+	end		
+	file:write(g_varLD .. 		" := " .. currentTarget.options.ld[1] .. "\n")
 	file:write("\n")
 
 	for i = 1, #currentTarget.configs do
@@ -226,7 +238,10 @@ function WriteMakeFileModuleVars(file, currrentTarget)
 end
 
 function WriteMakeFileStaticLibVars(file, currentTarget)
-	file:write(g_varAR .. " := ar\n")
+	if currentTarget.options.ar == nil then
+		mbwriter_fatalerror("No archive tool specified")
+	end
+	file:write(g_varAR .. " := " .. currentTarget.options.ar[1] .. "\n")
 	file:write("\n")
 
 	for i = 1, #currentTarget.configs do
@@ -284,7 +299,7 @@ function WriteCompileRule(file, currentTarget)
 		file:write("$(" .. filename .. "_OUTDIR)/" .. filename .. " ")
 	end	
 	file:write("\n")
-	file:write("	@echo Creating prelink obj " .. targetFileName .. "\n")
+	file:write("	@echo " .. GetDollarVar(g_varLD) .. " Creating prelink obj " .. targetFileName .. "\n")
 	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " -r " .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 	file:write("\n")
 
@@ -296,7 +311,7 @@ function WriteMakeFileAppTarget(file, currentTarget)
 	local targetPreLinkFileName = WriteCompileRule(file, currentTarget)
 
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
-	file:write("	@echo Linking " .. targetFileName .. "\n")
+	file:write("	@echo " .. GetDollarVar(g_varLD) .. " Linking " .. targetFileName .. "\n")
 	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 end
 
@@ -305,7 +320,7 @@ function WriteMakeFileModuleTarget(file, currentTarget)
 	local targetPreLinkFileName = WriteCompileRule(file, currentTarget)
 
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
-	file:write("	@echo Creating module obj " .. targetFileName .. "\n")
+	file:write("	@echo " .. GetDollarVar(g_varLD) .. " Creating module obj " .. targetFileName .. "\n")
 	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " -r " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 	mbwriter_registertarget(currentTarget.name, targetFileName)
 end
@@ -315,7 +330,7 @@ function WriteMakeFileStaticLibTarget(file, currentTarget)
 	local targetPreLinkFileName = WriteCompileRule(file, currentTarget)
 
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
-	file:write("	@echo Creating static lib " .. moduleTarget .. "\n")
+	file:write("	@echo " .. GetDollarVar(g_varAR) .. " Creating static lib " .. moduleTarget .. "\n")
 	file:write("	@" .. GetDollarVar(g_varAR) .. " .. GetDollarVar(g_varARFLAGS) .. " .. targetFileName .. " " .. GetDollarVar(g_varOBJ) .. "\n")
 	mbwriter_registertarget(currentTarget.name, targetFileName)
 end
@@ -513,5 +528,4 @@ end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 local currentTarget = writer_solution.targets[1]
-
 WriteMakeFile(currentTarget)
