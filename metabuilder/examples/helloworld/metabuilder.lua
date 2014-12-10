@@ -25,6 +25,7 @@ solution "helloworld"
 		--add any .h or .inl files found with a matching name
 		files
 		{
+			"metabuilder.lua",
 			"main.cpp"
 		}
 

@@ -492,6 +492,8 @@ function WriteMakeFile(currentTarget)
 	end
 
 	file:write("\n")
+	
+	--Avoid 'no rule to make target' errors
 	file:write("%.d: ;\n")
 	
 	for i = 1, #buildFiles do
