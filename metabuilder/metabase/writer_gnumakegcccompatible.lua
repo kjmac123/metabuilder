@@ -230,7 +230,10 @@ function WriteMakeFileAppVars(file, currentTarget)
 	file:write(g_varLDFLAGS .. " := $(" .. g_varLDFLAGS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ") $(" .. g_varLDLIBS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ")\n")
 end
 
-function WriteMakeFileModuleVars(file, currrentTarget)
+function WriteMakeFileModuleVars(var1, var2)
+	file = var1
+	currentTarget = var2
+	
 	if currentTarget.options.ld == nil then
 		mbwriter_fatalerror("No linker set")
 	end
@@ -302,8 +305,8 @@ function WriteCompileRule(file, currentTarget)
 		file:write("$(" .. filename .. "_OUTDIR)/" .. filename .. " ")
 	end	
 	file:write("\n")
-	file:write("	@echo " .. GetDollarVar(g_varLD) .. " Creating prelink obj " .. targetFileName .. "\n")
-	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " -r " .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
+	file:write("	@echo " .. "ld" .. " Creating prelink obj " .. targetFileName .. "\n")
+	file:write("	@" .. "ld" .. " " .. " -r " .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
 	file:write("\n")
 
 	return targetFileName
