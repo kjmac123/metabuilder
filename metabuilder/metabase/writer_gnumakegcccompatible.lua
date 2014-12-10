@@ -230,7 +230,10 @@ function WriteMakeFileAppVars(file, currentTarget)
 	file:write(g_varLDFLAGS .. " := $(" .. g_varLDFLAGS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ") $(" .. g_varLDLIBS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ")\n")
 end
 
-function WriteMakeFileModuleVars(file, currrentTarget)
+function WriteMakeFileModuleVars(var1, var2)
+	file = var1
+	currentTarget = var2
+	
 	if currentTarget.options.ld == nil then
 		mbwriter_fatalerror("No linker set")
 	end
