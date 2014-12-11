@@ -33,6 +33,7 @@ g_varLIBS = ""
 g_varLDLIBS = ""
 g_varLIBDIRS = ""
 g_varLDFLAGS = ""
+g_varARFLAGS = ""
 g_varCC = ""
 g_varCXX = ""
 g_varAR = ""
@@ -65,6 +66,7 @@ function InitVars(currentTarget)
 	g_varLDLIBS			= currentTarget.name .. "_LDLIBS"
 	g_varLIBDIRS		= currentTarget.name .. "_LIBDIRS"
 	g_varLDFLAGS		= currentTarget.name .. "_LDFLAGS"
+	g_varARFLAGS		= currentTarget.name .. "_ARFLAGS"
 	g_varCC				= currentTarget.name .. "_CC"
 	g_varCXX			= currentTarget.name .. "_CXX"
 	g_varAR				= currentTarget.name .. "_AR"
@@ -301,8 +303,9 @@ function WriteCompileRule(file, currentTarget)
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local submakeLinkTargetAbs = mbwriter_gettarget(filename)
 		
-		file:write("$(" .. filename .. "_OUTDIR)/" .. filename .. " ")
+		file:write(submakeLinkTargetAbs .. " ")
 	end	
 	file:write("\n")
 	file:write("	@echo " .. "ld" .. " Creating prelink obj " .. targetFileName .. "\n")
@@ -336,8 +339,8 @@ function WriteMakeFileStaticLibTarget(file, currentTarget)
 	local targetPreLinkFileName = WriteCompileRule(file, currentTarget)
 
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
-	file:write("	@echo " .. GetDollarVar(g_varAR) .. " Creating static lib " .. moduleTarget .. "\n")
-	file:write("	@" .. GetDollarVar(g_varAR) .. " .. GetDollarVar(g_varARFLAGS) .. " .. targetFileName .. " " .. GetDollarVar(g_varOBJ) .. "\n")
+	file:write("	@echo " .. GetDollarVar(g_varAR) .. " Creating static lib " .. targetFileName .. "\n")
+	file:write("	@" .. GetDollarVar(g_varAR) .. " " .. GetDollarVar(g_varARFLAGS) .. " " .. targetFileName .. " " .. GetDollarVar(g_varOBJ) .. "\n")
 	mbwriter_registertarget(currentTarget.name, targetFileName)
 end
 
