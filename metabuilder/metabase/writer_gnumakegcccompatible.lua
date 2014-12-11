@@ -343,14 +343,14 @@ end
 
 function WriteMakeFile(currentTarget)
 
-	local makeDir = Util_FilePathJoin(writer_global.makeoutputdirabs, currentTarget.name)
+	local makeDir = Util_FilePathJoin(writer_global.makeoutputdirabs, "")
 	mkdir(makeDir)
 	
 	local makeFilename = ""
 	if (writer_global.ismainmakefile) then
 		makeFilename = Util_FilePathJoin(makeDir, "Makefile")
 	else
-		makeFilename = Util_FilePathJoin(makeDir, "Makefile.mk")
+		makeFilename = Util_FilePathJoin(makeDir, currentTarget.name .. ".mk")
 	end
 	
 	local file = io.open(makeFilename, "w")
@@ -387,7 +387,7 @@ function WriteMakeFile(currentTarget)
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 
 		local submakeLinkTargetAbs = mbwriter_gettarget(filename)
-		local submakefileAbs = writer_global.makeoutputdirabs .. "/" .. filename .. "/Makefile.mk"
+		local submakefileAbs = writer_global.makeoutputdirabs .. "/" .. filename .. ".mk"
 		
 		file:write("include " .. submakefileAbs .. "\n")
 		file:write(g_varMODULEOBJ .. " += " .. submakeLinkTargetAbs .. "\n")
