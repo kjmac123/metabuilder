@@ -1,8 +1,8 @@
 
 lua_MODULEOBJ := 
 
-lua_INTDIR := ../../../../external/lua-5.2.2/metabuilder/metatmp/metabuilder/gnumakegcc_cygwin/int/lua/$(BUILDCONFIG)
-lua_OUTDIR := ../../../../external/lua-5.2.2/metabuilder/metatmp/metabuilder/gnumakegcc_cygwin/out/lua/$(BUILDCONFIG)
+lua_INTDIR := ../../../../external/lua-5.2.2/int/lua/$(BUILDCONFIG)
+lua_OUTDIR := ../../../../external/lua-5.2.2/out/lua/$(BUILDCONFIG)
 
 lua_CC := gcc
 lua_CXX := g++

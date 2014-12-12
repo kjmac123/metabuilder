@@ -3,11 +3,11 @@ BUILDCONFIG := Debug
 
 default : all 
 metabuilder_MODULEOBJ := 
-include C:/cygwin/home/Ken/opensource/metabuilder/metabuilder/metatmp/metabuilder/gnumakegcc_cygwin/lua.mk
+include ../../../metatmp/metabuilder/gnumakegcc_cygwin/lua.mk
 metabuilder_MODULEOBJ += $(lua_OUTDIR)/lua
 
-metabuilder_INTDIR := ../../../metatmp/metabuilder/gnumakegcc_cygwin/int/metabuilder/$(BUILDCONFIG)
-metabuilder_OUTDIR := ../../../metatmp/metabuilder/gnumakegcc_cygwin/out/metabuilder/$(BUILDCONFIG)
+metabuilder_INTDIR := ../../../int/metabuilder/$(BUILDCONFIG)
+metabuilder_OUTDIR := ../../../out/metabuilder/$(BUILDCONFIG)
 
 metabuilder_CC := gcc
 metabuilder_CXX := g++

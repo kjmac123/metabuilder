@@ -468,11 +468,12 @@ function WriteMakeFile(currentTarget)
 		local dependency = currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 
-		local submakeLinkTargetAbs = mbwriter_gettarget(filename)
+		local submakeLinkTarget = mbwriter_gettarget(filename)
 		local submakefileAbs = writer_global.makeoutputdirabs .. "/" .. filename .. ".mk"
+		local submakefile = GetFullFilePath(submakefileAbs)
 		
-		file:write("include " .. submakefileAbs .. "\n")
-		file:write(g_varMODULEOBJ .. " += " .. submakeLinkTargetAbs .. "\n")
+		file:write("include " .. submakefile .. "\n")
+		file:write(g_varMODULEOBJ .. " += " .. submakeLinkTarget .. "\n")
 	end
 	file:write("\n")
 			
