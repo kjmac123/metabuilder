@@ -3,7 +3,7 @@ BUILDCONFIG := Debug
 
 default : all 
 metabuilder_MODULEOBJ := 
-include ../../../../../../../../../home/pi/opensource/metabuilder/metabuilder/metatmp/metabuilder/gnumakegcc_posix/lua.mk
+include lua.mk
 metabuilder_MODULEOBJ += $(lua_OUTDIR)/lua
 
 metabuilder_INTDIR := ../../../int/metabuilder/$(BUILDCONFIG)
