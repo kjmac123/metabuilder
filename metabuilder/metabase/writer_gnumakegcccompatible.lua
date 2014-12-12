@@ -440,10 +440,7 @@ function WriteMakeFile(currentTarget)
 	end
 	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
 	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
-	
-	g_intdir = GetFullFilePath(g_intdir)
-	g_outdir = GetFullFilePath(g_outdir)
-	
+		
 	--print(inspect(writer_global))
 	--print(inspect(currentTarget))
 
