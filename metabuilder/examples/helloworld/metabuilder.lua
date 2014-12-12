@@ -26,7 +26,7 @@ solution "helloworld"
 		files
 		{
 			"metabuilder.lua",
-			"main.cpp"
+			"main.cpp",
 		}
 
 		--A current metabuilder quirk is that any build configurations you

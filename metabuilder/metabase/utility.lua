@@ -164,3 +164,13 @@ end
 function Util_FileQuoted(filepath)
 	return '"' .. filepath .. '"'
 end
+
+function Util_FindLast(str, toFind)
+	local toFindEscaped = Util_EscapeMagicLuaChars(toFind)
+    local i = str:match(".*" .. toFindEscaped .. "()")
+    if i == nil then 
+		return nil
+	end
+	
+	return i-1
+end

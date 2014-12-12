@@ -12,6 +12,8 @@ end
 
 g_firstTargetWritten = false
 
+g_useRelativePaths = true
+
 --Count the number of times a base name appears so that we can avoid filename clashes
 g_sourceFileBaseNameCounts = {}
 
@@ -44,14 +46,83 @@ g_varDEFINES = ""
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-function GetFullFilePath(filepath)
-	local newfilepath = g_filePathMap[filepath]
-	if newfilepath == nil then
-		return Util_FileNormaliseUnix(Util_FileConvertToAbsolute({g_filePathMap}, writer_global.currentmetamakedirabs, filepath))
+function GetLongestCommonSequenceLengthFromStart(str1, str2)
+	local str1Table = {}
+	
+	for c in str1:gmatch"." do
+		table.insert(str1Table, c)
 	end
 
-	return Util_FileNormaliseUnix(newfilepath)
+	
+	local count = 1
+	for c in str2:gmatch"." do
+		if (str1Table[count] ~= c) then
+			break
+		end
+		
+		count = count + 1
+	end
+	
+	return count
 end
+
+function GetNumDirLevels(dir)
+	local dirCount = 0
+
+	for c in dir:gmatch"." do
+		if c == "/" then
+			dirCount = dirCount + 1
+		end
+	end
+	
+	return dirCount
+end
+
+function BuildPathBack(nLevels)
+	local result = ""
+	for i = 1, nLevels do
+		result = result .. "../"
+	end
+	
+	return result
+end
+
+function GetFullFilePath(filepath)
+	local result = ""
+	
+	if (g_useRelativePaths == true) then
+		local normalisedFilepathAbs = Util_FileNormaliseUnix(Util_FileConvertToAbsolute({g_filePathMap}, writer_global.currentmetamakedirabs, filepath))
+		
+		local normalisedMakeOutputDirAbs = Util_FileNormaliseUnix(writer_global.makeoutputdirabs)
+
+		--baseDir is the common path fragment shared by the makefile output directory and 'filepath'
+		local baseDir = nil
+		do
+			local commonSubSequenceLength = GetLongestCommonSequenceLengthFromStart(normalisedFilepathAbs, normalisedMakeOutputDirAbs)
+			local commonSubSequence = normalisedFilepathAbs:sub(1, commonSubSequenceLength)
+			
+			--Look for last dir sep character in order to ignore a partial path or file match
+			local lastDirSep = Util_FindLast(commonSubSequence, "/")
+			if (lastDirSep > 0) then
+				--Take sequence up to last dir sep as our base dir
+				baseDir = commonSubSequence:sub(1, lastDirSep)
+			end
+		end
+		
+		local pathFromBaseToOutDir = Util_StringReplace(normalisedMakeOutputDirAbs, baseDir, "")
+		local nDirLevels = GetNumDirLevels("/" .. pathFromBaseToOutDir)
+		--Path back from make output dir to base dir
+		local pathBack = BuildPathBack(nDirLevels)
+		
+		local filepathBaseRelative = Util_StringReplace(normalisedFilepathAbs, baseDir, "")
+		result = pathBack .. filepathBaseRelative		
+	else
+		result = Util_FileNormaliseUnix(Util_FileConvertToAbsolute({g_filePathMap}, writer_global.currentmetamakedirabs, filepath))
+	end
+	
+	return result
+end
+
 
 function InitVars(currentTarget)
 	g_varBUILDCONFIG	= "BUILDCONFIG"
@@ -364,6 +435,9 @@ function WriteMakeFile(currentTarget)
 	g_outdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.outdir)
 	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
 	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
+	
+	g_intdir = GetFullFilePath(g_intdir)
+	g_outdir = GetFullFilePath(g_outdir)
 	
 	--print(inspect(writer_global))
 	--print(inspect(currentTarget))
