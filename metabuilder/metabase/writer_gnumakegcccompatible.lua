@@ -469,8 +469,12 @@ function WriteMakeFile(currentTarget)
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 
 		local submakeLinkTarget = mbwriter_gettarget(filename)
-		local submakefileAbs = writer_global.makeoutputdirabs .. "/" .. filename .. ".mk"
-		local submakefile = GetFullFilePath(submakefileAbs)
+		local submakefile = filename .. ".mk"
+		if (g_useRelativePaths == true) then
+			submakefile = filename .. ".mk"
+		else
+			submakefile = writer_global.makeoutputdirabs .. "/" .. filename .. ".mk"
+		end
 		
 		file:write("include " .. submakefile .. "\n")
 		file:write(g_varMODULEOBJ .. " += " .. submakeLinkTarget .. "\n")
