@@ -431,7 +431,7 @@ function WriteMakeFile(currentTarget)
 	
 	InitVars(currentTarget)	
 
-	if (g_useRelativePaths == true)
+	if (g_useRelativePaths == true) then
 		g_intdir = writer_global.intdir
 		g_outdir = writer_global.outdir
 	else

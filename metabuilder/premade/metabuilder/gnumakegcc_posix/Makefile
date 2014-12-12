@@ -6,8 +6,8 @@ metabuilder_MODULEOBJ :=
 include /home/pi/opensource/metabuilder/metabuilder/metatmp/metabuilder/gnumakegcc_posix/lua.mk
 metabuilder_MODULEOBJ += $(lua_OUTDIR)/lua
 
-metabuilder_INTDIR := ../../../../../../../../../home/pi/opensource/metabuilder/metabuilder/metatmp/metabuilder/gnumakegcc_posix/int/metabuilder/$(BUILDCONFIG)
-metabuilder_OUTDIR := ../../../../../../../../../home/pi/opensource/metabuilder/metabuilder/metatmp/metabuilder/gnumakegcc_posix/out/metabuilder/$(BUILDCONFIG)
+metabuilder_INTDIR := ../../../int/metabuilder/$(BUILDCONFIG)
+metabuilder_OUTDIR := ../../../out/metabuilder/$(BUILDCONFIG)
 
 metabuilder_CC := gcc
 metabuilder_CXX := g++
