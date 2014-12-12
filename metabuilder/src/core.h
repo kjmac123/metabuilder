@@ -4,14 +4,22 @@
 #if defined(__APPLE__) && defined(__MACH__)
 	#include <TargetConditionals.h>
 	#if TARGET_OS_MAC == 1
-		#define PLATFORM_OSX
-		#define PLATFORM_POSIX
+		#ifndef PLATFORM_OSX
+			#define PLATFORM_OSX
+		#endif
+		#ifndef PLATFORM_POSIX
+			#define PLATFORM_POSIX
+		#endif
 	#endif
 #endif
 
 #if defined(__linux__)
-	#define PLATFORM_LINUX
-	#define PLATFORM_POSIX
+	#ifndef PLATFORM_LINUX
+		#define PLATFORM_LINUX
+	#endif
+	#ifndef PLATFORM_POSIX
+		#define PLATFORM_POSIX
+	#endif
 #endif
 
 typedef unsigned char U8;
