@@ -431,8 +431,13 @@ function WriteMakeFile(currentTarget)
 	
 	InitVars(currentTarget)	
 
-	g_intdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.intdir)
-	g_outdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.outdir)
+	if (g_useRelativePaths == true)
+		g_intdir = writer_global.intdir
+		g_outdir = writer_global.outdir
+	else
+		g_intdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.intdir)
+		g_outdir = Util_FilePathJoin(writer_global.makeoutputdirabs, writer_global.outdir)
+	end
 	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
 	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
 	
