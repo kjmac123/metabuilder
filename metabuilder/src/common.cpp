@@ -799,8 +799,6 @@ void mbExpandMacros(std::string* result, const char* str)
 {
 	char macro[1024];
 
-	const char* srcCursor = str;
-
 	*result = str;
 
 	//Only process each macro if we know our string contains at least one.

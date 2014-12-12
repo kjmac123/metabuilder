@@ -160,15 +160,15 @@ static int luaFuncCopyFile(lua_State* l)
 	}
 	
 	fseek(fromFile, 0, SEEK_END);
-	long bytesToCopy = ftell(fromFile);
+	size_t bytesToCopy = ftell(fromFile);
 	fseek(fromFile, 0, SEEK_SET);
 	
 	char buf[10*1024];
 	while(bytesToCopy > 0)
 	{
-		long bytesThisTime = bytesToCopy > sizeof(buf) ? sizeof(buf) : bytesToCopy;
+		size_t bytesThisTime = bytesToCopy > sizeof(buf) ? sizeof(buf) : bytesToCopy;
 
-		long actualBytesRead = fread(buf, 1, bytesThisTime, fromFile);
+		size_t actualBytesRead = fread(buf, 1, bytesThisTime, fromFile);
 		if (actualBytesRead != bytesThisTime)
 		{
 			fclose(toFile);
@@ -177,7 +177,7 @@ static int luaFuncCopyFile(lua_State* l)
 			mbExitError();
 		}
 		
-		long bytesWritten = fwrite(buf, 1, actualBytesRead, toFile);
+		size_t bytesWritten = fwrite(buf, 1, actualBytesRead, toFile);
 		if (bytesWritten != bytesThisTime)
 		{
 			fclose(toFile);

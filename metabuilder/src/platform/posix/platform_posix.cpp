@@ -45,7 +45,7 @@ bool mbaCreateLink(const char* src, const char* dst)
 	if (readlinkResult > 0)
 	{
 		//link already exists
-		if (!stricmp(existingSrcPath, src))
+		if (!strcmp(existingSrcPath, src))
 			return true;
 			
 		//Link is to a different location.
@@ -154,7 +154,7 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 				char* current = strtok (tmp,",");
 				while (current != NULL)
 				{
-					if (stricmp(current, dirEntry->d_name) == 0)
+					if (strcmp(current, dirEntry->d_name) == 0)
 					{
 						filterMatched = true;
 						break;

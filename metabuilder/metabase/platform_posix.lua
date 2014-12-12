@@ -3,6 +3,11 @@ supportedplatforms
 	"POSIX",
 }
 
+defines 
+{ 
+	"PLATFORM_POSIX", 
+}
+
 platform "POSIX"
 	config "Debug"
 	config_end()
