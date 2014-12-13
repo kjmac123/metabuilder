@@ -9,14 +9,11 @@ lua_CXX := g++
 lua_CPPFLAGS.Debug := \
   -Wall -g -O0 \
 
-lua_CPPFLAGS.Debug := $(lua_CPPFLAGS.Debug)
 lua_CFLAGS.Debug := \
 
-lua_CFLAGS.Debug := $(lua_CFLAGS.Debug)
 lua_CXXFLAGS.Debug := \
   -Wall \
 
-lua_CXXFLAGS.Debug := $(lua_CXXFLAGS.Debug)
 lua_DEFINES.Debug := \
   -DMETABUILDER \
   -DPLATFORM_POSIX \
@@ -31,14 +28,11 @@ lua_CPPFLAGS.Debug += $(lua_INCLUDES.Debug)
 lua_CPPFLAGS.Release := \
   -Wall -g -O2 \
 
-lua_CPPFLAGS.Release := $(lua_CPPFLAGS.Release)
 lua_CFLAGS.Release := \
 
-lua_CFLAGS.Release := $(lua_CFLAGS.Release)
 lua_CXXFLAGS.Release := \
   -Wall \
 
-lua_CXXFLAGS.Release := $(lua_CXXFLAGS.Release)
 lua_DEFINES.Release := \
   -DMETABUILDER \
   -DPLATFORM_POSIX \
@@ -53,14 +47,11 @@ lua_CPPFLAGS.Release += $(lua_INCLUDES.Release)
 lua_CPPFLAGS.Master := \
   -Wall -O2 \
 
-lua_CPPFLAGS.Master := $(lua_CPPFLAGS.Master)
 lua_CFLAGS.Master := \
 
-lua_CFLAGS.Master := $(lua_CFLAGS.Master)
 lua_CXXFLAGS.Master := \
   -Wall \
 
-lua_CXXFLAGS.Master := $(lua_CXXFLAGS.Master)
 lua_DEFINES.Master := \
   -DMETABUILDER \
   -DPLATFORM_POSIX \

@@ -214,7 +214,6 @@ function WriteMakeFileCommonVars(file, currentTarget)
 			end
 		end
 		file:write("\n")
-		file:write(g_varCPPFLAGS .. "." .. config.name .. " := $(" .. g_varCPPFLAGS .. "." .. config.name .. ")\n")
 
 		--CFLAGS is for C only
 		file:write(g_varCFLAGS .. "." .. config.name .. " := \\\n")
@@ -224,7 +223,6 @@ function WriteMakeFileCommonVars(file, currentTarget)
 			end
 		end
 		file:write("\n")
-		file:write(g_varCFLAGS .. "." .. config.name .. " := $(" .. g_varCFLAGS .. "." .. config.name .. ")\n")
 
 		--CXXFLAGS is for C++ only
 		file:write(g_varCXXFLAGS .. "." .. config.name .. " := \\\n")
@@ -234,7 +232,6 @@ function WriteMakeFileCommonVars(file, currentTarget)
 			end
 		end
 		file:write("\n")
-		file:write(g_varCXXFLAGS .. "." .. config.name .. " := $(" .. g_varCXXFLAGS .. "." .. config.name .. ")\n")
 
 		--Preprocessor macros will live in CPPFLAGS
 		file:write(g_varDEFINES .. "." .. config.name .. " := \\\n")
@@ -281,7 +278,6 @@ function WriteMakeFileAppVars(file, currentTarget)
 			end
 		end
 		file:write("\n")
-		file:write(g_varLDFLAGS .. "." .. config.name .. " += $(" .. g_varLDFLAGS .. "." .. config.name .. ")\n")
 
 		--Library directories. Will be stored in LDFLAGS
 		file:write(g_varLIBDIRS .. "." .. config.name .. " := \\\n")

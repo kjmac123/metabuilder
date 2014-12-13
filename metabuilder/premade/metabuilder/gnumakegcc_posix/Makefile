@@ -14,14 +14,11 @@ metabuilder_CXX := g++
 metabuilder_CPPFLAGS.Debug := \
   -Wall -g -O0 \
 
-metabuilder_CPPFLAGS.Debug := $(metabuilder_CPPFLAGS.Debug)
 metabuilder_CFLAGS.Debug := \
 
-metabuilder_CFLAGS.Debug := $(metabuilder_CFLAGS.Debug)
 metabuilder_CXXFLAGS.Debug := \
   -Wall \
 
-metabuilder_CXXFLAGS.Debug := $(metabuilder_CXXFLAGS.Debug)
 metabuilder_DEFINES.Debug := \
   -DMETABUILDER \
   -DPLATFORM_POSIX \
@@ -37,14 +34,11 @@ metabuilder_CPPFLAGS.Debug += $(metabuilder_INCLUDES.Debug)
 metabuilder_CPPFLAGS.Release := \
   -Wall -g -O2 \
 
-metabuilder_CPPFLAGS.Release := $(metabuilder_CPPFLAGS.Release)
 metabuilder_CFLAGS.Release := \
 
-metabuilder_CFLAGS.Release := $(metabuilder_CFLAGS.Release)
 metabuilder_CXXFLAGS.Release := \
   -Wall \
 
-metabuilder_CXXFLAGS.Release := $(metabuilder_CXXFLAGS.Release)
 metabuilder_DEFINES.Release := \
   -DMETABUILDER \
   -DPLATFORM_POSIX \
@@ -67,7 +61,6 @@ metabuilder_LD := g++
 metabuilder_LDFLAGS.Debug := \
  \
 
-metabuilder_LDFLAGS.Debug += $(metabuilder_LDFLAGS.Debug)
 metabuilder_LIBDIRS.Debug := \
 
 metabuilder_LDFLAGS.Debug += $(metabuilder_LIBDIRS.Debug)
@@ -78,7 +71,6 @@ metabuilder_LDLIBS.Debug += $(metabuilder_LIBS.Debug)
 metabuilder_LDFLAGS.Release := \
  \
 
-metabuilder_LDFLAGS.Release += $(metabuilder_LDFLAGS.Release)
 metabuilder_LIBDIRS.Release := \
 
 metabuilder_LDFLAGS.Release += $(metabuilder_LIBDIRS.Release)
