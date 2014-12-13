@@ -110,6 +110,14 @@ function Util_FileTrimTrailingDot(path)
 	return path
 end
 
+function Util_FilePathMarkedAsRaw(filepath)
+	local firstChar = string.sub(filepath, 1, 1)
+	if firstChar == "!" then
+		return true
+	end
+	return false
+end
+
 function Util_FileConvertToAbsolute(filePathMap, baseDir, filepath)
 	local length = string.len(filepath)
 	if length == 0 then
@@ -117,8 +125,7 @@ function Util_FileConvertToAbsolute(filePathMap, baseDir, filepath)
 	end
 
 	--Bail if we've marked this filepath to not be expanded
-	local firstChar = string.sub(filepath, 1, 1)
-	if firstChar == "!" then
+	if Util_FilePathMarkedAsRaw(filepath) then
 		return string.sub(filepath, 2, length)
 	end
 
@@ -168,7 +175,7 @@ end
 function Util_FindLast(str, toFind)
 	local toFindEscaped = Util_EscapeMagicLuaChars(toFind)
     local i = str:match(".*" .. toFindEscaped .. "()")
-    if i == nil then 
+    if i == nil then
 		return nil
 	end
 	

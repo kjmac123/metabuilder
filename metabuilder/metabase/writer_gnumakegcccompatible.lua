@@ -54,15 +54,17 @@ function GetLongestCommonSequenceLengthFromStart(str1, str2)
 	end
 
 	
-	local count = 1
+	local count = 0
 	for c in str2:gmatch"." do
+		count = count + 1
 		if (str1Table[count] ~= c) then
 			break
-		end
-		
-		count = count + 1
+		end		
 	end
 	
+	if count > 0 then
+		count = count + 1
+	end
 	return count
 end
 
@@ -90,7 +92,7 @@ end
 function GetFullFilePath(filepath)
 	local result = ""
 	
-	if (g_useRelativePaths == true) then
+	if (g_useRelativePaths == true) or (Util_FilePathMarkedAsRaw(filepath)) then
 		local normalisedFilepathAbs = Util_FileNormaliseUnix(Util_FileConvertToAbsolute({g_filePathMap}, writer_global.currentmetamakedirabs, filepath))
 		
 		local normalisedMakeOutputDirAbs = Util_FileNormaliseUnix(writer_global.makeoutputdirabs)
@@ -103,23 +105,28 @@ function GetFullFilePath(filepath)
 			
 			--Look for last dir sep character in order to ignore a partial path or file match
 			local lastDirSep = Util_FindLast(commonSubSequence, "/")
-			if (lastDirSep > 0) then
+			if (lastDirSep ~= nil) then
 				--Take sequence up to last dir sep as our base dir
 				baseDir = commonSubSequence:sub(1, lastDirSep)
 			end
 		end
 		
-		local pathFromBaseToOutDir = Util_StringReplace(normalisedMakeOutputDirAbs, baseDir, "")
-		local nDirLevels = GetNumDirLevels("/" .. pathFromBaseToOutDir)
-		--Path back from make output dir to base dir
-		local pathBack = BuildPathBack(nDirLevels)
-		
-		local filepathBaseRelative = Util_StringReplace(normalisedFilepathAbs, baseDir, "")
-		result = pathBack .. filepathBaseRelative		
+		if (baseDir ~= nil) then
+			local pathFromBaseToOutDir = Util_StringReplace(normalisedMakeOutputDirAbs, baseDir, "")
+			local nDirLevels = GetNumDirLevels("/" .. pathFromBaseToOutDir)
+			--Path back from make output dir to base dir
+			local pathBack = BuildPathBack(nDirLevels)
+			
+			local filepathBaseRelative = Util_StringReplace(normalisedFilepathAbs, baseDir, "")
+			result = pathBack .. filepathBaseRelative
+		else
+			result = normalisedFilepathAbs
+		end
 	else
 		result = Util_FileNormaliseUnix(Util_FileConvertToAbsolute({g_filePathMap}, writer_global.currentmetamakedirabs, filepath))
 	end
 	
+	--print(result)
 	return result
 end
 
