@@ -1,6 +1,7 @@
 #include "metabuilder_pch.h"
 
-#include "common.h"
+#include "makesetup.h"
+#include "metabase.h"
 
 #include <sys/stat.h>
 

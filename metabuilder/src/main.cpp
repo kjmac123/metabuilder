@@ -1,6 +1,11 @@
 #include "metabuilder_pch.h"
 
-#include "common.h"
+#include "makesetup.h"
+#include "writer.h"
+#include "solution.h"
+#include "configparam.h"
+#include "metabase.h"
+#include "platformparam.h"
 
 #include "ezOptionParser.hpp"
 

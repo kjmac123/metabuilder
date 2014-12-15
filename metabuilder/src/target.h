@@ -1,7 +1,7 @@
 #ifndef TARGET_H
 #define TARGET_H
 
-#include "common.h"
+#include "block.h"
 
 struct TargetDepends
 {

@@ -1,13 +1,7 @@
 #include "metabuilder_pch.h"
 
-#include "common.h"
-
-
 std::vector<KeyValue> g_externalFileReference;
 std::vector<KeyValue> g_externalNativeTarget;
-
-
-
 
 int luaFuncWriterXcodeGenerateID(lua_State* l)
 {

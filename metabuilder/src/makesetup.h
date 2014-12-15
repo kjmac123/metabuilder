@@ -1,6 +1,8 @@
 #ifndef MAKESETUP_H
 #define MAKESETUP_H
 
+#include "block.h"
+
 class MakeSetup : public Block
 {
 public:

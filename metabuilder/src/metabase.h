@@ -1,7 +1,7 @@
 #ifndef METABASE_H
 #define METABASE_H
 
-#include "common.h"
+#include "block.h"
 
 class Metabase : public MakeBlock
 {

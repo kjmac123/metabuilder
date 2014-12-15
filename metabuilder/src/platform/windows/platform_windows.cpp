@@ -5,9 +5,6 @@
 #include <Windows.h>
 #include <direct.h>
 
-
-#include "common.h"
-
 #include "platform/platform.h"
 
 bool _mbaCreateDir(const char* osDir)

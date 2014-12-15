@@ -1,9 +1,7 @@
 #include "metabuilder_pch.h"
 
-#include "common.h"
-#include <set>
-
 #include "platform/platform.h"
+#include "solution.h"
 
 Target::Target()
 {

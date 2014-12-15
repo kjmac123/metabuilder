@@ -1,8 +1,6 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <iostream>
-#include <math.h>
 #include <assert.h>
 
 #include <vector>
@@ -214,16 +212,5 @@ int					luaFuncAddMacro(lua_State* lua);
 int					luaFuncExpandMacro(lua_State* lua);
 void				mbExpandMacros(std::string* result, const char* str);
 const char*			mbLuaToStringExpandMacros(std::string* result, lua_State* l, int stackPos);
-
-#include "block.h"
-#include "makesetup.h"
-#include "configparam.h"
-#include "target.h"
-#include "solution.h"
-#include "metabase.h"
-#include "platformparam.h"
-#include "writer.h"
-#include "writer_msvc.h"
-#include "writer_xcode.h"
 
 #endif

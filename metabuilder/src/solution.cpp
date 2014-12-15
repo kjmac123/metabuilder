@@ -1,6 +1,7 @@
 #include "metabuilder_pch.h"
 
-#include "common.h"
+#include "solution.h"
+#include "metabase.h"
 
 Solution::Solution()
 {

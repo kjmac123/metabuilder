@@ -1,11 +1,12 @@
 #include "metabuilder_pch.h"
 
-#include "common.h"
 #include "platform/platform.h"
 
+#include "writer_msvc.h"
 #include "writer_xcode.h"
-
-#include <set>
+#include "solution.h"
+#include "configparam.h"
+#include "metabase.h"
 
 static int luaFuncGlobalImport(lua_State* l)
 {

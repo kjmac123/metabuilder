@@ -2,8 +2,6 @@
 
 #ifdef PLATFORM_POSIX
 
-#include "../../common.h"
-
 #include "../platform.h"
 
 #include <sys/types.h>

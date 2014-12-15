@@ -1,6 +1,6 @@
 #include "metabuilder_pch.h"
 
-#include "common.h"
+#include "configparam.h"
 
 ConfigParam::ConfigParam()
 {

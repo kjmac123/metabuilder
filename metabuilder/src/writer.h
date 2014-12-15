@@ -1,8 +1,6 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-#include "common.h"
-
 struct WriterTarget
 {
 	MetaBuilderContext* ctx;

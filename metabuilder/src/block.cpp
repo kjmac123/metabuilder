@@ -1,6 +1,9 @@
 #include "metabuilder_pch.h"
 
+#include "configparam.h"
 #include "common.h"
+#include "block.h"
+#include "platformparam.h"
 
 static const char* g_stringGroups[] = {
 	STRINGGROUP_FILES,

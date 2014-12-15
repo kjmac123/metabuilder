@@ -1,7 +1,7 @@
 #ifndef SOLUTION_H
 #define SOLUTION_H
 
-#include "common.h"
+#include "target.h"
 
 class Solution : public MakeBlock
 {

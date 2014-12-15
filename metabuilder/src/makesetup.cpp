@@ -1,6 +1,6 @@
 #include "metabuilder_pch.h"
 
-#include "common.h"
+#include "makesetup.h"
 
 MakeSetup::MakeSetup()
 {

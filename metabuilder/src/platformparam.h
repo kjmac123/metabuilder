@@ -1,6 +1,8 @@
 #ifndef PLATFORMPARAM_H
 #define PLATFORMPARAM_H
 
+#include "block.h"
+
 class PlatformParam : public ParamBlock
 {
 public:

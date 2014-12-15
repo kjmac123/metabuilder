@@ -1,6 +1,8 @@
 #ifndef CONFIGPARAM_H
 #define CONFIGPARAM_H
 
+#include "block.h"
+
 class ConfigParam : public ParamBlock
 {
 public:
