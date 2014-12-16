@@ -8,6 +8,8 @@
 #include "configparam.h"
 #include "metabase.h"
 
+static std::vector<KeyValue>	g_registeredTargets;
+
 static int luaFuncGlobalImport(lua_State* l)
 {
     std::string requireFile;
@@ -105,6 +107,17 @@ static int luaFuncReportOutputFile(lua_State* l)
 	return 0;
 }
 
+static int luaFuncFatalError(lua_State* l)
+{
+    const char* str = lua_tostring(l, 1);
+	if (str)
+	{
+		MB_LOGERROR("%s", str);
+	}
+	mbExitError();
+	return 0;
+}
+
 #if 0
 static int luaFuncGetRelativeDirTo(lua_State* l)
 {
@@ -148,15 +161,15 @@ static int luaFuncCopyFile(lua_State* l)
 	}
 	
 	fseek(fromFile, 0, SEEK_END);
-	long bytesToCopy = ftell(fromFile);
+	size_t bytesToCopy = ftell(fromFile);
 	fseek(fromFile, 0, SEEK_SET);
 	
 	char buf[10*1024];
 	while(bytesToCopy > 0)
 	{
-		long bytesThisTime = bytesToCopy > sizeof(buf) ? sizeof(buf) : bytesToCopy;
+		size_t bytesThisTime = bytesToCopy > sizeof(buf) ? sizeof(buf) : bytesToCopy;
 
-		long actualBytesRead = fread(buf, 1, bytesThisTime, fromFile);
+		size_t actualBytesRead = fread(buf, 1, bytesThisTime, fromFile);
 		if (actualBytesRead != bytesThisTime)
 		{
 			fclose(toFile);
@@ -165,7 +178,7 @@ static int luaFuncCopyFile(lua_State* l)
 			mbExitError();
 		}
 		
-		long bytesWritten = fwrite(buf, 1, actualBytesRead, toFile);
+		size_t bytesWritten = fwrite(buf, 1, actualBytesRead, toFile);
 		if (bytesWritten != bytesThisTime)
 		{
 			fclose(toFile);
@@ -180,6 +193,34 @@ static int luaFuncCopyFile(lua_State* l)
 	fclose(toFile);
 	fclose(fromFile);
 
+	return 0;
+}
+
+static int luaFuncWriterRegisterTarget(lua_State* l)
+{
+	g_registeredTargets.push_back(KeyValue());
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().key, l, 1);	// target name;
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().value, l, 2);	// target filepath;
+	MB_LOGINFO("Registered target - name: %s location: %s", g_registeredTargets.back().key.c_str(), g_registeredTargets.back().value.c_str());
+	return 0;
+}
+
+static int luaFuncWriterGetTarget(lua_State* l)
+{
+    std::string target;
+	mbLuaToStringExpandMacros(&target, l, 1);
+	
+	for (int i = 0; i < (int)g_registeredTargets.size(); ++i)
+	{
+		if (g_registeredTargets[i].key == target)
+		{
+			lua_pushstring(l, g_registeredTargets[i].value.c_str());
+			return 1;
+		}
+	}
+
+	MB_LOGERROR("Failed to find target %s", target.c_str());
+	mbExitError();
 	return 0;
 }
 
@@ -214,6 +255,15 @@ void luaRegisterWriterFuncs(lua_State* l)
 
     lua_pushcfunction(l, luaFuncReportOutputFile);
     lua_setglobal(l, "reportoutputfile");
+
+    lua_pushcfunction(l, luaFuncFatalError);
+    lua_setglobal(l, "mbwriter_fatalerror");
+
+    lua_pushcfunction(l, luaFuncWriterRegisterTarget);
+    lua_setglobal(l, "mbwriter_registertarget");
+
+    lua_pushcfunction(l, luaFuncWriterGetTarget);
+    lua_setglobal(l, "mbwriter_gettarget");
 }
 
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)
@@ -298,7 +348,6 @@ static void mbWriterWriteConfigTable(lua_State* l, const FlatConfig& flatConfig)
 	mbWriterSetOptions(l, flatConfig.options);
 }
 
-
 void mbWriterDo(MetaBuilderContext* ctx)
 {
 	mbPushActiveContext(ctx);
@@ -361,6 +410,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 	
 		lua_pushboolean(l, appState->cmdSetup.verbose);
 		lua_setfield(l, -2, "verbose");
+
+		lua_pushboolean(l, ctx->isMainMakefile);
+		lua_setfield(l, -2, "ismainmakefile");
 		
 		lua_setglobal(l, "writer_global");
 	}

@@ -263,7 +263,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		file:write("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\" Label=\"Configuration\">\n")
 		if currentTarget.targetType == "app" then
 			file:write("    <ConfigurationType>Application</ConfigurationType>\n")
-		elseif currentTarget.targetType == "staticlib" then 		
+		elseif currentTarget.targetType == "staticlib" or currentTarget.targetType == "module" then 		
 			file:write("    <ConfigurationType>StaticLibrary</ConfigurationType>\n")
 		end
 
@@ -698,7 +698,7 @@ local groupMap = BuildFileGroups(g_currentTarget)
 --print(inspect(g_fileTypeMap))
 --TODO move out this hack for Windows builds
 if g_fileTypeMap["hlsl"] == "CompilerShader" then
-	print("HLSL support enabled")
+	--print("HLSL support enabled")
 	g_enableHLSL = true
 end
 

@@ -139,10 +139,10 @@ static int luaFuncTargetType(lua_State* l)
     return 0;
 }
 
-static int luaFuncTargetPCH(lua_State* l)
+static int luaFuncTargetPCH(lua_State*)
 {
-    Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-    const char* pch = mbLuaToStringExpandMacros(&target->pch , l, 1);
+    //Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
+    //const char* pch = mbLuaToStringExpandMacros(&target->pch , l, 1);
     return 0;
 }
 

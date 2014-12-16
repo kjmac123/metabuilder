@@ -1,7 +1,7 @@
 @set local
 @set TOPDIR=%~dp0..\..
 @set MBDIR=metatmp
-@set GEN=msvc2013_windows_x64
+@set GEN=msvc2013_windowsx64
 
 @REM Grab current dir name (not full path)
 @for %%* in (.) do set PROJECTNAME=%%~n*

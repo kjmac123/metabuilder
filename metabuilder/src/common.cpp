@@ -44,6 +44,12 @@ void AppState::Process()
 	if (cmdSetup._metabaseDir.length() > 0)		metabaseDirAbs = cmdSetup._metabaseDir;
 	if (cmdSetup._makeOutputDir.length() > 0)	makeOutputDirAbs = cmdSetup._makeOutputDir;
 
+	if (!mbCreateDirChain(cmdSetup._makeOutputDir.c_str()))
+	{
+		MB_LOGERROR("Failed to create output directory %s", cmdSetup._makeOutputDir.c_str());
+		mbExitError();
+	}
+
 	mainMetaMakeFileAbs = mbaFileGetAbsPath(cmdSetup._inputFile);
 	metabaseDirAbs = mbaFileGetAbsPath(cmdSetup._metabaseDir);
 	makeOutputDirAbs = mbaFileGetAbsPath(cmdSetup._makeOutputDir);
@@ -54,11 +60,11 @@ void AppState::Process()
 	//Set defaults if required.
 	if (intDir.size() == 0)
 	{
-		intDir = "tmp/int";
+		intDir = "int";
 	}
 	if (outDir.size() == 0)
 	{
-		outDir = "tmp/out";
+		outDir = "out";
 	}
 }
 
@@ -68,6 +74,7 @@ MetaBuilderContext::MetaBuilderContext()
 {
 	metabase = NULL;
 	solution = NULL;
+	isMainMakefile = false;
 	
 	g_contexts.push_back(this);
 }
@@ -792,8 +799,6 @@ void mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups)
 void mbExpandMacros(std::string* result, const char* str)
 {
 	char macro[1024];
-
-	const char* srcCursor = str;
 
 	*result = str;
 

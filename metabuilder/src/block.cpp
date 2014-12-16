@@ -37,7 +37,7 @@ static void AddHeadersAutomatically(StringVector* files)
 		const char* sourceFileExtensions[] = {"cpp", "c", "m", "mm", NULL};
 		for (const char** sourceExtCursor = sourceFileExtensions; *sourceExtCursor; ++sourceExtCursor)
 		{
-			if (!stricmp(*sourceExtCursor, fileExt))
+			if (!strcmp(*sourceExtCursor, fileExt))
 			{
 				const char* candidateExt[] = {"h", "inl", NULL};
 				for (const char** candidateExtCursor = candidateExt; *candidateExtCursor; ++candidateExtCursor)
@@ -89,7 +89,7 @@ static void ProcessWildcards(StringVector* result, const StringVector& input)
 			//dir = mbaFileGetAbsPath(dir);
 			mbaBuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
 
-			if (result->size() == initialResultCount)
+			if ((int)result->size() == initialResultCount)
 			{
 				MB_LOGERROR("No files found matching dir %s and filter %s",  dir.c_str(), filename.c_str());
 				mbExitError();

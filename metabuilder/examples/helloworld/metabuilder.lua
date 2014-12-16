@@ -9,7 +9,7 @@ solution "helloworld"
 
 	--Currently metabuilder supports only a single target per solution
 	target "helloworld"
-		--this is an application (as opposed to a staticlib for example)
+		--this is an application (as opposed to a module for example)
 		target_type "app"
 
 		--Additional makefiles for libraries we need to build and link against
@@ -25,7 +25,8 @@ solution "helloworld"
 		--add any .h or .inl files found with a matching name
 		files
 		{
-			"main.cpp"
+			"metabuilder.lua",
+			"main.cpp",
 		}
 
 		--A current metabuilder quirk is that any build configurations you

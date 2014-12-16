@@ -131,6 +131,7 @@ public:
 	Metabase*					metabase;
     Solution*					solution;
     std::stack<Block*>			activeBlockStack;
+	bool						isMainMakefile;
 };
 
 AppState*			mbGetAppState();

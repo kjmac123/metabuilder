@@ -1,7 +1,8 @@
 solution "lua"
 
 	target "lua"
-		target_type "staticlib"
+		--target_type "staticlib"
+		target_type "module"
 
 		--pch "luapch"
 

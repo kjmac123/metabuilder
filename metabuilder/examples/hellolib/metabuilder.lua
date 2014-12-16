@@ -1,7 +1,7 @@
 solution "hellolib"
 
 	target "hellolib"
-		target_type "staticlib"
+		target_type "module"
 
 		includedirs 
 		{ 
