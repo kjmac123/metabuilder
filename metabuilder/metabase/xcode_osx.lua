@@ -29,6 +29,13 @@ metabase "xcode_osx"
 	option("compiler", "ONLY_ACTIVE_ARCH", "YES")
 	option("compiler", "SDKROOT", "macosx")	
 
+	option("compiler", "ASSETCATALOG_COMPILER_APPICON_NAME", "AppIcon")
+	option("compiler", "ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME", "LaunchImage")
+	option("compiler", "COMBINE_HIDPI_IMAGES", "YES")
+	option("compiler", "GCC_PRECOMPILE_PREFIX_HEADER", "NO")
+	option("compiler", "PRODUCT_NAME", "\"$(TARGET_NAME)\"")
+	option("compiler", "WRAPPER_EXTENSION", "app")
+
 	config "Debug"
 		option("compiler", "COPY_PHASE_STRIP", "NO")
 		option("compiler", "GCC_C_LANGUAGE_STANDARD", "gnu99")
