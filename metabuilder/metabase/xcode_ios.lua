@@ -4,18 +4,17 @@ metabase "xcode_ios"
 
 	writer "writer_xcode.lua"	
 
-	option("compiler", "ARCHS", "\"$(ARCHS_STANDARD)\"")
+	--option("compiler", "ARCHS", "\"$(ARCHS_STANDARD)\"")
 	option("compiler", "CLANG_CXX_LANGUAGE_STANDARD", "\"gnu++0x\"")
 	option("compiler", "CLANG_CXX_LIBRARY", "\"libc++\"")
 	option("compiler", "CODE_SIGN_IDENTITY", "\"iPhone Developer\"")	
 	option("compiler", "GCC_C_LANGUAGE_STANDARD", "gnu99")
 	option("compiler", "IPHONEOS_DEPLOYMENT_TARGET", "6.0")
-	option("compiler", "ONLY_ACTIVE_ARCH", "NO")
 	option("compiler", "SDKROOT", "iphoneos")
 	option("compiler", "TARGETED_DEVICE_FAMILY", "\"1,2\"");
 	option("compiler", "USER_HEADER_SEARCH_PATHS", "\"\"");
 	option("compiler", "VALIDATE_PRODUCT", "YES");
-	option("compiler", "VALID_ARCHS", "armv7");
+	--option("compiler", "VALID_ARCHS", "armv7");
 	option("compiler", "GCC_FAST_MATH","YES")
 
 	config "Debug"
@@ -40,6 +39,7 @@ metabase "xcode_ios"
 		option("compiler", "GCC_WARN_UNINITIALIZED_AUTOS", "YES")
 		option("compiler", "GCC_WARN_UNUSED_FUNCTION", "YES")
 		option("compiler", "GCC_WARN_UNUSED_VARIABLE", "YES")
+		option("compiler", "ONLY_ACTIVE_ARCH", "YES")	
 	config_end()
 
 	config "Release"
