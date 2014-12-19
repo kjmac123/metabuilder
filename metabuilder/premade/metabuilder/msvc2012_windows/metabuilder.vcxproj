@@ -99,6 +99,64 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\block.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\common.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\configparam.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\core.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\makesetup.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\metabase.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\metabuilder_pch.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\platform\platform.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\platformparam.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\solution.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\target.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer_msvc.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer_xcode.h">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+   </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
    <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\block.cpp">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Default</CompileAs>
@@ -201,64 +259,6 @@
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\block.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\common.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\configparam.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\core.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\makesetup.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\metabase.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\metabuilder_pch.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\platform\platform.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\platformparam.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\solution.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\target.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer_msvc.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer_xcode.h">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:/cygwin/home/ken/opensource/metabuilder/metabuilder/metatmp/metabuilder/msvc2012_windows/lua.vcxproj">

@@ -4,17 +4,59 @@
     <Filter Include="src\platform">
       <UniqueIdentifier>{04716E12-E4E4-B086-701E-9901921AA469}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\platform\windows">
-      <UniqueIdentifier>{2FA80E4C-0AF6-1BF4-612B-46E31444FFB6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\platform\posix">
       <UniqueIdentifier>{31DE8473-7753-ACFC-F9D5-404F5DD2D08C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform\windows">
+      <UniqueIdentifier>{2FA80E4C-0AF6-1BF4-612B-46E31444FFB6}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{C2812391-2BC7-6320-9517-E679C55D33A9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\block.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\common.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\configparam.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\core.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\makesetup.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\metabase.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\metabuilder_pch.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\platform\platform.h">
+      <Filter>src\platform</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\platformparam.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\solution.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\target.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer_msvc.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer_xcode.h">
+      <Filter>src</Filter>
+   </ClInclude>
    <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\block.cpp">
       <Filter>src</Filter>
    </ClCompile>
@@ -66,47 +108,5 @@
    <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer_xcode.cpp">
       <Filter>src</Filter>
    </ClCompile>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\block.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\common.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\configparam.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\core.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\makesetup.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\metabase.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\metabuilder_pch.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\platform\platform.h">
-      <Filter>src\platform</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\platformparam.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\solution.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\target.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer_msvc.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\metabuilder\src\writer_xcode.h">
-      <Filter>src</Filter>
-   </ClInclude>
   </ItemGroup>
 </Project>

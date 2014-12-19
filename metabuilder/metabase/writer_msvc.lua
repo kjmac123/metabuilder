@@ -222,6 +222,9 @@ function WriteVcxProj(currentTarget, groupMap)
 	vcxprojName = Util_FileNormaliseWindows(vcxprojName)
 	--print("Writing " .. vcxprojName .. "\n")
 	local file = io.open(vcxprojName, "w")
+	if (file == nil) then 
+		mbwriter_fatalerror("Failed to open file " .. vcxprojName .. " for writing")
+	end
 
 	local pchFileBaseName = nil
 	local pchSourceFile = nil

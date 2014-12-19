@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="src\platform\posix">
-      <UniqueIdentifier>{31DE8473-7753-ACFC-F9D5-404F5DD2D08C}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{C2812391-2BC7-6320-9517-E679C55D33A9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform\posix">
+      <UniqueIdentifier>{31DE8473-7753-ACFC-F9D5-404F5DD2D08C}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\platform">
       <UniqueIdentifier>{04716E12-E4E4-B086-701E-9901921AA469}</UniqueIdentifier>
