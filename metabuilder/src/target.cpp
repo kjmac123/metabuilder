@@ -139,6 +139,13 @@ static int luaFuncTargetType(lua_State* l)
     return 0;
 }
 
+static int luaFuncTargetSubsystem(lua_State* l)
+{
+	Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
+	mbLuaToStringExpandMacros(&target->targetSubsystem, l, 1);
+	return 0;
+}
+
 static int luaFuncTargetPCH(lua_State*)
 {
     //Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
@@ -169,7 +176,10 @@ void mbTargetLuaRegister(lua_State* l)
     lua_pushcfunction(l, luaFuncTargetType);
     lua_setglobal(l, "target_type");
 	
-    lua_pushcfunction(l, luaFuncTargetPCH);
+	lua_pushcfunction(l, luaFuncTargetSubsystem);
+	lua_setglobal(l, "target_subsystem");
+	
+	lua_pushcfunction(l, luaFuncTargetPCH);
     lua_setglobal(l, "pch");
         	
     lua_pushcfunction(l, luaFuncTargetDepends);

@@ -158,7 +158,7 @@ function Util_GetKVValue(keyValueList, key)
 	end
 	
 	for i = 1, #keyValueList do
-		local keyValue = split(keyValueList[i], "=")
+		local keyValue = mbwriter_split(keyValueList[i], "=")
 		if keyValue[1] == key then
 			local value = keyValue[2]
 			return value;

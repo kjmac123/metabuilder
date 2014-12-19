@@ -232,29 +232,29 @@ void luaRegisterWriterFuncs(lua_State* l)
     lua_pushcfunction(l, luaFuncGlobalImport);
     lua_setglobal(l, "import");
 	
-    lua_pushcfunction(l, luaSplit);
-    lua_setglobal(l, "split");
-
 	lua_pushcfunction(l, luaFuncAddMacro);
 	lua_setglobal(l, "globalmacro");
 
 	lua_pushcfunction(l, luaFuncExpandMacro);
 	lua_setglobal(l, "expandmacro");
+
+	lua_pushcfunction(l, luaSplit);
+	lua_setglobal(l, "mbwriter_split");
 	
     lua_pushcfunction(l, luaFuncMkdir);
-    lua_setglobal(l, "mkdir");
+    lua_setglobal(l, "mbwriter_mkdir");
 	
     lua_pushcfunction(l, luaFuncMklink);
-    lua_setglobal(l, "mklink");
+    lua_setglobal(l, "mbwriter_mklink");
 
     lua_pushcfunction(l, luaFuncGetFileType);
-    lua_setglobal(l, "getfiletype");
+    lua_setglobal(l, "mbwriter_getfiletype");
 	
     lua_pushcfunction(l, luaFuncCopyFile);
-    lua_setglobal(l, "copyfile");
+    lua_setglobal(l, "mbwriter_copyfile");
 
     lua_pushcfunction(l, luaFuncReportOutputFile);
-    lua_setglobal(l, "reportoutputfile");
+    lua_setglobal(l, "mbwriter_reportoutputfile");
 
     lua_pushcfunction(l, luaFuncFatalError);
     lua_setglobal(l, "mbwriter_fatalerror");
@@ -438,7 +438,10 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				lua_setfield(l, -2, "name");
 
 				lua_pushstring(l, target->targetType.c_str());
-				lua_setfield(l, -2, "targetType");
+				lua_setfield(l, -2, "targettype");
+
+				lua_pushstring(l, target->targetSubsystem.c_str());
+				lua_setfield(l, -2, "targetsubsystem");
 
 				lua_pushstring(l, target->pch.c_str());
 				lua_setfield(l, -2, "pch");

@@ -28,6 +28,7 @@ public:
 	void				FlattenResources(StringVector* resources, const char* platformName) const;
 	
 	std::string         targetType;
+	std::string			targetSubsystem;
 
     std::vector<TargetDepends>
 						depends;

@@ -38,7 +38,7 @@ end
 function WriteMakeFile(currentTarget, config)
 
 	local makeDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name
-	mkdir(makeDir)
+	mbwriter_mkdir(makeDir)
 
 	print(inspect(config))
 
@@ -93,7 +93,7 @@ function WriteMakeFile(currentTarget, config)
 	end	
 	file:write("\n")
 
-	if currentTarget.targetType == "app" then
+	if currentTarget.targettype == "app" then
 		file:write("\n")
 		file:write("rule cxx\n")
 		file:write("  depfile = $out.d\n")
@@ -140,9 +140,9 @@ function WriteMakeFile(currentTarget, config)
 
 	--Link or create archive
 	local numFilesToLink = #filesToLink
-	if currentTarget.targetType == "app" then
+	if currentTarget.targettype == "app" then
 		file:write("build $outdir/" .. currentTarget.name .. "_" .. config.name .. ": link $\n")
-	elseif currentTarget.targetType == "staticlib" then
+	elseif currentTarget.targettype == "staticlib" then
 		file:write("build $outdir/" .. currentTarget.name .. "_" .. config.name .. ".a: ar $\n")
 	else
 		--TODO - error here
@@ -153,7 +153,7 @@ function WriteMakeFile(currentTarget, config)
 		file:write("  $intdir/" .. fileToLink .. " $\n")
 	end
 
-	if currentTarget.targetType == "app" then
+	if currentTarget.targettype == "app" then
 		-- Link with required projects
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
@@ -166,7 +166,7 @@ function WriteMakeFile(currentTarget, config)
 	file:write("\n")
 	file:close()
 
-	reportoutputfile(makeFilename)	
+	mbwriter_reportoutputfile(makeFilename)	
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------

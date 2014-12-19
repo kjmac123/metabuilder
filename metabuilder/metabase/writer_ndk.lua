@@ -32,15 +32,15 @@ function CreateLinks(currentTarget, config)
 	templateDir = GetFullFilePath(templateDir)
 
 	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
-	mkdir(workspaceDir)
+	mbwriter_mkdir(workspaceDir)
 
 	--print(templateDir)
 	--print(workspaceDir)
-	mklink(templateDir .. "/build.xml",									workspaceDir .. "/build.xml")
-	mklink(templateDir .. "/AndroidManifest.xml",						workspaceDir .. "/AndroidManifest.xml")
-	mklink(templateDir .. "/assets",									workspaceDir .. "/assets")
-	mklink(templateDir .. "/res",										workspaceDir .. "/res")
-	mklink(templateDir .. "/src",										workspaceDir .. "/src")
+	mbwriter_mklink(templateDir .. "/build.xml",								workspaceDir .. "/build.xml")
+	mbwriter_mklink(templateDir .. "/AndroidManifest.xml",						workspaceDir .. "/AndroidManifest.xml")
+	mbwriter_mklink(templateDir .. "/assets",									workspaceDir .. "/assets")
+	mbwriter_mklink(templateDir .. "/res",										workspaceDir .. "/res")
+	mbwriter_mklink(templateDir .. "/src",										workspaceDir .. "/src")
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ function WriteApplicationMk(currentTarget, config)
 --		return
 
 	local jniDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
-	mkdir(jniDir)
+	mbwriter_mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Application.mk"
 	local file = io.open(makeFilename, "w")
@@ -70,7 +70,7 @@ function WriteApplicationMk(currentTarget, config)
 
 	if config.options.ndkoptions ~= nil then
 		for jOption = 1, #config.options.ndkoptions do
-			local keyValue = split(config.options.ndkoptions[jOption], "=")
+			local keyValue = mbwriter_split(config.options.ndkoptions[jOption], "=")
 			local key = keyValue[1]
 			local value = keyValue[2]
 
@@ -78,7 +78,7 @@ function WriteApplicationMk(currentTarget, config)
 		end
 	end
 	file:close()
-	reportoutputfile(makeFilename)
+	mbwriter_reportoutputfile(makeFilename)
 end
 
 function WriteAndroidMk(currentTarget, config)
@@ -88,7 +88,7 @@ function WriteAndroidMk(currentTarget, config)
 --		return
 
 	local jniDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
-	mkdir(jniDir)
+	mbwriter_mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Android.mk"
 	local file = io.open(makeFilename, "w")
@@ -199,7 +199,7 @@ function WriteAndroidMk(currentTarget, config)
 	file:write("LOCAL_SRC_FILES := $(MY_LOCAL_SRC_FILES)\n")
 	file:write("\n")
 
-	if currentTarget.targetType == "app" then
+	if currentTarget.targettype == "app" then
 		
 		file:write("LOCAL_LDLIBS :=  $(MY_LIB_SEARCH_PATHS) $(MY_LIBS) -llog -landroid -lEGL -lGLESv2 -lOpenSLES \\\n")
 
@@ -288,19 +288,19 @@ function WriteAndroidMk(currentTarget, config)
 		file:write("\n")		
 
 		file:write("include $(BUILD_SHARED_LIBRARY)\n")
-	elseif currentTarget.targetType == "module" or currentTarget.targetType == "staticlib" then
+	elseif currentTarget.targettype == "module" or currentTarget.targettype == "staticlib" then
 		file:write("include $(BUILD_STATIC_LIBRARY)\n")
 	else
 		--TODO - error here
 	end
 
 	file:close()
-	reportoutputfile(makeFilename)
+	mbwriter_reportoutputfile(makeFilename)
 end
 
 function WriteJNI(currentTarget, config)
 	--links to template folder required for apps, but not libraries
-	if currentTarget.targetType == "app" then
+	if currentTarget.targettype == "app" then
 		CreateLinks(currentTarget, config)
 	end
 
