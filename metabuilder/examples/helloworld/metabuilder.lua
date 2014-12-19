@@ -11,6 +11,7 @@ solution "helloworld"
 	target "helloworld"
 		--this is an application (as opposed to a module for example)
 		target_type "app"
+		target_subsystem "console"
 
 		--Additional makefiles for libraries we need to build and link against
 		depends("hellolib",	"../hellolib/metabuilder.lua")

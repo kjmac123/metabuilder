@@ -347,11 +347,11 @@ end
 function GetTargetOutputFilename(currentTarget)
 	local ext = ""
 	--print(inspect(currentTarget))
-	if currentTarget.targetType == "app" then
+	if currentTarget.targettype == "app" then
 		if (currentTarget.options.appfileextension ~= nil) then
 			ext = "." .. currentTarget.options.appfileextension[1]
 		end
-	elseif currentTarget.targetType == "staticlib" then
+	elseif currentTarget.targettype == "staticlib" then
 		ext = ".a"
 	else
 	end
@@ -421,7 +421,7 @@ end
 function WriteMakeFile(currentTarget)
 
 	local makeDir = Util_FilePathJoin(writer_global.makeoutputdirabs, "")
-	mkdir(makeDir)
+	mbwriter_mkdir(makeDir)
 	
 	local makeFilename = ""
 	if (writer_global.ismainmakefile) then
@@ -484,11 +484,11 @@ function WriteMakeFile(currentTarget)
 	WriteMakeFileCommonVars(file, currentTarget)
 
 	--Write out variables for current target type
-	if currentTarget.targetType == "app" then
+	if currentTarget.targettype == "app" then
 		WriteMakeFileAppVars(file, currentTarget)
-	elseif currentTarget.targetType == "staticlib" then
+	elseif currentTarget.targettype == "staticlib" then
 		WriteMakeFileStaticLibVars(file, currentTarget)
-	elseif currentTarget.targetType == "module" then
+	elseif currentTarget.targettype == "module" then
 		WriteMakeFileModuleVars(file, currentTarget)
 	else
 		mbwriter_fatalerror("unsupported target type")
@@ -542,11 +542,11 @@ function WriteMakeFile(currentTarget)
 	file:write("\n")
 	
 	--Write out target
-	if currentTarget.targetType == "app" then
+	if currentTarget.targettype == "app" then
 		WriteMakeFileAppTarget(file, currentTarget)
-	elseif currentTarget.targetType == "staticlib" then
+	elseif currentTarget.targettype == "staticlib" then
 		WriteMakeFileStaticLibTarget(file, currentTarget)
-	elseif currentTarget.targetType == "module" then
+	elseif currentTarget.targettype == "module" then
 		WriteMakeFileModuleTarget(file, currentTarget)
 	else
 		mbwriter_fatalerror("unsupported target type")
@@ -613,7 +613,7 @@ function WriteMakeFile(currentTarget)
 	file:write("\n")
 	file:close()
 
-	reportoutputfile(makeFilename)	
+	mbwriter_reportoutputfile(makeFilename)	
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------

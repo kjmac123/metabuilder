@@ -44,7 +44,7 @@ function GetLastKnownFileType(filepath)
 	local ext = Util_FileExtension(filepath)
 	local lastKnownType = g_lastKnownFileTypeMap[ext]
 	if lastKnownType == nil then
-		local filetype = getfiletype(filepath)
+		local filetype = mbwriter_getfiletype(filepath)
 		if filetype == "dir" then
 			return "folder"
 		end
@@ -86,7 +86,7 @@ function InitFolder(folderList, path, filename)
 	local pathComponents = { "" }
 	
 	if (path ~= "") then 
-		pathComponents = split(path, "/")
+		pathComponents = mbwriter_split(path, "/")
 		table.insert(pathComponents, 1, "")
 	end
 
@@ -406,7 +406,7 @@ function WriteXCBuildConfigurations()
 		end
 
 		-- App specific compiler options
-		if g_currentTarget.targetType == "app" then
+		if g_currentTarget.targettype == "app" then
 			if config.options.compiler_app ~= nil then 
 				for j = 1, #config.options.compiler_app do
 					local compilerOption = config.options.compiler_app[j]
@@ -414,7 +414,7 @@ function WriteXCBuildConfigurations()
 				end
 			end
 		-- Static lib specific compiler options
-		elseif g_currentTarget.targetType == "module" or g_currentTarget.targetType == "staticlib" then 
+		elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then 
 			if config.options.compiler_staticlib ~= nil then 
 				for j = 1, #config.options.compiler_staticlib do
 					local compilerOption = config.options.compiler_staticlib[j]
@@ -517,9 +517,9 @@ function WriteXCBuildConfigurations()
 		end
 
 		file:write("				PRODUCT_NAME = \"$(TARGET_NAME)\";\n")
-		if g_currentTarget.targetType == "app" then 
+		if g_currentTarget.targettype == "app" then 
 			file:write("				WRAPPER_EXTENSION = app;\n")
-		elseif g_currentTarget.targetType == "module" or g_currentTarget.targetType == "staticlib" then
+		elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
 			file:write("				SKIP_INSTALL = YES;\n")
 		end
 		file:write("			};\n")
@@ -599,7 +599,7 @@ for i = 1, #g_currentTarget.files do
 	g_PBXBuildFileIDMap[f]		= xcodegenerateid()
 end
 
-g_currentTargetFileExtension = (g_currentTarget.targetType == "app" and  ".app") or  ".a"
+g_currentTargetFileExtension = (g_currentTarget.targettype == "app" and  ".app") or  ".a"
 g_currentTargetFilenameWithExt = g_currentTarget.name .. g_currentTargetFileExtension
 
 g_PBXFileRefIDMap[g_currentTargetFilenameWithExt] = xcodegenerateid()
@@ -682,7 +682,7 @@ end
 g_projectoutputfile = writer_global.makeoutputdirabs .. "/" .. writer_solution.name .. ".xcodeproj"
 
 --print("Creating project dir " .. g_projectoutputfile)
-mkdir(g_projectoutputfile)
+mbwriter_mkdir(g_projectoutputfile)
 
 local pbxprojFilename = g_projectoutputfile .. "/project.pbxproj"
 
@@ -759,9 +759,9 @@ file:write("/* End PBXContainerItemProxy section */\n\n")
 file:write("/* Begin PBXFileReference section */\n")
 
 g_productType = nil
-if g_currentTarget.targetType == "app" then
+if g_currentTarget.targettype == "app" then
 	g_productType = "wrapper.application"
-elseif g_currentTarget.targetType == "module" or g_currentTarget.targetType == "staticlib" then
+elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
 	g_productType = "archive.ar"
 end
 
@@ -831,9 +831,9 @@ file:write("			name = " .. g_currentTarget.name .. ";\n")
 file:write("			productName = " .. g_currentTarget.name .. ";\n")
 file:write("			productReference = " .. g_externalProductID .. " /* " .. g_currentTarget.name .. " */;\n")
 
-if g_currentTarget.targetType == "app" then
+if g_currentTarget.targettype == "app" then
 	file:write("			productType = \"com.apple.product-type.application\";\n")
-elseif g_currentTarget.targetType == "module" or g_currentTarget.targetType == "staticlib" then
+elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
 	file:write("			productType = \"com.apple.product-type.library.static\";\n")
 end
 file:write("		};\n")
@@ -985,4 +985,4 @@ file:write("	rootObject = " .. g_projectObjectID .. " /* Project object */;\n")
 file:write("}\n")
 
 file:close()
-reportoutputfile(pbxprojFilename)
+mbwriter_reportoutputfile(pbxprojFilename)

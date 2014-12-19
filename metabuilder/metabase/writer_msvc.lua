@@ -45,7 +45,7 @@ function InitFolder(folderList, path, filename)
 	local pathComponents = { "" }
 	
 	if (path ~= "") then 
-		pathComponents = split(path, "/")
+		pathComponents = mbwriter_split(path, "/")
 		table.insert(pathComponents, 1, "")
 	end
 
@@ -187,7 +187,7 @@ end
 function WriteVcxProjPropertyGroupOptions(file, groupOption)
 	if groupOption ~= nil then
 		for jOption = 1, #groupOption do
-			local keyValue = split(groupOption[jOption], "=")
+			local keyValue = mbwriter_split(groupOption[jOption], "=")
 			local key = keyValue[1]
 			local value = keyValue[2]
 
@@ -209,7 +209,7 @@ function WriteVcxProj(currentTarget, groupMap)
 	local projectID = msvcgenerateid()
 	msvcregisterprojectid(currentTarget.name, projectID)
 	
-	mkdir(writer_global.makeoutputdirabs)
+	mbwriter_mkdir(writer_global.makeoutputdirabs)
 
 	local msvcPlatform = Util_GetKVValue(writer_global.options.msvc, "platform")
 	if msvcPlatform == nil then
@@ -264,9 +264,9 @@ function WriteVcxProj(currentTarget, groupMap)
 	for iConfig = 1, #currentTarget.configs do
 		local config = currentTarget.configs[iConfig]
 		file:write("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\" Label=\"Configuration\">\n")
-		if currentTarget.targetType == "app" then
+		if currentTarget.targettype == "app" then
 			file:write("    <ConfigurationType>Application</ConfigurationType>\n")
-		elseif currentTarget.targetType == "staticlib" or currentTarget.targetType == "module" then 		
+		elseif currentTarget.targettype == "staticlib" or currentTarget.targettype == "module" then 		
 			file:write("    <ConfigurationType>StaticLibrary</ConfigurationType>\n")
 		end
 
@@ -316,7 +316,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		
 		if config.options.msvccompile ~= nil then
 			for jOption = 1, #config.options.msvccompile do
-				local keyValue = split(config.options.msvccompile[jOption], "=")
+				local keyValue = mbwriter_split(config.options.msvccompile[jOption], "=")
 				local key = keyValue[1]
 				local value = keyValue[2]
 
@@ -339,6 +339,10 @@ function WriteVcxProj(currentTarget, groupMap)
 
 		file:write("    </ClCompile>\n")
 		file:write("    <Link>\n")
+		
+		if currentTarget.targetsubsystem == "console" then
+			file:write("    <SubSystem>Console</SubSystem>")
+		end
 
 		--Lib directories
 		file:write("      <AdditionalLibraryDirectories>")
@@ -350,7 +354,7 @@ function WriteVcxProj(currentTarget, groupMap)
 
 		--Add hardwired options
 		--TODO: The below is not ideal, linkage only possible on final app target.
-		if currentTarget.targetType == "app" then
+		if currentTarget.targettype == "app" then
 	 	    file:write("      <AdditionalDependencies>")
 			for jLib = 1, #config.libs do
 				local lib = config.libs[jLib]
@@ -362,7 +366,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		--Add custom options
 		if config.options.msvclink ~= nil then
 			for jOption = 1, #config.options.msvclink do
-				local keyValue = split(config.options.msvclink[jOption], "=")
+				local keyValue = mbwriter_split(config.options.msvclink[jOption], "=")
 				local key = keyValue[1]
 				local value = keyValue[2]
 
@@ -526,7 +530,7 @@ function WriteVcxProj(currentTarget, groupMap)
 	file:write("</Project>\n")
 
 	file:close()
-	reportoutputfile(vcxprojName)
+	mbwriter_reportoutputfile(vcxprojName)
 end
 
 function FormatFilterPath(path)
@@ -595,7 +599,7 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 	file:write("</Project>\n")
 
 	file:close()
-	reportoutputfile(vcxProjFiltersFilename)
+	mbwriter_reportoutputfile(vcxProjFiltersFilename)
 end
 
 function WriteSolution(projectList, currentTarget)
@@ -676,7 +680,7 @@ function WriteSolution(projectList, currentTarget)
 	file:write("EndGlobal\n")
 
 	file:close()
-	reportoutputfile(slnFilename)
+	mbwriter_reportoutputfile(slnFilename)
 end
 
 --[[ MAIN ]]
@@ -710,7 +714,7 @@ WriterVcxProjFilters(g_currentTarget, groupMap)
 
 --Solutions only required by apps
 local projectList = {}
-if g_currentTarget.targetType == "app" then
+if g_currentTarget.targettype == "app" then
 	--Create a list of project GUID and name pairs. We'll need this to form the contents of our solution.
 	
 	--Current target.
