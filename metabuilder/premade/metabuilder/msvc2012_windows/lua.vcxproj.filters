@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{4870CB8B-BCB7-9C60-703B-9D2002E441D9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lapi.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lauxlib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lbaselib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lbitlib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lcode.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lcorolib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lctype.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ldblib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ldebug.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ldo.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ldump.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lfunc.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lgc.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\linit.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\liolib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\llex.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lmathlib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lmem.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\loadlib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lobject.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lopcodes.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\loslib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lparser.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lstate.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lstring.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lstrlib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ltable.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ltablib.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ltm.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lundump.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lvm.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lzio.c">
+      <Filter>src</Filter>
+   </ClCompile>
+   <None Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\metabuilder.lua">
+      <Filter></Filter>
+   </None>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lapi.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lauxlib.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lcode.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lctype.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ldebug.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ldo.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lfunc.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lgc.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\llex.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lmem.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lobject.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lopcodes.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lparser.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lstate.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lstring.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ltable.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\ltm.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lundump.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lvm.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="C:\cygwin\home\ken\opensource\metabuilder\external\lua-5.2.2\src\lzio.h">
+      <Filter>src</Filter>
+   </ClInclude>
+  </ItemGroup>
+</Project>

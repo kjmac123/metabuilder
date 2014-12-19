@@ -21,11 +21,15 @@ metabuilder_CXXFLAGS.Debug := \
 
 metabuilder_DEFINES.Debug := \
   -DMETABUILDER \
-  -DPLATFORM_POSIX \
+  -DPLATFORM_WINDOWS \
+  -DWIN32 \
+  -D_CRT_SECURE_NO_WARNINGS \
+  -D_WINDOWS \
   -DBUILD_CONFIG_DEBUG \
 
 metabuilder_CPPFLAGS.Debug += $(metabuilder_DEFINES.Debug)
 metabuilder_INCLUDES.Debug := \
+  -I"$(DXSDK_DIR)Include" \
   -I"../../../src" \
   -I"../../../../external/lua-5.2.2/src" \
   -I"../../../../external/ezOptionParser-0.2.1" \
@@ -41,11 +45,16 @@ metabuilder_CXXFLAGS.Release := \
 
 metabuilder_DEFINES.Release := \
   -DMETABUILDER \
-  -DPLATFORM_POSIX \
+  -DPLATFORM_WINDOWS \
+  -DWIN32 \
+  -D_CRT_SECURE_NO_WARNINGS \
+  -D_WINDOWS \
   -DBUILD_CONFIG_RELEASE \
+  -DNDEBUG \
 
 metabuilder_CPPFLAGS.Release += $(metabuilder_DEFINES.Release)
 metabuilder_INCLUDES.Release := \
+  -I"$(DXSDK_DIR)Include" \
   -I"../../../src" \
   -I"../../../../external/lua-5.2.2/src" \
   -I"../../../../external/ezOptionParser-0.2.1" \
@@ -90,7 +99,7 @@ metabuilder_SRC := \
 	../../../src/metabase.cpp \
 	../../../src/metabuilder_pch.cpp \
 	../../../src/platform/platform.cpp \
-	../../../src/platform/posix/platform_posix.cpp \
+	../../../src/platform/windows/platform_windows.cpp \
 	../../../src/platformparam.cpp \
 	../../../src/solution.cpp \
 	../../../src/target.cpp \
@@ -108,7 +117,7 @@ metabuilder_OBJ := \
 	$(metabuilder_INTDIR)/metabase.o \
 	$(metabuilder_INTDIR)/metabuilder_pch.o \
 	$(metabuilder_INTDIR)/platform.o \
-	$(metabuilder_INTDIR)/platform_posix.o \
+	$(metabuilder_INTDIR)/platform_windows.o \
 	$(metabuilder_INTDIR)/platformparam.o \
 	$(metabuilder_INTDIR)/solution.o \
 	$(metabuilder_INTDIR)/target.o \
@@ -143,8 +152,8 @@ $(metabuilder_INTDIR)/metabuilder_pch.o : ../../../src/metabuilder_pch.cpp $(met
 $(metabuilder_INTDIR)/platform.o : ../../../src/platform/platform.cpp $(metabuilder_INTDIR)/platform.d 
 	@echo $(metabuilder_CXX) ../../../src/platform/platform.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR)/platform_posix.o : ../../../src/platform/posix/platform_posix.cpp $(metabuilder_INTDIR)/platform_posix.d 
-	@echo $(metabuilder_CXX) ../../../src/platform/posix/platform_posix.cpp
+$(metabuilder_INTDIR)/platform_windows.o : ../../../src/platform/windows/platform_windows.cpp $(metabuilder_INTDIR)/platform_windows.d 
+	@echo $(metabuilder_CXX) ../../../src/platform/windows/platform_windows.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
 $(metabuilder_INTDIR)/platformparam.o : ../../../src/platformparam.cpp $(metabuilder_INTDIR)/platformparam.d 
 	@echo $(metabuilder_CXX) ../../../src/platformparam.cpp
@@ -169,8 +178,8 @@ $(metabuilder_INTDIR)/__metabuilder__prelink__ : $(metabuilder_OBJ) $(lua_OUTDIR
 	@echo ld Creating prelink obj $(metabuilder_INTDIR)/__metabuilder__prelink__
 	@ld  -r  $(metabuilder_OBJ) -o '$@' ;
 
-$(metabuilder_OUTDIR)/metabuilder : $(metabuilder_INTDIR)/__metabuilder__prelink__
-	@echo $(metabuilder_LD) Linking $(metabuilder_OUTDIR)/metabuilder
+$(metabuilder_OUTDIR)/metabuilder.exe : $(metabuilder_INTDIR)/__metabuilder__prelink__
+	@echo $(metabuilder_LD) Linking $(metabuilder_OUTDIR)/metabuilder.exe
 	@$(metabuilder_LD) $(metabuilder_LDFLAGS) $(metabuilder_MODULEOBJ) $(metabuilder_OBJ) -o '$@' ;
 
 
@@ -181,7 +190,7 @@ $(metabuilder_INTDIR):
 	mkdir -p $(metabuilder_OUTDIR)
 
 .PHONY: all_metabuilder
-all_metabuilder : $(metabuilder_OUTDIR)/metabuilder 
+all_metabuilder : $(metabuilder_OUTDIR)/metabuilder.exe 
 
 .PHONY: clean_metabuilder
 clean_metabuilder : clean_lua 
@@ -209,7 +218,7 @@ clean : clean_metabuilder
 -include $(metabuilder_INTDIR)/metabase.d
 -include $(metabuilder_INTDIR)/metabuilder_pch.d
 -include $(metabuilder_INTDIR)/platform.d
--include $(metabuilder_INTDIR)/platform_posix.d
+-include $(metabuilder_INTDIR)/platform_windows.d
 -include $(metabuilder_INTDIR)/platformparam.d
 -include $(metabuilder_INTDIR)/solution.d
 -include $(metabuilder_INTDIR)/target.d

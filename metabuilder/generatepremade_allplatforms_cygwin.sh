@@ -10,6 +10,7 @@ ${TOPDIR}/bin/windows/metabuilder.exe --input metabuilder.lua --gen gnumakegcc_c
 ${TOPDIR}/bin/windows/metabuilder.exe --input metabuilder.lua --gen gnumakegcc_windows --metabase ${TOPDIR}/metabase --outdir metatmp
 ${TOPDIR}/bin/windows/metabuilder.exe --input metabuilder.lua --gen gnumakegcc_posix --metabase ${TOPDIR}/metabase --outdir metatmp
 
+${TOPDIR}/bin/windows/metabuilder.exe --input metabuilder.lua --gen gnumakeclang_cygwin --metabase ${TOPDIR}/metabase --outdir metatmp
 ${TOPDIR}/bin/windows/metabuilder.exe --input metabuilder.lua --gen gnumakeclang_windows --metabase ${TOPDIR}/metabase --outdir metatmp
 ${TOPDIR}/bin/windows/metabuilder.exe --input metabuilder.lua --gen gnumakeclang_posix --metabase ${TOPDIR}/metabase --outdir metatmp
 

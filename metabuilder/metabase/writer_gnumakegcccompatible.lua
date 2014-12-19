@@ -183,7 +183,7 @@ function WriteSourceToObjRule(file, buildFile)
 end
 
 function WriteMakeFileGlobalVars(file, currentTarget)
-	file:write("BUILDCONFIG := " .. currentTarget.configs[1].name .. "\n\n")
+	file:write("BUILDCONFIG := " .. currentTarget.configs[#currentTarget.configs].name .. "\n\n")
 end
 
 function WriteMakeFileCommonVars(file, currentTarget)

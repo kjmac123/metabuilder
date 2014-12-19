@@ -1,4 +1,4 @@
-BUILDCONFIG := Debug
+BUILDCONFIG := Release
 
 
 default : all 
