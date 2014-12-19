@@ -11,11 +11,11 @@ g_buildPhaseFrameworkID = xcodegenerateid()
 g_PBXBuildFileIDMap = {}
 g_PBXFileRefIDMap = {}
 
-g_PBXContainerItemProxyIDMap	= {} -- Maps dependency name -> ID
+g_PBXContainerItemProxyIDMap		= {} -- Maps dependency name -> ID
 g_PBXReferenceProxyIDMap 		= {} -- Maps dependency name -> ID
 g_PBXTargetDependencyIDMap		= {} -- Maps dependency name -> ID
-g_PBXTargetProxy				= {} -- Maps dependency name -> ID
-g_ProductGroupIDs				= {} -- Maps dependency name -> ID
+g_PBXTargetProxy			= {} -- Maps dependency name -> ID
+g_ProductGroupIDs			= {} -- Maps dependency name -> ID
 
 g_currentTarget = writer_solution.targets[1]
 
@@ -306,14 +306,14 @@ end
 --[[ PRE-PROCESSING ]] --------------------------------------------------------------------------------
 
 -- Create file type map
-	g_lastKnownFileTypeMap["m"]			= "sourcecode.c.objc"
+	g_lastKnownFileTypeMap["m"]		= "sourcecode.c.objc"
 	g_lastKnownFileTypeMap["mm"]		= "sourcecode.cpp.objcpp"
-	g_lastKnownFileTypeMap["c"]			= "sourcecode.c.c"
+	g_lastKnownFileTypeMap["c"]		= "sourcecode.c.c"
 	g_lastKnownFileTypeMap["cpp"]		= "sourcecode.cpp.cpp"
-	g_lastKnownFileTypeMap["h"]			= "sourcecode.c.h"
+	g_lastKnownFileTypeMap["h"]		= "sourcecode.c.h"
 	g_lastKnownFileTypeMap["framework"]	= "wrapper.framework"
 	g_lastKnownFileTypeMap["app"]		= "wrapper.application"
-	g_lastKnownFileTypeMap["storyboard"]= "file.storyboard"
+	g_lastKnownFileTypeMap["storyboard"]	= "file.storyboard"
 	g_lastKnownFileTypeMap["vsh"]		= "sourcecode.glsl"
 	g_lastKnownFileTypeMap["psh"]		= "sourcecode.glsl"
 	g_lastKnownFileTypeMap["fsh"]		= "sourcecode.glsl"
@@ -324,7 +324,7 @@ end
 	g_lastKnownFileTypeMap["zip"]		= "archive.zip"
 	g_lastKnownFileTypeMap["xml"]		= "text.xml"
 	g_lastKnownFileTypeMap["plist"]		= "text.plist.xml"
-	g_lastKnownFileTypeMap["a"]			= "archive.ar"
+	g_lastKnownFileTypeMap["a"]		= "archive.ar"
 	g_lastKnownFileTypeMap["xcodeproj"]	= "wrapper.pb-project"
 
 	--'folder' is also a valid last known type
@@ -517,8 +517,13 @@ function WriteXCBuildConfigurations()
 		end
 
 		file:write("				PRODUCT_NAME = \"$(TARGET_NAME)\";\n")
-		if g_currentTarget.targettype == "app" then 
-			file:write("				WRAPPER_EXTENSION = app;\n")
+		if g_currentTarget.targettype == "app" then
+			if g_currentTarget.targetsubsystem == "console" then 
+			--	print("console")
+			else
+			--	print("app")
+				file:write("				WRAPPER_EXTENSION = app;\n")
+			end
 		elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
 			file:write("				SKIP_INSTALL = YES;\n")
 		end
@@ -599,7 +604,16 @@ for i = 1, #g_currentTarget.files do
 	g_PBXBuildFileIDMap[f]		= xcodegenerateid()
 end
 
-g_currentTargetFileExtension = (g_currentTarget.targettype == "app" and  ".app") or  ".a"
+g_currentTargetFileExtension = ""
+if g_currentTarget.targettype == "app" then
+	if g_currentTarget.targetsubsystem == "console" then
+	else
+		g_currentTargetFileExtension = ".app"
+	end
+else
+	g_currentTargetFileExtension = ".a"
+end
+
 g_currentTargetFilenameWithExt = g_currentTarget.name .. g_currentTargetFileExtension
 
 g_PBXFileRefIDMap[g_currentTargetFilenameWithExt] = xcodegenerateid()
@@ -636,10 +650,10 @@ for i = 1, #g_currentTarget.depends do
 	--store relative filepath
 	g_PBXFileRefIDMap[dependency]				= xcodegenerateid()
 	g_PBXBuildFileIDMap[dependency]				= xcodegenerateid()
-	g_PBXReferenceProxyIDMap[dependency] 		= xcodegenerateid()
-	g_PBXTargetDependencyIDMap[dependency]		= xcodegenerateid()
-	g_PBXContainerItemProxyIDMap[dependency]	= xcodegenerateid()
-	g_PBXReferenceProxyIDMap[dependency]		= xcodegenerateid()
+	g_PBXReferenceProxyIDMap[dependency] 			= xcodegenerateid()
+	g_PBXTargetDependencyIDMap[dependency]			= xcodegenerateid()
+	g_PBXContainerItemProxyIDMap[dependency]		= xcodegenerateid()
+	g_PBXReferenceProxyIDMap[dependency]			= xcodegenerateid()
 	g_PBXTargetProxy[dependency]				= xcodegenerateid()
 	g_ProductGroupIDs[dependency]				= xcodegenerateid()
 
@@ -694,13 +708,13 @@ end
 
 file:write(
 "// !$*UTF8*$!					\
-{								\
+{						\
 	archiveVersion = 1;			\
-	classes = {					\
-	};							\
+	classes = {				\
+	};					\
 	objectVersion = 46;			\
-	objects = {					\
-								\
+	objects = {				\
+						\
 ")
 
 file:write("/* Begin PBXBuildFile section */\n")
@@ -760,7 +774,11 @@ file:write("/* Begin PBXFileReference section */\n")
 
 g_productType = nil
 if g_currentTarget.targettype == "app" then
-	g_productType = "wrapper.application"
+	if g_currentTarget.targetsubsystem == "console" then
+		g_productType = "wrapper.tool"
+	else
+		g_productType = "wrapper.application"
+	end
 elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
 	g_productType = "archive.ar"
 end
@@ -832,7 +850,11 @@ file:write("			productName = " .. g_currentTarget.name .. ";\n")
 file:write("			productReference = " .. g_externalProductID .. " /* " .. g_currentTarget.name .. " */;\n")
 
 if g_currentTarget.targettype == "app" then
-	file:write("			productType = \"com.apple.product-type.application\";\n")
+	if g_currentTarget.targetsubsystem == "console" then
+		file:write("			productType = \"com.apple.product-type.tool\";\n")
+	else	
+		file:write("			productType = \"com.apple.product-type.application\";\n")
+	end
 elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
 	file:write("			productType = \"com.apple.product-type.library.static\";\n")
 end
