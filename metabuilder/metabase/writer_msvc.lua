@@ -22,12 +22,7 @@ g_fileTypeMap["inl"]		= "ClInclude"
 g_fileTypeMap["rc"]			= "ResourceCompile"
 
 function GetFullFilePath(filepath)
-	if string.find(filepath, "##") ~= nil then
-		filepath = string.gsub(filepath, "##", "")
-		return Util_FileNormaliseWindows(filepath)
-	else
-		return Util_FileNormaliseWindows(Util_FileConvertToAbsolute(g_filePathMap, writer_global.currentmetamakedirabs, filepath))
-	end
+	return Util_GetFullFilePath(filepath, writer_global.currentmetamakedirabs, writer_global.makeoutputdirabs, "\\", g_filePathMap)
 end
 
 function GetFileType(filepath)

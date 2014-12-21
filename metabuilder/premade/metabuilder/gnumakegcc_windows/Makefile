@@ -29,7 +29,7 @@ metabuilder_DEFINES.Debug := \
 
 metabuilder_CPPFLAGS.Debug += $(metabuilder_DEFINES.Debug)
 metabuilder_INCLUDES.Debug := \
-  -I"$(DXSDK_DIR)Include" \
+  -I"!$(DXSDK_DIR)Include" \
   -I"../../../src" \
   -I"../../../../external/lua-5.2.2/src" \
   -I"../../../../external/ezOptionParser-0.2.1" \
@@ -54,7 +54,7 @@ metabuilder_DEFINES.Release := \
 
 metabuilder_CPPFLAGS.Release += $(metabuilder_DEFINES.Release)
 metabuilder_INCLUDES.Release := \
-  -I"$(DXSDK_DIR)Include" \
+  -I"!$(DXSDK_DIR)Include" \
   -I"../../../src" \
   -I"../../../../external/lua-5.2.2/src" \
   -I"../../../../external/ezOptionParser-0.2.1" \
