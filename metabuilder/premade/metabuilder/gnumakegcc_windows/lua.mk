@@ -24,7 +24,7 @@ lua_DEFINES.Debug := \
 
 lua_CPPFLAGS.Debug += $(lua_DEFINES.Debug)
 lua_INCLUDES.Debug := \
-  -I"$(DXSDK_DIR)Include" \
+  -I"!$(DXSDK_DIR)Include" \
   -I"../../../../external/lua-5.2.2/src" \
 
 lua_CPPFLAGS.Debug += $(lua_INCLUDES.Debug)
@@ -47,7 +47,7 @@ lua_DEFINES.Release := \
 
 lua_CPPFLAGS.Release += $(lua_DEFINES.Release)
 lua_INCLUDES.Release := \
-  -I"$(DXSDK_DIR)Include" \
+  -I"!$(DXSDK_DIR)Include" \
   -I"../../../../external/lua-5.2.2/src" \
 
 lua_CPPFLAGS.Release += $(lua_INCLUDES.Release)
@@ -70,7 +70,7 @@ lua_DEFINES.Master := \
 
 lua_CPPFLAGS.Master += $(lua_DEFINES.Master)
 lua_INCLUDES.Master := \
-  -I"$(DXSDK_DIR)Include" \
+  -I"!$(DXSDK_DIR)Include" \
   -I"../../../../external/lua-5.2.2/src" \
 
 lua_CPPFLAGS.Master += $(lua_INCLUDES.Master)

@@ -1,3 +1,5 @@
+--Map relative to absolute path
+
 function Util_EscapeMagicLuaChars(str)
 	luaMagicChars = {"(", ")",".","%","+","-","*","?","[","]","^","$"}
 
@@ -118,7 +120,8 @@ function Util_FilePathMarkedAsRaw(filepath)
 	return false
 end
 
-function Util_FileConvertToAbsolute(filePathMap, baseDir, filepath)
+function Util_FileConvertToAbsolute(baseDir, filepath, dirSep, filepathMap)
+	
 	local length = string.len(filepath)
 	if length == 0 then
 		return filepath
@@ -130,9 +133,9 @@ function Util_FileConvertToAbsolute(filePathMap, baseDir, filepath)
 	end
 
 	--Expand!
-	local newfilepath = filePathMap[filepath]
+	local newfilepath = filepathMap[filepath]
 	if newfilepath == nil then
-		return baseDir .. "/" .. filepath
+		return baseDir .. dirSep .. filepath
 	end
 
 	return newfilepath
@@ -150,6 +153,111 @@ end
 
 function Util_FileNormaliseUnix(filepath)
 	return Util_StringReplace(filepath, "\\", "/")
+end
+
+function Util_FileNormalise(filepath, dirsep)
+	if dirsep == "\\" then
+		return Util_FileNormaliseWindows(filepath)
+	end
+	
+	return Util_FileNormaliseUnix(filepath)
+end
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+function Util_GetNumDirLevels(dir, dirSep)
+	local dirCount = 0
+
+	for c in dir:gmatch"." do
+		if c == dirSep then
+			dirCount = dirCount + 1
+		end
+	end
+	
+	return dirCount
+end
+
+function Util_BuildPathBack(nLevels, dirSep)
+	local result = ""
+	for i = 1, nLevels do
+		result = result .. ".." .. dirSep
+	end
+	
+	return result
+end
+
+function Util_GetLongestCommonSequenceLengthFromStart(str1, str2)
+	local str1Table = {}
+	
+	for c in str1:gmatch"." do
+		table.insert(str1Table, c)
+	end
+
+	
+	local count = 0
+	for c in str2:gmatch"." do
+		count = count + 1
+		if (str1Table[count] ~= c) then
+			break
+		end		
+	end
+	
+	if count > 0 then
+		count = count + 1
+	end
+	return count
+end
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+function Util_GetFullFilePath(filepath, oldBaseDir, newBaseDir, dirSep, filepathMap)
+	filepath = Util_FileNormalise(filepath, dirSep)
+	oldBaseDir = Util_FileNormalise(oldBaseDir, dirSep)
+	newBaseDir = Util_FileNormalise(newBaseDir, dirSep)
+
+	--If filepath has been flagged to escape any kind of modification
+	if Util_FilePathMarkedAsRaw(filepath) then
+		return filepath
+	end
+	
+	local useRelativePaths = true
+	
+	local result = ""
+	if useRelativePaths == true then
+		local normalisedFilepathAbs = Util_FileConvertToAbsolute(oldBaseDir, filepath, dirSep, filepathMap)
+		local normalisedMakeOutputDirAbs = newBaseDir
+
+		--baseDir is the common path fragment shared by the makefile output directory and 'filepath'
+		local baseDir = nil
+		do
+			local commonSubSequenceLength = Util_GetLongestCommonSequenceLengthFromStart(normalisedFilepathAbs, normalisedMakeOutputDirAbs)
+			local commonSubSequence = normalisedFilepathAbs:sub(1, commonSubSequenceLength)
+			
+			--Look for last dir sep character in order to ignore a partial path or file match
+			local lastDirSep = Util_FindLast(commonSubSequence, dirSep)
+			if (lastDirSep ~= nil) then
+				--Take sequence up to last dir sep as our base dir
+				baseDir = commonSubSequence:sub(1, lastDirSep)
+			end
+		end
+		
+		if (baseDir ~= nil) then
+			local pathFromBaseToOutDir = Util_StringReplace(normalisedMakeOutputDirAbs, baseDir, "")
+			local nDirLevels = Util_GetNumDirLevels(dirSep .. pathFromBaseToOutDir, dirSep)
+			--Path back from make output dir to base dir
+			local pathBack = Util_BuildPathBack(nDirLevels, dirSep)
+			
+			local filepathBaseRelative = Util_StringReplace(normalisedFilepathAbs, baseDir, "")
+			result = pathBack .. filepathBaseRelative
+		else
+			result = normalisedFilepathAbs
+		end
+	else
+		result = Util_FileConvertToAbsolute(newBaseDir, filepath, dirSep, filepathMap)
+	end
+
+	--print("[" .. oldBaseDir .. "] [" .. newBaseDir .. "] " .. result)
+	return result
 end
 
 function Util_GetKVValue(keyValueList, key)

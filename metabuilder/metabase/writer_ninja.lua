@@ -17,19 +17,8 @@ g_filePathMap = {}
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function GetFullFilePath(filepath)
-	local newfilepath = g_filePathMap[filepath]
-	if newfilepath == nil then
-		return Util_FileConvertToAbsolute({g_filePathMap}, writer_global.currentmetamakedirabs, filepath)
-	end
-
-	return newfilepath
+	return Util_GetFullFilePath(filepath, writer_global.currentmetamakedirabs, writer_global.currentmetamakedirabs, "/", g_filePathMap)
 end
-
---[[
-function GetWorkspaceDir(currentTargetName, configName)
-	return writer_global.makeoutputdirabs .. "/" .. currentTargetName .. "/" .. configName
-end
-]]
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --FILE WRITING
