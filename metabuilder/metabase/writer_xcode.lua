@@ -11,11 +11,11 @@ g_buildPhaseFrameworkID = xcodegenerateid()
 g_PBXBuildFileIDMap = {}
 g_PBXFileRefIDMap = {}
 
-g_PBXContainerItemProxyIDMap		= {} -- Maps dependency name -> ID
-g_PBXReferenceProxyIDMap 		= {} -- Maps dependency name -> ID
-g_PBXTargetDependencyIDMap		= {} -- Maps dependency name -> ID
-g_PBXTargetProxy			= {} -- Maps dependency name -> ID
-g_ProductGroupIDs			= {} -- Maps dependency name -> ID
+g_PBXContainerItemProxyIDMap	= {} 
+g_PBXReferenceProxyIDMap 		= {} 
+g_PBXTargetDependencyIDMap		= {} 
+g_PBXTargetProxy				= {} 
+g_ProductGroupIDs				= {}
 
 g_currentTarget = writer_solution.targets[1]
 
@@ -65,12 +65,7 @@ function GetSourceTree(filepath)
 end
 
 function GetFullFilePath(filepath)
-	local newfilepath = g_filePathMap[filepath]
-	if newfilepath == nil then
-		return writer_global.currentmetamakedirabs .. "/" .. filepath
-	end
-
-	return newfilepath
+	return Util_GetFullFilePath(filepath, writer_global.currentmetamakedirabs, writer_global.makeoutputdirabs, "/", g_filePathMap)
 end
 
 function GetFileListType(filepath)
@@ -306,11 +301,11 @@ end
 --[[ PRE-PROCESSING ]] --------------------------------------------------------------------------------
 
 -- Create file type map
-	g_lastKnownFileTypeMap["m"]		= "sourcecode.c.objc"
+	g_lastKnownFileTypeMap["m"]			= "sourcecode.c.objc"
 	g_lastKnownFileTypeMap["mm"]		= "sourcecode.cpp.objcpp"
-	g_lastKnownFileTypeMap["c"]		= "sourcecode.c.c"
+	g_lastKnownFileTypeMap["c"]			= "sourcecode.c.c"
 	g_lastKnownFileTypeMap["cpp"]		= "sourcecode.cpp.cpp"
-	g_lastKnownFileTypeMap["h"]		= "sourcecode.c.h"
+	g_lastKnownFileTypeMap["h"]			= "sourcecode.c.h"
 	g_lastKnownFileTypeMap["framework"]	= "wrapper.framework"
 	g_lastKnownFileTypeMap["app"]		= "wrapper.application"
 	g_lastKnownFileTypeMap["storyboard"]	= "file.storyboard"
@@ -324,7 +319,7 @@ end
 	g_lastKnownFileTypeMap["zip"]		= "archive.zip"
 	g_lastKnownFileTypeMap["xml"]		= "text.xml"
 	g_lastKnownFileTypeMap["plist"]		= "text.plist.xml"
-	g_lastKnownFileTypeMap["a"]		= "archive.ar"
+	g_lastKnownFileTypeMap["a"]			= "archive.ar"
 	g_lastKnownFileTypeMap["xcodeproj"]	= "wrapper.pb-project"
 
 	--'folder' is also a valid last known type
@@ -658,8 +653,7 @@ for i = 1, #g_currentTarget.depends do
 	g_ProductGroupIDs[dependency]				= xcodegenerateid()
 
 	--Xcode projects written adjacent to each other
-	local dependencyXcodeproj = dependency .. ".xcodeproj"
-	local dependencyPhysicalFilePath = writer_global.makeoutputdirabs .. "/" .. filename .. ".xcodeproj"
+	local dependencyPhysicalFilePath = filename .. ".xcodeproj"
 
 	g_filePathMap[dependency] = dependencyPhysicalFilePath
 	g_filePathMap[dependencyPhysicalFilePath] = dependencyPhysicalFilePath
