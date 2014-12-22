@@ -34,8 +34,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2010_windows\int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2010_windows\out\$(ProjectName)\</OutDir>
+    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -66,8 +66,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2010_windows\int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2010_windows\out\$(ProjectName)\</OutDir>
+    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -261,7 +261,7 @@
    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="C:/opensource/metabuilder/metabuilder/metatmp/metabuilder/msvc2010_windows/lua.vcxproj">
+    <ProjectReference Include="lua.vcxproj">
       <Project>{9FA3AD0B-AF39-6830-BDCC-DE3E687B60B8}</Project>
     </ProjectReference>
   </ItemGroup>
