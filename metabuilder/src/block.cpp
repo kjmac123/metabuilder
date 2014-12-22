@@ -63,7 +63,7 @@ static void AddHeadersAutomatically(StringVector* files)
 
 static void ProcessWildcards(StringVector* result, const StringVector& input)
 {
-	int initialResultCount = result->size();
+	int initialResultCount = (int)result->size();
 	std::string baseDir = mbPathGetDir(mbGetAppState()->mainMetaMakeFileAbs);
 
 	for (int i = 0; i < (int)input.size(); ++i)
