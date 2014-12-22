@@ -43,8 +43,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2012_windows\int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2012_windows\out\$(ProjectName)\</OutDir>
+    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -73,8 +73,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2012_windows\int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2012_windows\out\$(ProjectName)\</OutDir>
+    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -106,8 +106,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2012_windows\int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2012_windows\out\$(ProjectName)\</OutDir>
+    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
@@ -136,13 +136,6 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-   <None Include="..\..\..\..\external\lua-5.2.2\metabuilder.lua">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
-   </None>
-  </ItemGroup>
   <ItemGroup>
    <ClCompile Include="..\..\..\..\external\lua-5.2.2\src\lapi.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</CompileAs>
@@ -400,6 +393,13 @@
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+   <None Include="..\..\..\..\external\lua-5.2.2\metabuilder.lua">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
+   </None>
   </ItemGroup>
   <ItemGroup>
    <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lapi.h">

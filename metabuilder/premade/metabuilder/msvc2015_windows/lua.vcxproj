@@ -43,8 +43,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2015_windows\int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2015_windows\out\$(ProjectName)\</OutDir>
+    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -73,8 +73,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2015_windows\int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2015_windows\out\$(ProjectName)\</OutDir>
+    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -106,8 +106,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2015_windows\int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>C:\opensource\metabuilder\metabuilder\metatmp\metabuilder\msvc2015_windows\out\$(ProjectName)\</OutDir>
+    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">

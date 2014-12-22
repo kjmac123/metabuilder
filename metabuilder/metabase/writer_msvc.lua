@@ -288,8 +288,8 @@ function WriteVcxProj(currentTarget, groupMap)
 			file:write(GetFullFilePath(config.exedirs[jExeDir]) .. ";")
 		end
 		file:write("$(ExecutablePath)</ExecutablePath>\n")
-	    file:write("    <IntDir>" .. Util_FileNormaliseWindows(writer_global.makeoutputdirabs .."\\" .. writer_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
-	    file:write("    <OutDir>" .. Util_FileNormaliseWindows(writer_global.makeoutputdirabs .."\\" .. writer_global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
+	    file:write("    <IntDir>" .. Util_FileNormaliseWindows(writer_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
+	    file:write("    <OutDir>" .. Util_FileNormaliseWindows(writer_global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
 	    file:write("    <TargetName>$(ProjectName)_$(Configuration)</TargetName>\n")
 		
 		WriteVcxProjPropertyGroupOptions(file, config.options.msvcpropertygroup)
@@ -500,7 +500,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		local dependency = currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 
-		local projectFilename = writer_global.makeoutputdirabs .. "/" .. filename .. ".vcxproj"
+		local projectFilename = filename .. ".vcxproj"
 		file:write("    <ProjectReference Include=\"" .. projectFilename .. "\">\n")
 
 		local projectID = msvcgetprojectid(filename)
