@@ -1,5 +1,5 @@
-metabase "gnumakegcc_windows"
-	import "gnumakegcc_common.lua"
+metabase "gnumakeclang_mingw"
+	import "gnumakeclang_common.lua"
 	import "platform_windows.lua"
 	
 	option("appfileextension",	"exe")
