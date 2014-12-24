@@ -19,29 +19,6 @@ static int luaFuncGlobalImport(lua_State* l)
     return 0;
 }
 
-static int luaSplit (lua_State* l) 
-{
-  const char *s = luaL_checkstring(l, 1);
-  const char *sep = luaL_checkstring(l, 2);
-  const char *e;
-  int i = 1;
-
-  lua_newtable(l); 
-
-  //for each separator
-  while ((e = strchr(s, *sep)) != NULL) 
-  {
-		lua_pushlstring(l, s, e-s);  //push substring
-		lua_rawseti(l, -2, i++);
-		s = e + 1;  //skip separator
-  }
-
-  //push last substring
-  lua_pushstring(l, s);
-  lua_rawseti(l, -2, i);
-  return 1;
-}
-
 static int luaFuncMkdir(lua_State* l)
 {
 	Block* b = mbGetActiveContext()->ActiveBlock();
@@ -233,17 +210,7 @@ void luaRegisterWriterFuncs(lua_State* l)
 	mbWriterXcodeLuaRegister(l);
 	mbWriterMSVCLuaRegister(l);
 
-    lua_pushcfunction(l, luaFuncGlobalImport);
-    lua_setglobal(l, "import");
-	/*
-	lua_pushcfunction(l, luaFuncAddMacro);
-	lua_setglobal(l, "globalmacro");
-
-	lua_pushcfunction(l, luaFuncExpandMacro);
-	lua_setglobal(l, "expandmacro");
-	*/
-	lua_pushcfunction(l, luaSplit);
-	lua_setglobal(l, "mbwriter_split");
+	mbCommonLuaRegister(l);
 	
     lua_pushcfunction(l, luaFuncMkdir);
     lua_setglobal(l, "mbwriter_mkdir");

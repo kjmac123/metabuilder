@@ -730,17 +730,10 @@ const KeyValueMap& Block::FlattenMacros() const
 	std::map<std::string, KeyValueMap>::const_iterator it = m_keyValueGroups.find("__macros");
 	assert(it != m_keyValueGroups.end());
 
-	std::vector<const Block*> blocks;
+	m_flattenedMacroCache.clear();
 	for (const Block* block = this; block; block = block->GetParent())
 	{
-		blocks.push_back(block);
-	}
-
-	m_flattenedMacroCache.clear();
-	for (int iBlock = (int)blocks.size() - 1; iBlock >= 0; --iBlock)
-	{
-		const Block* b = blocks[iBlock];
-		const KeyValueMap& blockMacros = b->GetMacros();
+		const KeyValueMap& blockMacros = block->GetMacros();
 		m_flattenedMacroCache.insert(blockMacros.begin(), blockMacros.end());
 	}
 

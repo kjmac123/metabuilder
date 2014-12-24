@@ -40,7 +40,7 @@ function InitFolder(folderList, path, filename)
 	local pathComponents = { "" }
 	
 	if (path ~= "") then 
-		pathComponents = mbwriter_split(path, "/")
+		pathComponents = split(path, "/")
 		table.insert(pathComponents, 1, "")
 	end
 
@@ -182,7 +182,7 @@ end
 function WriteVcxProjPropertyGroupOptions(file, groupOption)
 	if groupOption ~= nil then
 		for jOption = 1, #groupOption do
-			local keyValue = mbwriter_split(groupOption[jOption], "=")
+			local keyValue = split(groupOption[jOption], "=")
 			local key = keyValue[1]
 			local value = keyValue[2]
 
@@ -310,7 +310,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		
 		if config.options.msvccompile ~= nil then
 			for jOption = 1, #config.options.msvccompile do
-				local keyValue = mbwriter_split(config.options.msvccompile[jOption], "=")
+				local keyValue = split(config.options.msvccompile[jOption], "=")
 				local key = keyValue[1]
 				local value = keyValue[2]
 
@@ -360,7 +360,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		--Add custom options
 		if config.options.msvclink ~= nil then
 			for jOption = 1, #config.options.msvclink do
-				local keyValue = mbwriter_split(config.options.msvclink[jOption], "=")
+				local keyValue = split(config.options.msvclink[jOption], "=")
 				local key = keyValue[1]
 				local value = keyValue[2]
 
@@ -681,7 +681,7 @@ end
 
 local customWriter = Util_GetKVValue(writer_global.options.msvc, "customwriter")
 if customWriter ~= nil then
-	print("Importing custom writer " .. customWriter)
+	--print("Importing custom writer " .. customWriter)
 	import(customWriter)
 end
 

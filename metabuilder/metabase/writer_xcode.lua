@@ -81,7 +81,7 @@ function InitFolder(folderList, path, filename)
 	local pathComponents = { "" }
 	
 	if (path ~= "") then 
-		pathComponents = mbwriter_split(path, "/")
+		pathComponents = split(path, "/")
 		table.insert(pathComponents, 1, "")
 	end
 

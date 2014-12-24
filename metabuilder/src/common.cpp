@@ -188,6 +188,58 @@ static int luaFuncExpandMacro(lua_State* l)
 	return 1;
 }
 
+static int luaFuncLogInfo(lua_State* l)
+{
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
+	const char* str = lua_tostring(l, 1);
+
+	std::string expandedString;
+	mbExpandMacros(&expandedString, b, str);
+
+	lua_pushstring(l, expandedString.c_str());
+	MB_LOGINFO("%s", expandedString.c_str());
+	return 0;
+}
+
+static int luaFuncLogError(lua_State* l)
+{
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
+	const char* str = lua_tostring(l, 1);
+
+	std::string expandedString;
+	mbExpandMacros(&expandedString, b, str);
+
+	lua_pushstring(l, expandedString.c_str());
+	MB_LOGERROR("%s", expandedString.c_str());
+	return 0;
+}
+
+static int luaSplit(lua_State* l)
+{
+	const char *s = luaL_checkstring(l, 1);
+	const char *sep = luaL_checkstring(l, 2);
+	const char *e;
+	int i = 1;
+
+	lua_newtable(l);
+
+	//for each separator
+	while ((e = strchr(s, *sep)) != NULL)
+	{
+		lua_pushlstring(l, s, e - s);  //push substring
+		lua_rawseti(l, -2, i++);
+		s = e + 1;  //skip separator
+	}
+
+	//push last substring
+	lua_pushstring(l, s);
+	lua_rawseti(l, -2, i);
+	return 1;
+}
+
+
 static int report (lua_State *L, int status) 
 {
   const char *msg;
@@ -515,11 +567,6 @@ void mbPopDir()
 	g_doFileCurrentDirStack.pop();
 }
 
-
-
-
-
-
 void mbCommonLuaRegister(lua_State* l)
 {
     lua_pushcfunction(l, luaFuncGlobalImport);
@@ -530,6 +577,15 @@ void mbCommonLuaRegister(lua_State* l)
 
 	lua_pushcfunction(l, luaFuncExpandMacro);
 	lua_setglobal(l, "expandmacro");
+
+	lua_pushcfunction(l, luaFuncLogInfo);
+	lua_setglobal(l, "loginfo");
+
+	lua_pushcfunction(l, luaFuncLogError);
+	lua_setglobal(l, "logerror");
+
+	lua_pushcfunction(l, luaSplit);
+	lua_setglobal(l, "split");
 }
 
 bool mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
@@ -830,7 +886,7 @@ void mbExpandMacros(std::string* result, const std::map<std::string, std::string
 	*result = str;
 
 	//Only process each macro if we know our string contains at least one.
-	const char* macroStart = strstr(str, "${");
+	const char* macroStart = strstr(str, "#{");
 	if (macroStart)
 	{
 		bool found = false;
@@ -839,7 +895,7 @@ void mbExpandMacros(std::string* result, const std::map<std::string, std::string
 			const std::string& key = it->first;
 			const std::string& value = it->second;
 
-			sprintf(macro, "${%s}", key.c_str());
+			sprintf(macro, "#{%s}", key.c_str());
 
 			found = mbStringReplace(*result, macro, value);
 			if (found)
@@ -859,7 +915,7 @@ void mbExpandMacros(std::string* result, const std::map<std::string, std::string
 			const char* envValue = getenv(key);
 			if (envValue)
 			{
-				sprintf(macro, "${%s}", key);
+				sprintf(macro, "#{%s}", key);
 				mbStringReplace(*result, macro, envValue);
 			}
 		}

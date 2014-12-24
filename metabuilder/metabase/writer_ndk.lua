@@ -65,7 +65,7 @@ function WriteApplicationMk(currentTarget, config)
 
 	if config.options.ndkoptions ~= nil then
 		for jOption = 1, #config.options.ndkoptions do
-			local keyValue = mbwriter_split(config.options.ndkoptions[jOption], "=")
+			local keyValue = split(config.options.ndkoptions[jOption], "=")
 			local key = keyValue[1]
 			local value = keyValue[2]
 

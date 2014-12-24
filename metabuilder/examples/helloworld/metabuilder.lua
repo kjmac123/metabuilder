@@ -12,7 +12,9 @@ solution "helloworld"
 		--this is an application (as opposed to a module for example)
 		target_type "app"
 		target_subsystem "console"
-					
+		
+		macro("MYTESTMACRO", "HelloFromTheTestMacro")
+							
 		--Additional makefiles for libraries we need to build and link against
 		depends("hellolib",	"../hellolib/metabuilder.lua")
 
@@ -36,17 +38,23 @@ solution "helloworld"
 		--This is because there's no concept of a mapping table to use if
 		--one of your libraries has a 'missing' build configuration.
 		config "Debug"
+			macro("MYTESTMACRO", "HelloFromTheTestMacro (Debug)")
+			loginfo("This is a test log message #{MYTESTMACRO}")
 		config_end()
 
 		config "Release"
+			macro("MYTESTMACRO", "HelloFromTheTestMacro (Release)")
+			loginfo("This is a test log message #{MYTESTMACRO}")			
 		config_end()
-
+		
 		config "Profile"
 		config_end()
 
 		config "Master"
 		config_end()
 		
+		loginfo("This is a test log message #{MYTESTMACRO} (not in config scope)")
+				
  	target_end()
 
 solution_end()
