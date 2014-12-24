@@ -215,7 +215,6 @@ function WriteVcxProj(currentTarget, groupMap)
 	
 	local vcxprojName = writer_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj";
 	vcxprojName = Util_FileNormaliseWindows(vcxprojName)
-	--print("Writing " .. vcxprojName .. "\n")
 	local file = io.open(vcxprojName, "w")
 	if (file == nil) then 
 		mbwriter_fatalerror("Failed to open file " .. vcxprojName .. " for writing")
@@ -538,7 +537,7 @@ function FormatFilterPath(path)
 end
 
 function WriterVcxProjFilters(currentTarget, groupMap)
-	local vcxProjFiltersFilename = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".vcxproj.filters"
+	local vcxProjFiltersFilename = Util_FileNormaliseWindows(writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".vcxproj.filters")
 	local file = io.open(vcxProjFiltersFilename, "w")
 
 	file:write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
@@ -615,7 +614,7 @@ function WriteSolution(projectList, currentTarget)
 		msvcFormatVersion = "12.00"
 	end
 
-	local slnFilename = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".sln"
+	local slnFilename = Util_FileNormaliseWindows(writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".sln")
 	local file = io.open(slnFilename, "w")
 	if file == nil then
 		print("Failed to open file for writing " .. slnFilename)

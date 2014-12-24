@@ -22,13 +22,13 @@ bool Metabase::IsA(E_BlockType t) const
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 static int luaFuncMetabase(lua_State* l)
-{
-	std::string generatorName;
-	mbLuaToStringExpandMacros(&generatorName, l, 1);
-	
+{	
 	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
 	assert(activeBlock == NULL);
-    
+ 
+	std::string generatorName;
+	mbLuaToStringExpandMacros(&generatorName, activeBlock, l, 1);
+
     Metabase* generator = new Metabase();
 	if (activeBlock)
 	{
@@ -65,7 +65,7 @@ static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		gen->supportedPlatforms.push_back(std::string());
-		mbLuaToStringExpandMacros(&gen->supportedPlatforms.back(), l, -1);
+		mbLuaToStringExpandMacros(&gen->supportedPlatforms.back(), gen, l, -1);
     }
 		
 	return 0;
@@ -82,7 +82,7 @@ static int luaFuncMetabaseWriter(lua_State* l)
     
     Metabase* gen = (Metabase*)mbGetActiveContext()->ActiveBlock();
 	std::string writer;
-	mbLuaToStringExpandMacros(&writer, l, 1);
+	mbLuaToStringExpandMacros(&writer, gen, l, 1);
 	gen->writerLua = writer;
 	
 	return 0;

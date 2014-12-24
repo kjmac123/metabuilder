@@ -61,11 +61,11 @@ void Target::Flatten(FlatConfig* result, const char* platformName, const char* c
 	for (const Block* block = this; block; block = block->GetParent())
 	{
 		blocks.push_back(block);
-		
-		for (int i = 0; i < (int)blocks.size(); ++i)
-		{
-			block->GetParams(&params, E_BlockType_Unknown, platformName, configName, true);
-		}
+	}
+
+	for (int i = 0; i < (int)blocks.size(); ++i)
+	{
+		blocks[i]->GetParams(&params, E_BlockType_Unknown, platformName, configName, true);
 	}
 
 	//Merge non config specifc params
@@ -111,7 +111,7 @@ static int luaFuncTarget(lua_State* l)
     Solution* solution = (Solution*)mbGetActiveContext()->ActiveBlock();
 
     std::string name;
-	mbLuaToStringExpandMacros(&name, l, 1);
+	mbLuaToStringExpandMacros(&name, solution, l, 1);
     
 	//Create new target instance.
     Target* target = new Target();
@@ -135,14 +135,14 @@ static int luaFuncTargetEnd(lua_State*)
 static int luaFuncTargetType(lua_State* l)
 {
     Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-    mbLuaToStringExpandMacros(&target->targetType, l, 1);
+    mbLuaToStringExpandMacros(&target->targetType, target, l, 1);
     return 0;
 }
 
 static int luaFuncTargetSubsystem(lua_State* l)
 {
 	Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-	mbLuaToStringExpandMacros(&target->targetSubsystem, l, 1);
+	mbLuaToStringExpandMacros(&target->targetSubsystem, target, l, 1);
 	return 0;
 }
 
@@ -157,8 +157,8 @@ static int luaFuncTargetDepends(lua_State* l)
 {
     Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
 	target->depends.push_back(TargetDepends());
-	mbLuaToStringExpandMacros(&target->depends.back().libTargetName, l, 1);	// libTargetName;
-	mbLuaToStringExpandMacros(&target->depends.back().libMakefile, l, 2);	// libMakefile;
+	mbLuaToStringExpandMacros(&target->depends.back().libTargetName, target, l, 1);	// libTargetName;
+	mbLuaToStringExpandMacros(&target->depends.back().libMakefile, target, l, 2);	// libMakefile;
 	
 	//Record this makefile, we'll process it later.
 	mbAddMakeFile(target->depends.back().libMakefile.c_str());

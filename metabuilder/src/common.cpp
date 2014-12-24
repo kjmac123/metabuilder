@@ -16,7 +16,11 @@ static std::list<MetaBuilderContext*>		g_contexts; //Has memory ownership of con
 static std::list<MetaBuilderContext*>		g_contextStack;
 static std::stack<std::string>				g_doFileCurrentDirStack;
 
-static std::map<std::string, std::string>	g_macroMap;
+//static std::map<std::string, std::string>	g_macroMap;
+
+const char* g_cAndCPPSourceExt[] = { "cpp", "cxx", "c", "cc", "m", "mm", NULL };
+const char* g_cAndCPPHeaderExt[] = { "hpp", "hxx", "h", NULL };
+const char* g_cAndCPPInlineExt[] = { "inl", NULL };
 
 AppState::AppState()
 {
@@ -142,12 +146,14 @@ const std::list<MetaBuilderContext*>& mbGetContexts()
 
 static int luaFuncGlobalImport(lua_State* lua)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
 	std::string requireFile;
-	mbLuaToStringExpandMacros(&requireFile, lua, 1);
+	mbLuaToStringExpandMacros(&requireFile, b, lua, 1);
 	mbLuaDoFile(lua, requireFile.c_str(), NULL);
     return 0;
 }
-
+/*
 int luaFuncAddMacro(lua_State* lua)
 {
 	const char* key = lua_tostring(lua, 1);
@@ -179,7 +185,7 @@ int luaFuncExpandMacro(lua_State* l)
 	lua_pushstring(l, expandedString.c_str());
 	return 1;
 }
-
+*/
 static int report (lua_State *L, int status) 
 {
   const char *msg;
@@ -199,8 +205,10 @@ static int report (lua_State *L, int status)
 
 static int luaFuncCheckPlatform(lua_State* l)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
     std::string testPlatform;
-	mbLuaToStringExpandMacros(&testPlatform, l, 1);
+	mbLuaToStringExpandMacros(&testPlatform, b, l, 1);
 	for (int i = 0; i < (int)mbGetActiveContext()->metabase->supportedPlatforms.size(); ++i)
 	{
 		const std::string& test = mbGetActiveContext()->metabase->supportedPlatforms[i];
@@ -480,6 +488,21 @@ void mbCommonInit(lua_State* l, const std::string& path)
 	mbLuaDoFile(l, "metabase.lua", NULL);
 }
 
+const char** mbGetCAndCPPSourceFileExtensions()
+{
+	return g_cAndCPPSourceExt;
+}
+
+const char** mbGetCAndCPPHeaderFileExtensions()
+{
+	return g_cAndCPPHeaderExt;
+}
+
+const char** mbGetCAndCPPInlineFileExtensions()
+{
+	return g_cAndCPPInlineExt;
+}
+
 void mbPushDir(const std::string& path)
 {
 	g_doFileCurrentDirStack.push(path);
@@ -503,11 +526,11 @@ void mbCommonLuaRegister(lua_State* l)
     lua_pushcfunction(l, luaFuncCheckPlatform);
     lua_setglobal(l, "checkplatform");
 
-	lua_pushcfunction(l, luaFuncAddMacro);
-	lua_setglobal(l, "globalmacro");
+//	lua_pushcfunction(l, luaFuncAddMacro);
+//	lua_setglobal(l, "globalmacro");
 
-	lua_pushcfunction(l, luaFuncExpandMacro);
-	lua_setglobal(l, "expandmacro");
+//	lua_pushcfunction(l, luaFuncExpandMacro);
+//	lua_setglobal(l, "expandmacro");
 }
 
 void mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
@@ -796,33 +819,65 @@ void mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups)
 	}
 }
 
-void mbExpandMacros(std::string* result, const char* str)
+void mbExpandMacros(std::string* result, const std::map<std::string, std::string>& macroMap, const char* str)
 {
 	char macro[1024];
 
 	*result = str;
 
 	//Only process each macro if we know our string contains at least one.
-	if (strstr(str, "$${"))
+	const char* macroStart = strstr(str, "${");
+	if (macroStart)
 	{
-		for (std::map<std::string, std::string>::const_iterator it = g_macroMap.begin(); it != g_macroMap.end(); ++it)
+		macroStart += 2;
 		{
-			const std::string& key= it->first;
+			char key[1024];
+			const char* macroEnd = strstr(macroStart, "}");
+			int length = macroEnd - macroStart;
+
+			memcpy(key, macroStart, length);
+			key[length] = '\0';
+
+			const char* envValue = getenv("key");
+			if (envValue)
+			{
+				sprintf(macro, "${%s}", key);
+				mbStringReplace(*result, macro, envValue);
+			}
+		}
+
+		for (std::map<std::string, std::string>::const_iterator it = macroMap.begin(); it != macroMap.end(); ++it)
+		{
+			const std::string& key = it->first;
 			const std::string& value = it->second;
 
-			sprintf(macro, "$${%s}", key.c_str());
+			sprintf(macro, "${%s}", key.c_str());
 
 			mbStringReplace(*result, macro, value);
 		}
 	}
 }
 
-const char* mbLuaToStringExpandMacros(std::string* result, lua_State* l, int stackPos)
+void mbExpandMacros(std::string* result, Block* block, const char* str)
+{
+	if (block)
+	{
+		mbExpandMacros(result, block->FlattenMacros(), str);
+	}
+	else
+	{
+		*result = str;
+	}
+}
+
+const char* mbLuaToStringExpandMacros(std::string* result, Block* block, lua_State* l, int stackPos)
 {
 	const char* str = lua_tostring(l, stackPos);
 	if (!str)
 		return NULL;
-
-	mbExpandMacros(result, str);
+	
+	mbExpandMacros(result, block, str);
+//	MB_LOGINFO("%s -> %s", str, result->c_str());
 	return result->c_str();
 }
+

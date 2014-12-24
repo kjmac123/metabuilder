@@ -27,7 +27,7 @@ static int luaFuncPlatform(lua_State* l)
 	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
 
     std::string name;
-	mbLuaToStringExpandMacros(&name, l, 1);
+	mbLuaToStringExpandMacros(&name, activeBlock, l, 1);
 	
 	//Create new target instance.
     PlatformParam* platform = new PlatformParam();

@@ -65,6 +65,11 @@ void _mbLogInfofLF(const char* fmt, ...);
 void _mbLogDebugf(const char* fmt, ...);
 void _mbLogDebugfLF(const char* fmt, ...);
 
+#define ARRAY_LENGTH(a) (sizeof((a))/sizeof((a)[0]))
+
+void ToUpperStr(char* str);
+void ToLowerStr(char* str);
+
 #include "platform/platform.h"
 
 #endif

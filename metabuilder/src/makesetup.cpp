@@ -23,16 +23,17 @@ bool MakeSetup::IsA(E_BlockType t) const
 
 static int luaFuncMakeSetup(lua_State* l)
 {
-    std::string metabase;
-	mbLuaToStringExpandMacros(&metabase, l, 1);
-
 	MakeSetup* makeSetup = mbGetAppState()->makeSetup;
+
+	std::string metabase;
+	mbLuaToStringExpandMacros(&metabase, makeSetup, l, 1);
+
 	//Only process for primary make file
 	if (mbGetAppState()->isProcessingPrimaryMakefile)
 	{
 		makeSetup->_metabaseDir = metabase;
 	}
-	
+
 	//MakeSetup becomes new active block
     mbGetActiveContext()->PushActiveBlock(makeSetup);
     return 0;
@@ -56,10 +57,12 @@ static int luaFuncMakeSetupEnd(lua_State* l)
 
 static int luaFuncMakeSetupIntermediateDir(lua_State* l)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
     std::string intermediateDir;
-	mbLuaToStringExpandMacros(&intermediateDir, l, 1);
+	mbLuaToStringExpandMacros(&intermediateDir, b, l, 1);
     
-    if (mbGetActiveContext()->ActiveBlock() != mbGetAppState()->makeSetup)
+    if (b != mbGetAppState()->makeSetup)
     {
         MB_LOGERROR("Intermediate dir must be set within correct block.");
         mbExitError();
@@ -71,15 +74,16 @@ static int luaFuncMakeSetupIntermediateDir(lua_State* l)
 
 static int luaFuncMakeSetupOutputDir(lua_State* l)
 {
-	std::string outputDir;
-	mbLuaToStringExpandMacros(&outputDir, l, 1);
-    
-    if (mbGetActiveContext()->ActiveBlock() != mbGetAppState()->makeSetup)
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (b != mbGetAppState()->makeSetup)
     {
         MB_LOGERROR("Output dir must be set within correct block.");
         mbExitError();
     }
     
+	std::string outputDir;
+	mbLuaToStringExpandMacros(&outputDir, b, l, 1);
+
 	mbGetAppState()->makeSetup->_outDir = outputDir;
     return 0;
 }

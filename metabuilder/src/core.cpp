@@ -56,3 +56,19 @@ void _mbLogDebugfLF(const char* fmt, ...)
 		PLATFORM_FORMAT_LOG_MESSAGE_LF(mbaLogDebug, 0);
 	}
 }
+
+void ToUpperStr(char* str)
+{
+	for (char* cursor = str; str; ++str)
+	{
+		*str = toupper(*cursor);
+	}
+}
+
+void ToLowerStr(char* str)
+{
+	for (char* cursor = str; str; ++str)
+	{
+		*str = tolower(*cursor);
+	}
+}

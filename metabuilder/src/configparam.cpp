@@ -26,7 +26,7 @@ static int luaFuncConfig(lua_State* l)
 	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
 
 	std::string name;
-	mbLuaToStringExpandMacros(&name, l, 1);
+	mbLuaToStringExpandMacros(&name, activeBlock, l, 1);
 	ConfigParam* config = activeBlock->AcquireConfigParam(name.c_str());
     
 	//Config becomes new active block

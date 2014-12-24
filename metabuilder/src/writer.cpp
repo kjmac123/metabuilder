@@ -13,7 +13,7 @@ static std::vector<KeyValue>	g_registeredTargets;
 static int luaFuncGlobalImport(lua_State* l)
 {
     std::string requireFile;
-	mbLuaToStringExpandMacros(&requireFile, l, 1);
+	mbLuaToStringExpandMacros(&requireFile, NULL, l, 1);
 
     mbLuaDoFile(l, requireFile, NULL);
     return 0;
@@ -44,8 +44,10 @@ static int luaSplit (lua_State* l)
 
 static int luaFuncMkdir(lua_State* l)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
     std::string path;
-	mbLuaToStringExpandMacros(&path, l, 1);
+	mbLuaToStringExpandMacros(&path, b, l, 1);
 	
 	if (!mbCreateDirChain(path.c_str()))
 	{
@@ -57,8 +59,10 @@ static int luaFuncMkdir(lua_State* l)
 
 static int luaFuncMklink(lua_State* l)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
     std::string src, dst;
-	if (!mbLuaToStringExpandMacros(&src, l, 1) || !mbLuaToStringExpandMacros(&dst, l, 2))
+	if (!mbLuaToStringExpandMacros(&src, b, l, 1) || !mbLuaToStringExpandMacros(&dst, b, l, 2))
 	{
 		MB_LOGERROR("Must specify both source and destination when creating link");
 		mbExitError();
@@ -101,7 +105,7 @@ static int luaFuncGetFileType(lua_State* l)
 static int luaFuncReportOutputFile(lua_State* l)
 {
     std::string filepath;
-	mbLuaToStringExpandMacros(&filepath, l, 1);
+	mbLuaToStringExpandMacros(&filepath, NULL, l, 1);
 	MB_LOGINFO("Wrote file %s", filepath.c_str());
 	
 	return 0;
@@ -139,7 +143,7 @@ static int luaFuncCopyFile(lua_State* l)
 {
 	std::string fromFilename, toFilename;
 	
-	if (!mbLuaToStringExpandMacros(&fromFilename, l, 1) || !mbLuaToStringExpandMacros(&toFilename, l, 2))
+	if (!mbLuaToStringExpandMacros(&fromFilename, NULL, l, 1) || !mbLuaToStringExpandMacros(&toFilename, NULL, l, 2))
 	{
 		MB_LOGERROR("Failed to copy file. Insufficient args");
 		mbExitError();
@@ -199,8 +203,8 @@ static int luaFuncCopyFile(lua_State* l)
 static int luaFuncWriterRegisterTarget(lua_State* l)
 {
 	g_registeredTargets.push_back(KeyValue());
-	mbLuaToStringExpandMacros(&g_registeredTargets.back().key, l, 1);	// target name;
-	mbLuaToStringExpandMacros(&g_registeredTargets.back().value, l, 2);	// target filepath;
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().key, NULL, l, 1);	// target name;
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().value, NULL, l, 2);	// target filepath;
 	MB_LOGINFO("Registered target - name: %s location: %s", g_registeredTargets.back().key.c_str(), g_registeredTargets.back().value.c_str());
 	return 0;
 }
@@ -208,7 +212,7 @@ static int luaFuncWriterRegisterTarget(lua_State* l)
 static int luaFuncWriterGetTarget(lua_State* l)
 {
     std::string target;
-	mbLuaToStringExpandMacros(&target, l, 1);
+	mbLuaToStringExpandMacros(&target, NULL, l, 1);
 	
 	for (int i = 0; i < (int)g_registeredTargets.size(); ++i)
 	{
@@ -231,13 +235,13 @@ void luaRegisterWriterFuncs(lua_State* l)
 
     lua_pushcfunction(l, luaFuncGlobalImport);
     lua_setglobal(l, "import");
-	
+	/*
 	lua_pushcfunction(l, luaFuncAddMacro);
 	lua_setglobal(l, "globalmacro");
 
 	lua_pushcfunction(l, luaFuncExpandMacro);
 	lua_setglobal(l, "expandmacro");
-
+	*/
 	lua_pushcfunction(l, luaSplit);
 	lua_setglobal(l, "mbwriter_split");
 	
@@ -508,6 +512,8 @@ void mbWriterDo(MetaBuilderContext* ctx)
 							{
 								const char* platformName = ctx->metabase->supportedPlatforms[kPlatform].c_str();
 								target->Flatten(&flatConfig, platformName, configName);
+
+								flatConfig.Init();
 							}
 							
 							lua_createtable(l, 0, 0);
