@@ -63,9 +63,9 @@ void Target::Flatten(FlatConfig* result, const char* platformName, const char* c
 		blocks.push_back(block);
 	}
 
-	for (int i = 0; i < (int)blocks.size(); ++i)
+	for (int iBlock = (int)blocks.size() - 1; iBlock >= 0; --iBlock)
 	{
-		blocks[i]->GetParams(&params, E_BlockType_Unknown, platformName, configName, true);
+		blocks[iBlock]->GetParams(&params, E_BlockType_Unknown, platformName, configName, true);
 	}
 
 	//Merge non config specifc params

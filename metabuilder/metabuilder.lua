@@ -9,7 +9,7 @@ solution "metabuilder"
 	target "metabuilder"
 		target_type "app"
 		target_subsystem "console"
-
+		
 		--build against Lua library
 		depends("lua",	"../external/lua-5.2.2/metabuilder.lua")
 

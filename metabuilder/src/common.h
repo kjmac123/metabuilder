@@ -191,7 +191,7 @@ ActiveBlock*		mbGetActiveBlock();
 
 void				mbLuaGetDefines(StringVector* defines, lua_State* lua, E_BlockType blockTypeExpected);
 
-void				mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr);
+bool				mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr);
 
 void				mbSetPlatformName(const char* name);
 void				mbLuaDump(lua_State* l);
@@ -214,13 +214,8 @@ bool				mbCreateDirChain(const char* osDir_);
 void				mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroups);
 void				mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups);
 
-//int					luaFuncAddMacro(lua_State* lua);
-//int					luaFuncExpandMacro(lua_State* lua);
-
 void				mbExpandMacros(std::string* result, const std::map<std::string, std::string>& macroMap, const char* str);
 void				mbExpandMacros(std::string* result, Block* block, const char* str);
-
-//const char*			mbLuaToStringExpandMacros(std::string* result, const std::map<std::string, std::string>& macroMap, lua_State* l, int stackPos);
 const char*			mbLuaToStringExpandMacros(std::string* result, Block* block, lua_State* l, int stackPos);
 
 #endif

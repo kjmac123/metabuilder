@@ -174,18 +174,20 @@ int luaFuncAddMacro(lua_State* lua)
 
 	return 0;
 }
-
-int luaFuncExpandMacro(lua_State* l)
+*/
+static int luaFuncExpandMacro(lua_State* l)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
 	const char* str = lua_tostring(l, 1);
 
 	std::string expandedString;
-	mbExpandMacros(&expandedString, str);
+	mbExpandMacros(&expandedString, b, str);
 
 	lua_pushstring(l, expandedString.c_str());
 	return 1;
 }
-*/
+
 static int report (lua_State *L, int status) 
 {
   const char *msg;
@@ -526,21 +528,23 @@ void mbCommonLuaRegister(lua_State* l)
     lua_pushcfunction(l, luaFuncCheckPlatform);
     lua_setglobal(l, "checkplatform");
 
-//	lua_pushcfunction(l, luaFuncAddMacro);
-//	lua_setglobal(l, "globalmacro");
-
-//	lua_pushcfunction(l, luaFuncExpandMacro);
-//	lua_setglobal(l, "expandmacro");
+	lua_pushcfunction(l, luaFuncExpandMacro);
+	lua_setglobal(l, "expandmacro");
 }
 
-void mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
+bool mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
 {
+	bool found = false;
     size_t pos = 0;
     while((pos = str.find(oldStr, pos)) != std::string::npos)
     {
         str.replace(pos, oldStr.length(), newStr);
         pos += newStr.length();
+
+		found = true;
     }
+
+	return found;
 }
 
 void mbLuaDump(lua_State* l)
@@ -829,23 +833,7 @@ void mbExpandMacros(std::string* result, const std::map<std::string, std::string
 	const char* macroStart = strstr(str, "${");
 	if (macroStart)
 	{
-		macroStart += 2;
-		{
-			char key[1024];
-			const char* macroEnd = strstr(macroStart, "}");
-			int length = macroEnd - macroStart;
-
-			memcpy(key, macroStart, length);
-			key[length] = '\0';
-
-			const char* envValue = getenv("key");
-			if (envValue)
-			{
-				sprintf(macro, "${%s}", key);
-				mbStringReplace(*result, macro, envValue);
-			}
-		}
-
+		bool found = false;
 		for (std::map<std::string, std::string>::const_iterator it = macroMap.begin(); it != macroMap.end(); ++it)
 		{
 			const std::string& key = it->first;
@@ -853,7 +841,27 @@ void mbExpandMacros(std::string* result, const std::map<std::string, std::string
 
 			sprintf(macro, "${%s}", key.c_str());
 
-			mbStringReplace(*result, macro, value);
+			found = mbStringReplace(*result, macro, value);
+			if (found)
+				break;
+		}
+
+		if (!found)
+		{
+			macroStart += 2;
+			char key[1024];
+			const char* macroEnd = strstr(macroStart, "}");
+			int length = macroEnd - macroStart;
+
+			memcpy(key, macroStart, length);
+			key[length] = '\0';
+
+			const char* envValue = getenv(key);
+			if (envValue)
+			{
+				sprintf(macro, "${%s}", key);
+				mbStringReplace(*result, macro, envValue);
+			}
 		}
 	}
 }

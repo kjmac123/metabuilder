@@ -155,8 +155,8 @@ static int luaFuncSetMacro(lua_State* l)
 	}
 
 	std::string key, value;
-	mbLuaToStringExpandMacros(&key, block, l, 2);
-	mbLuaToStringExpandMacros(&value, block, l, 3);
+	mbLuaToStringExpandMacros(&key, block, l, 1);
+	mbLuaToStringExpandMacros(&value, block, l, 2);
 
 	block->SetMacro(key.c_str(), value.c_str());
 	return 0;
@@ -737,9 +737,9 @@ const KeyValueMap& Block::FlattenMacros() const
 	}
 
 	m_flattenedMacroCache.clear();
-	for (int i = 0; i < (int)blocks.size(); ++i)
+	for (int iBlock = (int)blocks.size() - 1; iBlock >= 0; --iBlock)
 	{
-		const Block* b = blocks[i];
+		const Block* b = blocks[iBlock];
 		const KeyValueMap& blockMacros = b->GetMacros();
 		m_flattenedMacroCache.insert(blockMacros.begin(), blockMacros.end());
 	}
