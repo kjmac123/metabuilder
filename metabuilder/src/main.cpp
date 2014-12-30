@@ -123,7 +123,12 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 
 int main(int argc, const char * argv[])
 {
+	mbaInit();
+
 	MB_LOGINFO("Metabuilder");
+
+	MB_LOGSETTIMEENABLED(true);
+
 	AppState* appState = mbGetAppState();
 	appState->makeSetup = new MakeSetup();
 
@@ -200,5 +205,6 @@ int main(int argc, const char * argv[])
 	mbPopDir();
 	
     MB_LOGINFO("Project generation complete.");
+	mbaShutdown();
     return 0;
 }

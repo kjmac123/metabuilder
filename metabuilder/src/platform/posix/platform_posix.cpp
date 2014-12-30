@@ -11,8 +11,12 @@
 #include <fnmatch.h>
 #include <dirent.h>
 
+#if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
+static F64							platform_posix_MachTimeToNs;
+static mach_timebase_info_data_t	platform_posix_Timebase;
+#endif
 
-bool _mbaCreateDir(const char* osDir)
+static bool mbaCreateDir(const char* osDir)
 {
     struct stat statResult;
     int statresult = stat(osDir, &statResult);
@@ -35,6 +39,16 @@ bool _mbaCreateDir(const char* osDir)
 //    MB_LOGDEBUG("Created dir %s\n", osDir);
     return true;
 }
+
+void mbaInit()
+{
+#if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
+	mach_timebase_info(&PlatformThread_Timebase);
+	platform_posix_MachTimeToNs = ((F64)PlatformThread_Timebase.numer / (F64)PlatformThread_Timebase.denom);
+#endif
+}
+
+void mbaShutdown()
 
 bool mbaCreateLink(const char* src, const char* dst)
 {
@@ -241,6 +255,29 @@ void mbaLogInfo(const char* str)
 void mbaLogDebug(const char* str)
 {
 	printf("%s", str);
+}
+
+F64 GetSystemTicksToSecondsScale()
+{
+#if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
+	return 1.0 / F64(MB_SECONDS_TO_NANOSECONDS) * platform_posix_MachTimeToNs;
+#else
+	return 1.0 / F64(MB_SECONDS_TO_NANOSECONDS);
+#endif
+}
+
+U64 mbaGetSystemTicks()
+{
+#if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
+	U64 machTime = mach_absolute_time();
+	return mach_absolute_time();
+#else
+	timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	U64 nanoseconds = (U64)t.tv_nsec;
+	U64 seconds = (U64)t.tv_sec;
+	nanoseconds += seconds * MB_SECONDS_TO_NANOSECONDS;
+	return nanoseconds;
 }
 
 #endif

@@ -17,7 +17,10 @@ enum E_FileType
 	E_FileType_Dir
 };
 
-bool		_mbaCreateDir(const char* osDir);
+void		mbaInit();
+void		mbaShutdown();
+
+bool		mbaCreateDir(const char* osDir);
 bool		mbaCreateLink(const char* src, const char* dst);
 void		mbaNormaliseFilePath(char* outFilePath, const char* inFilePath);
 E_FileType	mbaGetFileType(const std::string& filepath);
@@ -30,5 +33,8 @@ std::string	mbaFileGetAbsPath(const std::string& path);
 void		mbaLogError(const char* str);
 void		mbaLogInfo(const char* str);
 void		mbaLogDebug(const char* str);
+
+F64			mbaGetSystemTicksToSecondsScale();
+U64			mbaGetSystemTicks();
 
 #endif

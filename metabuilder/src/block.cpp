@@ -1,7 +1,6 @@
 #include "metabuilder_pch.h"
 
 #include "configparam.h"
-#include "common.h"
 #include "block.h"
 #include "platformparam.h"
 
@@ -162,7 +161,7 @@ static int luaFuncSetMacro(lua_State* l)
 	return 0;
 }
 
-static int luaFuncAppendOption(lua_State* l)
+static int luaFuncAddOption(lua_State* l)
 {
 	Block* block = mbGetActiveContext()->ActiveBlock();
 	if (!block)
@@ -393,11 +392,11 @@ const char** mbGetStringGroupNames()
 
 void mbBlockLuaRegister(lua_State* l)
 {
-    lua_pushcfunction(l, luaFuncAppendOption);
-    lua_setglobal(l, "option");
+    lua_pushcfunction(l, luaFuncAddOption);
+    lua_setglobal(l, "addoption");
 	
 	lua_pushcfunction(l, luaFuncSetOption);
-	lua_setglobal(l, "setoption");
+	lua_setglobal(l, "option");
 
 	lua_pushcfunction(l, luaFuncSetMacro);
 	lua_setglobal(l, "macro");

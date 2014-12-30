@@ -200,7 +200,7 @@ function WriteVcxProjRawXMLBlocks(file, groupOptionRawXml)
 	end
 end
 
-function WriteVcxProj(currentTarget, groupMap)
+function WriteVcxProj(currentTarget, groupMap)	
 	local projectID = msvcgenerateid()
 	msvcregisterprojectid(currentTarget.name, projectID)
 	
@@ -395,31 +395,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		
 		file:write("  </ItemDefinitionGroup>\n")
 	end
---[[
-	--Shaders
-	file:write("  <ItemGroup>\n")
-	for i = 1, #CompileShaderGroup do
-		local f = CompileShaderGroup[i][1]
-		local fIncludedInBuild = CompileShaderGroup[i][2]
 
-		file:write("    <CompilerShader Include=\"" .. GetFullFilePath(f) .. "\">\n")
-		for iConfig = 1, #currentTarget.configs do
-			local config = currentTarget.configs[iConfig]
-			if fIncludedInBuild == false then 
-				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">true</ExcludedFromBuild>\n")
-			else
-				--TODO: something more robust than the below. Sensible file extensions sound good.
-				local profile = "vs_3_0"
-				if string.find(f, "Ps.hlsl") ~= nil then
-					profile = "ps_3_0"
-				end
-				file:write("      <TargetProfile Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">" .. profile .. "</TargetProfile>\n")
-			end
-		end
-		file:write("    </CompilerShader>\n")		
-	end	
-	file:write("  </ItemGroup>\n")
-	]]
 	local filesNotUsingPchMap = {}
 	for i = 1, #currentTarget.nopchfiles do
 		local f = currentTarget.nopchfiles[i]
@@ -429,8 +405,8 @@ function WriteVcxProj(currentTarget, groupMap)
 	--New group writing method which isn't horrid and totally hard-coded
 	--TODO - add function pointer approach for intrinsic types.
 	for groupName, group in pairs(groupMap) do 
+		--print(groupName)
 		file:write("  <ItemGroup>\n")
-
 		if groupName == "ClCompile" then
 			for i = 1, #group.fileInfo do
 				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
@@ -438,7 +414,6 @@ function WriteVcxProj(currentTarget, groupMap)
 					local config = currentTarget.configs[iConfig]
 					file:write("      <CompileAs Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Default</CompileAs>\n")
 				end
-				
 				--If we're using a pch and this is the pch file
 				if pchSourceFile ~= nil then
 					local f =  group.fileInfo[i].filename
@@ -470,7 +445,6 @@ function WriteVcxProj(currentTarget, groupMap)
 				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
 				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
 			end
-		--elseif groupName == "CompilerShader" then
 		else
 			if GetCustomGroupRule ~= nil then
 				for i = 1, #group.fileInfo do
@@ -490,7 +464,7 @@ function WriteVcxProj(currentTarget, groupMap)
 				end
 			end
 		end
-
+		
 		file:write("  </ItemGroup>\n")	
 	end
 
@@ -569,7 +543,7 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 		end
 	end
 	file:write("  </ItemGroup>\n")
-	
+
 	file:write("  <ItemGroup>\n")
 	for groupName, group in pairs(groupMap) do 
 		for i = 1, #group.fileInfo do
@@ -577,11 +551,8 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 			local filename = group.fileInfo[i].filename
 	
 			local f = GetFullFilePath(filename)
-			
+
 			local path = Util_FilePath(filename)
-	--		print(" none " .. fullFilePath)		
---			path = Util_FileTrimTrailingSlash(path)
-	--		path = Util_FileNormaliseWindows(path)
 		
 			file:write("   <" .. groupName .. " Include=\"" .. Util_FileNormaliseWindows(f) .. "\">\n")
 			file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
@@ -591,7 +562,6 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 	file:write("  </ItemGroup>\n")
 
 	file:write("</Project>\n")
-
 	file:close()
 	mbwriter_reportoutputfile(vcxProjFiltersFilename)
 end

@@ -624,6 +624,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
         mbExitError();
     }
 	
+	//MB_LOGINFO("PROFILE - Writer %s", metabase->writerLua.c_str());
     mbLuaDoFile(l, metabase->writerLua, luaRegisterWriterFuncs);
     
     lua_close(l);

@@ -7,7 +7,15 @@
 
 #include "platform/platform.h"
 
-bool _mbaCreateDir(const char* osDir)
+void mbaInit()
+{
+}
+
+void mbaShutdown()
+{
+}
+
+bool mbaCreateDir(const char* osDir)
 {
     DWORD ftyp = GetFileAttributesA(osDir);
     if (ftyp != INVALID_FILE_ATTRIBUTES)
@@ -208,6 +216,20 @@ void mbaLogDebug(const char* str)
 {
 	OutputDebugString(str);
 	printf("%s", str);
+}
+
+F64 mbaGetSystemTicksToSecondsScale()
+{
+	LARGE_INTEGER f;
+	QueryPerformanceFrequency(&f);
+	return 1.0 / (F64)f.QuadPart;
+}
+
+U64 mbaGetSystemTicks()
+{
+	LARGE_INTEGER ticks;
+	QueryPerformanceCounter(&ticks);
+	return ticks.QuadPart;
 }
 
 #endif

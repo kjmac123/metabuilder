@@ -51,6 +51,7 @@ typedef double F64;
 #define stricmp strcasecmp
 #endif
 
+#define MB_LOGSETTIMEENABLED(b)			_mbLogSetTimeEnabled(b)
 #define MB_LOGERROR(...)				_mbLogErrorfLF(__VA_ARGS__)
 #define MB_LOGINFO(...)					_mbLogInfofLF(__VA_ARGS__)
 #define MB_LOGDEBUG(...)				_mbLogDebugfLF(__VA_ARGS__)
@@ -58,6 +59,7 @@ typedef double F64;
 #define MB_CHECKERROR(test, ...)		{ if (!test) { _LogInfofLF(__VA_ARGS__); } }
 #define MB_CHECKEXPECTEDBLOCK(blockExpected, cmdName) mbCheckExpectedBlock(blockExpected, cmdName);
 
+void _mbLogSetTimeEnabled(bool b);
 void _mbLogErrorf(const char* fmt, ...);
 void _mbLogErrorfLF(const char* fmt, ...);
 void _mbLogInfof(const char* fmt, ...);
@@ -66,6 +68,9 @@ void _mbLogDebugf(const char* fmt, ...);
 void _mbLogDebugfLF(const char* fmt, ...);
 
 #define ARRAY_LENGTH(a) (sizeof((a))/sizeof((a)[0]))
+
+#define MB_SECONDS_TO_MILLISECONDS          1000
+#define MB_SECONDS_TO_NANOSECONDS           1000000000
 
 void ToUpperStr(char* str);
 void ToLowerStr(char* str);

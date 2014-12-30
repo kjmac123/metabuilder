@@ -1,7 +1,8 @@
 #include "metabuilder_pch.h"
-#include <stdarg.h> 
 
-#include "common.h"
+#include "timeutil.h"
+
+#include <stdarg.h> 
 
 #define PLATFORM_FORMAT_LOG_MESSAGE(fn, level)  \
 	char buf[16*1024]; \
@@ -13,6 +14,8 @@
 
 #define PLATFORM_FORMAT_LOG_MESSAGE_LF(fn, level)  \
 	char buf[16*1024]; \
+	sprintf(buf, core_logTimeEnabled ? "[%.2f] " : "", core_appTimer.GetTimeSeconds()); \
+	fn(buf); \
     va_list ap; \
     va_start(ap, fmt); \
 	vsprintf(buf, fmt, ap); \
@@ -20,9 +23,16 @@
 	strcat(buf, "\n"); \
 	fn(buf);
 
+bool	core_logTimeEnabled;
+Timer	core_appTimer;
 
 void mbaLogError(const char* str);
 void mbaLogInfo(const char* str);
+
+void _mbLogSetTimeEnabled(bool b)
+{
+	core_logTimeEnabled = b;
+}
 
 void _mbLogErrorf(const char* fmt, ...)
 {

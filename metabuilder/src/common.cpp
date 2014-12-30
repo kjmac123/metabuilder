@@ -6,9 +6,11 @@
 #include <sys/stat.h>
 
 #include <set>
+#include <unordered_set>
 #include <list>
 #include <algorithm>
 #include <sstream>
+#include <utility>
 
 static AppState								g_appState;
 static StringVector							g_makefiles;
@@ -567,6 +569,16 @@ void mbPopDir()
 	g_doFileCurrentDirStack.pop();
 }
 
+int luaCreateTable(lua_State* l)
+{
+	int narr = (int)lua_tonumber(l, 1);
+	int nrec = (int)lua_tonumber(l, 2);
+
+	lua_createtable(l, narr, nrec);
+
+	return 1;
+}
+
 void mbCommonLuaRegister(lua_State* l)
 {
     lua_pushcfunction(l, luaFuncGlobalImport);
@@ -586,6 +598,9 @@ void mbCommonLuaRegister(lua_State* l)
 
 	lua_pushcfunction(l, luaSplit);
 	lua_setglobal(l, "split");
+
+	lua_pushcfunction(l, luaCreateTable);
+	lua_setglobal(l, "createtable");
 }
 
 bool mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
@@ -739,6 +754,7 @@ void mbCheckExpectedBlock(E_BlockType blockExpected, const char* cmdName)
 
 void mbJoinArrays(StringVector* a, const StringVector& b)
 {
+	a->reserve(a->size() + b.size());
 	for (int i = 0; i < (int)b.size(); ++i)
 	{
 		a->push_back(b[i]);
@@ -750,7 +766,7 @@ void mbMergeArrays(StringVector* a, const StringVector& b)
 	mbJoinArrays(a, b);
 	mbRemoveDuplicates(a);
 }
-
+/*
 void mbRemoveDuplicates(StringVector* strings_)
 {
 	StringVector& strings = *strings_;
@@ -774,7 +790,53 @@ void mbRemoveDuplicates(StringVector* strings_)
 	
 	strings = tmp;
 }
+*/
 
+class StringPtrHash
+{
+public:
+	size_t operator()(const std::string* str) const
+	{
+		return std::hash<std::string>()(*str);
+	}
+};
+
+class StringPtrEqual
+{
+public:
+	bool operator()(const std::string* a, const std::string* b) const
+	{
+		return *a == *b;
+	}
+};
+
+
+void mbRemoveDuplicates(StringVector* strings_)
+{
+	typedef std::unordered_set<std::string*, StringPtrHash, StringPtrEqual> UniqueStringHashTable;
+
+	StringVector& strings = *strings_;
+	
+	StringVector tmp;
+	tmp.reserve(strings.size());
+	
+	UniqueStringHashTable uniqueStrings;
+	uniqueStrings.reserve(strings.size());
+	for (int i = 0; i < (int)strings.size(); ++i)
+	{
+		UniqueStringHashTable::const_iterator it = uniqueStrings.find(&strings[i]);
+		if (it == uniqueStrings.end())
+		{
+			std::pair<UniqueStringHashTable::iterator, bool> result = uniqueStrings.insert(&strings[i]);
+			if (!result.second)
+				continue; //Already added.
+				
+			tmp.push_back(strings[i]);
+		}
+	}
+	
+	strings = std::move(tmp);
+}
 
 struct StringSortRecord
 {
@@ -782,33 +844,35 @@ struct StringSortRecord
 	std::string originalString;
 };
 
-bool mbCompareNoCase(const StringSortRecord& a, const StringSortRecord& b)
+bool mbCompareNoCase(const StringSortRecord* a, const StringSortRecord* b)
 {
-	return a.lowerCaseString < b.lowerCaseString;
+	return a->lowerCaseString < b->lowerCaseString;
 }
 
 void mbRemoveDuplicatesAndSort(StringVector* strings_)
 {
+	typedef std::unordered_set<std::string*, StringPtrHash, StringPtrEqual> UniqueStringHashTable;
+
 	StringVector& strings = *strings_;
 	
-	std::vector<StringSortRecord> tmp;
+	std::vector<StringSortRecord*> tmp;
 	tmp.reserve(strings.size());
 		
-	std::set<std::string> uniqueStrings;
+	UniqueStringHashTable uniqueStrings;
 	for (int i = 0; i < (int)strings.size(); ++i)
 	{
-		uniqueStrings.insert(strings[i]);
+		uniqueStrings.insert(&strings[i]);
 	}
 
-	for (std::set<std::string>::iterator it = uniqueStrings.begin(); it != uniqueStrings.end(); ++it)
+	for (UniqueStringHashTable::const_iterator it = uniqueStrings.begin(); it != uniqueStrings.end(); ++it)
 	{
-		const std::string& currentString = *it;
+		const std::string* currentString = *it;
 
-		tmp.push_back(StringSortRecord());
-		StringSortRecord& r = tmp.back();
-		r.lowerCaseString = currentString;
-		std::transform(r.lowerCaseString.begin(), r.lowerCaseString.end(), r.lowerCaseString.begin(), ::tolower);
-		r.originalString = currentString;
+		StringSortRecord* r = new StringSortRecord();
+		tmp.push_back(r);
+		r->lowerCaseString = *currentString;
+		std::transform(r->lowerCaseString.begin(), r->lowerCaseString.end(), r->lowerCaseString.begin(), ::tolower);
+		r->originalString = *currentString;
 	}
 
 	std::sort(tmp.begin(), tmp.end(), mbCompareNoCase);
@@ -816,7 +880,9 @@ void mbRemoveDuplicatesAndSort(StringVector* strings_)
 	strings.clear();
 	for (int i = 0; i < (int)tmp.size(); ++i)
 	{
-		strings.push_back(tmp[i].originalString);
+		StringSortRecord* r = tmp[i];
+		strings.push_back(r->originalString);
+		delete r;
 	}
 }
 
@@ -843,14 +909,14 @@ bool mbCreateDirChain(const char* osDir_)
             *(char*)right = 0;
             const char* partialPath = left;
             
-            if (!_mbaCreateDir(partialPath))
+            if (!mbaCreateDir(partialPath))
                 return false;
             
             *(char*)right = sep;
         }
     }
     
-    return _mbaCreateDir(osDir);
+    return mbaCreateDir(osDir);
 }
 
 void mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroups)
