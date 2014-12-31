@@ -83,7 +83,7 @@ int mbWriterUtility_GetLongestCommonSequenceLengthFromStart(const char* str1, co
 	return commonCount;
 }
 
-static void mbWriterUtility_GetFullFilePath(char* result, const char* filepathUnnormalised)
+static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepathUnnormalised, const char* oldBaseDir, const char* newBaseDir)
 {
 	char dirSep = mbGetAppState()->makeGlobal->targetDirSep;
 
@@ -99,10 +99,6 @@ static void mbWriterUtility_GetFullFilePath(char* result, const char* filepathUn
 	}
 	else
 	{
-		MetaBuilderContext* ctx = mbGetActiveContext();
-		const char* oldBaseDir = ctx->currentMetaMakeDirAbs.c_str();
-		const char* newBaseDir = ctx->makeOutputDirAbs.c_str();
-
 		char normalisedFilepathAbs[MB_MAX_PATH];
 		mbWriterUtility_FileConvertToAbsolute(normalisedFilepathAbs, oldBaseDir, filepath);
 		const char* normalisedMakeOutputDirAbs = newBaseDir;
@@ -171,12 +167,27 @@ static int mbWriterUtility_LuaNormaliseHostFilePath(lua_State* l)
 	return 1;
 }
 
-static int mbWriterUtility_LuaGetFullFilePath(lua_State* l)
+static int mbWriterUtility_LuaGetOutputRelativeFilePath(lua_State* l)
 {
 	const char* filepathUnnormalised = lua_tostring(l, 1);
 
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	const char* oldBaseDir = ctx->currentMetaMakeDirAbs.c_str();
+	const char* newBaseDir = ctx->makeOutputDirAbs.c_str();
+
 	char result[MB_MAX_PATH];
-	mbWriterUtility_GetFullFilePath(result, filepathUnnormalised);
+	mbWriterUtility_GetRelativeFilePath(result, filepathUnnormalised, oldBaseDir, newBaseDir);
+	lua_pushstring(l, result);
+	return 1;
+}
+
+static int mbWriterUtility_LuaGetAbsoluteFilePath(lua_State* l)
+{
+	const char* filepath = lua_tostring(l, 1);
+
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	char result[MB_MAX_PATH];
+	mbWriterUtility_FileConvertToAbsolute(result, filepath, ctx->currentMetaMakeDirAbs.c_str());
 	lua_pushstring(l, result);
 	return 1;
 }
@@ -189,6 +200,9 @@ void mbWriterUtilityLuaRegister(lua_State* l)
 	lua_pushcfunction(l, mbWriterUtility_LuaNormaliseHostFilePath);
 	lua_setglobal(l, "Writer_NormaliseHostFilePath");
 
-	lua_pushcfunction(l, mbWriterUtility_LuaGetFullFilePath);
-	lua_setglobal(l, "Writer_GetFullFilePath");
+	lua_pushcfunction(l, mbWriterUtility_LuaGetOutputRelativeFilePath);
+	lua_setglobal(l, "Writer_GetOutputRelativeFilePath");
+
+	lua_pushcfunction(l, mbWriterUtility_LuaGetAbsoluteFilePath);
+	lua_setglobal(l, "Writer_GetAbsoluteFilePath");
 }

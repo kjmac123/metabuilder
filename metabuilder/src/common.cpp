@@ -211,6 +211,7 @@ static int luaFuncLogInfo(lua_State* l)
 
 static int luaFuncLogProfile(lua_State* l)
 {
+#ifdef MB_ENABLE_PROFILING
 	Block* b = mbGetActiveContext()->ActiveBlock();
 
 	const char* str = lua_tostring(l, 1);
@@ -220,6 +221,7 @@ static int luaFuncLogProfile(lua_State* l)
 
 	lua_pushstring(l, expandedString.c_str());
 	MB_LOGINFO("%s", expandedString.c_str());
+#endif
 	return 0;
 }
 

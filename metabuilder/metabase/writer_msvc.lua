@@ -40,9 +40,6 @@ function InitFolder(folderList, path_, filename)
 		table.insert(pathComponents, 1, "")
 	end
 
-	local fullProjectRelativeFilePath = filename--Util_FilePathJoin(path,filename,writer_global.targetDirSep)
-	--print(fullProjectRelativeFilePath)
-
 	local currentPath = ""
 	local currentParentID = g_mainGroupID
 	local currentParentPath = nil
@@ -50,8 +47,6 @@ function InitFolder(folderList, path_, filename)
 	local nComponents = #pathComponents
 	local currentFolderID = g_mainGroupID
 	
-	--print(fullProjectRelativeFilePath)
-
 	for i = 1, #pathComponents do
 		if i == 1 then
 			currentPath = pathComponents[i]
@@ -71,7 +66,7 @@ function InitFolder(folderList, path_, filename)
 				local newFolderID = msvcgenerateid()
 
 				currentFolder = {
-					fullName = Writer_GetFullFilePath(currentPath),
+					fullName = Writer_GetOutputRelativeFilePath(currentPath),
 					relativePath = currentPath,
 					shortName = pathComponents[i],
 					id = newFolderID,
@@ -90,7 +85,7 @@ function InitFolder(folderList, path_, filename)
 				currentParentPath = currentPath
 
 				folderList[currentPath] = currentFolder
-				print(currentPath.. " and " .. currentFolder.shortName)
+				local formattedPath = FormatFilterPath(currentFolder.relativePath)
 			end
 		else
 			local currentFolder = folderList[currentPath]
@@ -110,11 +105,10 @@ function InitFolders(folderList, groupMap)
 	
 	for groupName, group in pairs(groupMap) do 
 		for i = 1, #group.fileInfo do
-			InitFolder(folderList, group.fileInfo[i].dir, group.fileInfo[i].fullFilePath)
+			InitFolder(folderList, group.fileInfo[i].inputRelativeDir, group.fileInfo[i].outputRelativeFilename)
 		end
 	end
 
-	--print(inspect(folderList))
 	logprofile("END InitFolders")
 end
 
@@ -149,14 +143,13 @@ function BuildFileGroups(currentTarget)
 		end
 		
 		local fileInfo = {
-			filename = f, 
-			dir = "",
-			shortName = "",
-			ext = "",
+			inputRelativeDir = nil,
+			shortName = nil,
+			ext = nil,
 			includedInBuild = fIncludedInBuild,
-			fullFilePath = Writer_GetFullFilePath(f)
+			outputRelativeFilename = Writer_GetOutputRelativeFilePath(f)
 		}
-		fileInfo.dir, fileInfo.shortName, fileInfo.ext = Util_FilePathDecompose(fileInfo.fullFilePath)
+		fileInfo.inputRelativeDir, fileInfo.shortName, fileInfo.ext = Util_FilePathDecompose(f)
 		
 		group.fileInfo[#group.fileInfo+1] = fileInfo
 	end	
@@ -166,7 +159,7 @@ function BuildFileGroups(currentTarget)
 end
 
 function WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, fileInfo)
-	file:write("   <" .. groupName .. " Include=\"" .. fileInfo.fullFilePath .. "\">\n")
+	file:write("   <" .. groupName .. " Include=\"" .. fileInfo.outputRelativeFilename .. "\">\n")
 end
 
 function WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, fileInfo)
@@ -290,7 +283,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		file:write("    <LinkIncremental>false</LinkIncremental>\n") --incremental linking is only ever a source of pain (and corrupt files)
 	    file:write("    <ExecutablePath>")
 		for jExeDir = 1, #config.exedirs do
-			file:write(Writer_GetFullFilePath(config.exedirs[jExeDir]) .. ";")
+			file:write(Writer_GetOutputRelativeFilePath(config.exedirs[jExeDir]) .. ";")
 		end
 		file:write("$(ExecutablePath)</ExecutablePath>\n")
 	    file:write("    <IntDir>" .. Writer_NormaliseTargetFilePath(writer_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
@@ -332,7 +325,7 @@ function WriteVcxProj(currentTarget, groupMap)
 
 		file:write("      <AdditionalIncludeDirectories>")
 		for jIncludeDir = 1, #config.includedirs do
-			local includeDir = Writer_GetFullFilePath(config.includedirs[jIncludeDir])
+			local includeDir = Writer_GetOutputRelativeFilePath(config.includedirs[jIncludeDir])
 			file:write(includeDir .. ";")
 		end
 		file:write("</AdditionalIncludeDirectories>\n")
@@ -347,7 +340,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		--Lib directories
 		file:write("      <AdditionalLibraryDirectories>")
 		for jLibDir = 1, #config.libdirs do
-			local libDir = Writer_GetFullFilePath(config.libdirs[jLibDir])
+			local libDir = Writer_GetOutputRelativeFilePath(config.libdirs[jLibDir])
 			file:write(libDir .. ";")
 		end
 		file:write("</AdditionalLibraryDirectories>\n")
@@ -453,10 +446,10 @@ function WriteVcxProj(currentTarget, groupMap)
 			if GetCustomGroupRule ~= nil then
 				for i = 1, #group.fileInfo do
 					local fileInfo = group.fileInfo[i]
-					local customRuleWriterFunc = GetCustomGroupRule(groupName, fileInfo.filename)
+					local customRuleWriterFunc = GetCustomGroupRule(groupName, fileInfo.shortName)
 					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, fileInfo)
 						if customRuleWriterFunc ~= nil then
-							customRuleWriterFunc(file, currentTarget, msvcPlatform, fileInfo.fullFilePath)
+							customRuleWriterFunc(file, currentTarget, msvcPlatform, fileInfo.outputRelativeFilename)
 						end
 					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, fileInfo)
 				end
@@ -506,10 +499,11 @@ function WriteVcxProj(currentTarget, groupMap)
 end
 
 function FormatFilterPath(path)
+--[[
 	while string.find(path, "%.%.\\") == 1 do
 		path = string.sub(path, 4, length)
 	end
-
+]]
 	path = Util_FileTrimTrailingSlash(path)
 	return Writer_NormaliseTargetFilePath(path)
 end
@@ -523,7 +517,6 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 	
 	local folders = {}
 	InitFolders(folders, groupMap)
-	--print(inspect(folders))
 
 	--Write out filter folders
 	file:write("  <ItemGroup>\n")
@@ -544,8 +537,8 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 	file:write("  <ItemGroup>\n")	
 	for groupName, group in pairs(groupMap) do 
 		for i = 1, #group.fileInfo do
-			file:write("   <" .. groupName .. " Include=\"" .. group.fileInfo[i].fullFilePath .. "\">\n")
-			file:write("      <Filter>" .. FormatFilterPath(group.fileInfo[i].dir) .. "</Filter>\n")
+			file:write("   <" .. groupName .. " Include=\"" .. group.fileInfo[i].outputRelativeFilename .. "\">\n")
+			file:write("      <Filter>" .. FormatFilterPath(group.fileInfo[i].inputRelativeDir) .. "</Filter>\n")
 			file:write("   </" .. groupName .. ">\n")				
 		end
 	end
