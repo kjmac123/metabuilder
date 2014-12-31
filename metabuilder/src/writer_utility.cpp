@@ -101,7 +101,7 @@ static void mbWriterUtility_GetFullFilePath(char* result, const char* filepathUn
 	{
 		MetaBuilderContext* ctx = mbGetActiveContext();
 		const char* oldBaseDir = ctx->currentMetaMakeDirAbs.c_str();
-		const char* newBaseDir = mbGetAppState()->makeOutputDirAbs.c_str();
+		const char* newBaseDir = ctx->makeOutputDirAbs.c_str();
 
 		char normalisedFilepathAbs[MB_MAX_PATH];
 		mbWriterUtility_FileConvertToAbsolute(normalisedFilepathAbs, oldBaseDir, filepath);

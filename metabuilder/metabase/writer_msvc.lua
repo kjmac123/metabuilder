@@ -1,5 +1,6 @@
 --Note there's a bug in MSVC 2010 in which property pages stop working if absolute paths are used when including files
 --https://connect.microsoft.com/VisualStudio/feedback/details/635294/using-absolute-path-in-clcompile-item-prevents-property-pages-from-showing
+logprofile("STARTUP")
 
 import "writer_common.lua"
 
@@ -39,7 +40,8 @@ function InitFolder(folderList, path_, filename)
 		table.insert(pathComponents, 1, "")
 	end
 
-	local fullProjectRelativeFilePath = Util_FilePathJoin(path,filename,writer_global.targetDirSep)
+	local fullProjectRelativeFilePath = filename--Util_FilePathJoin(path,filename,writer_global.targetDirSep)
+	--print(fullProjectRelativeFilePath)
 
 	local currentPath = ""
 	local currentParentID = g_mainGroupID
@@ -47,6 +49,8 @@ function InitFolder(folderList, path_, filename)
 
 	local nComponents = #pathComponents
 	local currentFolderID = g_mainGroupID
+	
+	--print(fullProjectRelativeFilePath)
 
 	for i = 1, #pathComponents do
 		if i == 1 then
@@ -61,29 +65,33 @@ function InitFolder(folderList, path_, filename)
 		local currentFolder = folderList[currentPath]
 		if currentFolder == nil then
 			--we've not encountered this path before
+			
+			if #pathComponents[i] > 0 and pathComponents[i] ~= ".." then
+			
+				local newFolderID = msvcgenerateid()
 
-			local newFolderID = msvcgenerateid()
+				currentFolder = {
+					fullName = Writer_GetFullFilePath(currentPath),
+					relativePath = currentPath,
+					shortName = pathComponents[i],
+					id = newFolderID,
+					parentid = currentParentID,
+					childIDs = {}
+				}
 
-			currentFolder = {
-				fullName = Writer_GetFullFilePath(currentPath),
-				relativePath = currentPath,
-				shortName = pathComponents[i],
-				id = newFolderID,
-				parentid = currentParentID,
-				childIDs = {}
-			}
+				-- Add as a child of our parent
+				if currentParentPath ~= nil then
+					parentFolder = folderList[currentParentPath]
+					parentFolder.childIDs[#parentFolder.childIDs] = newFolderID
+				end
 
-			-- Add as a child of our parent
-			if currentParentPath ~= nil then
-				parentFolder = folderList[currentParentPath]
-				parentFolder.childIDs[#parentFolder.childIDs] = newFolderID
+				--update our parent for the next folder
+				currentParentID = newFolderID
+				currentParentPath = currentPath
+
+				folderList[currentPath] = currentFolder
+				print(currentPath.. " and " .. currentFolder.shortName)
 			end
-
-			--update our parent for the next folder
-			currentParentID = newFolderID
-			currentParentPath = currentPath
-
-			folderList[currentPath] = currentFolder
 		else
 			local currentFolder = folderList[currentPath]
 			currentParentID = currentFolder.id
@@ -149,10 +157,10 @@ function BuildFileGroups(currentTarget)
 			fullFilePath = Writer_GetFullFilePath(f)
 		}
 		fileInfo.dir, fileInfo.shortName, fileInfo.ext = Util_FilePathDecompose(fileInfo.fullFilePath)
+		
 		group.fileInfo[#group.fileInfo+1] = fileInfo
 	end	
 	
-	--print(inspect(groupMap))
 	logprofile("END BuildFileGroups")
 	return groupMap
 end
@@ -498,7 +506,7 @@ function WriteVcxProj(currentTarget, groupMap)
 end
 
 function FormatFilterPath(path)
-	while string.find(path, "%.%./") == 1 do
+	while string.find(path, "%.%.\\") == 1 do
 		path = string.sub(path, 4, length)
 	end
 
@@ -515,6 +523,7 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 	
 	local folders = {}
 	InitFolders(folders, groupMap)
+	--print(inspect(folders))
 
 	--Write out filter folders
 	file:write("  <ItemGroup>\n")
@@ -685,3 +694,5 @@ if CustomPostGenerateRule ~= nil then
 	print("Applying custom post generate rule")
 	CustomPostGenerateRule(projectList, g_currentTarget)
 end
+
+logprofile("SHUTDOWN")

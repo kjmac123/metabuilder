@@ -57,7 +57,7 @@ struct CmdSetup
     std::string _inputFile;
     std::string _generator;
 	std::string _metabaseDir;
-	std::string _makeOutputDir;
+	std::string _makeOutputTopDir;
 	bool		verbose;
 };
 
@@ -80,7 +80,7 @@ public:
     std::string mainMetaMakeFileAbs;
     std::string generator;
 	std::string metabaseDirAbs;
-	std::string makeOutputDirAbs;
+	std::string makeOutputTopDirAbs;
     std::string	intDir;
     std::string	outDir;
 	
@@ -132,6 +132,7 @@ public:
     }
 
     std::string					currentMetaMakeDirAbs;
+	std::string					makeOutputDirAbs;
 	Metabase*					metabase;
     Solution*					solution;
     std::stack<Block*>			activeBlockStack;
@@ -217,5 +218,8 @@ void				mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroup
 void				mbExpandMacros(std::string* result, const std::map<std::string, std::string>& macroMap, const char* str);
 void				mbExpandMacros(std::string* result, Block* block, const char* str);
 const char*			mbLuaToStringExpandMacros(std::string* result, Block* block, lua_State* l, int stackPos);
+
+void*				mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
+
 
 #endif

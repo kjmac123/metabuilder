@@ -49,17 +49,17 @@ void AppState::ProcessSetup()
 
 	//cmdline overrides
 	if (cmdSetup._metabaseDir.length() > 0)		metabaseDirAbs = cmdSetup._metabaseDir;
-	if (cmdSetup._makeOutputDir.length() > 0)	makeOutputDirAbs = cmdSetup._makeOutputDir;
+	if (cmdSetup._makeOutputTopDir.length() > 0)	makeOutputTopDirAbs = cmdSetup._makeOutputTopDir;
 
-	if (!mbCreateDirChain(cmdSetup._makeOutputDir.c_str()))
+	if (!mbCreateDirChain(cmdSetup._makeOutputTopDir.c_str()))
 	{
-		MB_LOGERROR("Failed to create output directory %s", cmdSetup._makeOutputDir.c_str());
+		MB_LOGERROR("Failed to create output directory %s", cmdSetup._makeOutputTopDir.c_str());
 		mbExitError();
 	}
 
 	mainMetaMakeFileAbs = mbaFileGetAbsPath(cmdSetup._inputFile);
 	metabaseDirAbs = mbaFileGetAbsPath(cmdSetup._metabaseDir);
-	makeOutputDirAbs = mbaFileGetAbsPath(cmdSetup._makeOutputDir);
+	makeOutputTopDirAbs = mbaFileGetAbsPath(cmdSetup._makeOutputTopDir);
 
 	//Set defaults if required.
 	if (intDir.size() == 0)
@@ -76,7 +76,7 @@ void AppState::ProcessGlobal()
 {
 	mbNormaliseFilePath(&mainMetaMakeFileAbs, makeGlobal->targetDirSep);
 	mbNormaliseFilePath(&metabaseDirAbs, makeGlobal->targetDirSep);
-	mbNormaliseFilePath(&makeOutputDirAbs, makeGlobal->targetDirSep);
+	mbNormaliseFilePath(&makeOutputTopDirAbs, makeGlobal->targetDirSep);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -987,3 +987,21 @@ const char* mbLuaToStringExpandMacros(std::string* result, Block* block, lua_Sta
 	return result->c_str();
 }
 
+void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
+{
+	if (nsize == 0)
+		free(ptr);
+	else
+	{
+		if (osize == 0)
+		{
+			return malloc(nsize);
+		}
+		else
+		{
+			return realloc(ptr, nsize);
+		}
+	}
+
+	return NULL;
+}

@@ -311,7 +311,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 	mbPushActiveContext(ctx);
 
 	lua_State *l;
-    l = luaL_newstate();
+	l = luaL_newstate();
+	lua_setallocf(l, mbLuaAllocator, NULL);
+
 	luaL_checkstack(l, MB_LUA_STACK_MAX, "Out of stack!");
 
 	luaL_openlibs(l);
@@ -336,12 +338,16 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		lua_setfield(l, -2, "metabasedirabs");
 				
 		{
-			char buf[MB_MAX_PATH];
-			sprintf(buf, "%s/%s/%s", appState->makeOutputDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->GetName().c_str());
-			lua_pushstring(l, buf);
+			{
+				char buf[MB_MAX_PATH];
+				sprintf(buf, "%s/%s/%s", appState->makeOutputTopDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->GetName().c_str());
+				mbNormaliseFilePath(buf, appState->makeGlobal->targetDirSep);
+				ctx->makeOutputDirAbs = buf;
+			}
+			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
 			lua_setfield(l, -2, "makeoutputdirabs");
 			
-			if (!mbCreateDirChain(buf))
+			if (!mbCreateDirChain(ctx->makeOutputDirAbs.c_str()))
 			{
 				mbExitError();
 			}

@@ -116,7 +116,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	opt.get("--input")->getString(appOptions->_inputFile);
 	opt.get("--gen")->getString(appOptions->_generator);
 	opt.get("--metabase")->getString(appOptions->_metabaseDir);
-	opt.get("--outdir")->getString(appOptions->_makeOutputDir);
+	opt.get("--outdir")->getString(appOptions->_makeOutputTopDir);
 	appOptions->verbose = opt.isSet("-v") != 0;
 }
 
@@ -160,6 +160,7 @@ int main(int argc, const char * argv[])
 		
 			lua_State *l;
 			l = luaL_newstate();
+			lua_setallocf(l, mbLuaAllocator, NULL);
 			luaL_checkstack(l, MB_LUA_STACK_MAX, "Out of stack!");
 			luaL_openlibs(l);
 
@@ -211,3 +212,27 @@ int main(int argc, const char * argv[])
 	mbaShutdown();
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
