@@ -1,6 +1,3 @@
-g_Util_GetFullFilePathResults = createtable(0,100000)
-g_Util_FileNormaliseResults = createtable(0,100000)
-
 function Util_EscapeMagicLuaChars(str)
 	luaMagicChars = {"(", ")",".","%","+","-","*","?","[","]","^","$"}
 
@@ -10,10 +7,10 @@ function Util_EscapeMagicLuaChars(str)
 	for c in str:gmatch"." do
 		for jMagic = 1, #luaMagicChars do
 			if c == luaMagicChars[jMagic] then
-				table.insert(buf, "%")
+				buf[#buf+1] = "%"
 			end
 		end
-		table.insert(buf, c)
+		buf[#buf+1] = c
 	end
 	
 	result = table.concat(buf)		
@@ -35,7 +32,7 @@ function Util_UnescapeMagicLuaChars(str)
 		end
 		
 		if foundEscape == false then
-			table.insert(buf, c)
+			buf[#buf+1] = c
 		end
 	end
 	
@@ -52,18 +49,18 @@ function Util_StringReplace(str, oldStr, newStr)
 	return Util_UnescapeMagicLuaChars(escapedStr)
 end
 
-function Util_FilePathJoin(path, filename)
+function Util_FilePathJoin(path, filename, dirSep)
 	if path == "" then
 		return filename
 	end
 
 	local length = string.len(path)
 	local lastChar = string.sub(path, length, length)
-	if lastChar == "/" then
+	if lastChar == g_utility_dirSep then
 		return path .. filename
 	end
 
-	return path .. "/" .. filename
+	return path .. dirSep .. filename
 end
 
 function Util_FilePathDecompose(filepath)
@@ -92,7 +89,7 @@ function Util_FileTrimTrailingSlash(path)
 	end
 
 	local lastChar = string.sub(path, length, length)
-	if lastChar == "/" then
+	if lastChar == '\\' or lastChar == '/' then
 		return string.sub(path, 1, length-1)
 	end
 
@@ -121,161 +118,13 @@ function Util_FilePathMarkedAsRaw(filepath)
 	return false
 end
 
-function Util_FileConvertToAbsolute(baseDir, filepath, dirSep, filepathMap)
-	
-	local length = string.len(filepath)
-	if length == 0 then
-		return filepath
-	end
-
-	--Bail if we've marked this filepath to not be expanded
-	if Util_FilePathMarkedAsRaw(filepath) then
-		return string.sub(filepath, 2, length)
-	end
-
-	--Expand!
-	local newfilepath = filepathMap[filepath]
-	if newfilepath == nil then
-		return baseDir .. dirSep .. filepath
-	end
-
-	return newfilepath
-end
-
 function Util_FileTrimExtension(filepath)
 	local path, filename, ext = Util_FilePathDecompose(filepath)
 
 	return path .. filename
 end	
 
-function Util_FileNormaliseWindows(filepath)
-	return Util_FileTrimTrailingDot(Util_StringReplace(filepath, "/", "\\"))
-end
-
-function Util_FileNormaliseUnix(filepath)
-	return Util_StringReplace(filepath, "\\", "/")
-end
-
-function Util_FileNormalise(filepath, dirsep)
-	local result = g_Util_FileNormaliseResults[filepath]
-	if result ~= nil then
-		return result
-	end
-
-	if dirsep == "\\" then
-		result = Util_FileNormaliseWindows(filepath)
-	else
-		result = Util_FileNormaliseUnix(filepath)
-	end
-
-	g_Util_FileNormaliseResults[filepath] = result
-	return result
-end
-
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-function Util_GetNumDirLevels(dir, dirSep)
-	local dirCount = 0
-
-	for c in dir:gmatch"." do
-		if c == dirSep then
-			dirCount = dirCount + 1
-		end
-	end
-	
-	return dirCount
-end
-
-function Util_BuildPathBack(nLevels, dirSep)
-	local result = ""
-	for i = 1, nLevels do
-		result = result .. ".." .. dirSep
-	end
-	
-	return result
-end
-
-function Util_GetLongestCommonSequenceLengthFromStart(str1, str2)
-	local str1Table = {}
-	
-	for c in str1:gmatch"." do
-		table.insert(str1Table, c)
-	end
-
-	
-	local count = 0
-	for c in str2:gmatch"." do
-		count = count + 1
-		if (str1Table[count] ~= c) then
-			break
-		end		
-	end
-	
-	if count > 0 then
-		count = count + 1
-	end
-	return count
-end
-
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-function Util_GetFullFilePath(filepathUnnormalised, oldBaseDir, newBaseDir, dirSep, filepathMap)
-	local result = g_Util_GetFullFilePathResults[filepathUnnormalised]
-	if result ~= nil then
-		return result
-	end
-
-	filepath = Util_FileNormalise(filepathUnnormalised, dirSep)
-	oldBaseDir = Util_FileNormalise(oldBaseDir, dirSep)
-	newBaseDir = Util_FileNormalise(newBaseDir, dirSep)
-
-	--If filepath has been flagged to escape any kind of modification
-	if Util_FilePathMarkedAsRaw(filepath) then
-		result = filepath
-	else	
-		local useRelativePaths = true
-	
-		result = ""
-		if useRelativePaths == true then
-			local normalisedFilepathAbs = Util_FileConvertToAbsolute(oldBaseDir, filepath, dirSep, filepathMap)
-			local normalisedMakeOutputDirAbs = newBaseDir
-
-			--baseDir is the common path fragment shared by the makefile output directory and 'filepath'
-			local baseDir = nil
-			do
-				local commonSubSequenceLength = Util_GetLongestCommonSequenceLengthFromStart(normalisedFilepathAbs, normalisedMakeOutputDirAbs)
-				local commonSubSequence = normalisedFilepathAbs:sub(1, commonSubSequenceLength)
-			
-				--Look for last dir sep character in order to ignore a partial path or file match
-				local lastDirSep = Util_FindLast(commonSubSequence, dirSep)
-				if (lastDirSep ~= nil) then
-					--Take sequence up to last dir sep as our base dir
-					baseDir = commonSubSequence:sub(1, lastDirSep)
-				end
-			end
-		
-			if (baseDir ~= nil) then
-				local pathFromBaseToOutDir = Util_StringReplace(normalisedMakeOutputDirAbs, baseDir, "")
-				local nDirLevels = Util_GetNumDirLevels(dirSep .. pathFromBaseToOutDir, dirSep)
-				--Path back from make output dir to base dir
-				local pathBack = Util_BuildPathBack(nDirLevels, dirSep)
-			
-				local filepathBaseRelative = Util_StringReplace(normalisedFilepathAbs, baseDir, "")
-				result = pathBack .. filepathBaseRelative
-			else
-				result = normalisedFilepathAbs
-			end
-		else
-			result = Util_FileConvertToAbsolute(newBaseDir, filepath, dirSep, filepathMap)
-		end
-
-		--print("[" .. oldBaseDir .. "] [" .. newBaseDir .. "] " .. result)
-		end
-
-	g_Util_GetFullFilePathResults[filepathUnnormalised] = result
-	--loginfo("added " .. filepathUnnormalised .. " -> " .. result)
-	return result
-end
 
 function Util_GetKVValue(keyValueList, key)
 	if keyValueList == nil then

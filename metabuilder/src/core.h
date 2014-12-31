@@ -72,6 +72,8 @@ void _mbLogDebugfLF(const char* fmt, ...);
 #define MB_SECONDS_TO_MILLISECONDS          1000
 #define MB_SECONDS_TO_NANOSECONDS           1000000000
 
+#define MB_GENERAL_STRING_BUFFER_SIZE		(2*1024)
+
 void ToUpperStr(char* str);
 void ToLowerStr(char* str);
 

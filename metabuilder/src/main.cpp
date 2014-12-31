@@ -1,6 +1,7 @@
 #include "metabuilder_pch.h"
 
 #include "makesetup.h"
+#include "makeglobal.h"
 #include "writer.h"
 #include "solution.h"
 #include "configparam.h"
@@ -131,6 +132,7 @@ int main(int argc, const char * argv[])
 
 	AppState* appState = mbGetAppState();
 	appState->makeSetup = new MakeSetup();
+	appState->makeGlobal = new MakeGlobal();
 
 	ParseArgs(&appState->cmdSetup, argc, (const char**)argv);
 
@@ -143,7 +145,7 @@ int main(int argc, const char * argv[])
 	
 	// We'll add to this array during iteration
 	const StringVector& makeFiles = mbGetMakeFiles();
-	mbPushDir(appState->makeSetup->_metabaseDir);
+	mbPushDir(appState->makeSetup->metabaseDir);
 			
 	appState->isProcessingPrimaryMakefile = true;
 	for (int i = 0; i < (int)makeFiles.size(); ++i)
@@ -162,6 +164,7 @@ int main(int argc, const char * argv[])
 			luaL_openlibs(l);
 
 			mbMakeSetupLuaRegister(l);
+			mbMakeGlobalLuaRegister(l);
 			mbCommonLuaRegister(l);
 			mbBlockLuaRegister(l);
 			mbMetabaseLuaRegister(l);

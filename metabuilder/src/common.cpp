@@ -1,6 +1,7 @@
 #include "metabuilder_pch.h"
 
 #include "makesetup.h"
+#include "makeglobal.h"
 #include "metabase.h"
 
 #include <sys/stat.h>
@@ -35,13 +36,13 @@ AppState::~AppState()
 	delete makeSetup;
 }
 
-void AppState::Process()
+void AppState::ProcessSetup()
 {
 	if (makeSetup)
 	{
-		metabaseDirAbs = makeSetup->_metabaseDir;
-		intDir = makeSetup->_intDir;
-		outDir = makeSetup->_outDir;
+		metabaseDirAbs = makeSetup->metabaseDir;
+		intDir = makeSetup->intDir;
+		outDir = makeSetup->outDir;
 	}
 	
 	generator = cmdSetup._generator;
@@ -59,9 +60,6 @@ void AppState::Process()
 	mainMetaMakeFileAbs = mbaFileGetAbsPath(cmdSetup._inputFile);
 	metabaseDirAbs = mbaFileGetAbsPath(cmdSetup._metabaseDir);
 	makeOutputDirAbs = mbaFileGetAbsPath(cmdSetup._makeOutputDir);
-	mbNormaliseFilePath(&mainMetaMakeFileAbs);
-	mbNormaliseFilePath(&metabaseDirAbs);
-	mbNormaliseFilePath(&makeOutputDirAbs);
 
 	//Set defaults if required.
 	if (intDir.size() == 0)
@@ -72,6 +70,13 @@ void AppState::Process()
 	{
 		outDir = "out";
 	}
+}
+
+void AppState::ProcessGlobal()
+{
+	mbNormaliseFilePath(&mainMetaMakeFileAbs, makeGlobal->targetDirSep);
+	mbNormaliseFilePath(&metabaseDirAbs, makeGlobal->targetDirSep);
+	mbNormaliseFilePath(&makeOutputDirAbs, makeGlobal->targetDirSep);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,6 +196,20 @@ static int luaFuncExpandMacro(lua_State* l)
 }
 
 static int luaFuncLogInfo(lua_State* l)
+{
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
+	const char* str = lua_tostring(l, 1);
+
+	std::string expandedString;
+	mbExpandMacros(&expandedString, b, str);
+
+	lua_pushstring(l, expandedString.c_str());
+	MB_LOGINFO("%s", expandedString.c_str());
+	return 0;
+}
+
+static int luaFuncLogProfile(lua_State* l)
 {
 	Block* b = mbGetActiveContext()->ActiveBlock();
 
@@ -423,58 +442,6 @@ bool mbPathReplaceFileExtension(char* result, const char* filename, const char* 
 	return false;
 }
 
-#if 0
-bool mbPathRelativeDirTo(
-	std::string* result,
-	const std::string& from,
-	const std::string& to)
-{
-	//Find longest common sequence
-	int minLen = from.length() < to.length() ? (int)from.length() : (int)to.length();
-	
-	int commonLen = 0;
-	for (; commonLen < minLen; ++commonLen)
-	{
-		if (from[commonLen] != to[commonLen])
-		{
-			--commonLen;
-			break;
-		}
-	}
-	//Nothing in common
-	if (commonLen <= 0)
-	{
-		return false;
-	}
-	
-	//Must end on dir sep
-	if (from[commonLen] != '/')
-	{
-		return false;
-	}
-	
-	//Go up folders from our 'from' until we get to the common folder.
-	char resultTmp[MB_MAX_PATH] = {0};
-	for (int i = from.size()-1; i >= commonLen; --i)
-	{
-		if (from[i] == '/')
-		{
-			strcat(resultTmp, "../");
-		}
-	}
-	
-	//Now we can move forward into the 'to' folder.
-	const char* toFolderCommonRelative = to.c_str()+commonLen+1;
-	
-	//Now combine the two
-	strcat(resultTmp, toFolderCommonRelative);
-			
-	*result = resultTmp;
-
-	return true;
-}
-#endif
-
 bool mbFileExists(const std::string& filepath)
 {
     FILE* f = fopen(filepath.c_str(), "rb");
@@ -487,41 +454,47 @@ bool mbFileExists(const std::string& filepath)
     return false;
 }
 
-void mbNormaliseFilePath(char* outFilePath, const char* inFilePath)
+void mbNormaliseFilePath(char* filepath, char dirSep)
 {
-    bool preceedingSlash = false;
-    
-    outFilePath[0] = 0;
-    char* outCursor = outFilePath;
-    for (const char* inCursor = inFilePath; *inCursor; ++inCursor)
-    {
-		char c = *inCursor;
-        //Normalise slashes
-        if (c == '\\')
-            c = '/';
-        
-        //Ignore duplicate slashes
-        if (c == '/')
-        {
-            if (preceedingSlash)
-                continue;
-            preceedingSlash = true;
-        }
-        else
-        {
-            preceedingSlash = false;
-        }
-        
-        *outCursor = c;
-        ++outCursor;
-    }
-	*outCursor = '\0';
+	bool preceedingSlash = false;
+
+	char dirSepToReplace = dirSep == '\\' ? '/' : '\\';
+
+	char* cursor = filepath;
+	for (; *cursor; ++cursor)
+	{
+		char c = *cursor;
+		//Normalise slashes
+		if (c == dirSepToReplace)
+			c = dirSep;
+
+		//Ignore duplicate slashes
+		if (c == dirSep)
+		{
+			if (preceedingSlash)
+				continue;
+			preceedingSlash = true;
+		}
+		else
+		{
+			preceedingSlash = false;
+		}
+
+		*cursor = c;
+	}
+	*cursor = '\0';
 }
 
-void mbNormaliseFilePath(std::string* inout)
+void mbNormaliseFilePath(char* outFilePath, const char* inFilePath, char dirSep)
+{
+	strcpy(outFilePath, inFilePath);
+	mbNormaliseFilePath(outFilePath, dirSep);
+}
+
+void mbNormaliseFilePath(std::string* inout, char dirSep)
 {
     char tmp[MB_MAX_PATH];
-	mbNormaliseFilePath(tmp, inout->c_str());
+	mbNormaliseFilePath(tmp, inout->c_str(), dirSep);
 	*inout = tmp;
 }
 
@@ -595,6 +568,9 @@ void mbCommonLuaRegister(lua_State* l)
 
 	lua_pushcfunction(l, luaFuncLogError);
 	lua_setglobal(l, "logerror");
+
+	lua_pushcfunction(l, luaFuncLogProfile);
+	lua_setglobal(l, "logprofile");
 
 	lua_pushcfunction(l, luaSplit);
 	lua_setglobal(l, "split");

@@ -30,6 +30,7 @@ enum E_BlockType
 	E_BlockType_Unknown,
 	E_BlockType_Block,
     E_BlockType_MakeSetup,
+	E_BlockType_MakeGlobal,
     E_BlockType_ConfigParam,
     E_BlockType_Metabase,
     E_BlockType_Solution,
@@ -44,6 +45,7 @@ class Metabase;
 class Solution;
 class ConfigParam;
 class MakeSetup;
+class MakeGlobal;
 class PlatformParam;
 class ParamBlock;
 
@@ -71,7 +73,8 @@ public:
 	AppState();	
 	~AppState();
 	
-	void Process();
+	void ProcessSetup();
+	void ProcessGlobal();
 	
 	std::string mainSolutionName;
     std::string mainMetaMakeFileAbs;
@@ -84,6 +87,7 @@ public:
 	
 	CmdSetup	cmdSetup;
 	MakeSetup*	makeSetup;
+	MakeGlobal*	makeGlobal;
 	
 	bool		isProcessingPrimaryMakefile;
 };
@@ -165,14 +169,10 @@ std::string			mbPathGetDir(const std::string& filePath);
 std::string			mbPathGetFilename(const std::string& filePath);
 bool				mbPathGetFileExtension(char* result, const char* filename);
 bool				mbPathReplaceFileExtension(char* result, const char* filename, const char* newExtension);
-#if 0
-bool				mbPathRelativeDirTo(
-						std::string* result,
-						const std::string& from,
-						const std::string& to);
-#endif
-void				mbNormaliseFilePath(char* outFilePath, const char* inFilePath);
-void				mbNormaliseFilePath(std::string* inout);
+
+void				mbNormaliseFilePath(char* outFilePath, const char* inFilePath, char dirSep);
+void				mbNormaliseFilePath(char* inout, char dirSep);
+void				mbNormaliseFilePath(std::string* inout, char dirSep);
 
 bool				mbFileExists(const std::string& filepath);
 

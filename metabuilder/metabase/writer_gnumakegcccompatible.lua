@@ -336,14 +336,14 @@ end
 
 function WriteMakeFile(currentTarget)
 
-	local makeDir = Util_FilePathJoin(writer_global.makeoutputdirabs, "")
+	local makeDir = Util_FilePathJoin(writer_global.makeoutputdirabs, "",writer_global.targetDirSep)
 	mbwriter_mkdir(makeDir)
 	
 	local makeFilename = ""
 	if (writer_global.ismainmakefile) then
-		makeFilename = Util_FilePathJoin(makeDir, "Makefile")
+		makeFilename = Util_FilePathJoin(makeDir, "Makefile",writer_global.targetDirSep)
 	else
-		makeFilename = Util_FilePathJoin(makeDir, currentTarget.name .. ".mk")
+		makeFilename = Util_FilePathJoin(makeDir, currentTarget.name .. ".mk",writer_global.targetDirSep)
 	end
 	
 	local file = io.open(makeFilename, "w")
@@ -353,8 +353,8 @@ function WriteMakeFile(currentTarget)
 	g_intdir = writer_global.intdir
 	g_outdir = writer_global.outdir
 
-	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
-	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
+	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG),writer_global.targetDirSep)
+	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG),writer_global.targetDirSep)
 		
 	--write out content we only require once per makefile
 	if (g_firstTargetWritten == false) then

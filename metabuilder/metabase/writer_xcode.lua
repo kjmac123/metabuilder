@@ -85,7 +85,7 @@ function InitFolder(folderList, path, filename)
 		table.insert(pathComponents, 1, "")
 	end
 
-	local fullProjectRelativeFilePath = Util_FilePathJoin(path,filename)
+	local fullProjectRelativeFilePath = Util_FilePathJoin(path,filename,writer_global.targetDirSep)
 
 	local currentPath = ""
 	local currentParentID = g_mainGroupID

@@ -1,3 +1,7 @@
+makeglobal()
+	dirsep "\\"
+makeglobal_end()
+
 supportedplatforms 
 {
 	"NT",

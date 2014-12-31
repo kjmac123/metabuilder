@@ -171,7 +171,7 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 						fp += 2;
 					}
 					char buf[MB_MAX_PATH];
-					mbNormaliseFilePath(buf,fp);
+					mbNormaliseFilePath(buf, fp, '\\');
 					fileList->push_back(buf);
 				}
 			}

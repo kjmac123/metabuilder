@@ -4,9 +4,12 @@
 
 #include "writer_msvc.h"
 #include "writer_xcode.h"
+#include "writer_utility.h"
 #include "solution.h"
 #include "configparam.h"
 #include "metabase.h"
+#include "makesetup.h"
+#include "makeglobal.h"
 
 static std::vector<KeyValue>	g_registeredTargets;
 
@@ -98,23 +101,6 @@ static int luaFuncFatalError(lua_State* l)
 	mbExitError();
 	return 0;
 }
-
-#if 0
-static int luaFuncGetRelativeDirTo(lua_State* l)
-{
-    const char* from = mbLuaToStringExpandMacros(l, 1);
-    const char* to = mbLuaToStringExpandMacros(l, 2);
-
-	std::string result;
-	if (mbPathRelativeDirTo(&result, from, to))
-	{
-		lua_pushstring(l, result.c_str());
-		return 1;
-	}
-
-	return 0;
-}
-#endif
 
 static int luaFuncCopyFile(lua_State* l)
 {
@@ -211,6 +197,7 @@ void luaRegisterWriterFuncs(lua_State* l)
 	mbWriterMSVCLuaRegister(l);
 
 	mbCommonLuaRegister(l);
+	mbWriterUtilityLuaRegister(l);
 	
     lua_pushcfunction(l, luaFuncMkdir);
     lua_setglobal(l, "mbwriter_mkdir");
@@ -371,7 +358,15 @@ void mbWriterDo(MetaBuilderContext* ctx)
 
 		lua_pushstring(l, appState->outDir.c_str());
 		lua_setfield(l, -2, "outdir");
-		
+
+		{
+			char tmp[2];
+			tmp[0] = appState->makeGlobal->targetDirSep;
+			tmp[1] = '\0';
+			lua_pushstring(l, tmp);
+			lua_setfield(l, -2, "targetDirSep");
+		}
+
 		//Write out the set of options associated with our metabase node.
 		{
 			std::map<std::string, KeyValueMap> options;
