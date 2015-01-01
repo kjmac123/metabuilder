@@ -15,23 +15,23 @@ int luaFuncWriterXcodeGenerateID(lua_State* l)
 static int luaFuncRegisterExternalPBXFileReferenceExternal(lua_State* l)
 {
 	g_externalFileReference.push_back(KeyValue());
-	mbLuaToStringExpandMacros(&g_externalFileReference.back().key, NULL, l, 1);	//filename
-	mbLuaToStringExpandMacros(&g_externalFileReference.back().value, NULL, l, 2);	//id
+	mbLuaToStringExpandMacros(&g_externalFileReference.back().key, nullptr, l, 1);	//filename
+	mbLuaToStringExpandMacros(&g_externalFileReference.back().value, nullptr, l, 2);	//id
 	return 0;
 }
 
 static int luaFuncRegisterExternalPBXNativeTargetExternal(lua_State* l)
 {
 	g_externalNativeTarget.push_back(KeyValue());
-	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().key, NULL, l, 1);	//target
-	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().value, NULL, l, 2);	//id
+	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().key, nullptr, l, 1);	//target
+	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().value, nullptr, l, 2);	//id
 	return 0;
 }
 
 static int luaFuncGetExternalPBXFileReferenceExternal(lua_State* l)
 {
     std::string filename;
-	mbLuaToStringExpandMacros(&filename, NULL, l, 1);
+	mbLuaToStringExpandMacros(&filename, nullptr, l, 1);
 	
 	for (int i = 0; i < (int)g_externalFileReference.size(); ++i)
 	{
@@ -47,7 +47,7 @@ static int luaFuncGetExternalPBXFileReferenceExternal(lua_State* l)
 static int luaFuncGetExternalPBXNativeTargetExternal(lua_State* l)
 {
     std::string targetName;
-	mbLuaToStringExpandMacros(&targetName, NULL, l, 1);
+	mbLuaToStringExpandMacros(&targetName, nullptr, l, 1);
 	
 	for (int i = 0; i < (int)g_externalNativeTarget.size(); ++i)
 	{

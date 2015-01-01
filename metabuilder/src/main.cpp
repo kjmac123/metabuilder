@@ -160,7 +160,7 @@ int main(int argc, const char * argv[])
 		
 			lua_State *l;
 			l = luaL_newstate();
-			lua_setallocf(l, mbLuaAllocator, NULL);
+			lua_setallocf(l, mbLuaAllocator, nullptr);
 			luaL_checkstack(l, MB_LUA_STACK_MAX, "Out of stack!");
 			luaL_openlibs(l);
 
@@ -178,11 +178,11 @@ int main(int argc, const char * argv[])
 			{
 				std::string metabase = appState->cmdSetup._generator + ".lua";
 				//Process metabase
-				mbLuaDoFile(l, metabase.c_str(), NULL);			
+				mbLuaDoFile(l, metabase.c_str(), nullptr);
 			}
 			mbPushDir(ctx->currentMetaMakeDirAbs);
 			//Process makefile
-			mbLuaDoFile(l, makeFiles[i], NULL);
+			mbLuaDoFile(l, makeFiles[i], nullptr);
 			mbPopDir();
 			
 			lua_close(l);

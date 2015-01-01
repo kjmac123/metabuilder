@@ -46,6 +46,9 @@ solution "metabuilder"
 			"src/writer_msvc.cpp",
 			"src/writer_utility.cpp",
 			"src/writer_xcode.cpp",
+			"metabuilder.lua",
+			"metabuilder_posix.lua",
+			"metabuilder_windows.lua",
 		}
 
 		--build configurations

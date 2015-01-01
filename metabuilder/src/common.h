@@ -118,7 +118,7 @@ public:
 	
     Block*    ActiveBlock() const
     {
-        return activeBlockStack.size() > 0 ? activeBlockStack.top() : NULL;
+		return activeBlockStack.size() > 0 ? activeBlockStack.top() : nullptr;
     }
 
     void PushActiveBlock(Block* block)

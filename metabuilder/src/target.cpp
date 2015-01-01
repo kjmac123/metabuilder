@@ -90,7 +90,7 @@ void Target::Flatten(FlatConfig* result, const char* platformName, const char* c
 void Target::FlattenStringGroup(StringVector* result, const char* stringGroup, const char* platformName) const
 {
 	FlatConfig f;
-	Flatten(&f, platformName, NULL);
+	Flatten(&f, platformName, nullptr);
 	
 	std::map<std::string, StringVector>::iterator it = f.stringGroups.find(stringGroup);
 	if (it == f.stringGroups.end())

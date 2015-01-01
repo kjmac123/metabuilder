@@ -21,14 +21,14 @@ static std::stack<std::string>				g_doFileCurrentDirStack;
 
 //static std::map<std::string, std::string>	g_macroMap;
 
-const char* g_cAndCPPSourceExt[] = { "cpp", "cxx", "c", "cc", "m", "mm", NULL };
-const char* g_cAndCPPHeaderExt[] = { "hpp", "hxx", "h", NULL };
-const char* g_cAndCPPInlineExt[] = { "inl", NULL };
+const char* g_cAndCPPSourceExt[] = { "cpp", "cxx", "c", "cc", "m", "mm", nullptr };
+const char* g_cAndCPPHeaderExt[] = { "hpp", "hxx", "h", nullptr };
+const char* g_cAndCPPInlineExt[] = { "inl", nullptr };
 
 AppState::AppState()
 {
 	isProcessingPrimaryMakefile = false;
-	makeSetup = NULL;
+	makeSetup = nullptr;
 }
 	
 AppState::~AppState()
@@ -83,8 +83,8 @@ void AppState::ProcessGlobal()
 
 MetaBuilderContext::MetaBuilderContext()
 {
-	metabase = NULL;
-	solution = NULL;
+	metabase = nullptr;
+	solution = nullptr;
 	isMainMakefile = false;
 	
 	g_contexts.push_back(this);
@@ -157,7 +157,7 @@ static int luaFuncGlobalImport(lua_State* lua)
 
 	std::string requireFile;
 	mbLuaToStringExpandMacros(&requireFile, b, lua, 1);
-	mbLuaDoFile(lua, requireFile.c_str(), NULL);
+	mbLuaDoFile(lua, requireFile.c_str(), nullptr);
     return 0;
 }
 /*
@@ -249,7 +249,7 @@ static int luaSplit(lua_State* l)
 	lua_newtable(l);
 
 	//for each separator
-	while ((e = strchr(s, *sep)) != NULL)
+	while ((e = strchr(s, *sep)) != nullptr)
 	{
 		lua_pushlstring(l, s, e - s);  //push substring
 		lua_rawseti(l, -2, i++);
@@ -269,7 +269,7 @@ static int report (lua_State *L, int status)
   if (status) 
   {
 		msg = lua_tostring(L, -1);
-		if (msg == NULL)
+		if (msg == nullptr)
 			msg = "(error with no message)";
 
 		fprintf(stderr, "status=%d, %s\n", status, msg);
@@ -516,7 +516,7 @@ void mbCommonInit(lua_State* l, const std::string& path)
 {
 	g_doFileCurrentDirStack.push(path);
 	
-	mbLuaDoFile(l, "metabase.lua", NULL);
+	mbLuaDoFile(l, "metabase.lua", nullptr);
 }
 
 const char** mbGetCAndCPPSourceFileExtensions()
@@ -982,7 +982,9 @@ const char* mbLuaToStringExpandMacros(std::string* result, Block* block, lua_Sta
 {
 	const char* str = lua_tostring(l, stackPos);
 	if (!str)
-		return NULL;
+	{
+		return nullptr;
+	}
 	
 	mbExpandMacros(result, block, str);
 //	MB_LOGINFO("%s -> %s", str, result->c_str());
@@ -1005,5 +1007,5 @@ void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }

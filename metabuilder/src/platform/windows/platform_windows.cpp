@@ -23,40 +23,22 @@ bool mbaCreateDir(const char* osDir)
         if ((ftyp & FILE_ATTRIBUTE_DIRECTORY) != 0)
             return true;
 
-//        Debug::Error("File obstructing dir creation %s", osDir);
+        MB_LOGERROR("File obstructing dir creation %s", osDir);
         return false;
     }
     
     if (!CreateDirectoryA(osDir, NULL) && GetLastError() != ERROR_PATH_NOT_FOUND)
     {
-//        Debug::Error("Mkdir failed for %s", osDir);
+		MB_LOGERROR("Mkdir failed for %s", osDir);
         return false;
     }
     
-//    Debug::Info("Created dir %s", osDir);
     return true;
 }
 
 bool mbaCreateLink(const char* src, const char* dst)
 {
-	/*
-	//mklink /h file3.txt file.txt
-	//>mklink /j c:\linktest\b c:\linktest\a
-
-	//remove existing
-
-	if (mbaGetFileType(src)
-	{
-	}
-
-	if (!result)
-	{
-		mbExitError();
-	}
-//	DWORD lastErr = GetLastError();
-
-	return result;
-	*/
+	MB_LOGERROR("Links not supported");
 	return false;
 }
 
