@@ -1,13 +1,13 @@
-package.path = package.path .. ";" .. mbwriter_global.metabasedirabs .. "/?.lua"
+package.path = package.path .. ";" .. mbwriter.global.metabasedirabs .. "/?.lua"
 local inspect = require('inspect')
 local util = require('utility')
 
-if mbwriter_global.verbose then 
-	print("mbwriter_global:\n")
-	print(inspect(mbwriter_global))
+if mbwriter.global.verbose then 
+	print("mbwriter.global:\n")
+	print(inspect(mbwriter.global))
 	print("\n")
-	print("mbwriter_solution:\n")
-	print(inspect(mbwriter_solution))
+	print("mbwriter.solution:\n")
+	print(inspect(mbwriter.solution))
 end
 
 g_firstTargetWritten = false
@@ -44,7 +44,7 @@ g_varDEFINES = ""
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, mbwriter_global.currentmetamakedirabs, mbwriter_global.makeoutputdirabs, "/", g_filePathMap)
+	return Util_GetFullFilePath(filepath, mbwriter.global.currentmetamakedirabs, mbwriter.global.makeoutputdirabs, "/", g_filePathMap)
 end
 
 function InitVars(currentTarget)
@@ -336,38 +336,38 @@ end
 
 function WriteMakeFile(currentTarget)
 
-	local makeDir = Util_FilePathJoin(mbwriter_global.makeoutputdirabs, "", mbwriter_global.targetDirSep)
+	local makeDir = Util_FilePathJoin(mbwriter.global.makeoutputdirabs, "", mbwriter.global.targetDirSep)
 	mbwriter.mkdir(makeDir)
 	
 	local makeFilename = ""
-	if (mbwriter_global.ismainmakefile) then
-		makeFilename = Util_FilePathJoin(makeDir, "Makefile", mbwriter_global.targetDirSep)
+	if (mbwriter.global.ismainmakefile) then
+		makeFilename = Util_FilePathJoin(makeDir, "Makefile", mbwriter.global.targetDirSep)
 	else
-		makeFilename = Util_FilePathJoin(makeDir, currentTarget.name .. ".mk", mbwriter_global.targetDirSep)
+		makeFilename = Util_FilePathJoin(makeDir, currentTarget.name .. ".mk", mbwriter.global.targetDirSep)
 	end
 	
 	local file = io.open(makeFilename, "w")
 	
 	InitVars(currentTarget)	
 
-	g_intdir = mbwriter_global.intdir
-	g_outdir = mbwriter_global.outdir
+	g_intdir = mbwriter.global.intdir
+	g_outdir = mbwriter.global.outdir
 
-	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG),mbwriter_global.targetDirSep)
-	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG),mbwriter_global.targetDirSep)
+	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
+	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
 		
 	--write out content we only require once per makefile
 	if (g_firstTargetWritten == false) then
 		g_firstTargetWritten = true
 
 		--write out content we only require at the start of the main makefile
-		if mbwriter_global.ismainmakefile then
+		if mbwriter.global.ismainmakefile then
 			WriteMakeFileGlobalVars(file, currentTarget)
 		end
 	end
 	
 	file:write("\n")
-	if mbwriter_global.ismainmakefile then
+	if mbwriter.global.ismainmakefile then
 		file:write("default : all \n")
 	end
 		
@@ -491,7 +491,7 @@ function WriteMakeFile(currentTarget)
 	file:write("	@if [ -d \"" .. GetDollarVar(g_varOUTDIR) .. "\" ]; then rmdir \"" .. GetDollarVar(g_varOUTDIR) .. "\";fi\n")
 	file:write("\n")
 	
-	if (mbwriter_global.ismainmakefile) then
+	if (mbwriter.global.ismainmakefile) then
 		--write 'all' target for main makefile
 		file:write(".PHONY: all\n")	
 		file:write("all : " .. "all_" .. currentTarget.name .. "\n")
@@ -524,5 +524,5 @@ end
 --MAIN
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local currentTarget = mbwriter_solution.targets[1]
+local currentTarget = mbwriter.solution.targets[1]
 WriteMakeFile(currentTarget)

@@ -305,10 +305,10 @@ void mbWriterDo(MetaBuilderContext* ctx)
 
 	lua_State *l;
 	l = lua_newstate(mbLuaAllocator, nullptr);
-
 	luaL_checkstack(l, MB_LUA_STACK_MAX, "Out of stack!");
-
 	luaL_openlibs(l);
+
+	luaRegisterWriterFuncs(l);
 
 	AppState* appState = mbGetAppState();
 
@@ -324,6 +324,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 	
 	//Global information table
 	{
+		lua_getglobal(l, "mbwriter");
+		MB_ASSERT(lua_istable(l, -1));
+
 		lua_createtable(l, 0, 1);
 
 		lua_pushstring(l, mbGetAppState()->metabaseDirAbs.c_str());
@@ -378,11 +381,14 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		lua_pushboolean(l, ctx->isMainMakefile);
 		lua_setfield(l, -2, "ismainmakefile");
 		
-		lua_setglobal(l, "mbwriter_global");
+		lua_setfield(l, -2, "global");
 	}
 	
 	//Solution table
 	{
+		lua_getglobal(l, "mbwriter");
+		MB_ASSERT(lua_istable(l, -1));
+
 		lua_createtable(l, 0, 4);
 				
 		lua_pushstring(l, solution->GetName().c_str());
@@ -608,7 +614,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		}
 		lua_setfield(l, -2, "targets");
 
-		lua_setglobal(l, "mbwriter_solution");
+		lua_setfield(l, -2, "solution");
 	}
 
 	if (metabase->writerLua.length() == 0)
@@ -618,7 +624,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
     }
 	
 	//MB_LOGINFO("PROFILE - Writer %s", metabase->writerLua.c_str());
-    mbLuaDoFile(l, metabase->writerLua, luaRegisterWriterFuncs);
+    mbLuaDoFile(l, metabase->writerLua, NULL);
     
     lua_close(l);
 	

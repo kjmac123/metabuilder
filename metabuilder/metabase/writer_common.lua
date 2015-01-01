@@ -1,13 +1,13 @@
-package.path = package.path .. ";" .. mbwriter_global.metabasedirabs .. "/?.lua"
+package.path = package.path .. ";" .. mbwriter.global.metabasedirabs .. "/?.lua"
 inspect = require('inspect')
 
 util = require('utility')
 
-if mbwriter_global.verbose then 
-	loginfo("mbwriter_global:\n")
-	loginfo(inspect(mbwriter_global))
+if mbwriter.global.verbose then 
+	loginfo("mbwriter.global:\n")
+	loginfo(inspect(mbwriter.global))
 	loginfo("\n")
-	loginfo("mbwriter_solution:\n")
-	loginfo(inspect(mbwriter_solution))
+	loginfo("mbwriter.solution:\n")
+	loginfo(inspect(mbwriter.solution))
 end
 

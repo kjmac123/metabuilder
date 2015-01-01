@@ -4,7 +4,7 @@ logprofile("STARTUP")
 
 import "writer_common.lua"
 
-g_currentTarget = mbwriter_solution.targets[1]
+g_currentTarget = mbwriter.solution.targets[1]
 
 g_enableHLSL = false
 
@@ -203,16 +203,16 @@ function WriteVcxProj(currentTarget, groupMap)
 	local projectID = mbwriter.msvcgenerateid()
 	mbwriter.msvcregisterprojectid(currentTarget.name, projectID)
 	
-	mbwriter.mkdir(mbwriter_global.makeoutputdirabs)
+	mbwriter.mkdir(mbwriter.global.makeoutputdirabs)
 
-	local msvcPlatform = Util_GetKVValue(mbwriter_global.options.msvc, "platform")
+	local msvcPlatform = Util_GetKVValue(mbwriter.global.options.msvc, "platform")
 	if msvcPlatform == nil then
 		-- TODO error
 		print("unknown platform!")
 		os.exit(1)
 	end
 	
-	local vcxprojName = mbwriter_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj";
+	local vcxprojName = mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj";
 	vcxprojName = mbwriter.normalisetargetfilepath(vcxprojName)
 	local file = io.open(vcxprojName, "w")
 	if (file == nil) then 
@@ -247,8 +247,8 @@ function WriteVcxProj(currentTarget, groupMap)
 				
 	file:write("    <RootNamespace>metabuilder</RootNamespace>\n")
 	
-	WriteVcxProjPropertyGroupOptions(file, mbwriter_global.options.msvcglobals)
-	WriteVcxProjRawXMLBlocks(file, mbwriter_global.options.msvcglobalsrawxml)
+	WriteVcxProjPropertyGroupOptions(file, mbwriter.global.options.msvcglobals)
+	WriteVcxProjRawXMLBlocks(file, mbwriter.global.options.msvcglobalsrawxml)
 
 	file:write("    <ProjectName>" .. g_currentTarget.name .. "</ProjectName>\n")
 	file:write("  </PropertyGroup>\n")
@@ -286,8 +286,8 @@ function WriteVcxProj(currentTarget, groupMap)
 			file:write(mbwriter.getoutputrelfilepath(config.exedirs[jExeDir]) .. ";")
 		end
 		file:write("$(ExecutablePath)</ExecutablePath>\n")
-	    file:write("    <IntDir>" .. mbwriter.normalisetargetfilepath(mbwriter_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
-	    file:write("    <OutDir>" .. mbwriter.normalisetargetfilepath(mbwriter_global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
+	    file:write("    <IntDir>" .. mbwriter.normalisetargetfilepath(mbwriter.global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
+	    file:write("    <OutDir>" .. mbwriter.normalisetargetfilepath(mbwriter.global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
 	    file:write("    <TargetName>$(ProjectName)_$(Configuration)</TargetName>\n")
 		
 		WriteVcxProjPropertyGroupOptions(file, config.options.msvcpropertygroup)
@@ -509,7 +509,7 @@ function FormatFilterPath(path)
 end
 
 function WriterVcxProjFilters(currentTarget, groupMap)
-	local vcxProjFiltersFilename = mbwriter.normalisetargetfilepath(mbwriter_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj.filters")
+	local vcxProjFiltersFilename = mbwriter.normalisetargetfilepath(mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj.filters")
 	local file = io.open(vcxProjFiltersFilename, "w")
 
 	file:write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
@@ -550,12 +550,12 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 end
 
 function WriteSolution(projectList, currentTarget)
-	if mbwriter_solution.msvcversion == nil then
+	if mbwriter.solution.msvcversion == nil then
 		-- TODO ERROR HERE
 	end
 
-	local msvcVersion = Util_GetKVValue(mbwriter_global.options.msvc, "version")
-	local msvcPlatform = Util_GetKVValue(mbwriter_global.options.msvc, "platform")
+	local msvcVersion = Util_GetKVValue(mbwriter.global.options.msvc, "version")
+	local msvcPlatform = Util_GetKVValue(mbwriter.global.options.msvc, "platform")
 	--if msvcPlatform == nil then
 		-- TODO error
 	--end
@@ -566,7 +566,7 @@ function WriteSolution(projectList, currentTarget)
 		msvcFormatVersion = "12.00"
 	end
 
-	local slnFilename = mbwriter.normalisetargetfilepath(mbwriter_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".sln")
+	local slnFilename = mbwriter.normalisetargetfilepath(mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".sln")
 	local file = io.open(slnFilename, "w")
 	if file == nil then
 		print("Failed to open file for writing " .. slnFilename)
@@ -631,7 +631,7 @@ end
 
 --[[ MAIN ]]
 
-local customWriter = Util_GetKVValue(mbwriter_global.options.msvc, "customwriter")
+local customWriter = Util_GetKVValue(mbwriter.global.options.msvc, "customwriter")
 if customWriter ~= nil then
 	--print("Importing custom writer " .. customWriter)
 	import(customWriter)

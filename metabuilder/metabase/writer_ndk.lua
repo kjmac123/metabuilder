@@ -6,11 +6,11 @@ g_filePathMap = {}
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, mbwriter_global.currentmetamakedirabs, mbwriter_global.currentmetamakedirabs, "/", g_filePathMap)
+	return Util_GetFullFilePath(filepath, mbwriter.global.currentmetamakedirabs, mbwriter.global.currentmetamakedirabs, "/", g_filePathMap)
 end
 
 function GetWorkspaceDir(currentTargetName, configName)
-	return mbwriter_global.makeoutputdirabs .. "/" .. currentTargetName .. "/" .. configName
+	return mbwriter.global.makeoutputdirabs .. "/" .. currentTargetName .. "/" .. configName
 end
 
 function GetJNIDir(currentTargetName, configName)
@@ -46,7 +46,7 @@ function WriteApplicationMk(currentTarget, config)
 		--TODO ERROR HERE
 --		return
 
-	local jniDir = mbwriter_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
+	local jniDir = mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
 	mbwriter.mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Application.mk"
@@ -80,7 +80,7 @@ function WriteAndroidMk(currentTarget, config)
 		--TODO ERROR HERE
 --		return
 
-	local jniDir = mbwriter_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
+	local jniDir = mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
 	mbwriter.mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Android.mk"
@@ -118,7 +118,7 @@ function WriteAndroidMk(currentTarget, config)
    	file:write("endif # TARGET_ARCH_ABI == armeabi-v7a\n")
 
 
-	file:write("SOURCE_ROOT := " .. mbwriter_global.currentmetamakedirabs .. "\n")
+	file:write("SOURCE_ROOT := " .. mbwriter.global.currentmetamakedirabs .. "\n")
 	file:write("MY_LOCAL_C_INCLUDES := \\\n")
 	for i = 1, #config.includedirs do
 	    file:write("	$(SOURCE_ROOT)/" .. config.includedirs[i] .. " \\\n")
@@ -133,7 +133,7 @@ function WriteAndroidMk(currentTarget, config)
 		-- TODO error
 	end
 
-	f = mbwriter_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi	
+	f = mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi	
 	file:write("	-L" .. f .. " \\\n")
 	file:write("\n")
 
@@ -212,7 +212,7 @@ function WriteAndroidMk(currentTarget, config)
 				filename = "lib" .. filename
 			end			
 
-			file:write("	-l:" .. mbwriter_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi .. "/" .. filename .. ".a \\\n")
+			file:write("	-l:" .. mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi .. "/" .. filename .. ".a \\\n")
 		end
 ]]
 --[[
@@ -305,7 +305,7 @@ end
 --MAIN
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local currentTarget = mbwriter_solution.targets[1]
+local currentTarget = mbwriter.solution.targets[1]
 
 for i = 1, #currentTarget.configs do
 	local config = currentTarget.configs[i]

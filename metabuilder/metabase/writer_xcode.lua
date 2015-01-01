@@ -16,7 +16,7 @@ g_PBXTargetDependencyIDMap		= {}
 g_PBXTargetProxy				= {} 
 g_ProductGroupIDs				= {}
 
-g_currentTarget = mbwriter_solution.targets[1]
+g_currentTarget = mbwriter.solution.targets[1]
 
 --used to refer to the product we're building here externally
 g_externalProductID = mbwriter.xcodegenerateid()
@@ -64,7 +64,7 @@ function GetSourceTree(filepath)
 end
 
 function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, mbwriter_global.currentmetamakedirabs, mbwriter_global.makeoutputdirabs, "/", g_filePathMap)
+	return Util_GetFullFilePath(filepath, mbwriter.global.currentmetamakedirabs, mbwriter.global.makeoutputdirabs, "/", g_filePathMap)
 end
 
 function GetFileListType(filepath)
@@ -84,7 +84,7 @@ function InitFolder(folderList, path, filename)
 		table.insert(pathComponents, 1, "")
 	end
 
-	local fullProjectRelativeFilePath = Util_FilePathJoin(path, filename, mbwriter_global.targetDirSep)
+	local fullProjectRelativeFilePath = Util_FilePathJoin(path, filename, mbwriter.global.targetDirSep)
 
 	local currentPath = ""
 	local currentParentID = g_mainGroupID
@@ -686,7 +686,7 @@ end
 
 --[[ FILE WRITING ]] --------------------------------------------------------------------------------
 
-g_projectoutputfile = mbwriter_global.makeoutputdirabs .. "/" .. mbwriter_solution.name .. ".xcodeproj"
+g_projectoutputfile = mbwriter.global.makeoutputdirabs .. "/" .. mbwriter.solution.name .. ".xcodeproj"
 
 --print("Creating project dir " .. g_projectoutputfile)
 mbwriter.mkdir(g_projectoutputfile)
