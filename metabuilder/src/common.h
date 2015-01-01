@@ -162,7 +162,7 @@ const char**		mbGetCAndCPPInlineFileExtensions();
 
 void				mbPushDir(const std::string& path);
 void				mbPopDir();
-void				mbCommonLuaRegister(lua_State* lua, LuaModuleFunctions* luaModuleFunctions);
+void				mbCommonLuaRegister(lua_State* lua, LuaModuleFunctions* luaFn);
 
 void				mbAddMakeFile(const char* makefile);
 const StringVector&	mbGetMakeFiles();

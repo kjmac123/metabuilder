@@ -586,33 +586,6 @@ int luaCreateTable(lua_State* l)
 	return 1;
 }
 
-void mbCommonLuaRegister(lua_State* l, LuaModuleFunctions* luaModuleFunctions)
-{
-    lua_pushcfunction(l, luaFuncGlobalImport);
-    lua_setglobal(l, "import");
-
-    lua_pushcfunction(l, luaFuncCheckPlatform);
-    lua_setglobal(l, "checkplatform");
-
-	lua_pushcfunction(l, luaFuncExpandMacro);
-	lua_setglobal(l, "expandmacro");
-
-	lua_pushcfunction(l, luaFuncLogInfo);
-	lua_setglobal(l, "loginfo");
-
-	lua_pushcfunction(l, luaFuncLogError);
-	lua_setglobal(l, "logerror");
-
-	lua_pushcfunction(l, luaFuncLogProfile);
-	lua_setglobal(l, "logprofile");
-
-	lua_pushcfunction(l, luaSplit);
-	lua_setglobal(l, "split");
-
-	lua_pushcfunction(l, luaCreateTable);
-	lua_setglobal(l, "createtable");
-}
-
 bool mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
 {
 	bool found = false;
@@ -1040,4 +1013,16 @@ void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
 	}
 
 	return nullptr;
+}
+
+void mbCommonLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)
+{
+	luaFn->AddFunction("import",		luaFuncGlobalImport);
+	luaFn->AddFunction("checkplatform",	luaFuncCheckPlatform);
+	luaFn->AddFunction("expandmacro",	luaFuncExpandMacro);
+	luaFn->AddFunction("loginfo",		luaFuncLogInfo);
+	luaFn->AddFunction("logerror",		luaFuncLogError);
+	luaFn->AddFunction("logprofile",	luaFuncLogProfile);
+	luaFn->AddFunction("split",			luaSplit);
+	luaFn->AddFunction("createtable",	luaCreateTable);
 }
