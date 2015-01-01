@@ -195,14 +195,14 @@ static int mbWriterUtility_LuaGetAbsoluteFilePath(lua_State* l)
 void mbWriterUtilityLuaRegister(lua_State* l)
 {
 	lua_pushcfunction(l, mbWriterUtility_LuaNormaliseTargetFilePath);
-	lua_setglobal(l, "Writer_NormaliseTargetFilePath");
+	lua_setglobal(l, "mbwriter_normalisetargetfilepath");
 
 	lua_pushcfunction(l, mbWriterUtility_LuaNormaliseHostFilePath);
-	lua_setglobal(l, "Writer_NormaliseHostFilePath");
+	lua_setglobal(l, "mbwriter_normalisehostfilepath");
 
 	lua_pushcfunction(l, mbWriterUtility_LuaGetOutputRelativeFilePath);
-	lua_setglobal(l, "Writer_GetOutputRelativeFilePath");
+	lua_setglobal(l, "mbwriter_getoutputrelfilepath");
 
 	lua_pushcfunction(l, mbWriterUtility_LuaGetAbsoluteFilePath);
-	lua_setglobal(l, "Writer_GetAbsoluteFilePath");
+	lua_setglobal(l, "mbwriter_getabsfilepath");
 }

@@ -49,11 +49,11 @@ static int luaFuncGetProjectID(lua_State* l)
 void mbWriterMSVCLuaRegister(lua_State* l)
 {
     lua_pushcfunction(l, luaFuncWriterMSVCGenerateID);
-    lua_setglobal(l, "msvcgenerateid");
+    lua_setglobal(l, "mbwriter_msvcgenerateid");
 
     lua_pushcfunction(l, luaFuncRegisterProjectID);
-    lua_setglobal(l, "msvcregisterprojectid");
+    lua_setglobal(l, "mbwriter_msvcregisterprojectid");
 
     lua_pushcfunction(l, luaFuncGetProjectID);
-    lua_setglobal(l, "msvcgetprojectid");
+    lua_setglobal(l, "mbwriter_msvcgetprojectid");
 }

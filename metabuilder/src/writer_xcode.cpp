@@ -63,17 +63,17 @@ static int luaFuncGetExternalPBXNativeTargetExternal(lua_State* l)
 void mbWriterXcodeLuaRegister(lua_State* l)
 {
     lua_pushcfunction(l, luaFuncWriterXcodeGenerateID);
-    lua_setglobal(l, "xcodegenerateid");
+    lua_setglobal(l, "mbwriter_xcodegenerateid");
 
     lua_pushcfunction(l, luaFuncRegisterExternalPBXFileReferenceExternal);
-    lua_setglobal(l, "xcoderegisterpbxfilereference_external");
+    lua_setglobal(l, "mbwriter_xcoderegisterpbxfilereference_external");
 
     lua_pushcfunction(l, luaFuncRegisterExternalPBXNativeTargetExternal);
-    lua_setglobal(l, "xcoderegisterpbxnativetarget_external");
+    lua_setglobal(l, "mbwriter_xcoderegisterpbxnativetarget_external");
 		
     lua_pushcfunction(l, luaFuncGetExternalPBXFileReferenceExternal);
-    lua_setglobal(l, "xcodegetpbxfilereference_external");
+    lua_setglobal(l, "mbwriter_xcodegetpbxfilereference_external");
 
     lua_pushcfunction(l, luaFuncGetExternalPBXNativeTargetExternal);
-    lua_setglobal(l, "xcodegetpbxnativetarget_external");
+    lua_setglobal(l, "mbwriter_xcodegetpbxnativetarget_external");
 }

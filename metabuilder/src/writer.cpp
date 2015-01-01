@@ -386,7 +386,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		lua_pushboolean(l, ctx->isMainMakefile);
 		lua_setfield(l, -2, "ismainmakefile");
 		
-		lua_setglobal(l, "writer_global");
+		lua_setglobal(l, "mbwriter_global");
 	}
 	
 	//Solution table
@@ -616,7 +616,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		}
 		lua_setfield(l, -2, "targets");
 
-		lua_setglobal(l, "writer_solution");
+		lua_setglobal(l, "mbwriter_solution");
 	}
 
 	if (metabase->writerLua.length() == 0)
