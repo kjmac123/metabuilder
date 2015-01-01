@@ -192,17 +192,10 @@ static int mbWriterUtility_LuaGetAbsoluteFilePath(lua_State* l)
 	return 1;
 }
 
-void mbWriterUtilityLuaRegister(lua_State* l)
+void mbWriterUtilityLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)
 {
-	lua_pushcfunction(l, mbWriterUtility_LuaNormaliseTargetFilePath);
-	lua_setglobal(l, "mbwriter_normalisetargetfilepath");
-
-	lua_pushcfunction(l, mbWriterUtility_LuaNormaliseHostFilePath);
-	lua_setglobal(l, "mbwriter_normalisehostfilepath");
-
-	lua_pushcfunction(l, mbWriterUtility_LuaGetOutputRelativeFilePath);
-	lua_setglobal(l, "mbwriter_getoutputrelfilepath");
-
-	lua_pushcfunction(l, mbWriterUtility_LuaGetAbsoluteFilePath);
-	lua_setglobal(l, "mbwriter_getabsfilepath");
+	luaFn->AddFunction("normalisetargetfilepath",	mbWriterUtility_LuaNormaliseTargetFilePath);
+	luaFn->AddFunction("normalisehostfilepath",		mbWriterUtility_LuaNormaliseHostFilePath);
+	luaFn->AddFunction("getoutputrelfilepath",		mbWriterUtility_LuaGetOutputRelativeFilePath);
+	luaFn->AddFunction("getabsfilepath",			mbWriterUtility_LuaGetAbsoluteFilePath);
 }

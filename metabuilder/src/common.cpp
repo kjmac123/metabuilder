@@ -1,5 +1,7 @@
 #include "metabuilder_pch.h"
 
+#include "dlmalloc.h"
+
 #include "makesetup.h"
 #include "makeglobal.h"
 #include "metabase.h"
@@ -104,6 +106,36 @@ MetaBuilderContext::~MetaBuilderContext()
 	delete metabase;
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+LuaModuleFunctions::LuaModuleFunctions()
+{
+	m_nFunctions = 0;
+	memset(m_luaFunctions, 0, sizeof(m_luaFunctions));
+}
+
+void LuaModuleFunctions::AddFunction(const char* name, lua_CFunction fn)
+{
+	MB_ASSERT(m_nFunctions != MB_LUAMODULE_MAX_FUNCTIONS);
+	m_luaFunctions[m_nFunctions].name = name;
+	m_luaFunctions[m_nFunctions].func = fn;
+	++m_nFunctions;
+}
+
+void LuaModuleFunctions::RegisterLuaGlobal(lua_State* l)
+{
+	for (int i = 0; i < m_nFunctions; ++i)
+	{
+		lua_pushcfunction(l, m_luaFunctions[i].func);
+		lua_setglobal(l, m_luaFunctions[i].name);
+	}
+}
+
+void LuaModuleFunctions::RegisterLuaModule(lua_State* l, const char* moduleName)
+{
+	luaL_newlib(l, m_luaFunctions);  //Create module
+	lua_setglobal(l, moduleName);
+}
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void mbAddMakeFile(const char* makefile)
@@ -554,7 +586,7 @@ int luaCreateTable(lua_State* l)
 	return 1;
 }
 
-void mbCommonLuaRegister(lua_State* l)
+void mbCommonLuaRegister(lua_State* l, LuaModuleFunctions* luaModuleFunctions)
 {
     lua_pushcfunction(l, luaFuncGlobalImport);
     lua_setglobal(l, "import");
@@ -994,16 +1026,16 @@ const char* mbLuaToStringExpandMacros(std::string* result, Block* block, lua_Sta
 void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
 {
 	if (nsize == 0)
-		free(ptr);
+		dlfree(ptr);
 	else
 	{
 		if (osize == 0)
 		{
-			return malloc(nsize);
+			return dlmalloc(nsize);
 		}
 		else
 		{
-			return realloc(ptr, nsize);
+			return dlrealloc(ptr, nsize);
 		}
 	}
 

@@ -159,20 +159,23 @@ int main(int argc, const char * argv[])
 			}
 		
 			lua_State *l;
-			l = luaL_newstate();
-			lua_setallocf(l, mbLuaAllocator, nullptr);
+			l = lua_newstate(mbLuaAllocator, nullptr);
 			luaL_checkstack(l, MB_LUA_STACK_MAX, "Out of stack!");
 			luaL_openlibs(l);
 
+			LuaModuleFunctions luaGlobalFunctions;
+
 			mbMakeSetupLuaRegister(l);
 			mbMakeGlobalLuaRegister(l);
-			mbCommonLuaRegister(l);
+			mbCommonLuaRegister(l, &luaGlobalFunctions);
 			mbBlockLuaRegister(l);
 			mbMetabaseLuaRegister(l);
 			mbSolutionLuaRegister(l);
 			mbTargetLuaRegister(l);
 			mbConfigParamLuaRegister(l);
 			mbPlatformParamLuaRegister(l);
+
+			luaGlobalFunctions.RegisterLuaGlobal(l);
 			
 			if (!mbGetAppState()->isProcessingPrimaryMakefile)
 			{

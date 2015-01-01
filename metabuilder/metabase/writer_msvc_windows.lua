@@ -40,10 +40,10 @@ end
 function PostGenerateEvent()
 	--Copy helper files
 	if g_enableHLSL then
-		mbwriter_copyfile(mbwriter_global.metabasedirabs .. "/msvc/hlsl.lc",		mbwriter_global.makeoutputdirabs .. "/hlsl.lc")
-		mbwriter_copyfile(mbwriter_global.metabasedirabs .. "/msvc/hlsl.props",		mbwriter_global.makeoutputdirabs .. "/hlsl.props")
-		mbwriter_copyfile(mbwriter_global.metabasedirabs .. "/msvc/hlsl.targets",	mbwriter_global.makeoutputdirabs .. "/hlsl.targets")
-		mbwriter_copyfile(mbwriter_global.metabasedirabs .. "/msvc/hlsl.xml",		mbwriter_global.makeoutputdirabs .. "/hlsl.xml")
+		mbwriter.copyfile(mbwriter_global.metabasedirabs .. "/msvc/hlsl.lc",		mbwriter_global.makeoutputdirabs .. "/hlsl.lc")
+		mbwriter.copyfile(mbwriter_global.metabasedirabs .. "/msvc/hlsl.props",		mbwriter_global.makeoutputdirabs .. "/hlsl.props")
+		mbwriter.copyfile(mbwriter_global.metabasedirabs .. "/msvc/hlsl.targets",	mbwriter_global.makeoutputdirabs .. "/hlsl.targets")
+		mbwriter.copyfile(mbwriter_global.metabasedirabs .. "/msvc/hlsl.xml",		mbwriter_global.makeoutputdirabs .. "/hlsl.xml")
 	end
 end
 

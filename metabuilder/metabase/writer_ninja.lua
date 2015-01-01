@@ -3,11 +3,11 @@ local inspect = require('inspect')
 local util = require('utility')
 
 if mbwriter_global.verbose then 
-	print("mbwriter_global:\n")
-	print(inspect(mbwriter_global))
-	print("\n")
-	print("mbwriter_solution:\n")
-	print(inspect(mbwriter_solution))
+	loginfo("mbwriter_global:\n")
+	loginfo(inspect(mbwriter_global))
+	loginfo("\n")
+	loginfo("mbwriter_solution:\n")
+	loginfo(inspect(mbwriter_solution))
 end
 
 
@@ -27,7 +27,7 @@ end
 function WriteMakeFile(currentTarget, config)
 
 	local makeDir = mbwriter_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name
-	mbwriter_mkdir(makeDir)
+	mbwriter.mkdir(makeDir)
 
 	print(inspect(config))
 
@@ -155,7 +155,7 @@ function WriteMakeFile(currentTarget, config)
 	file:write("\n")
 	file:close()
 
-	mbwriter_reportoutputfile(makeFilename)	
+	mbwriter.reportoutputfile(makeFilename)	
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------

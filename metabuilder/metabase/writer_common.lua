@@ -4,10 +4,10 @@ inspect = require('inspect')
 util = require('utility')
 
 if mbwriter_global.verbose then 
-	print("mbwriter_global:\n")
-	print(inspect(mbwriter_global))
-	print("\n")
-	print("mbwriter_solution:\n")
-	print(inspect(mbwriter_solution))
+	loginfo("mbwriter_global:\n")
+	loginfo(inspect(mbwriter_global))
+	loginfo("\n")
+	loginfo("mbwriter_solution:\n")
+	loginfo(inspect(mbwriter_solution))
 end
 

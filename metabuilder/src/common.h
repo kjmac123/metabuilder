@@ -139,6 +139,19 @@ public:
 	bool						isMainMakefile;
 };
 
+class LuaModuleFunctions
+{
+public:
+					LuaModuleFunctions();
+	void			AddFunction(const char* name, lua_CFunction fn);
+	void			RegisterLuaGlobal(lua_State* l);
+	void			RegisterLuaModule(lua_State* l, const char* moduleName);
+
+private:
+	luaL_Reg		m_luaFunctions[MB_LUAMODULE_MAX_FUNCTIONS+1]; //+1 to allow for sentinel
+	int				m_nFunctions;
+};
+
 AppState*			mbGetAppState();
 
 void				mbCommonInit(lua_State* l, const std::string& path);
@@ -149,7 +162,7 @@ const char**		mbGetCAndCPPInlineFileExtensions();
 
 void				mbPushDir(const std::string& path);
 void				mbPopDir();
-void				mbCommonLuaRegister(lua_State* lua);
+void				mbCommonLuaRegister(lua_State* lua, LuaModuleFunctions* luaModuleFunctions);
 
 void				mbAddMakeFile(const char* makefile);
 const StringVector&	mbGetMakeFiles();

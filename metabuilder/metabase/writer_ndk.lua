@@ -27,15 +27,13 @@ function CreateLinks(currentTarget, config)
 	templateDir = GetFullFilePath(templateDir)
 
 	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
-	mbwriter_mkdir(workspaceDir)
+	mbwriter.mkdir(workspaceDir)
 
-	--print(templateDir)
-	--print(workspaceDir)
-	mbwriter_mklink(templateDir .. "/build.xml",								workspaceDir .. "/build.xml")
-	mbwriter_mklink(templateDir .. "/AndroidManifest.xml",						workspaceDir .. "/AndroidManifest.xml")
-	mbwriter_mklink(templateDir .. "/assets",									workspaceDir .. "/assets")
-	mbwriter_mklink(templateDir .. "/res",										workspaceDir .. "/res")
-	mbwriter_mklink(templateDir .. "/src",										workspaceDir .. "/src")
+	mbwriter.mklink(templateDir .. "/build.xml",								workspaceDir .. "/build.xml")
+	mbwriter.mklink(templateDir .. "/AndroidManifest.xml",						workspaceDir .. "/AndroidManifest.xml")
+	mbwriter.mklink(templateDir .. "/assets",									workspaceDir .. "/assets")
+	mbwriter.mklink(templateDir .. "/res",										workspaceDir .. "/res")
+	mbwriter.mklink(templateDir .. "/src",										workspaceDir .. "/src")
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,7 +47,7 @@ function WriteApplicationMk(currentTarget, config)
 --		return
 
 	local jniDir = mbwriter_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
-	mbwriter_mkdir(jniDir)
+	mbwriter.mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Application.mk"
 	local file = io.open(makeFilename, "w")
@@ -73,7 +71,7 @@ function WriteApplicationMk(currentTarget, config)
 		end
 	end
 	file:close()
-	mbwriter_reportoutputfile(makeFilename)
+	mbwriter.reportoutputfile(makeFilename)
 end
 
 function WriteAndroidMk(currentTarget, config)
@@ -83,7 +81,7 @@ function WriteAndroidMk(currentTarget, config)
 --		return
 
 	local jniDir = mbwriter_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
-	mbwriter_mkdir(jniDir)
+	mbwriter.mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Android.mk"
 	local file = io.open(makeFilename, "w")
@@ -290,7 +288,7 @@ function WriteAndroidMk(currentTarget, config)
 	end
 
 	file:close()
-	mbwriter_reportoutputfile(makeFilename)
+	mbwriter.reportoutputfile(makeFilename)
 end
 
 function WriteJNI(currentTarget, config)

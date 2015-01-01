@@ -89,7 +89,7 @@ function WriteSourceToObjRule(file, buildFile)
 		compiler = GetDollarVar(g_varCXX)
 		compilerFlags = compilerFlags .. " " .. GetDollarVar(g_varCXXFLAGS)
 	else
-		mbwriter_fatalerror("unsupported source file type")
+		mbwriter.fatalerror("unsupported source file type")
 	end
 	basename = Util_StringReplace(buildFile.objFile, ".o", "")
 
@@ -107,7 +107,7 @@ function WriteMakeFileCommonVars(file, currentTarget)
 	file:write(g_varOUTDIR .. 		" := " .. g_outdir .. "\n")
 	file:write("\n")
 	if currentTarget.options.cc == nil then
-		mbwriter_fatalerror("No C compiler set")
+		mbwriter.fatalerror("No C compiler set")
 	end
 	
 	--print(inspect(currentTarget))
@@ -178,7 +178,7 @@ function WriteMakeFileAppVars(file, currentTarget)
 	file:write(g_varCFLAGS .. 	" += -c\n")
 	file:write(g_varCXXFLAGS ..	" += -c\n")
 	if currentTarget.options.ld == nil then
-		mbwriter_fatalerror("No linker set")
+		mbwriter.fatalerror("No linker set")
 	end		
 	file:write(g_varLD .. 		" := " .. currentTarget.options.ld[1] .. "\n")
 	file:write("\n")
@@ -227,7 +227,7 @@ function WriteMakeFileModuleVars(var1, var2)
 	currentTarget = var2
 	
 	if currentTarget.options.ld == nil then
-		mbwriter_fatalerror("No linker set")
+		mbwriter.fatalerror("No linker set")
 	end
 	file:write(g_varLD .. 		" := " .. currentTarget.options.ld[1] .. "\n")
 	file:write(g_varCFLAGS ..	" += -c\n")
@@ -237,7 +237,7 @@ end
 
 function WriteMakeFileStaticLibVars(file, currentTarget)
 	if currentTarget.options.ar == nil then
-		mbwriter_fatalerror("No archive tool specified")
+		mbwriter.fatalerror("No archive tool specified")
 	end
 	file:write(g_varAR .. " := " .. currentTarget.options.ar[1] .. "\n")
 	file:write("\n")
@@ -293,7 +293,7 @@ function WriteCompileRule(file, currentTarget)
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
-		local submakeLinkTargetAbs = mbwriter_gettarget(filename)
+		local submakeLinkTargetAbs = mbwriter.gettarget(filename)
 		
 		file:write(submakeLinkTargetAbs .. " ")
 	end	
@@ -321,7 +321,7 @@ function WriteMakeFileModuleTarget(file, currentTarget)
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
 	file:write("	@echo " .." ld" .. " Creating module obj " .. targetFileName .. "\n")
 	file:write("	@" .. "ld" .. " " .. " -r " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
-	mbwriter_registertarget(currentTarget.name, targetFileName)
+	mbwriter.registertarget(currentTarget.name, targetFileName)
 end
 
 function WriteMakeFileStaticLibTarget(file, currentTarget)
@@ -331,13 +331,13 @@ function WriteMakeFileStaticLibTarget(file, currentTarget)
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
 	file:write("	@echo " .. GetDollarVar(g_varAR) .. " Creating static lib " .. targetFileName .. "\n")
 	file:write("	@" .. GetDollarVar(g_varAR) .. " " .. GetDollarVar(g_varARFLAGS) .. " " .. targetFileName .. " " .. GetDollarVar(g_varOBJ) .. "\n")
-	mbwriter_registertarget(currentTarget.name, targetFileName)
+	mbwriter.registertarget(currentTarget.name, targetFileName)
 end
 
 function WriteMakeFile(currentTarget)
 
 	local makeDir = Util_FilePathJoin(mbwriter_global.makeoutputdirabs, "", mbwriter_global.targetDirSep)
-	mbwriter_mkdir(makeDir)
+	mbwriter.mkdir(makeDir)
 	
 	local makeFilename = ""
 	if (mbwriter_global.ismainmakefile) then
@@ -377,7 +377,7 @@ function WriteMakeFile(currentTarget)
 		local dependency = currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 
-		local submakeLinkTarget = mbwriter_gettarget(filename)
+		local submakeLinkTarget = mbwriter.gettarget(filename)
 		local submakefile = filename .. ".mk"
 		
 		file:write("include " .. submakefile .. "\n")
@@ -395,7 +395,7 @@ function WriteMakeFile(currentTarget)
 	elseif currentTarget.targettype == "module" then
 		WriteMakeFileModuleVars(file, currentTarget)
 	else
-		mbwriter_fatalerror("unsupported target type")
+		mbwriter.fatalerror("unsupported target type")
 	end
 		
     local buildFiles = {}
@@ -453,7 +453,7 @@ function WriteMakeFile(currentTarget)
 	elseif currentTarget.targettype == "module" then
 		WriteMakeFileModuleTarget(file, currentTarget)
 	else
-		mbwriter_fatalerror("unsupported target type")
+		mbwriter.fatalerror("unsupported target type")
 	end
 
 	file:write("\n")
@@ -517,7 +517,7 @@ function WriteMakeFile(currentTarget)
 	file:write("\n")
 	file:close()
 
-	mbwriter_reportoutputfile(makeFilename)	
+	mbwriter.reportoutputfile(makeFilename)	
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------

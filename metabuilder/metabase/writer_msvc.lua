@@ -63,10 +63,10 @@ function InitFolder(folderList, path_, filename)
 			
 			if #pathComponents[i] > 0 and pathComponents[i] ~= ".." then
 			
-				local newFolderID = mbwriter_msvcgenerateid()
+				local newFolderID = mbwriter.msvcgenerateid()
 
 				currentFolder = {
-					fullName = mbwriter_getoutputrelfilepath(currentPath),
+					fullName = mbwriter.getoutputrelfilepath(currentPath),
 					relativePath = currentPath,
 					shortName = pathComponents[i],
 					id = newFolderID,
@@ -147,7 +147,7 @@ function BuildFileGroups(currentTarget)
 			shortName = nil,
 			ext = nil,
 			includedInBuild = fIncludedInBuild,
-			outputRelativeFilename = mbwriter_getoutputrelfilepath(f)
+			outputRelativeFilename = mbwriter.getoutputrelfilepath(f)
 		}
 		fileInfo.inputRelativeDir, fileInfo.shortName, fileInfo.ext = Util_FilePathDecompose(f)
 		
@@ -200,10 +200,10 @@ end
 function WriteVcxProj(currentTarget, groupMap)	
 	logprofile("WriteVcxProj")
 	
-	local projectID = mbwriter_msvcgenerateid()
-	mbwriter_msvcregisterprojectid(currentTarget.name, projectID)
+	local projectID = mbwriter.msvcgenerateid()
+	mbwriter.msvcregisterprojectid(currentTarget.name, projectID)
 	
-	mbwriter_mkdir(mbwriter_global.makeoutputdirabs)
+	mbwriter.mkdir(mbwriter_global.makeoutputdirabs)
 
 	local msvcPlatform = Util_GetKVValue(mbwriter_global.options.msvc, "platform")
 	if msvcPlatform == nil then
@@ -213,10 +213,10 @@ function WriteVcxProj(currentTarget, groupMap)
 	end
 	
 	local vcxprojName = mbwriter_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj";
-	vcxprojName = mbwriter_normalisetargetfilepath(vcxprojName)
+	vcxprojName = mbwriter.normalisetargetfilepath(vcxprojName)
 	local file = io.open(vcxprojName, "w")
 	if (file == nil) then 
-		mbwriter_fatalerror("Failed to open file " .. vcxprojName .. " for writing")
+		mbwriter.fatalerror("Failed to open file " .. vcxprojName .. " for writing")
 	end
 
 	local pchFileBaseName = nil
@@ -283,11 +283,11 @@ function WriteVcxProj(currentTarget, groupMap)
 		file:write("    <LinkIncremental>false</LinkIncremental>\n") --incremental linking is only ever a source of pain (and corrupt files)
 	    file:write("    <ExecutablePath>")
 		for jExeDir = 1, #config.exedirs do
-			file:write(mbwriter_getoutputrelfilepath(config.exedirs[jExeDir]) .. ";")
+			file:write(mbwriter.getoutputrelfilepath(config.exedirs[jExeDir]) .. ";")
 		end
 		file:write("$(ExecutablePath)</ExecutablePath>\n")
-	    file:write("    <IntDir>" .. mbwriter_normalisetargetfilepath(mbwriter_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
-	    file:write("    <OutDir>" .. mbwriter_normalisetargetfilepath(mbwriter_global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
+	    file:write("    <IntDir>" .. mbwriter.normalisetargetfilepath(mbwriter_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
+	    file:write("    <OutDir>" .. mbwriter.normalisetargetfilepath(mbwriter_global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
 	    file:write("    <TargetName>$(ProjectName)_$(Configuration)</TargetName>\n")
 		
 		WriteVcxProjPropertyGroupOptions(file, config.options.msvcpropertygroup)
@@ -325,7 +325,7 @@ function WriteVcxProj(currentTarget, groupMap)
 
 		file:write("      <AdditionalIncludeDirectories>")
 		for jIncludeDir = 1, #config.includedirs do
-			local includeDir = mbwriter_getoutputrelfilepath(config.includedirs[jIncludeDir])
+			local includeDir = mbwriter.getoutputrelfilepath(config.includedirs[jIncludeDir])
 			file:write(includeDir .. ";")
 		end
 		file:write("</AdditionalIncludeDirectories>\n")
@@ -340,7 +340,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		--Lib directories
 		file:write("      <AdditionalLibraryDirectories>")
 		for jLibDir = 1, #config.libdirs do
-			local libDir = mbwriter_getoutputrelfilepath(config.libdirs[jLibDir])
+			local libDir = mbwriter.getoutputrelfilepath(config.libdirs[jLibDir])
 			file:write(libDir .. ";")
 		end
 		file:write("</AdditionalLibraryDirectories>\n")
@@ -472,7 +472,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		local projectFilename = filename .. ".vcxproj"
 		file:write("    <ProjectReference Include=\"" .. projectFilename .. "\">\n")
 
-		local projectID = mbwriter_msvcgetprojectid(filename)
+		local projectID = mbwriter.msvcgetprojectid(filename)
 		file:write("      <Project>{" .. projectID .. "}</Project>\n")
 		file:write("    </ProjectReference>\n")
 	end
@@ -494,7 +494,7 @@ function WriteVcxProj(currentTarget, groupMap)
 	file:write("</Project>\n")
 
 	file:close()
-	mbwriter_reportoutputfile(vcxprojName)
+	mbwriter.reportoutputfile(vcxprojName)
 	logprofile("END WriteVcxProj")
 end
 
@@ -505,11 +505,11 @@ function FormatFilterPath(path)
 	end
 ]]
 	path = Util_FileTrimTrailingSlash(path)
-	return mbwriter_normalisetargetfilepath(path)
+	return mbwriter.normalisetargetfilepath(path)
 end
 
 function WriterVcxProjFilters(currentTarget, groupMap)
-	local vcxProjFiltersFilename = mbwriter_normalisetargetfilepath(mbwriter_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj.filters")
+	local vcxProjFiltersFilename = mbwriter.normalisetargetfilepath(mbwriter_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj.filters")
 	local file = io.open(vcxProjFiltersFilename, "w")
 
 	file:write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
@@ -546,7 +546,7 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 
 	file:write("</Project>\n")
 	file:close()
-	mbwriter_reportoutputfile(vcxProjFiltersFilename)
+	mbwriter.reportoutputfile(vcxProjFiltersFilename)
 end
 
 function WriteSolution(projectList, currentTarget)
@@ -566,7 +566,7 @@ function WriteSolution(projectList, currentTarget)
 		msvcFormatVersion = "12.00"
 	end
 
-	local slnFilename = mbwriter_normalisetargetfilepath(mbwriter_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".sln")
+	local slnFilename = mbwriter.normalisetargetfilepath(mbwriter_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".sln")
 	local file = io.open(slnFilename, "w")
 	if file == nil then
 		print("Failed to open file for writing " .. slnFilename)
@@ -626,7 +626,7 @@ function WriteSolution(projectList, currentTarget)
 	file:write("EndGlobal\n")
 
 	file:close()
-	mbwriter_reportoutputfile(slnFilename)
+	mbwriter.reportoutputfile(slnFilename)
 end
 
 --[[ MAIN ]]
@@ -665,7 +665,7 @@ if g_currentTarget.targettype == "app" then
 	--Create a list of project GUID and name pairs. We'll need this to form the contents of our solution.
 	
 	--Current target.
-	local projectID = mbwriter_msvcgetprojectid(g_currentTarget.name)
+	local projectID = mbwriter.msvcgetprojectid(g_currentTarget.name)
 	projectList[#projectList+1] = {projectID, g_currentTarget.name}
 	
 	--Other targets we require.
@@ -673,7 +673,7 @@ if g_currentTarget.targettype == "app" then
 		local dependency = g_currentTarget.depends[i]
 		local path, filename, ext = Util_FilePathDecompose(dependency)
 
-		local projectID = mbwriter_msvcgetprojectid(filename)	
+		local projectID = mbwriter.msvcgetprojectid(filename)	
 		projectList[#projectList+1] = {projectID, filename}
 	end
 

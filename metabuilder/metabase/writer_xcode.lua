@@ -2,10 +2,10 @@ import "writer_common.lua"
 
 g_mainGroupID = "BE854ED918CA1112008EAFCD"
 
-g_projectObjectID = mbwriter_xcodegenerateid()
-g_infoPlistBuildFileID = mbwriter_xcodegenerateid()
+g_projectObjectID = mbwriter.xcodegenerateid()
+g_infoPlistBuildFileID = mbwriter.xcodegenerateid()
 
-g_buildPhaseFrameworkID = mbwriter_xcodegenerateid()
+g_buildPhaseFrameworkID = mbwriter.xcodegenerateid()
 
 g_PBXBuildFileIDMap = {}
 g_PBXFileRefIDMap = {}
@@ -19,8 +19,8 @@ g_ProductGroupIDs				= {}
 g_currentTarget = mbwriter_solution.targets[1]
 
 --used to refer to the product we're building here externally
-g_externalProductID = mbwriter_xcodegenerateid()
-g_pbxNativeTargetID = mbwriter_xcodegenerateid()
+g_externalProductID = mbwriter.xcodegenerateid()
+g_pbxNativeTargetID = mbwriter.xcodegenerateid()
 
 --used for overriding filepaths, e.g. for frameworks
 g_filePathMap = {}
@@ -43,7 +43,7 @@ function GetLastKnownFileType(filepath)
 	local ext = Util_FileExtension(filepath)
 	local lastKnownType = g_lastKnownFileTypeMap[ext]
 	if lastKnownType == nil then
-		local filetype = mbwriter_getfiletype(filepath)
+		local filetype = mbwriter.getfiletype(filepath)
 		if filetype == "dir" then
 			return "folder"
 		end
@@ -107,7 +107,7 @@ function InitFolder(folderList, path, filename)
 		if currentFolder == nil then
 			--we've not encountered this path before
 
-			local newFolderID = mbwriter_xcodegenerateid()
+			local newFolderID = mbwriter.xcodegenerateid()
 
 			currentFolder = {
 				shortName = pathComponents[i],
@@ -564,7 +564,7 @@ end
 for i = 1, #g_currentTarget.frameworks do
 	local f = g_currentTarget.frameworks[i]
 	
-	g_PBXBuildFileIDMap[f]		= mbwriter_xcodegenerateid()
+	g_PBXBuildFileIDMap[f]		= mbwriter.xcodegenerateid()
 
 	local dirCharIndex = string.find(f, "/")
 	if dirCharIndex == nil then
@@ -577,25 +577,25 @@ end
 -- CREATE IDs for static libs
 for i = 1, #g_currentTarget.depends do
 	local f = g_currentTarget.depends[i]	
-	g_PBXBuildFileIDMap[f]		= mbwriter_xcodegenerateid()
+	g_PBXBuildFileIDMap[f]		= mbwriter.xcodegenerateid()
 end
 
 -- Create IDs for resources
 for i = 1, #g_currentTarget.resources do
 	local f = g_currentTarget.resources[i]	
-	g_PBXBuildFileIDMap[f]		= mbwriter_xcodegenerateid()
+	g_PBXBuildFileIDMap[f]		= mbwriter.xcodegenerateid()
 end
 
 -- Create REF IDs for ALL files
 for i = 1, #g_currentTarget.allfiles do
 	local f = g_currentTarget.allfiles[i]	
-	g_PBXFileRefIDMap[f]		= mbwriter_xcodegenerateid()
+	g_PBXFileRefIDMap[f]		= mbwriter.xcodegenerateid()
 end
 
 -- Create BUILD IDs for files we're going to build
 for i = 1, #g_currentTarget.files do
 	local f = g_currentTarget.files[i]	
-	g_PBXBuildFileIDMap[f]		= mbwriter_xcodegenerateid()
+	g_PBXBuildFileIDMap[f]		= mbwriter.xcodegenerateid()
 end
 
 g_currentTargetFileExtension = ""
@@ -610,7 +610,7 @@ end
 
 g_currentTargetFilenameWithExt = g_currentTarget.name .. g_currentTargetFileExtension
 
-g_PBXFileRefIDMap[g_currentTargetFilenameWithExt] = mbwriter_xcodegenerateid()
+g_PBXFileRefIDMap[g_currentTargetFilenameWithExt] = mbwriter.xcodegenerateid()
 
 -- Create file list type lookup table (Source, Resource or Framework)
 for i = 1, #g_currentTarget.files do
@@ -631,8 +631,8 @@ end
 -- Assign IDs for configs
 for i = 1, #g_currentTarget.configs do
 	local config = g_currentTarget.configs[i]
-	g_PBXProjectConfigIDs[config.name] = mbwriter_xcodegenerateid()
-	g_PBXNativeTargetConfigIDs[config.name] = mbwriter_xcodegenerateid()
+	g_PBXProjectConfigIDs[config.name] = mbwriter.xcodegenerateid()
+	g_PBXNativeTargetConfigIDs[config.name] = mbwriter.xcodegenerateid()
 end
 
 -- Assign IDs for dependencies
@@ -642,14 +642,14 @@ for i = 1, #g_currentTarget.depends do
 	local path, filename, ext = Util_FilePathDecompose(dependency)
 
 	--store relative filepath
-	g_PBXFileRefIDMap[dependency]				= mbwriter_xcodegenerateid()
-	g_PBXBuildFileIDMap[dependency]				= mbwriter_xcodegenerateid()
-	g_PBXReferenceProxyIDMap[dependency] 		= mbwriter_xcodegenerateid()
-	g_PBXTargetDependencyIDMap[dependency]		= mbwriter_xcodegenerateid()
-	g_PBXContainerItemProxyIDMap[dependency]	= mbwriter_xcodegenerateid()
-	g_PBXReferenceProxyIDMap[dependency]		= mbwriter_xcodegenerateid()
-	g_PBXTargetProxy[dependency]				= mbwriter_xcodegenerateid()
-	g_ProductGroupIDs[dependency]				= mbwriter_xcodegenerateid()
+	g_PBXFileRefIDMap[dependency]				= mbwriter.xcodegenerateid()
+	g_PBXBuildFileIDMap[dependency]				= mbwriter.xcodegenerateid()
+	g_PBXReferenceProxyIDMap[dependency] 		= mbwriter.xcodegenerateid()
+	g_PBXTargetDependencyIDMap[dependency]		= mbwriter.xcodegenerateid()
+	g_PBXContainerItemProxyIDMap[dependency]	= mbwriter.xcodegenerateid()
+	g_PBXReferenceProxyIDMap[dependency]		= mbwriter.xcodegenerateid()
+	g_PBXTargetProxy[dependency]				= mbwriter.xcodegenerateid()
+	g_ProductGroupIDs[dependency]				= mbwriter.xcodegenerateid()
 
 	--Xcode projects written adjacent to each other
 	local dependencyPhysicalFilePath = filename .. ".xcodeproj"
@@ -689,7 +689,7 @@ end
 g_projectoutputfile = mbwriter_global.makeoutputdirabs .. "/" .. mbwriter_solution.name .. ".xcodeproj"
 
 --print("Creating project dir " .. g_projectoutputfile)
-mbwriter_mkdir(g_projectoutputfile)
+mbwriter.mkdir(g_projectoutputfile)
 
 local pbxprojFilename = g_projectoutputfile .. "/project.pbxproj"
 
@@ -748,14 +748,14 @@ for i = 1, #g_currentTarget.depends do
 	file:write("			isa = PBXContainerItemProxy;\n")
 	file:write("			containerPortal = " .. g_PBXFileRefIDMap[dependency]  .. " /* " .. f .. " */;\n")
 	file:write("			proxyType = 2;\n")
-	file:write("			remoteGlobalIDString = " .. mbwriter_xcodegetpbxfilereference_external(filename) .. ";\n")
+	file:write("			remoteGlobalIDString = " .. mbwriter.xcodegetpbxfilereference_external(filename) .. ";\n")
 	file:write("			remoteInfo = " .. filename .. ";\n")
 	file:write("		};\n")
 	file:write("		" .. g_PBXTargetProxy[dependency] .. " /* PBXContainerItemProxy */ = {\n")
 	file:write("			isa = PBXContainerItemProxy;\n")
 	file:write("			containerPortal = " .. g_PBXFileRefIDMap[dependency]  .. " /* " .. f .. " */;\n")
 	file:write("			proxyType = 1;\n")
-	file:write("			remoteGlobalIDString = " .. mbwriter_xcodegetpbxnativetarget_external(filename) .. ";\n")
+	file:write("			remoteGlobalIDString = " .. mbwriter.xcodegetpbxnativetarget_external(filename) .. ";\n")
 	file:write("			remoteInfo = " .. filename .. ";\n")
 	file:write("		};\n")
 end
@@ -776,7 +776,7 @@ elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "
 	g_productType = "archive.ar"
 end
 
-mbwriter_xcoderegisterpbxfilereference_external(g_currentTarget.name, g_externalProductID)
+mbwriter.xcoderegisterpbxfilereference_external(g_currentTarget.name, g_externalProductID)
 file:write("		" .. g_externalProductID .. " /* " .. g_currentTargetFilenameWithExt .. " */ = {isa = PBXFileReference; explicitFileType = " .. g_productType .. "; includeInIndex = 0; path = \"" .. g_currentTargetFilenameWithExt .. "\"; sourceTree = BUILT_PRODUCTS_DIR; };\n")
 
 --All files, regardless of whether they're for this platform or not.
@@ -819,7 +819,7 @@ WritePBXGroup()
 
 file:write("/* Begin PBXNativeTarget section */\n")
 
-mbwriter_xcoderegisterpbxnativetarget_external(g_currentTarget.name, g_pbxNativeTargetID)
+mbwriter.xcoderegisterpbxnativetarget_external(g_currentTarget.name, g_pbxNativeTargetID)
 file:write("		" .. g_pbxNativeTargetID .. " /* " .. g_currentTarget.name .. " */ = {\n")
 file:write("			isa = PBXNativeTarget;\n")
 file:write("			buildConfigurationList = BE854F1F18CA1112008EAFCD /* Build configuration list for PBXNativeTarget \"" .. g_currentTarget.name .. "\" */;\n")
@@ -1000,4 +1000,4 @@ file:write("	rootObject = " .. g_projectObjectID .. " /* Project object */;\n")
 file:write("}\n")
 
 file:close()
-mbwriter_reportoutputfile(pbxprojFilename)
+mbwriter.reportoutputfile(pbxprojFilename)

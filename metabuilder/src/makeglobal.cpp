@@ -51,6 +51,28 @@ static int luaFuncDirSep(lua_State* l)
 	return 0;
 }
 
+static int luaFuncLineEndingStyle(lua_State* l)
+{
+	const char* str = lua_tostring(l, 1);
+	E_LineEndingStyle style = E_LineEndingStyle_Unknown;
+	if (str && !strcmp(str, "windows"))
+	{
+		style = E_LineEndingStyle_Windows;
+	}
+	else if (str && !strcmp(str, "unix"))
+	{
+		style = E_LineEndingStyle_UNIX;
+	}
+	else
+	{
+		MB_LOGERROR("Unknown line ending style, valid values are \"windows\" and \"unix\"");
+		mbExitError();
+	}
+
+	mbGetAppState()->makeGlobal->lineEndingStyle = style;
+	return 0;
+}
+
 void mbMakeGlobalLuaRegister(lua_State* l)
 {
     lua_pushcfunction(l, luaFuncMakeGlobal);
@@ -61,4 +83,7 @@ void mbMakeGlobalLuaRegister(lua_State* l)
 	
 	lua_pushcfunction(l, luaFuncDirSep);
 	lua_setglobal(l, "dirsep");
+
+	lua_pushcfunction(l, luaFuncLineEndingStyle);
+	lua_setglobal(l, "lineEndingStyle");
 }

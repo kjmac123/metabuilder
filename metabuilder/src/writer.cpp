@@ -193,35 +193,28 @@ static int luaFuncWriterGetTarget(lua_State* l)
 
 void luaRegisterWriterFuncs(lua_State* l)
 {
-	mbWriterXcodeLuaRegister(l);
-	mbWriterMSVCLuaRegister(l);
+	{
+		LuaModuleFunctions luaFn;
+		mbCommonLuaRegister(l, &luaFn);
+		luaFn.RegisterLuaGlobal(l);
+	}
 
-	mbCommonLuaRegister(l);
-	mbWriterUtilityLuaRegister(l);
+	{
+		LuaModuleFunctions luaFn;
+		mbWriterXcodeLuaRegister(l, &luaFn);
+		mbWriterMSVCLuaRegister(l, &luaFn);
+		mbWriterUtilityLuaRegister(l, &luaFn);
 	
-    lua_pushcfunction(l, luaFuncMkdir);
-    lua_setglobal(l, "mbwriter_mkdir");
-	
-    lua_pushcfunction(l, luaFuncMklink);
-    lua_setglobal(l, "mbwriter_mklink");
-
-    lua_pushcfunction(l, luaFuncGetFileType);
-    lua_setglobal(l, "mbwriter_getfiletype");
-	
-    lua_pushcfunction(l, luaFuncCopyFile);
-    lua_setglobal(l, "mbwriter_copyfile");
-
-    lua_pushcfunction(l, luaFuncReportOutputFile);
-    lua_setglobal(l, "mbwriter_reportoutputfile");
-
-    lua_pushcfunction(l, luaFuncFatalError);
-    lua_setglobal(l, "mbwriter_fatalerror");
-
-    lua_pushcfunction(l, luaFuncWriterRegisterTarget);
-    lua_setglobal(l, "mbwriter_registertarget");
-
-    lua_pushcfunction(l, luaFuncWriterGetTarget);
-    lua_setglobal(l, "mbwriter_gettarget");
+		luaFn.AddFunction("mkdir", luaFuncMkdir);
+		luaFn.AddFunction("mklink", luaFuncMklink);
+		luaFn.AddFunction("getfiletype", luaFuncGetFileType);
+		luaFn.AddFunction("copyfile", luaFuncCopyFile);
+		luaFn.AddFunction("reportoutputfile", luaFuncReportOutputFile);
+		luaFn.AddFunction("fatalerror", luaFuncFatalError);
+		luaFn.AddFunction("registertarget", luaFuncWriterRegisterTarget);
+		luaFn.AddFunction("gettarget", luaFuncWriterGetTarget);
+		luaFn.RegisterLuaModule(l, "mbwriter");
+	}
 }
 
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)
@@ -311,8 +304,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 	mbPushActiveContext(ctx);
 
 	lua_State *l;
-	l = luaL_newstate();
-	lua_setallocf(l, mbLuaAllocator, nullptr);
+	l = lua_newstate(mbLuaAllocator, nullptr);
 
 	luaL_checkstack(l, MB_LUA_STACK_MAX, "Out of stack!");
 
