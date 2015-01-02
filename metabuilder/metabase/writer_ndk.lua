@@ -5,10 +5,6 @@ g_filePathMap = {}
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, mbwriter.global.currentmetamakedirabs, mbwriter.global.currentmetamakedirabs, "/", g_filePathMap)
-end
-
 function GetWorkspaceDir(currentTargetName, configName)
 	return mbwriter.global.makeoutputdirabs .. "/" .. currentTargetName .. "/" .. configName
 end
@@ -24,7 +20,7 @@ function CreateLinks(currentTarget, config)
 		print("Template dir not specified")
 		os.exit(1)
 	end
-	templateDir = GetFullFilePath(templateDir)
+	templateDir = mbwriter.getoutputrelfilepath(templateDir)
 
 	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
 	mbwriter.mkdir(workspaceDir)
@@ -154,7 +150,7 @@ function WriteAndroidMk(currentTarget, config)
 
 		file:write("include $(CLEAR_VARS)\n")
 		file:write("LOCAL_MODULE            := " .. filename .. "\n")
-		file:write("LOCAL_SRC_FILES         := " .. GetFullFilePath(f) .. "\n")
+		file:write("LOCAL_SRC_FILES         := " .. mbwriter.getoutputrelfilepath(f) .. "\n")
 		file:write("include $(PREBUILT_STATIC_LIBRARY)\n\n")
 	end
 
@@ -165,7 +161,7 @@ function WriteAndroidMk(currentTarget, config)
 
 		file:write("include $(CLEAR_VARS)\n")
 		file:write("LOCAL_MODULE            := " .. filename .. "\n")
-		file:write("LOCAL_SRC_FILES         := " .. GetFullFilePath(f) .. "\n")
+		file:write("LOCAL_SRC_FILES         := " .. mbwriter.getoutputrelfilepath(f) .. "\n")
 		file:write("include $(PREBUILT_SHARED_LIBRARY)\n\n")
 	end
 

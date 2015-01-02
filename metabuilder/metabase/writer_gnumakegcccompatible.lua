@@ -1,13 +1,4 @@
-package.path = package.path .. ";" .. mbwriter.global.metabasedirabs .. "/?.lua"
-local inspect = require('inspect')
-
-if mbwriter.global.verbose then 
-	print("mbwriter.global:\n")
-	print(inspect(mbwriter.global))
-	print("\n")
-	print("mbwriter.solution:\n")
-	print(inspect(mbwriter.solution))
-end
+import "writer_common.lua"
 
 g_firstTargetWritten = false
 
@@ -41,10 +32,6 @@ g_varOBJ = ""
 g_varDEFINES = ""
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, mbwriter.global.currentmetamakedirabs, mbwriter.global.makeoutputdirabs, "/", g_filePathMap)
-end
 
 function InitVars(currentTarget)
 	g_varBUILDCONFIG	= "BUILDCONFIG"
@@ -161,7 +148,7 @@ function WriteMakeFileCommonVars(file, currentTarget)
 		--Out include paths are shared between languages, so store in CPPFLAGS
 		file:write(g_varINCLUDES .. "." .. config.name .. " := \\\n")
 		for i = 1, #config.includedirs do
-			local includeDir = GetFullFilePath(config.includedirs[i])
+			local includeDir = mbwriter.getoutputrelfilepath(config.includedirs[i])
 			file:write("  -I" .. mbstring.quoted(includeDir) .. " \\\n")
 		end
 		file:write("\n")
@@ -198,7 +185,7 @@ function WriteMakeFileAppVars(file, currentTarget)
 		file:write(g_varLIBDIRS .. "." .. config.name .. " := \\\n")
 		if config.options.libdirs ~= nil then
 			for i = 1, #config.libdirs do
-				local libDir = GetFullFilePath(config.libdirs[i])
+				local libDir = mbwriter.getoutputrelfilepath(config.libdirs[i])
 				file:write("  -L" .. libDir .. " \\\n")
 			end
 		end
@@ -209,7 +196,7 @@ function WriteMakeFileAppVars(file, currentTarget)
 		file:write(g_varLIBS .. "." .. config.name .. " := \\\n")
 		if config.options.libs ~= nil then
 			for i = 1, #currentTarget.libs do
-				local lib = GetFullFilePath(config.libs[i])
+				local lib = mbwriter.getoutputrelfilepath(config.libs[i])
 				file:write("  " .. lib .. " \\\n")
 			end
 		end
@@ -402,7 +389,7 @@ function WriteMakeFile(currentTarget)
 		local f = currentTarget.files[i]
 		local path, filename, ext = mbfilepath.decompose(f)
 		if ext == "c" or ext == "cpp" then
-			local filenameAbs = GetFullFilePath(f)
+			local filenameAbs = mbwriter.getoutputrelfilepath(f)
 						
 			local fileBaseNameCount = g_sourceFileBaseNameCounts[filename]
 			if (fileBaseNameCount == nil) then

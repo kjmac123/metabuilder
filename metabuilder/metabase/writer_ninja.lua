@@ -14,12 +14,6 @@ end
 g_filePathMap = {}
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, mbwriter.global.currentmetamakedirabs, mbwriter.global.currentmetamakedirabs, "/", g_filePathMap)
-end
-
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --FILE WRITING
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -54,7 +48,7 @@ function WriteMakeFile(currentTarget, config)
 	end
 
 	for i = 1, #config.includedirs do
-		local includeDir = GetFullFilePath(config.includedirs[i])
+		local includeDir = mbwriter.getoutputrelfilepath(config.includedirs[i])
 		print(includeDir)
 		file:write("  -I" .. includeDir .. " $\n")
 	end
@@ -68,7 +62,7 @@ function WriteMakeFile(currentTarget, config)
 	end
 
 	for i = 1, #config.libdirs do
-		local libDir = GetFullFilePath(config.libdirs[i])
+		local libDir = mbwriter.getoutputrelfilepath(config.libdirs[i])
 		file:write("  -L" .. libDir .. " $\n")
 	end
 	file:write("\n")
@@ -118,7 +112,7 @@ function WriteMakeFile(currentTarget, config)
 		local ext = mbfilepath.getextension(f)
 		if ext == "c" or ext == "cpp" then
 			local shortName = mbfilepath.shortname(f)
-			local fileToBuild = GetFullFilePath(f)
+			local fileToBuild = mbwriter.getoutputrelfilepath(f)
 		    local fileToLink = mbfilepath.replaceextension(shortName, ext, "o")
 		    file:write("build $intdir/" .. fileToLink .. ": cxx " .. fileToBuild .. "\n")
 		    table.insert(filesToLink, fileToLink)

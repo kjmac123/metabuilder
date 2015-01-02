@@ -51,7 +51,7 @@ function module.replace(str, oldStr, newStr)
 	return module.unescapemagic(escapedStr)
 end
 
-function module.quote(filepath)
+function module.quoted(filepath)
 	return '"' .. filepath .. '"'
 end
 

@@ -63,10 +63,6 @@ function GetSourceTree(filepath)
 	return sourceTree
 end
 
-function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, mbwriter.global.currentmetamakedirabs, mbwriter.global.makeoutputdirabs, "/", g_filePathMap)
-end
-
 function GetFileListType(filepath)
 	local filelisttype = g_fileListType[filepath]
 	if filelisttype == nil then
@@ -175,7 +171,7 @@ function InitFolders(folderList, fileList)
 	--print(inspect(folderList))
 end
 
-function WritePBXGroup()
+function WritePBXGroup(file)
 	file:write("/* Begin PBXGroup section */\n")
 
 	file:write("		" .. g_mainGroupID .. " = {\n")
@@ -379,7 +375,7 @@ function BuildListPerSDK(stringList)
 end
 
 
-function WriteXCBuildConfigurations()
+function WriteXCBuildConfigurations(file)
 	file:write("/* Begin XCBuildConfiguration section */\n")
 
 	for i = 1, #g_currentTarget.configs do
@@ -430,7 +426,7 @@ function WriteXCBuildConfigurations()
 		file:write("					\"$(inherited)\",\n")
 		file:write("					\"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include\",\n")
 		for j = 1, #config.includedirs do
-			file:write("					\"" .. GetFullFilePath(config.includedirs[j]) .. "\",\n")
+			file:write("					\"" .. mbwriter.getoutputrelfilepath(config.includedirs[j]) .. "\",\n")
 		end
 		file:write("				);\n")
 
@@ -444,7 +440,7 @@ function WriteXCBuildConfigurations()
 			local dirCharIndex = string.find(f, "/")
 			if dirCharIndex ~= nil then
 				local frameworkPath = mbfilepath.getdir(f)
-				file:write("					\"" .. GetFullFilePath(frameworkPath) .. "\",\n")
+				file:write("					\"" .. mbwriter.getoutputrelfilepath(frameworkPath) .. "\",\n")
 			end
 		end
 		file:write("				);\n\n")
@@ -459,7 +455,7 @@ function WriteXCBuildConfigurations()
 				file:write("				\"LIBRARY_SEARCH_PATHS" .. sdk .. "\" = (\n")
 			end
 			for jString = 1, #strings do
-				file:write("					\"" .. GetFullFilePath(strings[jString]) .. "\",\n")
+				file:write("					\"" .. mbwriter.getoutputrelfilepath(strings[jString]) .. "\",\n")
 			end
 			file:write("				);\n\n")
 		end
@@ -483,7 +479,7 @@ function WriteXCBuildConfigurations()
 --		if g_currentTarget.pch ~= nil and g_currentTarget.pch ~= "" then
 --			print(g_currentTarget.name .. " PCH " .. g_currentTarget.pch)
 --			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = YES;\n")
---			file:write("				GCC_PREFIX_HEADER = \"" .. GetFullFilePath(g_currentTarget.pch) .. "\";\n")
+--			file:write("				GCC_PREFIX_HEADER = \"" .. mbwriter.getoutputrelfilepath(g_currentTarget.pch) .. "\";\n")
 --		else
 			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = NO;\n")
 --		end
@@ -491,7 +487,7 @@ function WriteXCBuildConfigurations()
 		do
 			local infoplist = mbutil.getkvvalue(config.options._xcode, "infoplist")
 			if infoplist ~= nil then 
-				file:write("				INFOPLIST_FILE = \"" .. GetFullFilePath(infoplist) .. "\";\n")
+				file:write("				INFOPLIST_FILE = \"" .. mbwriter.getoutputrelfilepath(infoplist) .. "\";\n")
 			end
 		end
 
@@ -529,7 +525,7 @@ function WriteXCBuildConfigurations()
 	file:write("/* End XCBuildConfiguration section */\n\n")
 end
 
-function WriteXCConfigurationList()
+function WriteXCConfigurationList(file)
 	file:write("/* Begin XCConfigurationList section */\n")
 
 	file:write("		BE854EDD18CA1112008EAFCD /* Build configuration list for PBXProject " .. g_currentTarget.name .. " */ = {\n")
@@ -781,14 +777,14 @@ file:write("		" .. g_externalProductID .. " /* " .. g_currentTargetFilenameWithE
 --All files, regardless of whether they're for this platform or not.
 for i = 1, #g_currentTarget.allfiles do
 	local f = g_currentTarget.allfiles[i]
-	file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(f) .. "; name = \"" .. mbfilepath.getshortname(f) .. "\"; path = \"" .. GetFullFilePath(f) .. "\"; sourceTree = " .. GetSourceTree(f) .. "; };\n")
+	file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(f) .. "; name = \"" .. mbfilepath.getshortname(f) .. "\"; path = \"" .. mbwriter.getoutputrelfilepath(f) .. "\"; sourceTree = " .. GetSourceTree(f) .. "; };\n")
 end
 
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
 	local dependencyXcodeproj = dependency .. ".xcodeproj"
 
-	file:write("		" .. g_PBXFileRefIDMap[dependency] 	.. " /* " .. dependency .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(dependencyXcodeproj) .. "; name = \"" .. mbfilepath.getshortname(dependency) .. ".xcodeproj\"; path = \"" .. GetFullFilePath(dependency) .. "\"; sourceTree = " .. GetSourceTree(dependency) .. "; };\n")
+	file:write("		" .. g_PBXFileRefIDMap[dependency] 	.. " /* " .. dependency .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(dependencyXcodeproj) .. "; name = \"" .. mbfilepath.getshortname(dependency) .. ".xcodeproj\"; path = \"" .. mbwriter.getoutputrelfilepath(dependency) .. "\"; sourceTree = " .. GetSourceTree(dependency) .. "; };\n")
 end
 
 file:write("/* End PBXFileReference section */\n\n")
@@ -814,7 +810,7 @@ file:write("			runOnlyForDeploymentPostprocessing = 0;\n")
 file:write("		};\n")
 file:write("/* End PBXFrameworksBuildPhase section */\n\n")
 
-WritePBXGroup()
+WritePBXGroup(file)
 
 file:write("/* Begin PBXNativeTarget section */\n")
 
@@ -991,8 +987,8 @@ file:write("			sourceTree = \"<group>\";\n")
 file:write("		};\n")
 file:write("/* End PBXVariantGroup section */\n\n")
 
-WriteXCBuildConfigurations()
-WriteXCConfigurationList()
+WriteXCBuildConfigurations(file)
+WriteXCConfigurationList(file)
 
 file:write("	};\n")
 file:write("	rootObject = " .. g_projectObjectID .. " /* Project object */;\n")
