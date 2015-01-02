@@ -1,2 +1,11 @@
+# Make
+Makefile binary
 *.mk binary
-metabuilder/premade/* binary
+
+# MSVC
+*.filters binary
+*.vcxproj binary
+*.sln binary
+
+# XCode
+*.pbxproj binary
