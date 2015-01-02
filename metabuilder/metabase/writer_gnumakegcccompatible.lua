@@ -1,6 +1,5 @@
 package.path = package.path .. ";" .. mbwriter.global.metabasedirabs .. "/?.lua"
 local inspect = require('inspect')
-local util = require('utility')
 
 if mbwriter.global.verbose then 
 	print("mbwriter.global:\n")
@@ -91,7 +90,7 @@ function WriteSourceToObjRule(file, buildFile)
 	else
 		mbwriter.fatalerror("unsupported source file type")
 	end
-	basename = Util_StringReplace(buildFile.objFile, ".o", "")
+	basename = mbstring.replace(buildFile.objFile, ".o", "")
 
 	file:write(buildFile.objFile .. " : " .. buildFile.srcFile .. " " .. basename .. ".d \n")
 	file:write("	@echo " .. compiler .. " " .. buildFile.srcFile .. "\n")
@@ -163,7 +162,7 @@ function WriteMakeFileCommonVars(file, currentTarget)
 		file:write(g_varINCLUDES .. "." .. config.name .. " := \\\n")
 		for i = 1, #config.includedirs do
 			local includeDir = GetFullFilePath(config.includedirs[i])
-			file:write("  -I" .. Util_FileQuoted(includeDir) .. " \\\n")
+			file:write("  -I" .. mbstring.quoted(includeDir) .. " \\\n")
 		end
 		file:write("\n")
 		file:write(g_varCPPFLAGS .. "." .. config.name .. " += $(" .. g_varINCLUDES .. "." .. config.name .. ")\n")
@@ -292,7 +291,7 @@ function WriteCompileRule(file, currentTarget)
 
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 		local submakeLinkTargetAbs = mbwriter.gettarget(filename)
 		
 		file:write(submakeLinkTargetAbs .. " ")
@@ -336,14 +335,14 @@ end
 
 function WriteMakeFile(currentTarget)
 
-	local makeDir = Util_FilePathJoin(mbwriter.global.makeoutputdirabs, "", mbwriter.global.targetDirSep)
+	local makeDir = mbfilepath.join(mbwriter.global.makeoutputdirabs, "", mbwriter.global.targetDirSep)
 	mbwriter.mkdir(makeDir)
 	
 	local makeFilename = ""
 	if (mbwriter.global.ismainmakefile) then
-		makeFilename = Util_FilePathJoin(makeDir, "Makefile", mbwriter.global.targetDirSep)
+		makeFilename = mbfilepath.join(makeDir, "Makefile", mbwriter.global.targetDirSep)
 	else
-		makeFilename = Util_FilePathJoin(makeDir, currentTarget.name .. ".mk", mbwriter.global.targetDirSep)
+		makeFilename = mbfilepath.join(makeDir, currentTarget.name .. ".mk", mbwriter.global.targetDirSep)
 	end
 	
 	local file = mbfile.open(makeFilename, "w")
@@ -353,8 +352,8 @@ function WriteMakeFile(currentTarget)
 	g_intdir = mbwriter.global.intdir
 	g_outdir = mbwriter.global.outdir
 
-	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
-	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
+	g_intdir = mbfilepath.join(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
+	g_outdir = mbfilepath.join(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
 		
 	--write out content we only require once per makefile
 	if (g_firstTargetWritten == false) then
@@ -375,7 +374,7 @@ function WriteMakeFile(currentTarget)
 	--include submakefiles
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
 		local submakeLinkTarget = mbwriter.gettarget(filename)
 		local submakefile = filename .. ".mk"
@@ -401,7 +400,7 @@ function WriteMakeFile(currentTarget)
     local buildFiles = {}
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
-		local path, filename, ext = Util_FilePathDecompose(f)
+		local path, filename, ext = mbfilepath.decompose(f)
 		if ext == "c" or ext == "cpp" then
 			local filenameAbs = GetFullFilePath(f)
 						
@@ -411,8 +410,8 @@ function WriteMakeFile(currentTarget)
 				fileBaseNameCount = 0				
 			end
 			
-			local obj = Util_StringReplace(filename, ".cpp", "")
-			obj = Util_StringReplace(obj, ".c", "")
+			local obj = mbstring.replace(filename, ".cpp", "")
+			obj = mbstring.replace(obj, ".c", "")
 			obj = GetDollarVar(g_varINTDIR) .. "/" .. obj
 			local objWithCount = obj
 			if (fileBaseNameCount > 0) then
@@ -479,7 +478,7 @@ function WriteMakeFile(currentTarget)
 	file:write("clean_" .. currentTarget.name .. " : ")
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 		file:write("clean_" .. filename .. " ")
 	end
 	file:write("\n")
@@ -510,7 +509,7 @@ function WriteMakeFile(currentTarget)
 	
 	for i = 1, #buildFiles do
 		local objFile = buildFiles[i].objFile
-		local depFile = Util_StringReplace(objFile, ".o", ".d")
+		local depFile = mbstring.replace(objFile, ".o", ".d")
 		file:write("-include " .. depFile .. "\n")
 	end	
 	

@@ -20,7 +20,7 @@ g_fileTypeMap["inl"]		= "ClInclude"
 g_fileTypeMap["rc"]			= "ResourceCompile"
 
 function GetFileType(filepath)
-	local ext = Util_FileExtension(filepath)
+	local ext = mbfilepath.getextension(filepath)
 	local lastKnownType = g_fileTypeMap[ext]
 	if lastKnownType == nil then
 		return "None"
@@ -31,7 +31,7 @@ end
 
 
 function InitFolder(folderList, path_, filename)
-	local path = Util_FileTrimTrailingSlash(path_)
+	local path = mbfilepath.trimtrailingslash(path_)
 
 	local pathComponents = { "" }
 	
@@ -149,7 +149,7 @@ function BuildFileGroups(currentTarget)
 			includedInBuild = fIncludedInBuild,
 			outputRelativeFilename = mbwriter.getoutputrelfilepath(f)
 		}
-		fileInfo.inputRelativeDir, fileInfo.shortName, fileInfo.ext = Util_FilePathDecompose(f)
+		fileInfo.inputRelativeDir, fileInfo.shortName, fileInfo.ext = mbfilepath.decompose(f)
 		
 		group.fileInfo[#group.fileInfo+1] = fileInfo
 	end	
@@ -205,7 +205,7 @@ function WriteVcxProj(currentTarget, groupMap)
 	
 	mbwriter.mkdir(mbwriter.global.makeoutputdirabs)
 
-	local msvcPlatform = Util_GetKVValue(mbwriter.global.options.msvc, "platform")
+	local msvcPlatform = mbutil.getkvvalue(mbwriter.global.options.msvc, "platform")
 	if msvcPlatform == nil then
 		-- TODO error
 		print("unknown platform!")
@@ -383,7 +383,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		
 		--Post build event
 		file:write("    <PostBuildEvent>\n")
-		local postbuild = Util_GetKVValue(config.options.msvc, "postbuild")
+		local postbuild = mbutil.getkvvalue(config.options.msvc, "postbuild")
 		if postbuild ~= nil then
 			file:write("	  <Command>" .. postbuild .. "</Command>\n")
 		end
@@ -467,7 +467,7 @@ function WriteVcxProj(currentTarget, groupMap)
 	file:write("  <ItemGroup>\n")
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
 		local projectFilename = filename .. ".vcxproj"
 		file:write("    <ProjectReference Include=\"" .. projectFilename .. "\">\n")
@@ -504,7 +504,7 @@ function FormatFilterPath(path)
 		path = string.sub(path, 4, length)
 	end
 ]]
-	path = Util_FileTrimTrailingSlash(path)
+	path = mbfilepath.trimtrailingslash(path)
 	return mbwriter.normalisetargetfilepath(path)
 end
 
@@ -554,8 +554,8 @@ function WriteSolution(projectList, currentTarget)
 		-- TODO ERROR HERE
 	end
 
-	local msvcVersion = Util_GetKVValue(mbwriter.global.options.msvc, "version")
-	local msvcPlatform = Util_GetKVValue(mbwriter.global.options.msvc, "platform")
+	local msvcVersion = mbutil.getkvvalue(mbwriter.global.options.msvc, "version")
+	local msvcPlatform = mbutil.getkvvalue(mbwriter.global.options.msvc, "platform")
 	--if msvcPlatform == nil then
 		-- TODO error
 	--end
@@ -631,7 +631,7 @@ end
 
 --[[ MAIN ]]
 
-local customWriter = Util_GetKVValue(mbwriter.global.options.msvc, "customwriter")
+local customWriter = mbutil.getkvvalue(mbwriter.global.options.msvc, "customwriter")
 if customWriter ~= nil then
 	--print("Importing custom writer " .. customWriter)
 	import(customWriter)
@@ -671,7 +671,7 @@ if g_currentTarget.targettype == "app" then
 	--Other targets we require.
 	for i = 1, #g_currentTarget.depends do
 		local dependency = g_currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
 		local projectID = mbwriter.msvcgetprojectid(filename)	
 		projectList[#projectList+1] = {projectID, filename}

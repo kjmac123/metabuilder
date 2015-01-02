@@ -1,6 +1,5 @@
 package.path = package.path .. ";" .. mbwriter.global.metabasedirabs .. "/?.lua"
 local inspect = require('inspect')
-local util = require('utility')
 
 if mbwriter.global.verbose then 
 	loginfo("mbwriter.global:\n")
@@ -105,7 +104,7 @@ function WriteMakeFile(currentTarget, config)
 
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 		local dependsDir = mbwriter.global.makeoutputdirabs .. "/" .. filename .. "/" .. config.name
 		local f = dependsDir .. "/build.ninja"
 
@@ -116,11 +115,11 @@ function WriteMakeFile(currentTarget, config)
 	local filesToLink = {}	
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
-		local ext = Util_FileExtension(f)
+		local ext = mbfilepath.getextension(f)
 		if ext == "c" or ext == "cpp" then
-			local shortName = Util_FileShortname(f)
+			local shortName = mbfilepath.shortname(f)
 			local fileToBuild = GetFullFilePath(f)
-		    local fileToLink = Util_FileReplaceExtension(shortName, ext, "o")
+		    local fileToLink = mbfilepath.replaceextension(shortName, ext, "o")
 		    file:write("build $intdir/" .. fileToLink .. ": cxx " .. fileToBuild .. "\n")
 		    table.insert(filesToLink, fileToLink)
 		end
@@ -146,7 +145,7 @@ function WriteMakeFile(currentTarget, config)
 		-- Link with required projects
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
-			local path, filename, ext = Util_FilePathDecompose(dependency)
+			local path, filename, ext = mbfilepath.decompose(dependency)
 			local f = filename .. "_" .. config.name .. ".a"
 			file:write("  $outdir/" .. f .. " $\n")
 		end		

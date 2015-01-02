@@ -18,7 +18,7 @@ function GetJNIDir(currentTargetName, configName)
 end
 
 function CreateLinks(currentTarget, config)
-	local templateDir = Util_GetKVValue(config.options._ndk, "templatedir")
+	local templateDir = mbutil.getkvvalue(config.options._ndk, "templatedir")
 	if templateDir == nil then
 		--TODO proper error here
 		print("Template dir not specified")
@@ -55,7 +55,7 @@ function WriteApplicationMk(currentTarget, config)
 	file:write("APP_MODULES := " .. currentTarget.name .. " ")
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
 		file:write(filename .. " ")
 	end
@@ -88,14 +88,10 @@ function WriteAndroidMk(currentTarget, config)
 
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
 		file:write("SOURCE_ROOT := " .. jniDir .. "\n")
 		file:write("include $(SOURCE_ROOT)/../../../" .. filename .. "/" .. config.name .. "/jni/Android.mk\n")
-		--file:write("include ../../../" .. filename .. "/" .. config.name .. "/jni/Android.mk\n")
---		local includeFile = jniDir .. "/../../../" .. filename .. "/" .. config.name .. "/jni/Android.mk"
---		file:write("include " .. includeFile .. "\n")
-
 		file:write("include $(CLEAR_VARS)\n\n")
 	end
 
@@ -128,7 +124,7 @@ function WriteAndroidMk(currentTarget, config)
 	-- Add project lib search paths
 	file:write("MY_LIB_SEARCH_PATHS:= \\\n")
 
-	local abi = Util_GetKVValue(config.options.ndkoptions, "APP_ABI")
+	local abi = mbutil.getkvvalue(config.options.ndkoptions, "APP_ABI")
 	if abi == nil then
 		-- TODO error
 	end
@@ -142,7 +138,7 @@ function WriteAndroidMk(currentTarget, config)
     local staticLibs = {}
 	for i = 1, #config.libs do
 		local f = config.libs[i]
-		local path, filename, ext = Util_FilePathDecompose(f)
+		local path, filename, ext = mbfilepath.decompose(f)
 		if ext == "so" then
 			table.insert(sharedLibs, f)
 		else
@@ -153,7 +149,7 @@ function WriteAndroidMk(currentTarget, config)
 	--Include static libs
 	for i = 1, #staticLibs do
 		local f = staticLibs[i]
-		local path, filename, ext = Util_FilePathDecompose(f)
+		local path, filename, ext = mbfilepath.decompose(f)
 		filename = string.gsub(filename, "%.a", "")
 
 		file:write("include $(CLEAR_VARS)\n")
@@ -165,7 +161,7 @@ function WriteAndroidMk(currentTarget, config)
 	--Include shared libs
 	for i = 1, #sharedLibs do
 		local f = sharedLibs[i]
-		local path, filename, ext = Util_FilePathDecompose(f)
+		local path, filename, ext = mbfilepath.decompose(f)
 
 		file:write("include $(CLEAR_VARS)\n")
 		file:write("LOCAL_MODULE            := " .. filename .. "\n")
@@ -176,7 +172,7 @@ function WriteAndroidMk(currentTarget, config)
 	file:write("MY_LOCAL_SRC_FILES := \\\n")
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
-		local ext = Util_FileExtension(f)
+		local ext = mbfilepath.getextension(f)
 		if ext == "c" or ext == "cpp" then
 		    file:write("	$(SOURCE_ROOT)/" .. f .. "\\\n")
 		end
@@ -200,9 +196,9 @@ function WriteAndroidMk(currentTarget, config)
 		--[[
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
-			local path, filename, ext = Util_FilePathDecompose(dependency)
+			local path, filename, ext = mbfilepath.decompose(dependency)
 
-			local abi = Util_GetKVValue(config.options.ndkoptions, "APP_ABI")
+			local abi = mbutil.getkvvalue(config.options.ndkoptions, "APP_ABI")
 			if abi == nil then
 				-- TODO error
 			end
@@ -238,7 +234,7 @@ function WriteAndroidMk(currentTarget, config)
 		file:write("LOCAL_SHARED_LIBRARIES := \\\n")
 		for i = 1, #sharedLibs do
 			local f = sharedLibs[i]
-			local path, filename, ext = Util_FilePathDecompose(f)
+			local path, filename, ext = mbfilepath.decompose(f)
 			file:write("	" .. filename .. " \\\n")
 		end
 		file:write("\n")
@@ -250,7 +246,7 @@ function WriteAndroidMk(currentTarget, config)
 
 		for i = 1, #staticLibs do
 			local f = staticLibs[i]
-			local path, filename, ext = Util_FilePathDecompose(f)
+			local path, filename, ext = mbfilepath.decompose(f)
 
 --[[
 			if string.find(f, "-l:") == nil then
@@ -269,7 +265,7 @@ function WriteAndroidMk(currentTarget, config)
 
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
-			local path, filename, ext = Util_FilePathDecompose(dependency)
+			local path, filename, ext = mbfilepath.decompose(dependency)
 			table.insert(libList, filename)
 		end
 		
