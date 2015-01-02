@@ -10,8 +10,7 @@
 
 #include "ezOptionParser.hpp"
 
-
-//////////////////////////////////////////////////////////////////////////////////
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 {
@@ -128,8 +127,6 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	opt.get("--endstyle")->getString(appOptions->lineEndingStyle);
 	appOptions->verbose = opt.isSet("-v") != 0;
 }
-
-//////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, const char * argv[])
 {

@@ -75,6 +75,12 @@ struct GeneratorMapping
     std::string luaFileAbs;
 };
 
+struct ActiveBlock
+{
+	E_BlockType type;
+	void* block;
+};
+
 class AppState
 {
 public:
@@ -100,23 +106,19 @@ public:
 	bool					isProcessingPrimaryMakefile;
 };
 
-typedef std::vector<std::string>		StringVector;
-typedef std::vector<ParamBlock*>		ParamVector;
-typedef std::vector<ConfigParam*>		ConfigParamVector;
-typedef std::vector<PlatformParam*>		PlatformParamVector;
-
 struct KeyValue
 {
     std::string key;
     std::string value;
 };
-typedef std::vector<KeyValue> KeyValueVector;
 
-typedef std::map<std::string, std::string> KeyValueMap;
-
+typedef std::vector<std::string>			StringVector;
+typedef std::vector<ParamBlock*>			ParamVector;
+typedef std::vector<ConfigParam*>			ConfigParamVector;
+typedef std::vector<PlatformParam*>			PlatformParamVector;
+typedef std::vector<KeyValue>				KeyValueVector;
+typedef std::map<std::string, std::string>	KeyValueMap;
 typedef void (*PostLoadInitFunc)(lua_State*);
-
-
 
 class MetaBuilderContext
 {
@@ -160,6 +162,8 @@ private:
 	int				m_nFunctions;
 };
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
 AppState*			mbGetAppState();
 
 void				mbCommonInit(lua_State* l, const std::string& path);
@@ -198,14 +202,7 @@ void				mbNormaliseFilePath(std::string* inout, char dirSep);
 
 bool				mbFileExists(const std::string& filepath);
 
-std::string			mbGetMakeOutputDirRelativePath(const std::string& path);
-
-struct ActiveBlock
-{
-	E_BlockType type;
-	void* block;
-};
-
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 //Expects top of stack to contain table.
 void				mbRegisterBlock(lua_State* l);
@@ -241,6 +238,5 @@ void				mbExpandMacros(std::string* result, Block* block, const char* str);
 const char*			mbLuaToStringExpandMacros(std::string* result, Block* block, lua_State* l, int stackPos);
 
 void*				mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
-
 
 #endif

@@ -8,24 +8,58 @@
 
 #include <sys/stat.h>
 
-#include <set>
 #include <unordered_set>
 #include <list>
 #include <algorithm>
 #include <sstream>
 #include <utility>
 
+struct mbRandomContext
+{
+	mbRandomContext();
+	U32 seed[4];
+};
+
+class StringPtrHash
+{
+public:
+	size_t operator()(const std::string* str) const
+	{
+		return std::hash<std::string>()(*str);
+	}
+};
+
+class StringPtrEqual
+{
+public:
+	bool operator()(const std::string* a, const std::string* b) const
+	{
+		return *a == *b;
+	}
+};
+
 static AppState								g_appState;
 static StringVector							g_makefiles;
 static std::list<MetaBuilderContext*>		g_contexts; //Has memory ownership of context
 static std::list<MetaBuilderContext*>		g_contextStack;
 static std::stack<std::string>				g_doFileCurrentDirStack;
-
-//static std::map<std::string, std::string>	g_macroMap;
+static mbRandomContext						g_randomContext;
 
 const char* g_cAndCPPSourceExt[] = { "cpp", "cxx", "c", "cc", "m", "mm", nullptr };
 const char* g_cAndCPPHeaderExt[] = { "hpp", "hxx", "h", nullptr };
 const char* g_cAndCPPInlineExt[] = { "inl", nullptr };
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+mbRandomContext::mbRandomContext()
+{
+	seed[0] = 0xfe354cd2;
+	seed[1] = 0xabcde012;
+	seed[2] = 0x458229cd;
+	seed[3] = 0xdeadbeef;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 AppState::AppState()
 {
@@ -103,7 +137,7 @@ void AppState::ProcessGlobal()
 	mbNormaliseFilePath(&makeOutputTopDirAbs, makeGlobal->targetDirSep);
 }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 MetaBuilderContext::MetaBuilderContext()
 {
@@ -128,7 +162,7 @@ MetaBuilderContext::~MetaBuilderContext()
 	delete metabase;
 }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 LuaModuleFunctions::LuaModuleFunctions()
 {
@@ -158,7 +192,8 @@ void LuaModuleFunctions::RegisterLuaModule(lua_State* l, const char* moduleName)
 	luaL_newlib(l, m_luaFunctions);  //Create module
 	lua_setglobal(l, moduleName);
 }
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 void mbAddMakeFile(const char* makefile)
 {
@@ -214,28 +249,7 @@ static int luaFuncGlobalImport(lua_State* lua)
 	mbLuaDoFile(lua, requireFile.c_str(), nullptr);
     return 0;
 }
-/*
-int luaFuncAddMacro(lua_State* lua)
-{
-	const char* key = lua_tostring(lua, 1);
-	const char* value = lua_tostring(lua, 2);
-	
-	if (!key || !value)
-	{
-		//TODO - error handling
-		MB_LOGERROR("Must specify both a key and value when adding a macro");
-		mbExitError();
-	}
 
-	if (mbGetAppState()->cmdSetup.verbose)
-	{
-		MB_LOGINFO("Setting global macro %s with a value of %s", key, value);
-	}
-	g_macroMap[key] = value;
-
-	return 0;
-}
-*/
 static int luaFuncExpandMacro(lua_State* l)
 {
 	Block* b = mbGetActiveContext()->ActiveBlock();
@@ -316,7 +330,6 @@ static int luaSplit(lua_State* l)
 	return 1;
 }
 
-
 static int report (lua_State *L, int status) 
 {
   const char *msg;
@@ -331,8 +344,6 @@ static int report (lua_State *L, int status)
 	}
 	return status;
 }
-
-
 
 static int luaFuncCheckPlatform(lua_State* l)
 {
@@ -353,8 +364,6 @@ static int luaFuncCheckPlatform(lua_State* l)
 	lua_pushboolean(l, 0);
 	return 1;
 }
-
-
 
 void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc initFunc)
 {
@@ -554,13 +563,6 @@ void mbNormaliseFilePath(std::string* inout, char dirSep)
 	*inout = tmp;
 }
 
-
-std::string mbGetMakeOutputDirRelativePath(const std::string& path)
-{
-	//TODO. Use abs path for now
-	return mbaFileGetAbsPath(path);
-}
-
 AppState* mbGetAppState()
 {
 	return &g_appState;
@@ -703,31 +705,6 @@ void mbMergeOptions(std::map<std::string, KeyValueMap>* result,	const std::map<s
 	}
 }
 
-
-struct mbRandomContext
-{
-	mbRandomContext();
-	U32 seed[4];
-};
-
-
-mbRandomContext::mbRandomContext()
-{
-	seed[0] = 0xfe354cd2;
-	seed[1] = 0xabcde012;
-	seed[2] = 0x458229cd;
-	seed[3] = 0xdeadbeef;
-}
-
-static mbRandomContext g_randomContext;
-
-U32 mbRandomU32(mbRandomContext& ctx);
-
-U32 mbRandomU32()
-{ 
-	return mbRandomU32(g_randomContext);
-}
-
 U32 mbRandomU32(mbRandomContext& ctx)
 {
 // Originally by David Jones, UCL in http://www.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf
@@ -746,6 +723,11 @@ U32 mbRandomU32(mbRandomContext& ctx)
 	c = t >> 32; 
 	z = (U32)t;
 	return x + y + z; 
+}
+
+U32 mbRandomU32()
+{ 
+	return mbRandomU32(g_randomContext);
 }
 
 void mbCheckExpectedBlock(E_BlockType blockExpected, const char* cmdName)
@@ -771,50 +753,6 @@ void mbMergeArrays(StringVector* a, const StringVector& b)
 	mbJoinArrays(a, b);
 	mbRemoveDuplicates(a);
 }
-/*
-void mbRemoveDuplicates(StringVector* strings_)
-{
-	StringVector& strings = *strings_;
-	
-	StringVector tmp;
-	tmp.reserve(strings.size());
-		
-	std::set<std::string> uniqueStrings;
-	for (int i = 0; i < (int)strings.size(); ++i)
-	{
-		std::set<std::string>::iterator it = uniqueStrings.find(strings[i]);
-		if (it == uniqueStrings.end())
-		{
-			std::pair<std::set<std::string>::iterator, bool> result = uniqueStrings.insert(strings[i]);
-			if (!result.second)
-				continue; //Already added.
-				
-			tmp.push_back(strings[i]);
-		}
-	}
-	
-	strings = tmp;
-}
-*/
-
-class StringPtrHash
-{
-public:
-	size_t operator()(const std::string* str) const
-	{
-		return std::hash<std::string>()(*str);
-	}
-};
-
-class StringPtrEqual
-{
-public:
-	bool operator()(const std::string* a, const std::string* b) const
-	{
-		return *a == *b;
-	}
-};
-
 
 void mbRemoveDuplicates(StringVector* strings_)
 {

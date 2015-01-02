@@ -14,6 +14,8 @@
 
 static std::vector<KeyValue>	g_registeredTargets;
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
 static int luaFuncGlobalImport(lua_State* l)
 {
     std::string requireFile;

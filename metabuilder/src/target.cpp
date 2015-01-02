@@ -100,6 +100,8 @@ void Target::FlattenStringGroup(StringVector* result, const char* stringGroup, c
 	mbJoinArrays(result, strings);	
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
 static int luaFuncTarget(lua_State* l)
 {
     if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->GetType() != E_BlockType_Solution)

@@ -2,6 +2,8 @@
 
 std::vector<KeyValue> g_externalProjectReference;
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
 int luaFuncWriterMSVCGenerateID(lua_State* l)
 {
 	U32 a = mbRandomU32();

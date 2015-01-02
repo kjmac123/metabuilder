@@ -131,10 +131,8 @@ public:
 								ParamBlock();
 	virtual						~ParamBlock();
 	
-	virtual bool				IsA(E_BlockType t) const;
-	
+	virtual bool				IsA(E_BlockType t) const;	
 	virtual void				Process();
-	
 	virtual void				Dump() const;	
 };
 

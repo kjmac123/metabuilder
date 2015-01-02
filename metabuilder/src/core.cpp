@@ -29,6 +29,8 @@ Timer	core_appTimer;
 void mbaLogError(const char* str);
 void mbaLogInfo(const char* str);
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
 void _mbLogSetTimeEnabled(bool b)
 {
 	core_logTimeEnabled = b;
