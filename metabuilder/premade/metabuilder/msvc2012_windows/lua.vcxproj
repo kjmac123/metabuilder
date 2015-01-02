@@ -42,7 +42,7 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
     <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
@@ -59,10 +59,10 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>METABUILDER;PLATFORM_WINDOWS;WIN32;_CRT_SECURE_NO_WARNINGS;_WINDOWS;BUILD_CONFIG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>!$(DXSDK_DIR)Include;..\..\..\..\external\lua-5.2.2\src;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;..\..\..\..\external\lua-5.2.2\src;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>!$(DXSDK_DIR)Lib\x86;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x86;</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
 
@@ -72,7 +72,7 @@
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
     <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
@@ -90,10 +90,10 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>METABUILDER;PLATFORM_WINDOWS;WIN32;_CRT_SECURE_NO_WARNINGS;_WINDOWS;BUILD_CONFIG_RELEASE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>!$(DXSDK_DIR)Include;..\..\..\..\external\lua-5.2.2\src;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;..\..\..\..\external\lua-5.2.2\src;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>!$(DXSDK_DIR)Lib\x86;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x86;</AdditionalLibraryDirectories>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
@@ -105,7 +105,7 @@
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <ExecutablePath>!$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
     <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>out\$(ProjectName)\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
@@ -123,10 +123,10 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>METABUILDER;PLATFORM_WINDOWS;WIN32;_CRT_SECURE_NO_WARNINGS;_WINDOWS;BUILD_CONFIG_MASTER;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>!$(DXSDK_DIR)Include;..\..\..\..\external\lua-5.2.2\src;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;..\..\..\..\external\lua-5.2.2\src;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>!$(DXSDK_DIR)Lib\x86;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x86;</AdditionalLibraryDirectories>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
@@ -136,6 +136,13 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemGroup>
+   <None Include="..\..\..\..\external\lua-5.2.2\metabuilder.lua">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
+   </None>
+  </ItemGroup>
   <ItemGroup>
    <ClCompile Include="..\..\..\..\external\lua-5.2.2\src\lapi.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</CompileAs>
@@ -393,13 +400,6 @@
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-   <None Include="..\..\..\..\external\lua-5.2.2\metabuilder.lua">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
-   </None>
   </ItemGroup>
   <ItemGroup>
    <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lapi.h">

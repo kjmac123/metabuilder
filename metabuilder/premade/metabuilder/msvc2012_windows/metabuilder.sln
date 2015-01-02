@@ -2,8 +2,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # MetaBuilder 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "metabuilder", "metabuilder.vcxproj", "{4B0237A2-8DF1-7EEF-233F-2BA0BB5F61D1}"
 	ProjectSection(ProjectDependencies) = postProject
+		{4870CB8B-BCB7-9C60-703B-9D2002E441D9} = {4870CB8B-BCB7-9C60-703B-9D2002E441D9}
+	EndProjectSection
 		{9FA3AD0B-AF39-6830-BDCC-DE3E687B60B8} = {9FA3AD0B-AF39-6830-BDCC-DE3E687B60B8}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dlmalloc", "dlmalloc.vcxproj", "{4870CB8B-BCB7-9C60-703B-9D2002E441D9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua", "lua.vcxproj", "{9FA3AD0B-AF39-6830-BDCC-DE3E687B60B8}"
 EndProject
@@ -17,6 +21,10 @@ Global
 		{4B0237A2-8DF1-7EEF-233F-2BA0BB5F61D1}.Debug|Win32.Build.0 = Debug|Win32
 		{4B0237A2-8DF1-7EEF-233F-2BA0BB5F61D1}.Release|Win32.ActiveCfg = Release|Win32
 		{4B0237A2-8DF1-7EEF-233F-2BA0BB5F61D1}.Release|Win32.Build.0 = Release|Win32
+		{4870CB8B-BCB7-9C60-703B-9D2002E441D9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4870CB8B-BCB7-9C60-703B-9D2002E441D9}.Debug|Win32.Build.0 = Debug|Win32
+		{4870CB8B-BCB7-9C60-703B-9D2002E441D9}.Release|Win32.ActiveCfg = Release|Win32
+		{4870CB8B-BCB7-9C60-703B-9D2002E441D9}.Release|Win32.Build.0 = Release|Win32
 		{9FA3AD0B-AF39-6830-BDCC-DE3E687B60B8}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9FA3AD0B-AF39-6830-BDCC-DE3E687B60B8}.Debug|Win32.Build.0 = Debug|Win32
 		{9FA3AD0B-AF39-6830-BDCC-DE3E687B60B8}.Release|Win32.ActiveCfg = Release|Win32
