@@ -95,7 +95,7 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 	//If filepath has been flagged to escape any kind of modification
 	if (mbWriterUtility_FilePathMarkedAsRaw(filepath))
 	{
-		strcpy(result, filepath);
+		strcpy(result, filepath+1);
 	}
 	else
 	{
