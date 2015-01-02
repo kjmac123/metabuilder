@@ -1,2 +1,2 @@
 *.mk binary
-metabuilder/premade/ binary
+metabuilder/premade/* binary
