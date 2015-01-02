@@ -50,7 +50,7 @@ function WriteApplicationMk(currentTarget, config)
 	mbwriter.mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Application.mk"
-	local file = io.open(makeFilename, "w")
+	local file = mbfile.open(makeFilename, "w")
 
 	file:write("APP_MODULES := " .. currentTarget.name .. " ")
 	for i = 1, #currentTarget.depends do
@@ -84,7 +84,7 @@ function WriteAndroidMk(currentTarget, config)
 	mbwriter.mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Android.mk"
-	local file = io.open(makeFilename, "w")
+	local file = mbfile.open(makeFilename, "w")
 
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]

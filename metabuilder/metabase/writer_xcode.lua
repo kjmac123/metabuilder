@@ -693,8 +693,7 @@ mbwriter.mkdir(g_projectoutputfile)
 
 local pbxprojFilename = g_projectoutputfile .. "/project.pbxproj"
 
---print("Writing pbxproj " .. pbxprojFilename)
-file = io.open(pbxprojFilename, "w")
+local file = mbfile.open(pbxprojFilename, "w")
 if file == nil then
 	--TODO - error
 end

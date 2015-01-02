@@ -214,7 +214,7 @@ function WriteVcxProj(currentTarget, groupMap)
 	
 	local vcxprojName = mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj";
 	vcxprojName = mbwriter.normalisetargetfilepath(vcxprojName)
-	local file = io.open(vcxprojName, "w")
+	local file = mbfile.open(vcxprojName, "w")
 	if (file == nil) then 
 		mbwriter.fatalerror("Failed to open file " .. vcxprojName .. " for writing")
 	end
@@ -567,7 +567,7 @@ function WriteSolution(projectList, currentTarget)
 	end
 
 	local slnFilename = mbwriter.normalisetargetfilepath(mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".sln")
-	local file = io.open(slnFilename, "w")
+	local file = mbfile.open(slnFilename, "w")
 	if file == nil then
 		print("Failed to open file for writing " .. slnFilename)
 	end

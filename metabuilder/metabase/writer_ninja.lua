@@ -32,7 +32,7 @@ function WriteMakeFile(currentTarget, config)
 	print(inspect(config))
 
 	local makeFilename = makeDir .. "/" .. "build.ninja"
-	local file = io.open(makeFilename, "w")
+	local file = mbfile.open(makeFilename, "w")
 
 	local intdir = mbwriter.global.intdir .. "/" .. currentTarget.name 
 	local outdir = mbwriter.global.outdir  

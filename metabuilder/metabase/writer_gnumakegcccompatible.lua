@@ -346,7 +346,7 @@ function WriteMakeFile(currentTarget)
 		makeFilename = Util_FilePathJoin(makeDir, currentTarget.name .. ".mk", mbwriter.global.targetDirSep)
 	end
 	
-	local file = io.open(makeFilename, "w")
+	local file = mbfile.open(makeFilename, "w")
 	
 	InitVars(currentTarget)	
 
