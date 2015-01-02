@@ -33,6 +33,7 @@ solution "metabuilder"
 			"src/common.cpp",
 			"src/configparam.cpp",
 			"src/core.cpp",
+			"src/luafile.cpp",
 			"src/main.cpp",
 			"src/makeglobal.cpp",
 			"src/makesetup.cpp",

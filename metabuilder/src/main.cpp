@@ -81,6 +81,14 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
             "--outdir"     // Flag token.
             );
 			
+	opt.add(
+            "", // Default.
+            false, // Required?
+            1, // Number of args expected.
+            0, // Delimiter if expecting multiple args.
+            "Line endings style to use", // Help description.
+            "--endstyle"     // Flag token.
+            );
 	
 	opt.parse(argc, argv);
 	std::string usage;
@@ -117,6 +125,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	opt.get("--gen")->getString(appOptions->_generator);
 	opt.get("--metabase")->getString(appOptions->_metabaseDir);
 	opt.get("--outdir")->getString(appOptions->_makeOutputTopDir);
+	opt.get("--endstyle")->getString(appOptions->lineEndingStyle);
 	appOptions->verbose = opt.isSet("-v") != 0;
 }
 

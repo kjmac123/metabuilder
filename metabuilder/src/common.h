@@ -40,6 +40,13 @@ enum E_BlockType
 	E_BlockType_Param
 };
 
+enum E_LineEndingStyle
+{
+	E_LineEndingStyle_Default = 0,
+	E_LineEndingStyle_Windows,
+	E_LineEndingStyle_UNIX,
+};
+
 class Block;
 class Metabase;
 class Solution;
@@ -54,11 +61,12 @@ struct CmdSetup
     CmdSetup()
     {}
 
-    std::string _inputFile;
-    std::string _generator;
-	std::string _metabaseDir;
-	std::string _makeOutputTopDir;
-	bool		verbose;
+    std::string				_inputFile;
+    std::string				_generator;
+	std::string				_metabaseDir;
+	std::string				_makeOutputTopDir;
+	std::string				lineEndingStyle;
+	bool					verbose;
 };
 
 struct GeneratorMapping
@@ -76,20 +84,20 @@ public:
 	void ProcessSetup();
 	void ProcessGlobal();
 	
-	std::string mainSolutionName;
-    std::string mainMetaMakeFileAbs;
-    std::string generator;
-	std::string metabaseDirAbs;
-	std::string makeOutputTopDirAbs;
-    std::string	intDir;
-    std::string	outDir;
+	std::string				mainSolutionName;
+    std::string				mainMetaMakeFileAbs;
+    std::string				generator;
+	std::string				metabaseDirAbs;
+	std::string				makeOutputTopDirAbs;
+    std::string				intDir;
+    std::string				outDir;
+	E_LineEndingStyle		lineEndingStyle;
 	
+	CmdSetup				cmdSetup;
+	MakeSetup*				makeSetup;
+	MakeGlobal*				makeGlobal;
 	
-	CmdSetup	cmdSetup;
-	MakeSetup*	makeSetup;
-	MakeGlobal*	makeGlobal;
-	
-	bool		isProcessingPrimaryMakefile;
+	bool					isProcessingPrimaryMakefile;
 };
 
 typedef std::vector<std::string>		StringVector;

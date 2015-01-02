@@ -72,6 +72,28 @@ void AppState::ProcessSetup()
 	{
 		outDir = "out";
 	}
+
+	lineEndingStyle = E_LineEndingStyle_Default;
+	if (cmdSetup.lineEndingStyle.length() > 0)
+	{
+		if (cmdSetup.lineEndingStyle == "default")
+		{
+			lineEndingStyle = E_LineEndingStyle_Default;
+		}
+		else if (cmdSetup.lineEndingStyle == "windows")
+		{
+			lineEndingStyle = E_LineEndingStyle_Windows;
+		}
+		else if (cmdSetup.lineEndingStyle == "unix")
+		{
+			lineEndingStyle = E_LineEndingStyle_UNIX;
+		}
+		else
+		{
+			MB_LOGERROR("Unknown line ending style, valid values are \"default\", \"windows\" and \"unix\"");
+			mbExitError();
+		}
+	}
 }
 
 void AppState::ProcessGlobal()

@@ -3,13 +3,6 @@
 
 #include "block.h"
 
-enum E_LineEndingStyle
-{
-	E_LineEndingStyle_Unknown = 0,
-	E_LineEndingStyle_Windows,
-	E_LineEndingStyle_UNIX,
-};
-
 class MakeGlobal : public Block
 {
 public:
@@ -19,7 +12,6 @@ public:
 	virtual bool			IsA(E_BlockType t) const;		
 				
 	char					targetDirSep;
-	E_LineEndingStyle		lineEndingStyle;
 
 protected:
 };

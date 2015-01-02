@@ -510,7 +510,7 @@ end
 
 function WriterVcxProjFilters(currentTarget, groupMap)
 	local vcxProjFiltersFilename = mbwriter.normalisetargetfilepath(mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj.filters")
-	local file = io.open(vcxProjFiltersFilename, "w")
+	local file = mbfile.open(vcxProjFiltersFilename, "w")
 
 	file:write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 	file:write("<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")

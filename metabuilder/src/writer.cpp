@@ -10,6 +10,7 @@
 #include "metabase.h"
 #include "makesetup.h"
 #include "makeglobal.h"
+#include "luafile.h"
 
 static std::vector<KeyValue>	g_registeredTargets;
 
@@ -193,6 +194,8 @@ static int luaFuncWriterGetTarget(lua_State* l)
 
 void luaRegisterWriterFuncs(lua_State* l)
 {
+	mbLuaFile_Register(l);
+
 	{
 		LuaModuleFunctions luaFn;
 		mbCommonLuaRegister(l, &luaFn);
