@@ -18,12 +18,6 @@
 #define _FILE_OFFSET_BITS 64
 #endif
 
-
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #define liolib_c
 #define LUA_LIB
 

@@ -10,6 +10,15 @@
 #include <set>
 #include <list>
 
+/*
+** POSIX idiosyncrasy!
+** This definition must come before the inclusion of 'stdio.h'; it
+** should not affect non-POSIX systems
+*/
+#if !defined(_FILE_OFFSET_BITS)
+#define _FILE_OFFSET_BITS 64
+#endif
+
 #include "stdio.h"
 
 #ifndef LUA_AS_CPP

@@ -93,9 +93,9 @@ void AppState::ProcessSetup()
 		mbExitError();
 	}
 
-	mainMetaMakeFileAbs = mbaFileGetAbsPath(cmdSetup._inputFile);
-	metabaseDirAbs = mbaFileGetAbsPath(cmdSetup._metabaseDir);
-	makeOutputTopDirAbs = mbaFileGetAbsPath(cmdSetup._makeOutputTopDir);
+	mainMetaMakeFileAbs = Platform::FileGetAbsPath(cmdSetup._inputFile);
+	metabaseDirAbs = Platform::FileGetAbsPath(cmdSetup._metabaseDir);
+	makeOutputTopDirAbs = Platform::FileGetAbsPath(cmdSetup._makeOutputTopDir);
 
 	//Set defaults if required.
 	if (intDir.size() == 0)
@@ -384,7 +384,7 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc ini
 	{
 		if (mbFileExists(filepath))
 		{
-			absPath = mbaFileGetAbsPath(filepath);
+			absPath = Platform::FileGetAbsPath(filepath);
 		}
 	}
 
@@ -839,7 +839,7 @@ bool mbCreateDirChain(const char* osDir_)
 //    Debug::Error("Creating dir chain %s", osDir_);
 
     char osDir[FILENAME_MAX] = {0};
-    mbaNormaliseFilePath(osDir, osDir_);
+    Platform::NormaliseFilePath(osDir, osDir_);
     
     if (osDir[0] == 0)
         return false;
@@ -852,14 +852,14 @@ bool mbCreateDirChain(const char* osDir_)
             *(char*)right = 0;
             const char* partialPath = left;
             
-            if (!mbaCreateDir(partialPath))
+            if (!Platform::CreateDir(partialPath))
                 return false;
             
             *(char*)right = sep;
         }
     }
     
-    return mbaCreateDir(osDir);
+    return Platform::CreateDir(osDir);
 }
 
 void mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroups)

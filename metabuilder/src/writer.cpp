@@ -51,7 +51,7 @@ static int luaFuncMklink(lua_State* l)
 		mbExitError();
 	}
 		
-	if (!mbaCreateLink(src.c_str(), dst.c_str()))
+	if (!Platform::CreateLink(src.c_str(), dst.c_str()))
 	{
 		MB_LOGERROR("Failed to create link %s->%s", src.c_str(), dst.c_str());
 		mbExitError();
@@ -63,7 +63,7 @@ static int luaFuncMklink(lua_State* l)
 static int luaFuncGetFileType(lua_State* l)
 {
     const char* filepath = lua_tostring(l, 1);
-	E_FileType fileType = mbaGetFileType(filepath);
+	E_FileType fileType = Platform::GetFileType(filepath);
 	
 	const char* result = "unknown";
 	switch (fileType)

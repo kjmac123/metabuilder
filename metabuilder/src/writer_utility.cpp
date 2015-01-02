@@ -161,7 +161,7 @@ static int mbWriterUtility_LuaNormaliseHostFilePath(lua_State* l)
 	const char* filepathUnnormalised = lua_tostring(l, 1);
 
 	char result[MB_MAX_PATH];
-	mbaNormaliseFilePath(result, filepathUnnormalised);
+	Platform::NormaliseFilePath(result, filepathUnnormalised);
 	lua_pushstring(l, result);
 
 	return 1;

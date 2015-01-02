@@ -130,7 +130,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 
 int main(int argc, const char * argv[])
 {
-	mbaInit();
+	Platform::Init();
 
 	MB_LOGINFO("Metabuilder");
 
@@ -145,7 +145,7 @@ int main(int argc, const char * argv[])
 	//---------- GLOBAL SCOPE FUNCTIONS ----------
 	   
 	// build context objects
-    std::string inputFileAbs = mbaFileGetAbsPath(appState->cmdSetup._inputFile);
+    std::string inputFileAbs = Platform::FileGetAbsPath(appState->cmdSetup._inputFile);
 		
 	mbAddMakeFile(inputFileAbs.c_str());
 	
@@ -161,7 +161,7 @@ int main(int argc, const char * argv[])
 		{
 			{
 				std::string makedir = mbPathGetDir(makeFiles[i]);
-				ctx->currentMetaMakeDirAbs = mbaFileGetAbsPath(makedir);
+				ctx->currentMetaMakeDirAbs = Platform::FileGetAbsPath(makedir);
 			}
 		
 			lua_State *l;
@@ -218,7 +218,7 @@ int main(int argc, const char * argv[])
 	mbPopDir();
 	
     MB_LOGINFO("Project generation complete.");
-	mbaShutdown();
+	Platform::Shutdown();
     return 0;
 }
 

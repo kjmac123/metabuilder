@@ -109,7 +109,7 @@ static void ProcessWildcards(StringVector* result, const StringVector& input)
 			std::string dir = mbPathGetDir(inputFilepath);
 			std::string filename = mbPathGetFilename(inputFilepath);
 
-			mbaBuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
+			Platform::BuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
 			if ((int)result->size() == initialResultCount)
 			{
 				MB_LOGERROR("No files found matching dir %s and filter %s",  dir.c_str(), filename.c_str());

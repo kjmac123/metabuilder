@@ -1,21 +1,22 @@
 #include "metabuilder_pch.h"
 
-#ifdef PLATFORM_WINDOWS
-
 #include <Windows.h>
 #include <direct.h>
 
 #include "platform/platform.h"
 
-void mbaInit()
+namespace Platform
+{
+
+void Init()
 {
 }
 
-void mbaShutdown()
+void Shutdown()
 {
 }
 
-bool mbaCreateDir(const char* osDir)
+bool CreateDir(const char* osDir)
 {
     DWORD ftyp = GetFileAttributesA(osDir);
     if (ftyp != INVALID_FILE_ATTRIBUTES)
@@ -36,13 +37,13 @@ bool mbaCreateDir(const char* osDir)
     return true;
 }
 
-bool mbaCreateLink(const char* src, const char* dst)
+bool CreateLink(const char* src, const char* dst)
 {
 	MB_LOGERROR("Links not supported");
 	return false;
 }
 
-void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)
+void NormaliseFilePath(char* outFilePath, const char* inFilePath)
 {
     outFilePath[0] = 0;
     char* outCursor = outFilePath;
@@ -59,7 +60,7 @@ void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)
 	*outCursor = '\0';
 }
 
-E_FileType mbaGetFileType(const std::string& filepath)
+E_FileType GetFileType(const std::string& filepath)
 {
 	DWORD fileAttr = GetFileAttributesA(filepath.c_str());
 	
@@ -72,7 +73,7 @@ E_FileType mbaGetFileType(const std::string& filepath)
 	return E_FileType_File;
 }
 
-bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir)
+bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir)
 {
 	//Process dirs
 	{
@@ -101,7 +102,7 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 				{
 					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
 					{
-						mbaBuildFileListRecurse(fileList, sPath.c_str(), includeFilePattern, excludeDir);
+						BuildFileListRecurse(fileList, sPath.c_str(), includeFilePattern, excludeDir);
 					}
 				}
 			}
@@ -138,7 +139,7 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 				{
 					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
 					{
-						mbaBuildFileListRecurse(fileList, sPath.c_str(), includeFilePattern, excludeDir);
+						BuildFileListRecurse(fileList, sPath.c_str(), includeFilePattern, excludeDir);
 					}
 				}
 				else
@@ -165,53 +166,54 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
     return true;
 }
 
-void mbaFileSetWorkingDir(const std::string& path)
+void FileSetWorkingDir(const std::string& path)
 {
     _chdir(path.c_str());
 }
 
-std::string mbaFileGetWorkingDir()
+std::string FileGetWorkingDir()
 {
     char workingDir[MB_MAX_PATH];
     return _getcwd(workingDir, sizeof(workingDir));
 }
 
-std::string	mbaFileGetAbsPath(const std::string& path)
+std::string	FileGetAbsPath(const std::string& path)
 {
 	char tmp[MB_MAX_PATH];
 	return _fullpath(tmp, path.c_str(), sizeof(tmp));
 }
 
-void mbaLogError(const char* str)
+void LogError(const char* str)
 {
 	OutputDebugString(str);
 	printf("%s", str);
 }
 
-void mbaLogInfo(const char* str)
+void LogInfo(const char* str)
 {
 	OutputDebugString(str);
 	printf("%s", str);
 }
 
-void mbaLogDebug(const char* str)
+void LogDebug(const char* str)
 {
 	OutputDebugString(str);
 	printf("%s", str);
 }
 
-F64 mbaGetSystemTicksToSecondsScale()
+F64 GetSystemTicksToSecondsScale()
 {
 	LARGE_INTEGER f;
 	QueryPerformanceFrequency(&f);
 	return 1.0 / (F64)f.QuadPart;
 }
 
-U64 mbaGetSystemTicks()
+U64 GetSystemTicks()
 {
 	LARGE_INTEGER ticks;
 	QueryPerformanceCounter(&ticks);
 	return ticks.QuadPart;
 }
 
-#endif
+}
+

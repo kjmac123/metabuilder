@@ -2,3 +2,6 @@
 
 #include "platform.h"
 
+namespace Platform
+{
+}

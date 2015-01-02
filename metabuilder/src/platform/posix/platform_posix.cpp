@@ -1,7 +1,5 @@
 #include "metabuilder_pch.h"
 
-#ifdef PLATFORM_POSIX
-
 #include "../platform.h"
 
 #include <sys/types.h>
@@ -11,12 +9,15 @@
 #include <fnmatch.h>
 #include <dirent.h>
 
+namespace Platform
+{
+
 #if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
-static F64							platform_posix_MachTimeToNs;
-static mach_timebase_info_data_t	platform_posix_Timebase;
+static F64							g_machTimeToNs;
+static mach_timebase_info_data_t	g_timebase;
 #endif
 
-static bool mbaCreateDir(const char* osDir)
+static bool CreateDir(const char* osDir)
 {
     struct stat statResult;
     int statresult = stat(osDir, &statResult);
@@ -40,17 +41,17 @@ static bool mbaCreateDir(const char* osDir)
     return true;
 }
 
-void mbaInit()
+void Init()
 {
 #if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
 	mach_timebase_info(&PlatformThread_Timebase);
-	platform_posix_MachTimeToNs = ((F64)PlatformThread_Timebase.numer / (F64)PlatformThread_Timebase.denom);
+	g_MachTimeToNs = ((F64)PlatformThread_Timebase.numer / (F64)PlatformThread_Timebase.denom);
 #endif
 }
 
-void mbaShutdown()
+void Shutdown()
 
-bool mbaCreateLink(const char* src, const char* dst)
+bool CreateLink(const char* src, const char* dst)
 {
 	char existingSrcPath[MB_MAX_PATH] = {0};
 	ssize_t readlinkResult = readlink(dst, existingSrcPath, sizeof(existingSrcPath));
@@ -74,7 +75,7 @@ bool mbaCreateLink(const char* src, const char* dst)
 	return false;
 }
 
-void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)
+void NormaliseFilePath(char* outFilePath, const char* inFilePath)
 {
     bool preceedingSlash = false;
     
@@ -105,7 +106,7 @@ void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)
 	*outCursor = '\0';
 }
 
-E_FileType mbaGetFileType(const std::string& filepath)
+E_FileType GetFileType(const std::string& filepath)
 {
 	struct stat statbuf;
     if (stat(filepath.c_str(), &statbuf) == -1)
@@ -121,7 +122,7 @@ E_FileType mbaGetFileType(const std::string& filepath)
 	return E_FileType_File;
 }
 
-bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDirs)
+bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDirs)
 {
 	if (osInputDir[0] == '\0')
 	{
@@ -203,13 +204,13 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 
     for (int i = 0; i < (int)dirStack.size(); ++i)
     {
-        mbaBuildFileListRecurse(fileList, dirStack[i].c_str(), includeFilePattern, excludeDirs);
+        BuildFileListRecurse(fileList, dirStack[i].c_str(), includeFilePattern, excludeDirs);
     }
     
     return true;
 }
 
-void mbaFileSetWorkingDir(const std::string& path)
+void FileSetWorkingDir(const std::string& path)
 {
     if (chdir(path.c_str()) != 0)
     {
@@ -218,7 +219,7 @@ void mbaFileSetWorkingDir(const std::string& path)
     }
 }
 
-std::string mbaFileGetWorkingDir()
+std::string FileGetWorkingDir()
 {
     char workingDir[MB_MAX_PATH];
 	if (getcwd(workingDir, sizeof(workingDir)) == nullptr)
@@ -230,7 +231,7 @@ std::string mbaFileGetWorkingDir()
     return workingDir;
 }
 
-std::string mbaFileGetAbsPath(const std::string& path)
+std::string FileGetAbsPath(const std::string& path)
 {
     char storage[MB_MAX_PATH];
 	if (realpath(path.c_str(), storage) == nullptr)
@@ -242,17 +243,17 @@ std::string mbaFileGetAbsPath(const std::string& path)
 	return storage;
 }
 
-void mbaLogError(const char* str)
+void LogError(const char* str)
 {
 	printf("%s", str);
 }
 
-void mbaLogInfo(const char* str)
+void LogInfo(const char* str)
 {
 	printf("%s", str);
 }
 
-void mbaLogDebug(const char* str)
+void LogDebug(const char* str)
 {
 	printf("%s", str);
 }
@@ -260,13 +261,13 @@ void mbaLogDebug(const char* str)
 F64 GetSystemTicksToSecondsScale()
 {
 #if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
-	return 1.0 / F64(MB_SECONDS_TO_NANOSECONDS) * platform_posix_MachTimeToNs;
+	return 1.0 / F64(MB_SECONDS_TO_NANOSECONDS) * g_machTimeToNs;
 #else
 	return 1.0 / F64(MB_SECONDS_TO_NANOSECONDS);
 #endif
 }
 
-U64 mbaGetSystemTicks()
+U64 GetSystemTicks()
 {
 #if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
 	U64 machTime = mach_absolute_time();
@@ -280,4 +281,4 @@ U64 mbaGetSystemTicks()
 	return nanoseconds;
 }
 
-#endif
+}

@@ -17,24 +17,29 @@ enum E_FileType
 	E_FileType_Dir
 };
 
-void		mbaInit();
-void		mbaShutdown();
+namespace Platform
+{
 
-bool		mbaCreateDir(const char* osDir);
-bool		mbaCreateLink(const char* src, const char* dst);
-void		mbaNormaliseFilePath(char* outFilePath, const char* inFilePath);
-E_FileType	mbaGetFileType(const std::string& filepath);
-bool		mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir);
+void		Init();
+void		Shutdown();
 
-void		mbaFileSetWorkingDir(const std::string& path);
-std::string	mbaFileGetWorkingDir();
-std::string	mbaFileGetAbsPath(const std::string& path);
+bool		CreateDir(const char* osDir);
+bool		CreateLink(const char* src, const char* dst);
+void		NormaliseFilePath(char* outFilePath, const char* inFilePath);
+E_FileType	GetFileType(const std::string& filepath);
+bool		BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir);
 
-void		mbaLogError(const char* str);
-void		mbaLogInfo(const char* str);
-void		mbaLogDebug(const char* str);
+void		FileSetWorkingDir(const std::string& path);
+std::string	FileGetWorkingDir();
+std::string	FileGetAbsPath(const std::string& path);
 
-F64			mbaGetSystemTicksToSecondsScale();
-U64			mbaGetSystemTicks();
+void		LogError(const char* str);
+void		LogInfo(const char* str);
+void		LogDebug(const char* str);
+
+F64			GetSystemTicksToSecondsScale();
+U64			GetSystemTicks();
+
+}
 
 #endif
