@@ -10,7 +10,7 @@ platform "POSIX"
 	
 	libs 
 	{ 
-		"librt",
+		"-lrt",
 	}
 
 platform_end()

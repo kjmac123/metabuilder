@@ -192,7 +192,8 @@ function WriteMakeFileAppVars(file, currentTarget)
 		if config.libs ~= nil then
 			for i = 1, #config.libs do
 				local lib = config.libs[i]
-				file:write("  -l:" .. lib .. " \\\n")
+				--file:write("  -l:" .. lib .. " \\\n")
+				file:write(" " .. lib .. " \\\n")
 			end
 		end
 		file:write("\n")

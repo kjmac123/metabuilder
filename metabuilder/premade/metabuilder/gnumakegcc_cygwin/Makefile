@@ -73,7 +73,7 @@ metabuilder_LIBDIRS.Debug := \
 
 metabuilder_LDFLAGS.Debug += $(metabuilder_LIBDIRS.Debug)
 metabuilder_LIBS.Debug := \
-  -l:librt \
+ -lrt \
 
 metabuilder_LDLIBS.Debug += $(metabuilder_LIBS.Debug)
 
@@ -84,7 +84,7 @@ metabuilder_LIBDIRS.Release := \
 
 metabuilder_LDFLAGS.Release += $(metabuilder_LIBDIRS.Release)
 metabuilder_LIBS.Release := \
-  -l:librt \
+ -lrt \
 
 metabuilder_LDLIBS.Release += $(metabuilder_LIBS.Release)
 
