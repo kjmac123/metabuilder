@@ -388,14 +388,17 @@ static int luaFuncCheckPlatform(lua_State* l)
 	return 1;
 }
 
-void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc initFunc)
+void mbLuaDoFile(lua_State* l, const std::string& filepath_, PostLoadInitFunc initFunc)
 {
+	char normalisedFilePath[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedFilePath, filepath_.c_str());
 	const std::string& currentDir = g_doFileCurrentDirStack.top();
 
     std::string absPath;
     //Try relative to make file first.
     {
-        std::string tmp = mbPathJoin(currentDir, filepath);
+		char tmp[MB_MAX_PATH];
+		mbHostPathJoin(tmp, currentDir.c_str(), normalisedFilePath);
         if (mbFileExists(tmp))
         {
             absPath = tmp;
@@ -405,16 +408,18 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc ini
 	//Attempt to open directly
     if (absPath.length() == 0)
 	{
-		if (mbFileExists(filepath))
+		if (mbFileExists(normalisedFilePath))
 		{
-			absPath = Platform::FileGetAbsPath(filepath);
+			absPath = Platform::FileGetAbsPath(normalisedFilePath);
 		}
 	}
 
     //Fall back to lua base dir
     if (absPath.length() == 0)
     {
-        absPath = mbPathJoin(mbGetAppState()->metabaseDirAbs, filepath);
+		char tmpJoin[MB_MAX_PATH];
+		mbHostPathJoin(tmpJoin, mbGetAppState()->metabaseDirAbs.c_str(), normalisedFilePath);
+		absPath = tmpJoin;
     }
 	
 	std::string newDir = mbPathGetDir(absPath.c_str());
@@ -450,12 +455,42 @@ void mbExitError()
     exit(1);
 }
 
-std::string mbPathJoin(const std::string& a, const std::string& b)
+void mbHostPathJoin(char* result, const char* a, const char* b)
 {
-	if (a.length() > 0)
-		return a + std::string("/") + b;
-		
-	return b;
+	if (a[0] == '\0')
+	{
+		strcpy(result, b);
+	}
+	
+	if (b[0] == '\0')
+	{
+		strcpy(result, a);
+	}
+
+	//Trim leading slash
+	if (b[0] == '/' || b[0] == '\\')
+	{
+		++b;
+	}
+
+	//Trim trailing slash
+	int aLen = strlen(a);
+
+	char trailingSlashToRestore = 0;
+	char* trailingSlashPtr = NULL;
+	if (a[aLen-1] == '/' || a[aLen-1] == '\\')
+	{
+		trailingSlashPtr = const_cast<char*>(a)+aLen-1;
+		trailingSlashToRestore = *trailingSlashPtr;
+		*trailingSlashPtr = '\0';
+	}
+
+	sprintf(result, "%s%c%s", a, Platform::GetDirSep(), b);
+
+	if (trailingSlashPtr)
+	{
+		*trailingSlashPtr = trailingSlashToRestore;
+	}
 }
 
 std::string mbPathGetDir(const std::string& filePath)

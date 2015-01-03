@@ -247,6 +247,11 @@ std::string FileGetAbsPath(const std::string& path)
 	return storage;
 }
 
+char GetDirSep()
+{
+	return '/';
+}
+
 void LogError(const char* str)
 {
 	printf("%s", str);

@@ -195,11 +195,12 @@ const std::list<MetaBuilderContext*>&
 
 void				mbExitError();
 void				mbLuaDoFile(lua_State* lua, const std::string& filepath, PostLoadInitFunc initFunc);
-std::string			mbPathJoin(const std::string& a, const std::string& b);
+void				mbHostPathJoin(char* result, const char* a, const char* b);
 std::string			mbPathGetDir(const std::string& filePath);
 std::string			mbPathGetFilename(const std::string& filePath);
 bool				mbPathGetFileExtension(char* result, const char* filename);
 bool				mbPathReplaceFileExtension(char* result, const char* filename, const char* newExtension);
+
 
 void				mbNormaliseFilePath(char* outFilePath, const char* inFilePath, char dirSep);
 void				mbNormaliseFilePath(char* inout, char dirSep);

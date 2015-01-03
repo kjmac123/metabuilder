@@ -32,6 +32,7 @@ bool		BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInp
 void		FileSetWorkingDir(const std::string& path);
 std::string	FileGetWorkingDir();
 std::string	FileGetAbsPath(const std::string& path);
+char		GetDirSep();
 
 void		LogError(const char* str);
 void		LogInfo(const char* str);
