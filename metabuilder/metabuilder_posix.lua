@@ -1,5 +1,5 @@
 platform "POSIX"
-	addoption("cxxflags",	"-Wunused-function")
+	addoption("cxxflags",	"-Wno-unused-function")
 
 	files
 	{
