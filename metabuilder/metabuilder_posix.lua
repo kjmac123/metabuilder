@@ -1,4 +1,6 @@
 platform "POSIX"
+	addoption("cxxflags",	"-Wunused-function")
+
 	files
 	{
 		"../external/freebsd/realpath.cpp",

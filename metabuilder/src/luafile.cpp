@@ -225,7 +225,6 @@ static int io_open (lua_State *l) {
 
 	const char *mode = luaL_optstring(l, 2, "r");
 	LStream *p = newfile(l);
-	const char *md = mode;  /* to traverse/check mode */
 	
 	if (strcmp(mode, "w") != 0 && strcmp(mode, "r") != 0)
 	{

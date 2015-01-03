@@ -1,6 +1,7 @@
 #include "metabuilder_pch.h"
 
 #include "../platform.h"
+#include "freebsd/realpath.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -237,7 +238,7 @@ std::string FileGetWorkingDir()
 std::string FileGetAbsPath(const std::string& path)
 {
     char storage[MB_MAX_PATH];
-	if (realpath(path.c_str(), storage) == nullptr)
+	if (FreeBSD::realpath(path.c_str(), storage) == nullptr)
     {
 		MB_LOGERROR("Failed to get absolute path for %s", path.c_str());
 		mbExitError();

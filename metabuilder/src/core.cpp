@@ -14,8 +14,11 @@
 
 #define PLATFORM_FORMAT_LOG_MESSAGE_LF(fn, level)  \
 	char buf[16*1024]; \
-	sprintf(buf, g_coreLogTimeEnabled ? "[%.2f] " : "", g_coreAppTimer.GetTimeSeconds()); \
-	fn(buf); \
+	if (g_coreLogTimeEnabled) \
+	{ \
+		sprintf(buf, "[%.2f] ", g_coreAppTimer.GetTimeSeconds()); \
+		fn(buf); \
+	} \
     va_list ap; \
     va_start(ap, fmt); \
 	vsprintf(buf, fmt, ap); \
@@ -25,9 +28,6 @@
 
 static bool		g_coreLogTimeEnabled;
 static Timer	g_coreAppTimer;
-
-void Platform::LogError(const char* str);
-void Platform::LogInfo(const char* str);
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
