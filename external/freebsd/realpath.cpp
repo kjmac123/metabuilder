@@ -39,6 +39,33 @@
 namespace FreeBSD
 {
 
+size_t strlcpy(char* dst, const char* src, size_t size)
+{
+	int srcLen = strlen(src);
+
+	int maxBytes = size - 1;
+	int bytesToCopy = srcLen < maxBytes ? srcLen : maxBytes;
+
+	memcpy(dst, src, bytesToCopy);
+	dst[bytesToCopy] = '\0';
+
+	return bytesToCopy;
+}
+
+size_t strlcat(char* dst, const char* src, size_t size)
+{
+	int srcLen = strlen(src);
+
+	int dstLen = strlen(dst);
+	int maxBytes = size - dstLen - 1;
+	
+	int bytesToCopy = srcLen < maxBytes ? srcLen : maxBytes;
+	memcpy(dst, src, bytesToCopy);
+	dst[bytesToCopy] = '\0';
+
+	return bytesToCopy;
+}
+
 /*
  * Find the real name of path, by removing all ".", ".." and symlink
  * components.  Returns (resolved) on success, or (NULL) on failure,
