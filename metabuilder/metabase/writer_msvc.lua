@@ -520,6 +520,10 @@ function FormatFilterPath(path)
 	return mbwriter.normalisetargetfilepath(path)
 end
 
+function FolderCompare(a, b)
+	return a.relativePath < b.relativePath
+end
+
 function WriterVcxProjFilters(currentTarget, groups)
 	local vcxProjFiltersFilename = mbwriter.normalisetargetfilepath(mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj.filters")
 	local file = mbfile.open(vcxProjFiltersFilename, "w")
@@ -532,9 +536,14 @@ function WriterVcxProjFilters(currentTarget, groups)
 
 	--Write out filter folders
 	file:write("  <ItemGroup>\n")
-	for k, v in pairs(folders) do 
-		local folder = v
-		--print(inspect(folder))
+	
+	local sortedFolderList = {}
+	for _, v in pairs(folders) do 
+		sortedFolderList[#sortedFolderList+1] = v
+	end
+	table.sort(sortedFolderList, FolderCompare)
+	
+	for _, folder in ipairs(sortedFolderList) do	
 		if folder.shortName ~= "" then 
 			local formattedPath = FormatFilterPath(folder.relativePath)
 			if formattedPath ~= "." then
