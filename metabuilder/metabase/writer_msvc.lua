@@ -36,7 +36,7 @@ function InitFolder(folderList, path_, filename)
 	local pathComponents = { "" }
 	
 	if (path ~= "") then 
-		pathComponents = split(path, "\\")
+		pathComponents = split(path, "/")
 		table.insert(pathComponents, 1, "")
 	end
 
@@ -53,7 +53,7 @@ function InitFolder(folderList, path_, filename)
 		elseif i == 2 then
 			currentPath = pathComponents[i]
 		else			
-			currentPath = currentPath .. "\\" .. pathComponents[i]
+			currentPath = currentPath .. "/" .. pathComponents[i]
 		end
 
 
@@ -61,8 +61,7 @@ function InitFolder(folderList, path_, filename)
 		if currentFolder == nil then
 			--we've not encountered this path before
 			
-			if #pathComponents[i] > 0 and pathComponents[i] ~= ".." then
-			
+			if #pathComponents[i] > 0 then
 				local newFolderID = mbwriter.msvcgenerateid()
 
 				currentFolder = {
@@ -85,7 +84,6 @@ function InitFolder(folderList, path_, filename)
 				currentParentPath = currentPath
 
 				folderList[currentPath] = currentFolder
-				local formattedPath = FormatFilterPath(currentFolder.relativePath)
 			end
 		else
 			local currentFolder = folderList[currentPath]
@@ -511,11 +509,6 @@ function WriteVcxProj(currentTarget, groups)
 end
 
 function FormatFilterPath(path)
---[[
-	while string.find(path, "%.%.\\") == 1 do
-		path = string.sub(path, 4, length)
-	end
-]]
 	path = mbfilepath.trimtrailingslash(path)
 	return mbwriter.normalisetargetfilepath(path)
 end
