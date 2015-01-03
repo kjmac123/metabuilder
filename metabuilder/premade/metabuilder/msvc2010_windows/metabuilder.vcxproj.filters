@@ -1,20 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="src">
+    <Filter Include="..">
+      <UniqueIdentifier>{4B0237A2-8DF1-7EEF-233F-2BA0BB5F61D1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\external">
       <UniqueIdentifier>{751D879F-BAF7-572A-553D-C0310AD19A7E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\platform">
+    <Filter Include="..\external\dlmalloc-2.8.6">
       <UniqueIdentifier>{C2812391-2BC7-6320-9517-E679C55D33A9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\platform\posix">
+    <Filter Include="..\external\freebsd">
       <UniqueIdentifier>{04716E12-E4E4-B086-701E-9901921AA469}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\platform\windows">
+    <Filter Include="src">
       <UniqueIdentifier>{31DE8473-7753-ACFC-F9D5-404F5DD2D08C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform">
+      <UniqueIdentifier>{2FA80E4C-0AF6-1BF4-612B-46E31444FFB6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform\posix">
+      <UniqueIdentifier>{40EB541F-476B-D4C9-BEA4-BC8FA85C5AE2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform\windows">
+      <UniqueIdentifier>{1B26E4F2-71BB-8273-4595-E17726990F05}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+   <ClCompile Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp">
+      <Filter>..\external\dlmalloc-2.8.6</Filter>
+   </ClCompile>
+   <ClCompile Include="..\..\..\..\external\freebsd\realpath.cpp">
+      <Filter>..\external\freebsd</Filter>
+   </ClCompile>
    <ClCompile Include="..\..\..\src\block.cpp">
       <Filter>src</Filter>
    </ClCompile>
@@ -78,6 +96,12 @@
    <ClCompile Include="..\..\..\src\writer_xcode.cpp">
       <Filter>src</Filter>
    </ClCompile>
+   <ClInclude Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.h">
+      <Filter>..\external\dlmalloc-2.8.6</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\freebsd\realpath.h">
+      <Filter>..\external\freebsd</Filter>
+   </ClInclude>
    <ClInclude Include="..\..\..\src\block.h">
       <Filter>src</Filter>
    </ClInclude>

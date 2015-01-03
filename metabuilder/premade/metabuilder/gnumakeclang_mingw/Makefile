@@ -3,8 +3,6 @@ BUILDCONFIG := Release
 
 default : all 
 metabuilder_MODULEOBJ := 
-include dlmalloc.mk
-metabuilder_MODULEOBJ += $(dlmalloc_OUTDIR)/dlmalloc
 include lua.mk
 metabuilder_MODULEOBJ += $(lua_OUTDIR)/lua
 
@@ -33,9 +31,10 @@ metabuilder_CPPFLAGS.Debug += $(metabuilder_DEFINES.Debug)
 metabuilder_INCLUDES.Debug := \
   -I"$(DXSDK_DIR)Include" \
   -I"..\..\..\src" \
-  -I"..\..\..\..\external\ezOptionParser-0.2.1" \
   -I"..\..\..\..\external\dlmalloc-2.8.6" \
+  -I"..\..\..\..\external\ezOptionParser-0.2.1" \
   -I"..\..\..\..\external\lua-5.2.2\src" \
+  -I"..\..\..\..\external" \
 
 metabuilder_CPPFLAGS.Debug += $(metabuilder_INCLUDES.Debug)
 metabuilder_CPPFLAGS.Release := \
@@ -59,9 +58,10 @@ metabuilder_CPPFLAGS.Release += $(metabuilder_DEFINES.Release)
 metabuilder_INCLUDES.Release := \
   -I"$(DXSDK_DIR)Include" \
   -I"..\..\..\src" \
-  -I"..\..\..\..\external\ezOptionParser-0.2.1" \
   -I"..\..\..\..\external\dlmalloc-2.8.6" \
+  -I"..\..\..\..\external\ezOptionParser-0.2.1" \
   -I"..\..\..\..\external\lua-5.2.2\src" \
+  -I"..\..\..\..\external" \
 
 metabuilder_CPPFLAGS.Release += $(metabuilder_INCLUDES.Release)
 metabuilder_CPPFLAGS	:= -MMD -MP $(metabuilder_CPPFLAGS.$(BUILDCONFIG))
@@ -94,6 +94,7 @@ metabuilder_LDLIBS.Release += $(metabuilder_LIBS.Release)
 metabuilder_LDFLAGS := $(metabuilder_LDFLAGS.$(BUILDCONFIG)) $(metabuilder_LDLIBS.$(BUILDCONFIG))
 
 metabuilder_SRC := \
+	..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp \
 	..\..\..\src\block.cpp \
 	..\..\..\src\common.cpp \
 	..\..\..\src\configparam.cpp \
@@ -116,6 +117,7 @@ metabuilder_SRC := \
 	..\..\..\src\writer_xcode.cpp \
 
 metabuilder_OBJ := \
+	$(metabuilder_INTDIR)/dlmalloc.o \
 	$(metabuilder_INTDIR)/block.o \
 	$(metabuilder_INTDIR)/common.o \
 	$(metabuilder_INTDIR)/configparam.o \
@@ -137,6 +139,9 @@ metabuilder_OBJ := \
 	$(metabuilder_INTDIR)/writer_utility.o \
 	$(metabuilder_INTDIR)/writer_xcode.o \
 
+$(metabuilder_INTDIR)/dlmalloc.o : ..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp $(metabuilder_INTDIR)/dlmalloc.d 
+	@echo $(metabuilder_CXX) ..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp
+	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
 $(metabuilder_INTDIR)/block.o : ..\..\..\src\block.cpp $(metabuilder_INTDIR)/block.d 
 	@echo $(metabuilder_CXX) ..\..\..\src\block.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
@@ -198,7 +203,7 @@ $(metabuilder_INTDIR)/writer_xcode.o : ..\..\..\src\writer_xcode.cpp $(metabuild
 	@echo $(metabuilder_CXX) ..\..\..\src\writer_xcode.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
 
-$(metabuilder_INTDIR)/__metabuilder__prelink__ : $(metabuilder_OBJ) $(dlmalloc_OUTDIR)/dlmalloc $(lua_OUTDIR)/lua 
+$(metabuilder_INTDIR)/__metabuilder__prelink__ : $(metabuilder_OBJ) $(lua_OUTDIR)/lua 
 	@echo ld Creating prelink obj $(metabuilder_INTDIR)/__metabuilder__prelink__
 	@ld  -r  $(metabuilder_OBJ) -o '$@' ;
 
@@ -217,7 +222,7 @@ $(metabuilder_INTDIR):
 all_metabuilder : $(metabuilder_OUTDIR)/metabuilder.exe 
 
 .PHONY: clean_metabuilder
-clean_metabuilder : clean_dlmalloc clean_lua 
+clean_metabuilder : clean_lua 
 	@echo Cleaning $(metabuilder_INTDIR)
 	@rm -f "$(metabuilder_INTDIR)"/*
 	@if [ -d "$(metabuilder_INTDIR)" ]; then rmdir "$(metabuilder_INTDIR)";fi
@@ -233,6 +238,7 @@ all : all_metabuilder
 clean : clean_metabuilder
 
 %.d: ;
+-include $(metabuilder_INTDIR)/dlmalloc.d
 -include $(metabuilder_INTDIR)/block.d
 -include $(metabuilder_INTDIR)/common.d
 -include $(metabuilder_INTDIR)/configparam.d
