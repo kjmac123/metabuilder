@@ -2,8 +2,6 @@ import "writer_common.lua"
 
 g_firstTargetWritten = false
 
-g_filePathMap = {}
-
 --Count the number of times a base name appears so that we can avoid filename clashes
 g_sourceFileBaseNameCounts = {}
 
@@ -332,6 +330,7 @@ function WriteMakeFile(currentTarget)
 		makeFilename = mbfilepath.join(makeDir, currentTarget.name .. ".mk", mbwriter.global.targetDirSep)
 	end
 	
+	makeFilename = mbwriter.normalisetargetfilepath(makeFilename)
 	local file = mbfile.open(makeFilename, "w")
 	
 	InitVars(currentTarget)	
@@ -406,13 +405,13 @@ function WriteMakeFile(currentTarget)
 			end
 			obj = obj .. ".o"
 
-			table.insert(buildFiles, {objFile=obj, srcFile=filenameAbs, ext=ext})
+			buildFiles[#buildFiles+1] = {objFile=obj, srcFile=filenameAbs, ext=ext}
 			g_sourceFileBaseNameCounts[filename] = fileBaseNameCount + 1
 		end
 	end
 	file:write("\n")
 	file:write(g_varSRC .. " := \\\n")
-
+	
 	for i = 1, #buildFiles do
 		file:write("	" .. buildFiles[i].srcFile .. " \\\n")
 	end

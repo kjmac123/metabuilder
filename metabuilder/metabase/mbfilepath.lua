@@ -1,17 +1,17 @@
 local module = {}
 
-function module.join(path, filename, dirSep)
-	if path == "" then
-		return filename
+function module.join(a, b, dirSep)
+	if a == "" then
+		return b
 	end
-
-	local length = string.len(path)
-	local lastChar = string.sub(path, length, length)
-	if lastChar == g_utility_dirSep then
-		return path .. filename
+	if b == "" then
+		return a
 	end
+	
+	module.trimtrailingslash(a)
+	module.trimleadingslash(b)
 
-	return path .. dirSep .. filename
+	return a .. dirSep .. b
 end
 
 function module.decompose(filepath)
@@ -33,15 +33,29 @@ function module.getextension(filepath)
 	return ext
 end
 
-function module.trimtrailingslash(path)
-	local length = string.len(path)
+function module.trimtrailingslash(filepath)
+	local length = string.len(filepath)
 	if length == 0 then
-		return path
+		return filepath
 	end
 
-	local lastChar = string.sub(path, length, length)
+	local lastChar = string.sub(filepath, length, length)
 	if lastChar == '\\' or lastChar == '/' then
-		return string.sub(path, 1, length-1)
+		return string.sub(filepath, 1, length-1)
+	end
+
+	return filepath
+end
+
+function module.trimleadingslash(filepath)
+	local length = string.len(filepath)
+	if length == 0 then
+		return filepath
+	end
+
+	local firstChar = string.sub(filepath, 1, 1)
+	if lastChar == '\\' or lastChar == '/' then
+		return string.sub(filepath, 1, length-1)
 	end
 
 	return path
