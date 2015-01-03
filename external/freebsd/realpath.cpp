@@ -26,11 +26,7 @@
  * SUCH DAMAGE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char sccsid[] = "@(#)realpath.c  8.1 (Berkeley) 2/16/94";
-#endif /* LIBC_SCCS and not lint */
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD: release/9.0.0/lib/libc/stdlib/realpath.c 217144 2011-01-08 11:04:30Z kib $");
 
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -39,6 +35,9 @@ __FBSDID("$FreeBSD: release/9.0.0/lib/libc/stdlib/realpath.c 217144 2011-01-08 1
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+namespace FreeBSD
+{
 
 /*
  * Find the real name of path, by removing all ".", ".." and symlink
@@ -65,7 +64,7 @@ realpath(const char * __restrict path, char * __restrict resolved)
         }
         serrno = errno;
         if (resolved == NULL) {
-                resolved = malloc(PATH_MAX);
+                resolved = (char*)malloc(PATH_MAX);
                 if (resolved == NULL)
                         return (NULL);
                 m = 1;
@@ -229,4 +228,6 @@ realpath(const char * __restrict path, char * __restrict resolved)
         if (resolved_len > 1 && resolved[resolved_len - 1] == '/')
                 resolved[resolved_len - 1] = '\0';
         return (resolved);
+}
+
 }

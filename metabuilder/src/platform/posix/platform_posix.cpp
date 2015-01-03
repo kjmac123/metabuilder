@@ -5,9 +5,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <errno.h>
 #include <fnmatch.h>
 #include <dirent.h>
+#include <sys/stat.h> 
+#include <fcntl.h>
 
 namespace Platform
 {
@@ -17,7 +18,7 @@ static F64							g_machTimeToNs;
 static mach_timebase_info_data_t	g_timebase;
 #endif
 
-static bool CreateDir(const char* osDir)
+bool CreateDir(const char* osDir)
 {
     struct stat statResult;
     int statresult = stat(osDir, &statResult);
@@ -50,6 +51,8 @@ void Init()
 }
 
 void Shutdown()
+{	
+}
 
 bool CreateLink(const char* src, const char* dst)
 {
@@ -279,6 +282,7 @@ U64 GetSystemTicks()
 	U64 seconds = (U64)t.tv_sec;
 	nanoseconds += seconds * MB_SECONDS_TO_NANOSECONDS;
 	return nanoseconds;
+#endif
 }
 
 }

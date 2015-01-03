@@ -24,6 +24,7 @@ typedef double F64;
 
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <vector>
 #include <string>

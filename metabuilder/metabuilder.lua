@@ -11,7 +11,6 @@ solution "metabuilder"
 		target_subsystem "console"
 		
 		--build against Lua library
-		depends("dlmalloc",	"../external/dlmalloc-2.8.6/metabuilder.lua")
 		depends("lua",	"../external/lua-5.2.2/metabuilder.lua")
 
 		defines
@@ -21,13 +20,16 @@ solution "metabuilder"
 		includedirs 
 		{ 
 			"src",
-			"../external/ezOptionParser-0.2.1",
 			"../external/dlmalloc-2.8.6",
+			"../external/ezOptionParser-0.2.1",
 			"../external/lua-5.2.2/src",
+			"../external",
 		}
 
 		files
 		{
+			"../external/dlmalloc-2.8.6/dlmalloc.cpp",
+		
 			"src/platform/platform.cpp",
 			"src/block.cpp",
 			"src/common.cpp",
