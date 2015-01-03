@@ -7,4 +7,10 @@ platform "POSIX"
 	
 		"src/platform/posix/platform_posix.cpp",
 	}
+	
+	libs 
+	{ 
+		"librt",
+	}
+
 platform_end()
