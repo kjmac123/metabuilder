@@ -38,6 +38,17 @@ public:
 	}
 };
 
+class StringPtrLess
+{
+public:
+	bool operator()(const std::string* a, const std::string* b) const
+	{
+		return *a < *b;
+	}
+};
+
+typedef std::unordered_set<std::string*, StringPtrHash, StringPtrEqual> UniqueStringHashTable;
+
 static AppState								g_appState;
 static StringVector							g_makefiles;
 static std::list<MetaBuilderContext*>		g_contexts; //Has memory ownership of context
@@ -788,8 +799,6 @@ void mbMergeArrays(StringVector* a, const StringVector& b)
 
 void mbRemoveDuplicates(StringVector* strings_)
 {
-	typedef std::unordered_set<std::string*, StringPtrHash, StringPtrEqual> UniqueStringHashTable;
-
 	StringVector& strings = *strings_;
 	
 	StringVector tmp;
@@ -826,8 +835,6 @@ bool mbCompareNoCase(const StringSortRecord* a, const StringSortRecord* b)
 
 void mbRemoveDuplicatesAndSort(StringVector* strings_)
 {
-	typedef std::unordered_set<std::string*, StringPtrHash, StringPtrEqual> UniqueStringHashTable;
-
 	StringVector& strings = *strings_;
 	
 	std::vector<StringSortRecord*> tmp;

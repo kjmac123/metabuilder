@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="src\platform">
+      <UniqueIdentifier>{C2812391-2BC7-6320-9517-E679C55D33A9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\platform\windows">
       <UniqueIdentifier>{31DE8473-7753-ACFC-F9D5-404F5DD2D08C}</UniqueIdentifier>
     </Filter>
@@ -9,9 +12,6 @@
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{751D879F-BAF7-572A-553D-C0310AD19A7E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\platform">
-      <UniqueIdentifier>{C2812391-2BC7-6320-9517-E679C55D33A9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -78,15 +78,6 @@
    <ClCompile Include="..\..\..\src\writer_xcode.cpp">
       <Filter>src</Filter>
    </ClCompile>
-   <None Include="..\..\..\metabuilder.lua">
-      <Filter></Filter>
-   </None>
-   <None Include="..\..\..\metabuilder_posix.lua">
-      <Filter></Filter>
-   </None>
-   <None Include="..\..\..\metabuilder_windows.lua">
-      <Filter></Filter>
-   </None>
    <ClInclude Include="..\..\..\src\block.h">
       <Filter>src</Filter>
    </ClInclude>
@@ -141,5 +132,14 @@
    <ClInclude Include="..\..\..\src\writer_xcode.h">
       <Filter>src</Filter>
    </ClInclude>
+   <None Include="..\..\..\metabuilder.lua">
+      <Filter></Filter>
+   </None>
+   <None Include="..\..\..\metabuilder_posix.lua">
+      <Filter></Filter>
+   </None>
+   <None Include="..\..\..\metabuilder_windows.lua">
+      <Filter></Filter>
+   </None>
   </ItemGroup>
 </Project>

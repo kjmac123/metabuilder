@@ -395,13 +395,6 @@
    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-   <None Include="..\..\..\..\external\lua-5.2.2\metabuilder.lua">
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
-   </None>
-  </ItemGroup>
-  <ItemGroup>
    <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lapi.h">
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
@@ -502,6 +495,13 @@
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+   <None Include="..\..\..\..\external\lua-5.2.2\metabuilder.lua">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
+   </None>
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

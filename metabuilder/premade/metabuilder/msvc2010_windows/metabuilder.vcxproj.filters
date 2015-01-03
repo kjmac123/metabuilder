@@ -1,83 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="src\platform">
-      <UniqueIdentifier>{C2812391-2BC7-6320-9517-E679C55D33A9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{751D879F-BAF7-572A-553D-C0310AD19A7E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\platform\posix">
       <UniqueIdentifier>{04716E12-E4E4-B086-701E-9901921AA469}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\platform">
+      <UniqueIdentifier>{C2812391-2BC7-6320-9517-E679C55D33A9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\platform\windows">
       <UniqueIdentifier>{31DE8473-7753-ACFC-F9D5-404F5DD2D08C}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-   <ClInclude Include="..\..\..\src\block.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\common.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\configparam.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\core.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\luafile.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\makeglobal.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\makesetup.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\metabase.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\metabuilder_pch.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\platform\platform.h">
-      <Filter>src\platform</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\platformparam.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\solution.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\target.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\timeutil.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\writer.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\writer_msvc.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\writer_utility.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\writer_xcode.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <None Include="..\..\..\metabuilder.lua">
-      <Filter></Filter>
-   </None>
-   <None Include="..\..\..\metabuilder_posix.lua">
-      <Filter></Filter>
-   </None>
-   <None Include="..\..\..\metabuilder_windows.lua">
-      <Filter></Filter>
-   </None>
    <ClCompile Include="..\..\..\src\block.cpp">
       <Filter>src</Filter>
    </ClCompile>
@@ -141,5 +78,68 @@
    <ClCompile Include="..\..\..\src\writer_xcode.cpp">
       <Filter>src</Filter>
    </ClCompile>
+   <ClInclude Include="..\..\..\src\block.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\common.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\configparam.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\core.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\luafile.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\makeglobal.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\makesetup.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\metabase.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\metabuilder_pch.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\platform\platform.h">
+      <Filter>src\platform</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\platformparam.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\solution.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\target.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\timeutil.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\writer.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\writer_msvc.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\writer_utility.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\writer_xcode.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <None Include="..\..\..\metabuilder.lua">
+      <Filter></Filter>
+   </None>
+   <None Include="..\..\..\metabuilder_posix.lua">
+      <Filter></Filter>
+   </None>
+   <None Include="..\..\..\metabuilder_windows.lua">
+      <Filter></Filter>
+   </None>
   </ItemGroup>
 </Project>

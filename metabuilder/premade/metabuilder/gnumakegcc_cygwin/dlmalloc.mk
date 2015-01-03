@@ -12,7 +12,7 @@ dlmalloc_CPPFLAGS.Debug := \
 dlmalloc_CFLAGS.Debug := \
 
 dlmalloc_CXXFLAGS.Debug := \
-  -Wall \
+  -Wall std=c++11 \
 
 dlmalloc_DEFINES.Debug := \
   -DMETABUILDER \
@@ -31,7 +31,7 @@ dlmalloc_CPPFLAGS.Release := \
 dlmalloc_CFLAGS.Release := \
 
 dlmalloc_CXXFLAGS.Release := \
-  -Wall \
+  -Wall std=c++11 \
 
 dlmalloc_DEFINES.Release := \
   -DMETABUILDER \
@@ -50,7 +50,7 @@ dlmalloc_CPPFLAGS.Master := \
 dlmalloc_CFLAGS.Master := \
 
 dlmalloc_CXXFLAGS.Master := \
-  -Wall \
+  -Wall std=c++11 \
 
 dlmalloc_DEFINES.Master := \
   -DMETABUILDER \

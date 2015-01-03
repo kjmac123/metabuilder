@@ -95,7 +95,7 @@ function InitFolder(folderList, path_, filename)
 	end
 end
 
-function InitFolders(folderList, groupMap)
+function InitFolders(folderList, groups)
 	logprofile("InitFolders")
 	-- Lazily initialise chains of folders based upon the list of files provided
 	-- For each folder store:
@@ -103,7 +103,7 @@ function InitFolders(folderList, groupMap)
 	--	its unique id
 	--	the unique id of its parent
 	
-	for groupName, group in pairs(groupMap) do 
+	for _, group in ipairs(groups) do 
 		for i = 1, #group.fileInfo do
 			InitFolder(folderList, group.fileInfo[i].inputRelativeDir, group.fileInfo[i].outputRelativeFilename)
 		end
@@ -113,6 +113,10 @@ function InitFolders(folderList, groupMap)
 end
 
 --[[ FILE WRITING ]] --------------------------------------------------------------------------------
+
+function FileGroupCompare(a, b)
+	return a.name < b.name
+end
 
 function BuildFileGroups(currentTarget)
 	logprofile("BuildFileGroups " .. currentTarget.name)
@@ -128,6 +132,7 @@ function BuildFileGroups(currentTarget)
 
 	for i = 1, #currentTarget.allsourcefiles do
 		local f = currentTarget.allsourcefiles[i]
+		
 		local fIncludedInBuild = fileIncludedInBuild[f]
 		if fIncludedInBuild == nil then
 			fIncludedInBuild = false
@@ -137,7 +142,7 @@ function BuildFileGroups(currentTarget)
  
 		local group = groupMap[fileType]
 		if group == nil then
-			local newGroup = {fileType=fileType, fileInfo={}}
+			local newGroup = {name=fileType, fileInfo={}}
 			groupMap[fileType] = newGroup
 			group = newGroup
 		end
@@ -152,10 +157,18 @@ function BuildFileGroups(currentTarget)
 		fileInfo.inputRelativeDir, fileInfo.shortName, fileInfo.ext = mbfilepath.decompose(f)
 		
 		group.fileInfo[#group.fileInfo+1] = fileInfo
-	end	
+	end
 	
+	local sortedGroups = {}
+	
+	for _, group in pairs(groupMap) do 
+		sortedGroups[#sortedGroups+1] = group
+	end
+	
+	table.sort(sortedGroups, FileGroupCompare)
+			
 	logprofile("END BuildFileGroups")
-	return groupMap
+	return sortedGroups
 end
 
 function WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, fileInfo)
@@ -197,7 +210,7 @@ function WriteVcxProjRawXMLBlocks(file, groupOptionRawXml)
 	end
 end
 
-function WriteVcxProj(currentTarget, groupMap)	
+function WriteVcxProj(currentTarget, groups)	
 	logprofile("WriteVcxProj")
 	
 	local projectID = mbwriter.msvcgenerateid()
@@ -403,12 +416,11 @@ function WriteVcxProj(currentTarget, groupMap)
 
 	--New group writing method which isn't horrid and totally hard-coded
 	--TODO - add function pointer approach for intrinsic types.
-	for groupName, group in pairs(groupMap) do 
-		--print(groupName)
+	for _, group in ipairs(groups) do 
 		file:write("  <ItemGroup>\n")
-		if groupName == "ClCompile" then
+		if group.name == "ClCompile" then
 			for i = 1, #group.fileInfo do
-				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 				for iConfig = 1, #currentTarget.configs do
 					local config = currentTarget.configs[iConfig]
 					file:write("      <CompileAs Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Default</CompileAs>\n")
@@ -430,33 +442,33 @@ function WriteVcxProj(currentTarget, groupMap)
 					end
 				end
 
-				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 			end
-		elseif groupName == "ClInclude" then
+		elseif group.name == "ClInclude" then
 			for i = 1, #group.fileInfo do
-				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
-				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
+				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 			end
-		elseif groupName == "None" then
+		elseif group.name == "None" then
 			for i = 1, #group.fileInfo do
-				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
-				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
+				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 			end
 		else
 			if GetCustomGroupRule ~= nil then
 				for i = 1, #group.fileInfo do
 					local fileInfo = group.fileInfo[i]
-					local customRuleWriterFunc = GetCustomGroupRule(groupName, fileInfo.shortName)
-					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, fileInfo)
+					local customRuleWriterFunc = GetCustomGroupRule(group.name, fileInfo.shortName)
+					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, fileInfo)
 						if customRuleWriterFunc ~= nil then
 							customRuleWriterFunc(file, currentTarget, msvcPlatform, fileInfo.outputRelativeFilename)
 						end
-					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, fileInfo)
+					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, fileInfo)
 				end
 			else
 				for i = 1, #group.fileInfo do
-					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
-					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
+					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 				end
 			end
 		end
@@ -508,7 +520,7 @@ function FormatFilterPath(path)
 	return mbwriter.normalisetargetfilepath(path)
 end
 
-function WriterVcxProjFilters(currentTarget, groupMap)
+function WriterVcxProjFilters(currentTarget, groups)
 	local vcxProjFiltersFilename = mbwriter.normalisetargetfilepath(mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj.filters")
 	local file = mbfile.open(vcxProjFiltersFilename, "w")
 
@@ -516,7 +528,7 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 	file:write("<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
 	
 	local folders = {}
-	InitFolders(folders, groupMap)
+	InitFolders(folders, groups)
 
 	--Write out filter folders
 	file:write("  <ItemGroup>\n")
@@ -535,11 +547,11 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 	file:write("  </ItemGroup>\n")
 
 	file:write("  <ItemGroup>\n")	
-	for groupName, group in pairs(groupMap) do 
+	for _, group in ipairs(groups) do 
 		for i = 1, #group.fileInfo do
-			file:write("   <" .. groupName .. " Include=\"" .. group.fileInfo[i].outputRelativeFilename .. "\">\n")
+			file:write("   <" .. group.name .. " Include=\"" .. group.fileInfo[i].outputRelativeFilename .. "\">\n")
 			file:write("      <Filter>" .. FormatFilterPath(group.fileInfo[i].inputRelativeDir) .. "</Filter>\n")
-			file:write("   </" .. groupName .. ">\n")				
+			file:write("   </" .. group.name .. ">\n")				
 		end
 	end
 	file:write("  </ItemGroup>\n")
@@ -647,7 +659,7 @@ if GetFileTypeMap ~= nil then
 	g_fileTypeMap = GetFileTypeMap()
 end
 
-local groupMap = BuildFileGroups(g_currentTarget)
+local groups = BuildFileGroups(g_currentTarget)
 --print(inspect(g_fileTypeMap))
 
 --TODO move out this hack for Windows builds
@@ -656,8 +668,8 @@ if g_fileTypeMap["hlsl"] == "CompilerShader" then
 	g_enableHLSL = true
 end
 
-WriteVcxProj(g_currentTarget, groupMap)
-WriterVcxProjFilters(g_currentTarget, groupMap)
+WriteVcxProj(g_currentTarget, groups)
+WriterVcxProjFilters(g_currentTarget, groups)
 
 --Solutions only required by apps
 local projectList = {}

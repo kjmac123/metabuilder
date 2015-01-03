@@ -6,9 +6,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-   <None Include="..\..\..\..\external\lua-5.2.2\metabuilder.lua">
-      <Filter></Filter>
-   </None>
    <ClCompile Include="..\..\..\..\external\lua-5.2.2\src\lapi.c">
       <Filter>src</Filter>
    </ClCompile>
@@ -165,5 +162,8 @@
    <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lzio.h">
       <Filter>src</Filter>
    </ClInclude>
+   <None Include="..\..\..\..\external\lua-5.2.2\metabuilder.lua">
+      <Filter></Filter>
+   </None>
   </ItemGroup>
 </Project>
