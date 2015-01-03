@@ -225,24 +225,24 @@ void FileSetWorkingDir(const std::string& path)
 
 std::string FileGetWorkingDir()
 {
-    char workingDir[MB_MAX_PATH];
+   	char workingDir[MB_MAX_PATH];
 	if (getcwd(workingDir, sizeof(workingDir)) == NULL)
-    {
+ 	{
 		MB_LOGERROR("Failed to query working dir");
 		mbExitError();
-    }
+ 	}
 
-    return workingDir;
+	return workingDir;
 }
 
 std::string FileGetAbsPath(const std::string& path)
 {
-    char storage[MB_MAX_PATH];
-	if (FreeBSD::realpath(path.c_str(), storage) == NULL)
-    {
+   	char storage[MB_MAX_PATH];
+	if (/*FreeBSD::*/realpath(path.c_str(), storage) == NULL)
+   	{
 		MB_LOGERROR("Failed to get absolute path for %s", path.c_str());
 		mbExitError();
-    }
+   	}
 
 	return storage;
 }

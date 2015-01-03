@@ -833,7 +833,7 @@ void mbRemoveDuplicates(StringVector* strings_)
 		}
 	}
 	
-	strings = std::move(tmp);
+	std::swap(tmp, strings);
 }
 
 struct StringSortRecord
