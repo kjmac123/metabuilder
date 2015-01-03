@@ -8,7 +8,7 @@ option("cxx", "g++")
 option("ar", "ar")
 option("ld", "g++")
 
-option("cxxflags",	"-Wall -std=c++11")
+option("cxxflags",	"-Wall")
 option("arflags",	"crsT")
 option("ldflags",	"")
 
