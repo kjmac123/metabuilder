@@ -17,7 +17,7 @@ metabuilder_CPPFLAGS.Debug := \
 metabuilder_CFLAGS.Debug := \
 
 metabuilder_CXXFLAGS.Debug := \
-  -Wall -std=c++11 \
+  -Wall \
   -Wno-unused-function \
 
 metabuilder_DEFINES.Debug := \
@@ -40,7 +40,7 @@ metabuilder_CPPFLAGS.Release := \
 metabuilder_CFLAGS.Release := \
 
 metabuilder_CXXFLAGS.Release := \
-  -Wall -std=c++11 \
+  -Wall \
   -Wno-unused-function \
 
 metabuilder_DEFINES.Release := \

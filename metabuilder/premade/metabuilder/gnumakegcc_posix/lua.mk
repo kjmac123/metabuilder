@@ -12,7 +12,7 @@ lua_CPPFLAGS.Debug := \
 lua_CFLAGS.Debug := \
 
 lua_CXXFLAGS.Debug := \
-  -Wall -std=c++11 \
+  -Wall \
 
 lua_DEFINES.Debug := \
   -DMETABUILDER \
@@ -30,7 +30,7 @@ lua_CPPFLAGS.Release := \
 lua_CFLAGS.Release := \
 
 lua_CXXFLAGS.Release := \
-  -Wall -std=c++11 \
+  -Wall \
 
 lua_DEFINES.Release := \
   -DMETABUILDER \
@@ -48,7 +48,7 @@ lua_CPPFLAGS.Master := \
 lua_CFLAGS.Master := \
 
 lua_CXXFLAGS.Master := \
-  -Wall -std=c++11 \
+  -Wall \
 
 lua_DEFINES.Master := \
   -DMETABUILDER \
