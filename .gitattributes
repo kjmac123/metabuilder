@@ -1,11 +1,11 @@
 # Make
-Makefile binary
-*.mk binary
+Makefile eol=lf
+*.mk eol=lf
 
 # MSVC
-*.filters binary
-*.vcxproj binary
-*.sln binary
+*.filters eol=crlf
+*.vcxproj eol=crlf
+*.sln eol=crlf
 
 # XCode
-*.pbxproj binary
+*.pbxproj eol=lf

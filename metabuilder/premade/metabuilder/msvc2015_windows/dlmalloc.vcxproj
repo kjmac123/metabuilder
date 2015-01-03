@@ -137,11 +137,11 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-   <ClInclude Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.h">
+   <None Include="..\..\..\..\external\dlmalloc-2.8.6\metabuilder.lua">
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
-   </ClInclude>
+   </None>
   </ItemGroup>
   <ItemGroup>
    <ClCompile Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp">
@@ -154,11 +154,11 @@
    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-   <None Include="..\..\..\..\external\dlmalloc-2.8.6\metabuilder.lua">
+   <ClInclude Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.h">
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">false</ExcludedFromBuild>
-   </None>
+   </ClInclude>
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

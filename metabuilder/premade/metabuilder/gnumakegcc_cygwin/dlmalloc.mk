@@ -22,7 +22,7 @@ dlmalloc_DEFINES.Debug := \
 
 dlmalloc_CPPFLAGS.Debug += $(dlmalloc_DEFINES.Debug)
 dlmalloc_INCLUDES.Debug := \
-  -I"../../../../../../../:\opensource\metabuilder\external\dlmalloc-2.8.6/src" \
+  -I"../../../../external/dlmalloc-2.8.6/src" \
 
 dlmalloc_CPPFLAGS.Debug += $(dlmalloc_INCLUDES.Debug)
 dlmalloc_CPPFLAGS.Release := \
@@ -41,7 +41,7 @@ dlmalloc_DEFINES.Release := \
 
 dlmalloc_CPPFLAGS.Release += $(dlmalloc_DEFINES.Release)
 dlmalloc_INCLUDES.Release := \
-  -I"../../../../../../../:\opensource\metabuilder\external\dlmalloc-2.8.6/src" \
+  -I"../../../../external/dlmalloc-2.8.6/src" \
 
 dlmalloc_CPPFLAGS.Release += $(dlmalloc_INCLUDES.Release)
 dlmalloc_CPPFLAGS.Master := \
@@ -60,7 +60,7 @@ dlmalloc_DEFINES.Master := \
 
 dlmalloc_CPPFLAGS.Master += $(dlmalloc_DEFINES.Master)
 dlmalloc_INCLUDES.Master := \
-  -I"../../../../../../../:\opensource\metabuilder\external\dlmalloc-2.8.6/src" \
+  -I"../../../../external/dlmalloc-2.8.6/src" \
 
 dlmalloc_CPPFLAGS.Master += $(dlmalloc_INCLUDES.Master)
 dlmalloc_CPPFLAGS	:= -MMD -MP $(dlmalloc_CPPFLAGS.$(BUILDCONFIG))
@@ -72,13 +72,13 @@ dlmalloc_CXXFLAGS += -c
 dlmalloc_LDFLAGS := 
 
 dlmalloc_SRC := \
-	../../../../../../../:\opensource\metabuilder\external\dlmalloc-2.8.6/dlmalloc.cpp \
+	../../../../external/dlmalloc-2.8.6/dlmalloc.cpp \
 
 dlmalloc_OBJ := \
 	$(dlmalloc_INTDIR)/dlmalloc.o \
 
-$(dlmalloc_INTDIR)/dlmalloc.o : ../../../../../../../:\opensource\metabuilder\external\dlmalloc-2.8.6/dlmalloc.cpp $(dlmalloc_INTDIR)/dlmalloc.d 
-	@echo $(dlmalloc_CXX) ../../../../../../../:\opensource\metabuilder\external\dlmalloc-2.8.6/dlmalloc.cpp
+$(dlmalloc_INTDIR)/dlmalloc.o : ../../../../external/dlmalloc-2.8.6/dlmalloc.cpp $(dlmalloc_INTDIR)/dlmalloc.d 
+	@echo $(dlmalloc_CXX) ../../../../external/dlmalloc-2.8.6/dlmalloc.cpp
 	@$(dlmalloc_CXX) $(dlmalloc_CPPFLAGS) $(dlmalloc_CXXFLAGS) -o '$@' '$<'; 
 
 $(dlmalloc_INTDIR)/__dlmalloc__prelink__ : $(dlmalloc_OBJ) 

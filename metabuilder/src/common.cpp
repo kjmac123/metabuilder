@@ -132,9 +132,20 @@ void AppState::ProcessSetup()
 
 void AppState::ProcessGlobal()
 {
-	mbNormaliseFilePath(&mainMetaMakeFileAbs, makeGlobal->targetDirSep);
-	mbNormaliseFilePath(&metabaseDirAbs, makeGlobal->targetDirSep);
-	mbNormaliseFilePath(&makeOutputTopDirAbs, makeGlobal->targetDirSep);
+	OnTargetDirSepChanged();
+}
+
+void AppState::OnTargetDirSepChanged()
+{
+	mbNormaliseFilePath(&mainMetaMakeFileAbs,	makeGlobal->GetTargetDirSep());
+	mbNormaliseFilePath(&metabaseDirAbs,		makeGlobal->GetTargetDirSep());
+	mbNormaliseFilePath(&makeOutputTopDirAbs,	makeGlobal->GetTargetDirSep());
+
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	if (ctx)
+	{
+		ctx->OnTargetDirSepChanged();
+	}
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -160,6 +171,27 @@ MetaBuilderContext::~MetaBuilderContext()
 	}
 	
 	delete metabase;
+}
+
+Block* MetaBuilderContext::ActiveBlock() const
+{
+	return activeBlockStack.size() > 0 ? activeBlockStack.top() : nullptr;
+}
+
+void MetaBuilderContext::PushActiveBlock(Block* block)
+{
+    activeBlockStack.push(block);
+}
+    
+void MetaBuilderContext::PopActiveBlock()
+{
+    activeBlockStack.pop();
+}
+
+void MetaBuilderContext::OnTargetDirSepChanged()
+{
+	mbNormaliseFilePath(&currentMetaMakeDirAbs, mbGetAppState()->makeGlobal->GetTargetDirSep());
+	mbNormaliseFilePath(&makeOutputDirAbs, mbGetAppState()->makeGlobal->GetTargetDirSep());
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------

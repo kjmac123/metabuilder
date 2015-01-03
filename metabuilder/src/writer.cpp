@@ -341,7 +341,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 			{
 				char buf[MB_MAX_PATH];
 				sprintf(buf, "%s/%s/%s", appState->makeOutputTopDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->GetName().c_str());
-				mbNormaliseFilePath(buf, appState->makeGlobal->targetDirSep);
+				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
 				ctx->makeOutputDirAbs = buf;
 			}
 			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
@@ -367,7 +367,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 
 		{
 			char tmp[2];
-			tmp[0] = appState->makeGlobal->targetDirSep;
+			tmp[0] = appState->makeGlobal->GetTargetDirSep();
 			tmp[1] = '\0';
 			lua_pushstring(l, tmp);
 			lua_setfield(l, -2, "targetDirSep");

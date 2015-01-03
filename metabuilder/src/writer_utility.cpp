@@ -13,13 +13,13 @@ static bool mbWriterUtility_FilePathMarkedAsRaw(const char* filepath)
 
 static void mbWriterUtility_NormaliseTargetFilePath(char* filepath)
 {
-	char dirSep = mbGetAppState()->makeGlobal->targetDirSep;
+	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
 	mbNormaliseFilePath(filepath, dirSep);
 }
 
 static int mbWriterUtility_GetNumDirLevels(const char* dir)
 {
-	char dirSep = mbGetAppState()->makeGlobal->targetDirSep;
+	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
 	int dirCount = 0;
 
 	for (const char* cursor = dir; *cursor; ++cursor)
@@ -51,12 +51,12 @@ static void mbWriterUtility_FileConvertToAbsolute(char* filepathAbs, const char*
 	}
 
 	//Expand!
-	sprintf(filepathAbs, "%s%c%s", baseDir, mbGetAppState()->makeGlobal->targetDirSep, filepath);
+	sprintf(filepathAbs, "%s%c%s", baseDir, mbGetAppState()->makeGlobal->GetTargetDirSep(), filepath);
 }
 
 void mbWriterUtility_BuildPathBack(char* result, int nLevels)
 {
-	char dirSep = mbGetAppState()->makeGlobal->targetDirSep;
+	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
 	
 	char* cursor = result;
 	for (int i = 0; i < nLevels; ++i)
@@ -85,7 +85,7 @@ int mbWriterUtility_GetLongestCommonSequenceLengthFromStart(const char* str1, co
 
 static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepathUnnormalised, const char* oldBaseDir, const char* newBaseDir)
 {
-	char dirSep = mbGetAppState()->makeGlobal->targetDirSep;
+	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
 
 	char filepath[MB_MAX_PATH];
 	strcpy(filepath, filepathUnnormalised);
@@ -145,7 +145,7 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 
 static int mbWriterUtility_LuaNormaliseTargetFilePath(lua_State* l)
 {
-	char dirSep = mbGetAppState()->makeGlobal->targetDirSep;
+	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
 	const char* filepathUnnormalised = lua_tostring(l, 1);
 	
 	char result[MB_MAX_PATH];
@@ -157,7 +157,7 @@ static int mbWriterUtility_LuaNormaliseTargetFilePath(lua_State* l)
 
 static int mbWriterUtility_LuaNormaliseHostFilePath(lua_State* l)
 {
-	char dirSep = mbGetAppState()->makeGlobal->targetDirSep;
+	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
 	const char* filepathUnnormalised = lua_tostring(l, 1);
 
 	char result[MB_MAX_PATH];
@@ -170,6 +170,11 @@ static int mbWriterUtility_LuaNormaliseHostFilePath(lua_State* l)
 static int mbWriterUtility_LuaGetOutputRelativeFilePath(lua_State* l)
 {
 	const char* filepathUnnormalised = lua_tostring(l, 1);
+
+	if (strstr(filepathUnnormalised, "writer_xcode"))
+	{
+		int x= 0;x;
+	}
 
 	MetaBuilderContext* ctx = mbGetActiveContext();
 	const char* oldBaseDir = ctx->currentMetaMakeDirAbs.c_str();

@@ -113,6 +113,11 @@ public:
 	MakeGlobal*				makeGlobal;
 	
 	bool					isProcessingPrimaryMakefile;
+
+private:
+	void OnTargetDirSepChanged();
+
+	friend class MakeGlobal;
 };
 
 struct KeyValue
@@ -135,20 +140,11 @@ public:
 	MetaBuilderContext();
 	~MetaBuilderContext();
 	
-    Block*    ActiveBlock() const
-    {
-		return activeBlockStack.size() > 0 ? activeBlockStack.top() : nullptr;
-    }
+    Block*		ActiveBlock() const;
+    void		PushActiveBlock(Block* block);
+    void		PopActiveBlock();
 
-    void PushActiveBlock(Block* block)
-    {
-        activeBlockStack.push(block);
-    }
-    
-    void PopActiveBlock()
-    {
-        activeBlockStack.pop();
-    }
+	void		OnTargetDirSepChanged();
 
     std::string					currentMetaMakeDirAbs;
 	std::string					makeOutputDirAbs;

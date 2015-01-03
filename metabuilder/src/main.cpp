@@ -162,6 +162,7 @@ int main(int argc, const char * argv[])
 			{
 				std::string makedir = mbPathGetDir(makeFiles[i]);
 				ctx->currentMetaMakeDirAbs = Platform::FileGetAbsPath(makedir);
+				mbNormaliseFilePath(&ctx->currentMetaMakeDirAbs, mbGetAppState()->makeGlobal->GetTargetDirSep());
 			}
 		
 			lua_State *l;

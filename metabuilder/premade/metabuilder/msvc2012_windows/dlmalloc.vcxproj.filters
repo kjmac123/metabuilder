@@ -3,14 +3,14 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-   <ClCompile Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp">
-      <Filter></Filter>
-   </ClCompile>
-   <None Include="..\..\..\..\external\dlmalloc-2.8.6\metabuilder.lua">
-      <Filter></Filter>
-   </None>
    <ClInclude Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.h">
       <Filter></Filter>
    </ClInclude>
+   <None Include="..\..\..\..\external\dlmalloc-2.8.6\metabuilder.lua">
+      <Filter></Filter>
+   </None>
+   <ClCompile Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp">
+      <Filter></Filter>
+   </ClCompile>
   </ItemGroup>
 </Project>

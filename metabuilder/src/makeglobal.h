@@ -9,11 +9,13 @@ public:
 	MakeGlobal();
 	
     virtual E_BlockType		GetType() const;
-	virtual bool			IsA(E_BlockType t) const;		
-				
-	char					targetDirSep;
+	virtual bool			IsA(E_BlockType t) const;
 
+	void					SetTargetDirSep(char dirSep);
+	char					GetTargetDirSep() const;
+				
 protected:
+	char					m_targetDirSep;
 };
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
