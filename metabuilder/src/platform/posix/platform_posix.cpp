@@ -169,7 +169,7 @@ bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInpu
 				char tmp[MB_MAX_PATH];
 				strcpy(tmp, excludeDirs);
 				char* current = strtok (tmp,",");
-				while (current != nullptr)
+				while (current != NULL)
 				{
 					if (strcmp(current, dirEntry->d_name) == 0)
 					{
@@ -177,7 +177,7 @@ bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInpu
 						break;
 					}
 					
-					current = strtok(nullptr, ",");
+					current = strtok(NULL, ",");
 				}
 			}
 			
@@ -226,7 +226,7 @@ void FileSetWorkingDir(const std::string& path)
 std::string FileGetWorkingDir()
 {
     char workingDir[MB_MAX_PATH];
-	if (getcwd(workingDir, sizeof(workingDir)) == nullptr)
+	if (getcwd(workingDir, sizeof(workingDir)) == NULL)
     {
 		MB_LOGERROR("Failed to query working dir");
 		mbExitError();
@@ -238,7 +238,7 @@ std::string FileGetWorkingDir()
 std::string FileGetAbsPath(const std::string& path)
 {
     char storage[MB_MAX_PATH];
-	if (FreeBSD::realpath(path.c_str(), storage) == nullptr)
+	if (FreeBSD::realpath(path.c_str(), storage) == NULL)
     {
 		MB_LOGERROR("Failed to get absolute path for %s", path.c_str());
 		mbExitError();

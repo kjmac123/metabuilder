@@ -115,7 +115,7 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 
 			//Look for last dir sep character in order to ignore a partial path or file match
 			char* lastDirSep = strrchr(commonSubSequence, dirSep);
-			if (lastDirSep != nullptr)
+			if (lastDirSep != NULL)
 			{
 				//Take sequence up to last dir sep as our base dir
 				*lastDirSep = '\0';
@@ -123,7 +123,7 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 			}
 		}
 
-		if (baseDir != nullptr)
+		if (baseDir != NULL)
 		{
 			const char* pathFromBaseToOutDir = normalisedMakeOutputDirAbs + baseDirLength + 1;
 			int nDirLevels = mbWriterUtility_GetNumDirLevels(pathFromBaseToOutDir) + 1;

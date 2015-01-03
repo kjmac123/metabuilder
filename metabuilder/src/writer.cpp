@@ -19,9 +19,9 @@ static std::vector<KeyValue>	g_registeredTargets;
 static int luaFuncGlobalImport(lua_State* l)
 {
     std::string requireFile;
-	mbLuaToStringExpandMacros(&requireFile, nullptr, l, 1);
+	mbLuaToStringExpandMacros(&requireFile, NULL, l, 1);
 
-	mbLuaDoFile(l, requireFile, nullptr);
+	mbLuaDoFile(l, requireFile, NULL);
     return 0;
 }
 
@@ -88,7 +88,7 @@ static int luaFuncGetFileType(lua_State* l)
 static int luaFuncReportOutputFile(lua_State* l)
 {
     std::string filepath;
-	mbLuaToStringExpandMacros(&filepath, nullptr, l, 1);
+	mbLuaToStringExpandMacros(&filepath, NULL, l, 1);
 	MB_LOGINFO("Wrote file %s", filepath.c_str());
 	
 	return 0;
@@ -109,7 +109,7 @@ static int luaFuncCopyFile(lua_State* l)
 {
 	std::string fromFilename, toFilename;
 	
-	if (!mbLuaToStringExpandMacros(&fromFilename, nullptr, l, 1) || !mbLuaToStringExpandMacros(&toFilename, nullptr, l, 2))
+	if (!mbLuaToStringExpandMacros(&fromFilename, NULL, l, 1) || !mbLuaToStringExpandMacros(&toFilename, NULL, l, 2))
 	{
 		MB_LOGERROR("Failed to copy file. Insufficient args");
 		mbExitError();
@@ -169,8 +169,8 @@ static int luaFuncCopyFile(lua_State* l)
 static int luaFuncWriterRegisterTarget(lua_State* l)
 {
 	g_registeredTargets.push_back(KeyValue());
-	mbLuaToStringExpandMacros(&g_registeredTargets.back().key, nullptr, l, 1);	// target name;
-	mbLuaToStringExpandMacros(&g_registeredTargets.back().value, nullptr, l, 2);	// target filepath;
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().key, NULL, l, 1);	// target name;
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().value, NULL, l, 2);	// target filepath;
 	MB_LOGINFO("Registered target - name: %s location: %s", g_registeredTargets.back().key.c_str(), g_registeredTargets.back().value.c_str());
 	return 0;
 }
@@ -178,7 +178,7 @@ static int luaFuncWriterRegisterTarget(lua_State* l)
 static int luaFuncWriterGetTarget(lua_State* l)
 {
     std::string target;
-	mbLuaToStringExpandMacros(&target, nullptr, l, 1);
+	mbLuaToStringExpandMacros(&target, NULL, l, 1);
 	
 	for (int i = 0; i < (int)g_registeredTargets.size(); ++i)
 	{
@@ -309,7 +309,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 	mbPushActiveContext(ctx);
 
 	lua_State *l;
-	l = lua_newstate(mbLuaAllocator, nullptr);
+	l = lua_newstate(mbLuaAllocator, NULL);
 	luaL_checkstack(l, MB_LUA_STACK_MAX, "Out of stack!");
 	luaL_openlibs(l);
 
@@ -424,7 +424,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector allFiles;
 					
-					target->FlattenFiles(&allFiles, nullptr);
+					target->FlattenFiles(&allFiles, NULL);
 					mbRemoveDuplicatesAndSort(&allFiles);
 						
 					lua_createtable(l, 0, 0);
@@ -440,8 +440,8 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					}
 					lua_setfield(l, -2, "allsourcefiles");
 					
-					target->FlattenResources(&allFiles, nullptr);
-					target->FlattenFrameworks(&allFiles, nullptr);
+					target->FlattenResources(&allFiles, NULL);
+					target->FlattenFrameworks(&allFiles, NULL);
 					mbRemoveDuplicatesAndSort(&allFiles);
 					
 					lua_createtable(l, 0, 0);
@@ -464,7 +464,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					StringVector configNames;
 					{
 						ConfigParamVector configs;
-						target->GetParams((ParamVector*)&configs, E_BlockType_ConfigParam, nullptr, nullptr, true);
+						target->GetParams((ParamVector*)&configs, E_BlockType_ConfigParam, NULL, NULL, true);
 						for (int jConfig = 0; jConfig < (int)configs.size(); ++jConfig)
 						{
 							configNames.push_back(configs[jConfig]->GetName());
@@ -610,7 +610,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 					{
 						const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
-						target->Flatten(&flatTarget, platformName, nullptr);
+						target->Flatten(&flatTarget, platformName, NULL);
 					}
 					mbWriterSetOptions(l, flatTarget.options);
 				}

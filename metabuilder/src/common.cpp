@@ -8,34 +8,15 @@
 
 #include <sys/stat.h>
 
-#include <unordered_set>
+#include <set>
 #include <list>
 #include <algorithm>
 #include <sstream>
-#include <utility>
 
 struct mbRandomContext
 {
 	mbRandomContext();
 	U32 seed[4];
-};
-
-class StringPtrHash
-{
-public:
-	size_t operator()(const std::string* str) const
-	{
-		return std::hash<std::string>()(*str);
-	}
-};
-
-class StringPtrEqual
-{
-public:
-	bool operator()(const std::string* a, const std::string* b) const
-	{
-		return *a == *b;
-	}
 };
 
 class StringPtrLess
@@ -47,7 +28,7 @@ public:
 	}
 };
 
-typedef std::unordered_set<std::string*, StringPtrHash, StringPtrEqual> UniqueStringHashTable;
+typedef std::set<std::string*, StringPtrLess> UniqueStringHashTable;
 
 static AppState								g_appState;
 static StringVector							g_makefiles;
@@ -56,9 +37,9 @@ static std::list<MetaBuilderContext*>		g_contextStack;
 static std::stack<std::string>				g_doFileCurrentDirStack;
 static mbRandomContext						g_randomContext;
 
-const char* g_cAndCPPSourceExt[] = { "cpp", "cxx", "c", "cc", "m", "mm", nullptr };
-const char* g_cAndCPPHeaderExt[] = { "hpp", "hxx", "h", nullptr };
-const char* g_cAndCPPInlineExt[] = { "inl", nullptr };
+const char* g_cAndCPPSourceExt[] = { "cpp", "cxx", "c", "cc", "m", "mm", NULL };
+const char* g_cAndCPPHeaderExt[] = { "hpp", "hxx", "h", NULL };
+const char* g_cAndCPPInlineExt[] = { "inl", NULL };
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -75,7 +56,7 @@ mbRandomContext::mbRandomContext()
 AppState::AppState()
 {
 	isProcessingPrimaryMakefile = false;
-	makeSetup = nullptr;
+	makeSetup = NULL;
 }
 	
 AppState::~AppState()
@@ -163,8 +144,8 @@ void AppState::OnTargetDirSepChanged()
 
 MetaBuilderContext::MetaBuilderContext()
 {
-	metabase = nullptr;
-	solution = nullptr;
+	metabase = NULL;
+	solution = NULL;
 	isMainMakefile = false;
 	
 	g_contexts.push_back(this);
@@ -186,7 +167,7 @@ MetaBuilderContext::~MetaBuilderContext()
 
 Block* MetaBuilderContext::ActiveBlock() const
 {
-	return activeBlockStack.size() > 0 ? activeBlockStack.top() : nullptr;
+	return activeBlockStack.size() > 0 ? activeBlockStack.top() : NULL;
 }
 
 void MetaBuilderContext::PushActiveBlock(Block* block)
@@ -289,7 +270,7 @@ static int luaFuncGlobalImport(lua_State* lua)
 
 	std::string requireFile;
 	mbLuaToStringExpandMacros(&requireFile, b, lua, 1);
-	mbLuaDoFile(lua, requireFile.c_str(), nullptr);
+	mbLuaDoFile(lua, requireFile.c_str(), NULL);
     return 0;
 }
 
@@ -360,7 +341,7 @@ static int luaSplit(lua_State* l)
 	lua_newtable(l);
 
 	//for each separator
-	while ((e = strchr(s, *sep)) != nullptr)
+	while ((e = strchr(s, *sep)) != NULL)
 	{
 		lua_pushlstring(l, s, e - s);  //push substring
 		lua_rawseti(l, -2, i++);
@@ -379,7 +360,7 @@ static int report (lua_State *L, int status)
   if (status) 
   {
 		msg = lua_tostring(L, -1);
-		if (msg == nullptr)
+		if (msg == NULL)
 			msg = "(error with no message)";
 
 		fprintf(stderr, "status=%d, %s\n", status, msg);
@@ -615,7 +596,7 @@ void mbCommonInit(lua_State* l, const std::string& path)
 {
 	g_doFileCurrentDirStack.push(path);
 	
-	mbLuaDoFile(l, "metabase.lua", nullptr);
+	mbLuaDoFile(l, "metabase.lua", NULL);
 }
 
 const char** mbGetCAndCPPSourceFileExtensions()
@@ -805,7 +786,6 @@ void mbRemoveDuplicates(StringVector* strings_)
 	tmp.reserve(strings.size());
 	
 	UniqueStringHashTable uniqueStrings;
-	uniqueStrings.reserve(strings.size());
 	for (int i = 0; i < (int)strings.size(); ++i)
 	{
 		UniqueStringHashTable::const_iterator it = uniqueStrings.find(&strings[i]);
@@ -987,7 +967,7 @@ const char* mbLuaToStringExpandMacros(std::string* result, Block* block, lua_Sta
 	const char* str = lua_tostring(l, stackPos);
 	if (!str)
 	{
-		return nullptr;
+		return NULL;
 	}
 	
 	mbExpandMacros(result, block, str);
@@ -1011,7 +991,7 @@ void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
 		}
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 void mbCommonLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)

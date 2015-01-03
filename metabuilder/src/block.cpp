@@ -15,7 +15,7 @@ static const char* g_stringGroups[] = {
 	STRINGGROUP_EXEDIRS,
 	STRINGGROUP_RESOURCES,
 	STRINGGROUP_FRAMEWORKS,
-	nullptr
+	NULL
 };
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ static void ProcessWildcards(StringVector* result, const StringVector& input)
 		//Look for wildcard
 		if (inputFilepath.find('*') != std::string::npos)
 		{
-			const char* excludeDirs = nullptr;
+			const char* excludeDirs = NULL;
 #if 0
 			const char* delimiter = "|excludedirs=";
 			char* tmp = (char*)strstr(inputFilepath.c_str(), delimiter);
@@ -449,7 +449,7 @@ void FlatConfig::Dump()
 
 Block::Block()
 {
-	m_parent = nullptr;
+	m_parent = NULL;
 	m_keyValueGroups.insert(std::make_pair("__macros", KeyValueMap()));
 	m_macroCacheDirty = true;
 }
@@ -511,13 +511,13 @@ const char* Block::GetParentConfig() const
 		if (block && block->GetType() == E_BlockType_ConfigParam)
 		{
 			if (block->m_name.length() == 0)
-				return nullptr;
+				return NULL;
 			
 			return block->m_name.c_str();
 		}
 	 }
 	 
-	return nullptr;
+	return NULL;
 }
 
 const char* Block::GetParentPlatform() const
@@ -527,13 +527,13 @@ const char* Block::GetParentPlatform() const
 		if (block && block->GetType() == E_BlockType_PlatformParam)
 		{
 			if (block->m_name.length() == 0)
-				return nullptr;
+				return NULL;
 			
 			return block->m_name.c_str();
 		}
 	 }
 	 
-	return nullptr;
+	return NULL;
 }
 
 void Block::AddChild(Block* block)
@@ -632,7 +632,7 @@ const StringVector* Block::GetStringGroup(const char* groupName) const
 	
 	if (it == m_stringGroups.end())
 	{
-		return nullptr;
+		return NULL;
 	}
 	
 	return &it->second;
@@ -840,7 +840,7 @@ ParamBlock* Block::GetParam(E_BlockType t, const char* name)
 			return (ParamBlock*)child;
 	}
 	
-	return nullptr;
+	return NULL;
 }
 
 const ParamBlock* Block::GetParam(E_BlockType t, const char* name) const

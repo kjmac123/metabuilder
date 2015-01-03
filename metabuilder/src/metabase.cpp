@@ -24,7 +24,7 @@ bool Metabase::IsA(E_BlockType t) const
 static int luaFuncMetabase(lua_State* l)
 {	
 	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
-	assert(activeBlock == nullptr);
+	assert(activeBlock == NULL);
  
 	std::string generatorName;
 	mbLuaToStringExpandMacros(&generatorName, activeBlock, l, 1);
