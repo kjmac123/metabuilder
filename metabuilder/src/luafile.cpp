@@ -571,7 +571,7 @@ static int g_write (lua_State *L, FILE *f, int arg) {
 				}
 			}
 
-			int dstLength = (int)(dstCursor - formattedLine);
+			size_t dstLength = (size_t)(dstCursor - formattedLine);
 			status = status && (fwrite(formattedLine, sizeof(char), dstLength, f) == dstLength);
 		}
     }

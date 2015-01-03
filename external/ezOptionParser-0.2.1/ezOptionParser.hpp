@@ -22,6 +22,7 @@ v0.2.1 20130506 Allow disabling doublespace of OPTIONS usage descriptions.
 #pragma GCC diagnostic ignored "-Wuninitialized"
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
 #include <stdlib.h>
