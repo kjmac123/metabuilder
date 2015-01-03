@@ -75,6 +75,7 @@ metabuilder_LDFLAGS.Debug := \
  \
 
 metabuilder_LIBDIRS.Debug := \
+  -L$(DXSDK_DIR)Lib\x86 \
 
 metabuilder_LDFLAGS.Debug += $(metabuilder_LIBDIRS.Debug)
 metabuilder_LIBS.Debug := \
@@ -85,6 +86,7 @@ metabuilder_LDFLAGS.Release := \
  \
 
 metabuilder_LIBDIRS.Release := \
+  -L$(DXSDK_DIR)Lib\x86 \
 
 metabuilder_LDFLAGS.Release += $(metabuilder_LIBDIRS.Release)
 metabuilder_LIBS.Release := \

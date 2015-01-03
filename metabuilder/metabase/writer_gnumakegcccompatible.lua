@@ -94,8 +94,6 @@ function WriteMakeFileCommonVars(file, currentTarget)
 		mbwriter.fatalerror("No C compiler set")
 	end
 	
-	--print(inspect(currentTarget))
-	
 	file:write(g_varCC .. 			" := " .. currentTarget.options.cc[1] .. "\n")
 	if currentTarget.options.cxx == nil then
 		mbwriter_fatalerror("No C++ compiler set")
@@ -104,7 +102,6 @@ function WriteMakeFileCommonVars(file, currentTarget)
 
 	for i = 1, #currentTarget.configs do
 		local config = currentTarget.configs[i]
-		--print(inspect(config))
 
 		--CPPFLAGS is commong to C and C++
 		file:write(g_varCPPFLAGS .. "." .. config.name .. " := \\\n")
@@ -181,7 +178,7 @@ function WriteMakeFileAppVars(file, currentTarget)
 
 		--Library directories. Will be stored in LDFLAGS
 		file:write(g_varLIBDIRS .. "." .. config.name .. " := \\\n")
-		if config.options.libdirs ~= nil then
+		if config.libdirs ~= nil then
 			for i = 1, #config.libdirs do
 				local libDir = mbwriter.getoutputrelfilepath(config.libdirs[i])
 				file:write("  -L" .. libDir .. " \\\n")
@@ -192,10 +189,10 @@ function WriteMakeFileAppVars(file, currentTarget)
 		
 		--Libraries
 		file:write(g_varLIBS .. "." .. config.name .. " := \\\n")
-		if config.options.libs ~= nil then
-			for i = 1, #currentTarget.libs do
-				local lib = mbwriter.getoutputrelfilepath(config.libs[i])
-				file:write("  " .. lib .. " \\\n")
+		if config.libs ~= nil then
+			for i = 1, #config.libs do
+				local lib = config.libs[i]
+				file:write("  -l:" .. lib .. " \\\n")
 			end
 		end
 		file:write("\n")
@@ -442,8 +439,6 @@ function WriteMakeFile(currentTarget)
 	end
 
 	file:write("\n")
-	
-	--print(inspect(currentTarget))
 	
 	file:write("\n")
 	file:write(GetDollarVar(g_varOBJ) .. " : | " .. GetDollarVar(g_varINTDIR) .. "\n\n")
