@@ -18,6 +18,7 @@ metabuilder_CFLAGS.Debug := \
 
 metabuilder_CXXFLAGS.Debug := \
   -Wall -std=c++11 \
+  -Wunused-function \
 
 metabuilder_DEFINES.Debug := \
   -DMETABUILDER \
@@ -41,6 +42,7 @@ metabuilder_CFLAGS.Release := \
 
 metabuilder_CXXFLAGS.Release := \
   -Wall -std=c++11 \
+  -Wunused-function \
 
 metabuilder_DEFINES.Release := \
   -DMETABUILDER \
