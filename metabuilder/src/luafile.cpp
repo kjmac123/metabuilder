@@ -546,20 +546,17 @@ static int g_write (lua_State *L, FILE *f, int arg) {
 		const char *s = luaL_checklstring(L, arg, &stringLength);
 		E_LineEndingStyle lineEndingStyle = mbGetAppState()->lineEndingStyle;
 
-#ifdef PLATFORM_WINDOWS
-		E_LineEndingStyle hostLineEndingStyle = E_LineEndingStyle_Windows;
-#else
-		E_LineEndingStyle hostLineEndingStyle = E_LineEndingStyle_UNIX;
-#endif
-
-		//Write without changing line endings
-		if (hostLineEndingStyle == lineEndingStyle)
-		{
-			status = status && (fwrite(s, sizeof(char), stringLength, f) == stringLength);
-		}
-		else
+		//TODO move setting of line ending behaviour somewhere sensible.
 		{
 			const char* lineEnding;
+			if (lineEndingStyle == E_LineEndingStyle_Default)
+			{
+#ifdef PLATFORM_WINDOWS
+				lineEndingStyle = E_LineEndingStyle_Windows;
+#else
+				lineEndingStyle = E_LineEndingStyle_UNIX;
+#endif
+			}
 			if (lineEndingStyle == E_LineEndingStyle_Windows)
 				lineEnding = "\r\n";
 			else

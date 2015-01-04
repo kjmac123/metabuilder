@@ -1,4 +1,4 @@
-@set local
+@SETLOCAL
 @set TOPDIR=%~dp0..\..
 @set MBDIR=metatmp
 @set GEN=msvc2013_windowsx64

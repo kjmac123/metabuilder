@@ -1,6 +1,13 @@
+@echo on
 setlocal
 
-SET MBBIN=bin\windows\metabuilder
+@set TOPDIR=%~dp0..
+
+IF "%1" == "" (
+	SET MBBIN=%TOPDIR%\bin\windows\metabuilder
+) ELSE (
+	SET MBBIN=%1
+)
 
 pushd ..\
 %MBBIN% --input metabuilder.lua --gen gnumakegcc_cygwin --metabase metabase --outdir metatmp_premade --endstyle unix

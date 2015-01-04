@@ -91,7 +91,6 @@ metabuilder_LDLIBS.Release += $(metabuilder_LIBS.Release)
 metabuilder_LDFLAGS := $(metabuilder_LDFLAGS.$(BUILDCONFIG)) $(metabuilder_LDLIBS.$(BUILDCONFIG))
 
 metabuilder_SRC := \
-	../../../../external/dlmalloc-2.8.6/dlmalloc.cpp \
 	../../../../external/freebsd/realpath.cpp \
 	../../../src/block.cpp \
 	../../../src/common.cpp \
@@ -115,7 +114,6 @@ metabuilder_SRC := \
 	../../../src/writer_xcode.cpp \
 
 metabuilder_OBJ := \
-	$(metabuilder_INTDIR)/dlmalloc.o \
 	$(metabuilder_INTDIR)/realpath.o \
 	$(metabuilder_INTDIR)/block.o \
 	$(metabuilder_INTDIR)/common.o \
@@ -138,9 +136,6 @@ metabuilder_OBJ := \
 	$(metabuilder_INTDIR)/writer_utility.o \
 	$(metabuilder_INTDIR)/writer_xcode.o \
 
-$(metabuilder_INTDIR)/dlmalloc.o : ../../../../external/dlmalloc-2.8.6/dlmalloc.cpp $(metabuilder_INTDIR)/dlmalloc.d 
-	@echo $(metabuilder_CXX) ../../../../external/dlmalloc-2.8.6/dlmalloc.cpp
-	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
 $(metabuilder_INTDIR)/realpath.o : ../../../../external/freebsd/realpath.cpp $(metabuilder_INTDIR)/realpath.d 
 	@echo $(metabuilder_CXX) ../../../../external/freebsd/realpath.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
@@ -240,7 +235,6 @@ all : all_metabuilder
 clean : clean_metabuilder
 
 %.d: ;
--include $(metabuilder_INTDIR)/dlmalloc.d
 -include $(metabuilder_INTDIR)/realpath.d
 -include $(metabuilder_INTDIR)/block.d
 -include $(metabuilder_INTDIR)/common.d
