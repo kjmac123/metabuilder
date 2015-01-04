@@ -330,6 +330,9 @@ function WriteMakeFile(currentTarget)
 	
 	makeFilename = mbwriter.normalisetargetfilepath(makeFilename)
 	local file = mbfile.open(makeFilename, "w")
+	if file == nil then
+		mbwriter.fatalerror("failed to open file " .. makeFilename)
+	end
 	
 	InitVars(currentTarget)	
 

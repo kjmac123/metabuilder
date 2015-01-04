@@ -96,66 +96,6 @@
    <ClCompile Include="..\..\..\src\writer_xcode.cpp">
       <Filter>src</Filter>
    </ClCompile>
-   <ClInclude Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.h">
-      <Filter>..\external\dlmalloc-2.8.6</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\..\external\freebsd\realpath.h">
-      <Filter>..\external\freebsd</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\block.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\common.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\configparam.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\core.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\luafile.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\makeglobal.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\makesetup.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\metabase.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\metabuilder_pch.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\platform\platform.h">
-      <Filter>src\platform</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\platformparam.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\solution.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\target.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\timeutil.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\writer.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\writer_msvc.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\writer_utility.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\writer_xcode.h">
-      <Filter>src</Filter>
-   </ClInclude>
    <None Include="..\..\..\metabuilder.lua">
       <Filter></Filter>
    </None>

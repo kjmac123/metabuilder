@@ -43,23 +43,6 @@ bool CreateLink(const char* src, const char* dst)
 	return false;
 }
 
-void NormaliseFilePath(char* outFilePath, const char* inFilePath)
-{
-    outFilePath[0] = 0;
-    char* outCursor = outFilePath;
-    for (const char* inCursor = inFilePath; *inCursor; ++inCursor)
-    {
-		char c = *inCursor;
-        //Normalise slashes
-        if (c == '/')
-            c = '\\';
-        
-        *outCursor = c;
-        ++outCursor;
-    }
-	*outCursor = '\0';
-}
-
 E_FileType GetFileType(const std::string& filepath)
 {
 	DWORD fileAttr = GetFileAttributesA(filepath.c_str());

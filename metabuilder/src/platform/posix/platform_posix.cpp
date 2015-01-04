@@ -79,37 +79,6 @@ bool CreateLink(const char* src, const char* dst)
 	return false;
 }
 
-void NormaliseFilePath(char* outFilePath, const char* inFilePath)
-{
-    bool preceedingSlash = false;
-    
-    outFilePath[0] = 0;
-    char* outCursor = outFilePath;
-    for (const char* inCursor = inFilePath; *inCursor; ++inCursor)
-    {
-		char c = *inCursor;
-        //Normalise slashes
-        if (c == '\\')
-            c = '/';
-        
-        //Ignore duplicate slashes
-        if (c == '/')
-        {
-            if (preceedingSlash)
-                continue;
-            preceedingSlash = true;
-        }
-        else
-        {
-            preceedingSlash = false;
-        }
-        
-        *outCursor = c;
-        ++outCursor;
-    }
-	*outCursor = '\0';
-}
-
 E_FileType GetFileType(const std::string& filepath)
 {
 	struct stat statbuf;
@@ -244,6 +213,7 @@ std::string FileGetAbsPath(const std::string& path)
 		mbExitError();
    	}
 
+	MB_LOGINFO(storage);
 	return storage;
 }
 

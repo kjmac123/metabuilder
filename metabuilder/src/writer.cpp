@@ -31,8 +31,11 @@ static int luaFuncMkdir(lua_State* l)
 
     std::string path;
 	mbLuaToStringExpandMacros(&path, b, l, 1);
+
+	char normalisedDir[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedDir, path.c_str());
 	
-	if (!mbCreateDirChain(path.c_str()))
+	if (!mbCreateDirChain(normalisedDir))
 	{
 		mbExitError();
 	}
@@ -50,10 +53,15 @@ static int luaFuncMklink(lua_State* l)
 		MB_LOGERROR("Must specify both source and destination when creating link");
 		mbExitError();
 	}
-		
-	if (!Platform::CreateLink(src.c_str(), dst.c_str()))
+
+	char normalisedLinkSrc[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedLinkSrc, src.c_str());
+	char normalisedLinkDst[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedLinkDst, dst.c_str());
+
+	if (!Platform::CreateLink(normalisedLinkSrc, normalisedLinkDst))
 	{
-		MB_LOGERROR("Failed to create link %s->%s", src.c_str(), dst.c_str());
+		MB_LOGERROR("Failed to create link %s->%s", normalisedLinkSrc, normalisedLinkDst);
 		mbExitError();
 	}
 	
@@ -107,26 +115,31 @@ static int luaFuncFatalError(lua_State* l)
 
 static int luaFuncCopyFile(lua_State* l)
 {
-	std::string fromFilename, toFilename;
+	std::string fromFilename_, toFilename_;
 	
-	if (!mbLuaToStringExpandMacros(&fromFilename, NULL, l, 1) || !mbLuaToStringExpandMacros(&toFilename, NULL, l, 2))
+	if (!mbLuaToStringExpandMacros(&fromFilename_, NULL, l, 1) || !mbLuaToStringExpandMacros(&toFilename_, NULL, l, 2))
 	{
 		MB_LOGERROR("Failed to copy file. Insufficient args");
 		mbExitError();
 		return 0;
 	}
 
-	FILE* fromFile = fopen(fromFilename.c_str(), "rb");
+	char normalisedFromFilename[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedFromFilename, fromFilename_.c_str());
+	char normalisedToFilename[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedToFilename, toFilename_.c_str());
+
+	FILE* fromFile = fopen(normalisedFromFilename, "rb");
 	if (!fromFile)
 	{
-        MB_LOGERROR("cannot open file %s", fromFilename.c_str());
+		MB_LOGERROR("cannot open file %s", normalisedFromFilename);
         mbExitError();
 	}
 	
-	FILE* toFile = fopen(toFilename.c_str(), "wb");
+	FILE* toFile = fopen(normalisedToFilename, "wb");
 	if (!toFile)
 	{
-        MB_LOGERROR("cannot open file %s", toFilename.c_str());
+		MB_LOGERROR("cannot open file %s", normalisedToFilename);
         mbExitError();
 	}
 	
@@ -144,7 +157,7 @@ static int luaFuncCopyFile(lua_State* l)
 		{
 			fclose(toFile);
 			fclose(fromFile);
-			MB_LOGERROR("Failed to read from file %s", fromFilename.c_str());
+			MB_LOGERROR("Failed to read from file %s", normalisedFromFilename);
 			mbExitError();
 		}
 		
@@ -153,7 +166,7 @@ static int luaFuncCopyFile(lua_State* l)
 		{
 			fclose(toFile);
 			fclose(fromFile);
-			MB_LOGERROR("Failed to copy to file %s", toFilename.c_str());
+			MB_LOGERROR("Failed to copy to file %s", normalisedToFilename);
 			mbExitError();
 		}
 		

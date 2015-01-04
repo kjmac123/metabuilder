@@ -212,16 +212,23 @@ static LStream *newfile (lua_State *L) {
 }
 
 
-static void opencheck (lua_State *L, const char *fname, const char *mode) {
+static void opencheck (lua_State *L, const char *fname_, const char *mode) {
   LStream *p = newfile(L);
-  p->f = fopen(fname, mode);
+
+  char normalisedFname[MB_MAX_PATH];
+  Platform::NormaliseFilePath(normalisedFname, fname_);
+
+  p->f = fopen(normalisedFname, mode);
   if (p->f == NULL)
-    luaL_error(L, "cannot open file " LUA_QS " (%s)", fname, strerror(errno));
+	  luaL_error(L, "cannot open file " LUA_QS " (%s)", normalisedFname, strerror(errno));
 }
 
 
 static int io_open (lua_State *l) {
-	const char *filename = luaL_checkstring(l, 1);
+	const char *filename_ = luaL_checkstring(l, 1);
+
+	char normalisedFname[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedFname, filename_);
 
 	const char *mode = luaL_optstring(l, 2, "r");
 	LStream *p = newfile(l);
@@ -240,8 +247,8 @@ static int io_open (lua_State *l) {
 		mode = "wb";
 	}
 
-	p->f = fopen(filename, mode);
-	return (p->f == NULL) ? luaL_fileresult(l, 0, filename) : 1;
+	p->f = fopen(normalisedFname, mode);
+	return (p->f == NULL) ? luaL_fileresult(l, 0, normalisedFname) : 1;
 }
 
 
@@ -540,20 +547,24 @@ static int g_write (lua_State *L, FILE *f, int arg) {
 		E_LineEndingStyle lineEndingStyle = mbGetAppState()->lineEndingStyle;
 
 #ifdef PLATFORM_WINDOWS
-		E_LineEndingStyle defaultLineEndingStyle = E_LineEndingStyle_Windows;
-		char lineEnding[] = "\r\n";
+		E_LineEndingStyle hostLineEndingStyle = E_LineEndingStyle_Windows;
 #else
-		E_LineEndingStyle defaultLineEndingStyle = E_LineEndingStyle_UNIX;
-		char lineEnding[] = "\n";
+		E_LineEndingStyle hostLineEndingStyle = E_LineEndingStyle_UNIX;
 #endif
 
 		//Write without changing line endings
-		if ((lineEndingStyle == E_LineEndingStyle_Default && defaultLineEndingStyle == E_LineEndingStyle_UNIX) || lineEndingStyle == E_LineEndingStyle_UNIX)
+		if (hostLineEndingStyle == lineEndingStyle)
 		{
 			status = status && (fwrite(s, sizeof(char), stringLength, f) == stringLength);
 		}
 		else
 		{
+			const char* lineEnding;
+			if (lineEndingStyle == E_LineEndingStyle_Windows)
+				lineEnding = "\r\n";
+			else
+				lineEnding = "\n";
+
 			char* dstCursor = formattedLine;
 			for (const char* srcCursor = s; *srcCursor; ++srcCursor)
 			{

@@ -123,13 +123,15 @@ void AppState::ProcessSetup()
 
 void AppState::ProcessGlobal()
 {
+	char tmp[MB_MAX_PATH];
+	Platform::NormaliseFilePath(tmp, metabaseDirAbs.c_str());
+	metabaseDirAbs = tmp;
 	OnTargetDirSepChanged();
 }
 
 void AppState::OnTargetDirSepChanged()
 {
 	mbNormaliseFilePath(&mainMetaMakeFileAbs,	makeGlobal->GetTargetDirSep());
-	mbNormaliseFilePath(&metabaseDirAbs,		makeGlobal->GetTargetDirSep());
 	mbNormaliseFilePath(&makeOutputTopDirAbs,	makeGlobal->GetTargetDirSep());
 
 	MetaBuilderContext* ctx = mbGetActiveContext();
@@ -388,18 +390,17 @@ static int luaFuncCheckPlatform(lua_State* l)
 	return 1;
 }
 
-void mbLuaDoFile(lua_State* l, const std::string& filepath_, PostLoadInitFunc initFunc)
+void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc initFunc)
 {
-	char normalisedFilePath[MB_MAX_PATH];
-	Platform::NormaliseFilePath(normalisedFilePath, filepath_.c_str());
-	const std::string& currentDir = g_doFileCurrentDirStack.top();
+	char normalisedCurrentDir[MB_MAX_PATH];
 
     std::string absPath;
     //Try relative to make file first.
     {
 		char tmp[MB_MAX_PATH];
-		mbHostPathJoin(tmp, currentDir.c_str(), normalisedFilePath);
-        if (mbFileExists(tmp))
+		mbHostPathJoin(tmp, normalisedCurrentDir, filepath.c_str());
+		Platform::NormaliseFilePath(tmp);
+		if (mbFileExists(tmp))
         {
             absPath = tmp;
         }
@@ -408,9 +409,9 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath_, PostLoadInitFunc in
 	//Attempt to open directly
     if (absPath.length() == 0)
 	{
-		if (mbFileExists(normalisedFilePath))
+		if (mbFileExists(filepath.c_str()))
 		{
-			absPath = Platform::FileGetAbsPath(normalisedFilePath);
+			absPath = Platform::FileGetAbsPath(filepath);
 		}
 	}
 
@@ -418,14 +419,17 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath_, PostLoadInitFunc in
     if (absPath.length() == 0)
     {
 		char tmpJoin[MB_MAX_PATH];
-		mbHostPathJoin(tmpJoin, mbGetAppState()->metabaseDirAbs.c_str(), normalisedFilePath);
+		mbHostPathJoin(tmpJoin, mbGetAppState()->metabaseDirAbs.c_str(), filepath.c_str());
 		absPath = tmpJoin;
     }
 	
 	std::string newDir = mbPathGetDir(absPath.c_str());
 	g_doFileCurrentDirStack.push(newDir);
 	
-	if (report(l, luaL_loadfile(l, absPath.c_str())))
+	char normalisedLuaFile[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedLuaFile, absPath.c_str());
+
+	if (report(l, luaL_loadfile(l, normalisedLuaFile)))
 		mbExitError();
 	
 	if (initFunc)
