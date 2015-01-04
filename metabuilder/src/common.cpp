@@ -1,6 +1,8 @@
 #include "metabuilder_pch.h"
 
+#ifdef MB_DLMALLOC
 #include "dlmalloc.h"
+#endif
 
 #include "makesetup.h"
 #include "makeglobal.h"
@@ -478,7 +480,7 @@ void mbHostPathJoin(char* result, const char* a, const char* b)
 	}
 
 	//Trim trailing slash
-	int aLen = strlen(a);
+	int aLen = (int)strlen(a);
 
 	char trailingSlashToRestore = 0;
 	char* trailingSlashPtr = NULL;
@@ -975,7 +977,7 @@ void mbExpandMacros(std::string* result, const std::map<std::string, std::string
 			macroStart += 2;
 			char key[1024];
 			const char* macroEnd = strstr(macroStart, "}");
-			int length = macroEnd - macroStart;
+			int length = static_cast<int>(macroEnd - macroStart);
 
 			memcpy(key, macroStart, length);
 			key[length] = '\0';
@@ -1017,17 +1019,28 @@ const char* mbLuaToStringExpandMacros(std::string* result, Block* block, lua_Sta
 
 void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
 {
+	//Only an experiment for windows builds right now
+	#ifdef MB_DLMALLOC
+		#define LUA_MALLOC dlmalloc
+		#define LUA_REALLOC dlrealloc
+		#define LUA_FREE dlfree
+	#else
+		#define LUA_MALLOC malloc
+		#define LUA_REALLOC realloc
+		#define LUA_FREE free
+	#endif
+
 	if (nsize == 0)
-		dlfree(ptr);
+		LUA_FREE(ptr);
 	else
 	{
 		if (osize == 0)
 		{
-			return dlmalloc(nsize);
+			return LUA_MALLOC(nsize);
 		}
 		else
 		{
-			return dlrealloc(ptr, nsize);
+			return LUA_REALLOC(ptr, nsize);
 		}
 	}
 

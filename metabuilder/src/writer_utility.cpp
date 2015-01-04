@@ -44,7 +44,7 @@ static void mbWriterUtility_FileConvertToAbsolute(char* filepathAbs, const char*
 	//Bail if we've marked this filepath to not be expanded
 	if (mbWriterUtility_FilePathMarkedAsRaw(filepath))
 	{
-		int len = strlen(filepath);
+		int len = (int)strlen(filepath);
 		//As we're truncating, len will account for null termination.
 		memcpy(filepathAbs, filepath + 1, len);
 		return;

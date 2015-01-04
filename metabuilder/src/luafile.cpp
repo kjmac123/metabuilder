@@ -689,6 +689,7 @@ static void createmeta (lua_State *L) {
   lua_pop(L, 1);  /* pop new metatable */
 }
 
+#if 0
 
 /*
 ** function to (not) close the standard files stdin, stdout, and stderr
@@ -701,7 +702,6 @@ static int io_noclose (lua_State *L) {
   return 2;
 }
 
-
 static void createstdfile (lua_State *L, FILE *f, const char *k,
                            const char *fname) {
   LStream *p = newprefile(L);
@@ -713,6 +713,7 @@ static void createstdfile (lua_State *L, FILE *f, const char *k,
   }
   lua_setfield(L, -2, fname);  /* add file to module */
 }
+#endif
 
 
 void mbLuaFile_Register(lua_State* L)

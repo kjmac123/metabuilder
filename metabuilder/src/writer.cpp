@@ -16,14 +16,7 @@ static std::vector<KeyValue>	g_registeredTargets;
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-static int luaFuncGlobalImport(lua_State* l)
-{
-    std::string requireFile;
-	mbLuaToStringExpandMacros(&requireFile, NULL, l, 1);
 
-	mbLuaDoFile(l, requireFile, NULL);
-    return 0;
-}
 
 static int luaFuncMkdir(lua_State* l)
 {

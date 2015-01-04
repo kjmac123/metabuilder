@@ -39,31 +39,62 @@
 namespace FreeBSD
 {
 
-size_t strlcpy(char* dst, const char* src, size_t size)
+/*
+ * Copy src to string dst of size siz.  At most siz-1 characters
+ * will be copied.  Always NUL terminates (unless siz == 0).
+ * Returns strlen(src); if retval >= siz, truncation occurred.
+ */
+size_t
+strlcpy(char * __restrict dst, const char * __restrict src, size_t siz)
 {
-	int srcLen = strlen(src);
-
-	int maxBytes = size - 1;
-	int bytesToCopy = srcLen < maxBytes ? srcLen : maxBytes;
-
-	memcpy(dst, src, bytesToCopy);
-	dst[bytesToCopy] = '\0';
-
-	return bytesToCopy;
+    char *d = dst;
+    const char *s = src;
+    size_t n = siz;
+    
+    /* Copy as many bytes as will fit */
+    if (n != 0) {
+        while (--n != 0) {
+            if ((*d++ = *s++) == '\0')
+                break;
+        }
+    }
+    
+    /* Not enough room in dst, add NUL and traverse rest of src */
+    if (n == 0) {
+        if (siz != 0)
+            *d = '\0';		/* NUL-terminate dst */
+        while (*s++)
+            ;
+    }
+    
+    return(s - src - 1);	/* count does not include NUL */
 }
 
-size_t strlcat(char* dst, const char* src, size_t size)
+size_t strlcat(char *dst, const char *src, size_t siz)
 {
-	int srcLen = strlen(src);
-
-	int dstLen = strlen(dst);
-	int maxBytes = size - dstLen - 1;
-	
-	int bytesToCopy = srcLen < maxBytes ? srcLen : maxBytes;
-	memcpy(dst, src, bytesToCopy);
-	dst[bytesToCopy] = '\0';
-
-	return bytesToCopy;
+    char *d = dst;
+    const char *s = src;
+    size_t n = siz;
+    size_t dlen;
+    
+    /* Find the end of dst and adjust bytes left but don't go past end */
+    while (n-- != 0 && *d != '\0')
+        d++;
+    dlen = d - dst;
+    n = siz - dlen;
+    
+    if (n == 0)
+        return(dlen + strlen(s));
+    while (*s != '\0') {
+        if (n != 1) {
+            *d++ = *s;
+            n--;
+        }
+        s++;
+    }
+    *d = '\0';
+    
+    return(dlen + (s - src));	/* count does not include NUL */
 }
 
 /*
@@ -202,7 +233,7 @@ realpath(const char * __restrict path, char * __restrict resolved)
                                 errno = ELOOP;
                                 return (NULL);
                         }
-                        slen = readlink(resolved, symlink, sizeof(symlink) - 1);
+                        slen = static_cast<int>(readlink(resolved, symlink, sizeof(symlink) - 1));
                         if (slen < 0) {
                                 if (m)
                                         free(resolved);

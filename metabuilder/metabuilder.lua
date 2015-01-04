@@ -28,8 +28,6 @@ solution "metabuilder"
 
 		files
 		{
-			"../external/dlmalloc-2.8.6/dlmalloc.cpp",
-		
 			"src/platform/platform.cpp",
 			"src/block.cpp",
 			"src/common.cpp",

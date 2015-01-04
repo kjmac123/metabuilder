@@ -87,7 +87,7 @@ static void AddHeadersAutomatically(StringVector* files)
 
 static void ProcessWildcards(StringVector* result, const StringVector& input)
 {
-	int initialResultCount = result->size();
+	int initialResultCount = static_cast<int>(result->size());
 	
 	for (int i = 0; i < (int)input.size(); ++i)
 	{
