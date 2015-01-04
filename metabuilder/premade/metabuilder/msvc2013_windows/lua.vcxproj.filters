@@ -102,6 +102,66 @@
    <ClCompile Include="..\..\..\..\external\lua-5.2.2\src\lzio.c">
       <Filter>src</Filter>
    </ClCompile>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lapi.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lauxlib.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lcode.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lctype.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\ldebug.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\ldo.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lfunc.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lgc.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\llex.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lmem.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lobject.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lopcodes.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lparser.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lstate.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lstring.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\ltable.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\ltm.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lundump.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lvm.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\lua-5.2.2\src\lzio.h">
+      <Filter>src</Filter>
+   </ClInclude>
    <None Include="..\..\..\..\external\lua-5.2.2\metabuilder.lua">
       <Filter></Filter>
    </None>

@@ -213,7 +213,6 @@ std::string FileGetAbsPath(const std::string& path)
 		mbExitError();
    	}
 
-	MB_LOGINFO(storage);
 	return storage;
 }
 

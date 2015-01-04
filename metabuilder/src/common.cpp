@@ -571,7 +571,9 @@ bool mbPathReplaceFileExtension(char* result, const char* filename, const char* 
 
 bool mbFileExists(const std::string& filepath)
 {
-    FILE* f = fopen(filepath.c_str(), "rb");
+	char normalised[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalised, filepath.c_str());
+	FILE* f = fopen(normalised, "rb");
     if (f)
     {
         fclose(f);
