@@ -79,6 +79,18 @@ metabuilder_LIBDIRS.Debug := \
 
 metabuilder_LDFLAGS.Debug += $(metabuilder_LIBDIRS.Debug)
 metabuilder_LIBS.Debug := \
+ kernel32.lib \
+ user32.lib \
+ gdi32.lib \
+ winspool.lib \
+ comdlg32.lib \
+ advapi32.lib \
+ shell32.lib \
+ ole32.lib \
+ oleaut32.lib \
+ uuid.lib \
+ odbc32.lib \
+ odbccp32.lib \
 
 metabuilder_LDLIBS.Debug += $(metabuilder_LIBS.Debug)
 
@@ -90,6 +102,18 @@ metabuilder_LIBDIRS.Release := \
 
 metabuilder_LDFLAGS.Release += $(metabuilder_LIBDIRS.Release)
 metabuilder_LIBS.Release := \
+ kernel32.lib \
+ user32.lib \
+ gdi32.lib \
+ winspool.lib \
+ comdlg32.lib \
+ advapi32.lib \
+ shell32.lib \
+ ole32.lib \
+ oleaut32.lib \
+ uuid.lib \
+ odbc32.lib \
+ odbccp32.lib \
 
 metabuilder_LDLIBS.Release += $(metabuilder_LIBS.Release)
 
