@@ -41,6 +41,8 @@ protected:
 
 typedef std::vector<Target*> TargetVector;
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
 void mbTargetLuaRegister(lua_State* lua);
 
 #endif

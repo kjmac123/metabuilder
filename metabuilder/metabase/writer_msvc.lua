@@ -1,14 +1,12 @@
 --Note there's a bug in MSVC 2010 in which property pages stop working if absolute paths are used when including files
 --https://connect.microsoft.com/VisualStudio/feedback/details/635294/using-absolute-path-in-clcompile-item-prevents-property-pages-from-showing
+logprofile("STARTUP")
 
 import "writer_common.lua"
 
-g_currentTarget = writer_solution.targets[1]
+g_currentTarget = mbwriter.solution.targets[1]
 
 g_enableHLSL = false
-
---Map relative to absolute path
-g_filePathMap = {}
 
 --[[ PRE-PROCESSING ]] --------------------------------------------------------------------------------
 
@@ -21,12 +19,8 @@ g_fileTypeMap["hpp"]		= "ClInclude"
 g_fileTypeMap["inl"]		= "ClInclude"
 g_fileTypeMap["rc"]			= "ResourceCompile"
 
-function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, writer_global.currentmetamakedirabs, writer_global.makeoutputdirabs, "\\", g_filePathMap)
-end
-
 function GetFileType(filepath)
-	local ext = Util_FileExtension(filepath)
+	local ext = mbfilepath.getextension(filepath)
 	local lastKnownType = g_fileTypeMap[ext]
 	if lastKnownType == nil then
 		return "None"
@@ -36,15 +30,15 @@ function GetFileType(filepath)
 end
 
 
-function InitFolder(folderList, path, filename)
+function InitFolder(folderList, path_, filename)
+	local path = mbfilepath.trimtrailingslash(path_)
+
 	local pathComponents = { "" }
 	
 	if (path ~= "") then 
-		pathComponents = mbwriter_split(path, "/")
+		pathComponents = split(path, "/")
 		table.insert(pathComponents, 1, "")
 	end
-
-	local fullProjectRelativeFilePath = Util_FilePathJoin(path,filename)
 
 	local currentPath = ""
 	local currentParentID = g_mainGroupID
@@ -52,7 +46,7 @@ function InitFolder(folderList, path, filename)
 
 	local nComponents = #pathComponents
 	local currentFolderID = g_mainGroupID
-
+	
 	for i = 1, #pathComponents do
 		if i == 1 then
 			currentPath = pathComponents[i]
@@ -66,67 +60,65 @@ function InitFolder(folderList, path, filename)
 		local currentFolder = folderList[currentPath]
 		if currentFolder == nil then
 			--we've not encountered this path before
+			
+			if #pathComponents[i] > 0 then
+				local newFolderID = mbwriter.msvcgenerateid()
 
-			local newFolderID = msvcgenerateid()
+				currentFolder = {
+					fullName = mbwriter.getoutputrelfilepath(currentPath),
+					relativePath = currentPath,
+					shortName = pathComponents[i],
+					id = newFolderID,
+					parentid = currentParentID,
+					childIDs = {}
+				}
 
-			currentFolder = {
-				fullName = GetFullFilePath(currentPath),
-				relativePath = currentPath,
-				shortName = pathComponents[i],
-				id = newFolderID,
-				parentid = currentParentID,
-				childIDs = {}
-			}
+				-- Add as a child of our parent
+				if currentParentPath ~= nil then
+					parentFolder = folderList[currentParentPath]
+					parentFolder.childIDs[#parentFolder.childIDs] = newFolderID
+				end
 
-			-- Add as a child of our parent
-			if currentParentPath ~= nil then
-				parentFolder = folderList[currentParentPath]
-				table.insert(parentFolder.childIDs, newFolderID)
+				--update our parent for the next folder
+				currentParentID = newFolderID
+				currentParentPath = currentPath
+
+				folderList[currentPath] = currentFolder
 			end
-
-			--print("created " .. currentPath .. " parent id " .. currentParentID)
-
-			--update our parent for the next folder
-			currentParentID = newFolderID
-			currentParentPath = currentPath
-
-			folderList[currentPath] = currentFolder
 		else
 			local currentFolder = folderList[currentPath]
 			currentParentID = currentFolder.id
 			currentParentPath = currentPath
 		end
-
-
 	end
 end
 
-function InitFolders(folderList, fileList)
+function InitFolders(folderList, groups)
+	logprofile("InitFolders")
 	-- Lazily initialise chains of folders based upon the list of files provided
 	-- For each folder store:
 	--	the short name of the folder
 	--	its unique id
 	--	the unique id of its parent
-
-	for i = 1, #fileList do
-		local f = fileList[i]
-		--print(f)
-		local path, filename, ext = Util_FilePathDecompose(f)
-
-		--remove trailing slash
-		local path = string.sub(path, 1, -2)
-
-		--print(path .. " from file " .. filename)
-		
-		InitFolder(folderList, path, filename)
+	
+	for _, group in ipairs(groups) do 
+		for i = 1, #group.fileInfo do
+			InitFolder(folderList, group.fileInfo[i].inputRelativeDir, group.fileInfo[i].outputRelativeFilename)
+		end
 	end
 
-	--print(inspect(folderList))
+	logprofile("END InitFolders")
 end
 
 --[[ FILE WRITING ]] --------------------------------------------------------------------------------
 
+function FileGroupCompare(a, b)
+	return a.name < b.name
+end
+
 function BuildFileGroups(currentTarget)
+	logprofile("BuildFileGroups " .. currentTarget.name)
+
 	local fileIncludedInBuild = {}
 
 	for i = 1, #currentTarget.files do
@@ -138,6 +130,7 @@ function BuildFileGroups(currentTarget)
 
 	for i = 1, #currentTarget.allsourcefiles do
 		local f = currentTarget.allsourcefiles[i]
+		
 		local fIncludedInBuild = fileIncludedInBuild[f]
 		if fIncludedInBuild == nil then
 			fIncludedInBuild = false
@@ -147,22 +140,37 @@ function BuildFileGroups(currentTarget)
  
 		local group = groupMap[fileType]
 		if group == nil then
-			local newGroup = {fileType=fileType, fileInfo={}}
+			local newGroup = {name=fileType, fileInfo={}}
 			groupMap[fileType] = newGroup
 			group = newGroup
 		end
 		
-		local fileInfo = {filename=f, includedInBuild=fIncludedInBuild}
-		table.insert(group.fileInfo, fileInfo)
-	end	
+		local fileInfo = {
+			inputRelativeDir = nil,
+			shortName = nil,
+			ext = nil,
+			includedInBuild = fIncludedInBuild,
+			outputRelativeFilename = mbwriter.getoutputrelfilepath(f)
+		}
+		fileInfo.inputRelativeDir, fileInfo.shortName, fileInfo.ext = mbfilepath.decompose(f)
+		
+		group.fileInfo[#group.fileInfo+1] = fileInfo
+	end
 	
-	--print(inspect(groupMap))
-	return groupMap
+	local sortedGroups = {}
+	
+	for _, group in pairs(groupMap) do 
+		sortedGroups[#sortedGroups+1] = group
+	end
+	
+	table.sort(sortedGroups, FileGroupCompare)
+			
+	logprofile("END BuildFileGroups")
+	return sortedGroups
 end
 
 function WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, fileInfo)
-	local f = GetFullFilePath(fileInfo.filename)
-	file:write("   <" .. groupName .. " Include=\"" .. f .. "\">\n")
+	file:write("   <" .. groupName .. " Include=\"" .. fileInfo.outputRelativeFilename .. "\">\n")
 end
 
 function WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, fileInfo)
@@ -182,7 +190,7 @@ end
 function WriteVcxProjPropertyGroupOptions(file, groupOption)
 	if groupOption ~= nil then
 		for jOption = 1, #groupOption do
-			local keyValue = mbwriter_split(groupOption[jOption], "=")
+			local keyValue = split(groupOption[jOption], "=")
 			local key = keyValue[1]
 			local value = keyValue[2]
 
@@ -200,25 +208,26 @@ function WriteVcxProjRawXMLBlocks(file, groupOptionRawXml)
 	end
 end
 
-function WriteVcxProj(currentTarget, groupMap)
-	local projectID = msvcgenerateid()
-	msvcregisterprojectid(currentTarget.name, projectID)
+function WriteVcxProj(currentTarget, groups)	
+	logprofile("WriteVcxProj")
 	
-	mbwriter_mkdir(writer_global.makeoutputdirabs)
+	local projectID = mbwriter.msvcgenerateid()
+	mbwriter.msvcregisterprojectid(currentTarget.name, projectID)
+	
+	mbwriter.mkdir(mbwriter.global.makeoutputdirabs)
 
-	local msvcPlatform = Util_GetKVValue(writer_global.options.msvc, "platform")
+	local msvcPlatform = mbutil.getkvvalue(mbwriter.global.options.msvc, "platform")
 	if msvcPlatform == nil then
 		-- TODO error
 		print("unknown platform!")
 		os.exit(1)
 	end
 	
-	local vcxprojName = writer_global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj";
-	vcxprojName = Util_FileNormaliseWindows(vcxprojName)
-	--print("Writing " .. vcxprojName .. "\n")
-	local file = io.open(vcxprojName, "w")
+	local vcxprojName = mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj";
+	vcxprojName = mbwriter.normalisetargetfilepath(vcxprojName)
+	local file = mbfile.open(vcxprojName, "w")
 	if (file == nil) then 
-		mbwriter_fatalerror("Failed to open file " .. vcxprojName .. " for writing")
+		mbwriter.fatalerror("Failed to open file " .. vcxprojName .. " for writing")
 	end
 
 	local pchFileBaseName = nil
@@ -249,8 +258,8 @@ function WriteVcxProj(currentTarget, groupMap)
 				
 	file:write("    <RootNamespace>metabuilder</RootNamespace>\n")
 	
-	WriteVcxProjPropertyGroupOptions(file, writer_global.options.msvcglobals)
-	WriteVcxProjRawXMLBlocks(file, writer_global.options.msvcglobalsrawxml)
+	WriteVcxProjPropertyGroupOptions(file, mbwriter.global.options.msvcglobals)
+	WriteVcxProjRawXMLBlocks(file, mbwriter.global.options.msvcglobalsrawxml)
 
 	file:write("    <ProjectName>" .. g_currentTarget.name .. "</ProjectName>\n")
 	file:write("  </PropertyGroup>\n")
@@ -285,11 +294,11 @@ function WriteVcxProj(currentTarget, groupMap)
 		file:write("    <LinkIncremental>false</LinkIncremental>\n") --incremental linking is only ever a source of pain (and corrupt files)
 	    file:write("    <ExecutablePath>")
 		for jExeDir = 1, #config.exedirs do
-			file:write(GetFullFilePath(config.exedirs[jExeDir]) .. ";")
+			file:write(mbwriter.getoutputrelfilepath(config.exedirs[jExeDir]) .. ";")
 		end
 		file:write("$(ExecutablePath)</ExecutablePath>\n")
-	    file:write("    <IntDir>" .. Util_FileNormaliseWindows(writer_global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
-	    file:write("    <OutDir>" .. Util_FileNormaliseWindows(writer_global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
+	    file:write("    <IntDir>" .. mbwriter.normalisetargetfilepath(mbwriter.global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
+	    file:write("    <OutDir>" .. mbwriter.normalisetargetfilepath(mbwriter.global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
 	    file:write("    <TargetName>$(ProjectName)_$(Configuration)</TargetName>\n")
 		
 		WriteVcxProjPropertyGroupOptions(file, config.options.msvcpropertygroup)
@@ -311,7 +320,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		
 		if config.options.msvccompile ~= nil then
 			for jOption = 1, #config.options.msvccompile do
-				local keyValue = mbwriter_split(config.options.msvccompile[jOption], "=")
+				local keyValue = split(config.options.msvccompile[jOption], "=")
 				local key = keyValue[1]
 				local value = keyValue[2]
 
@@ -327,7 +336,7 @@ function WriteVcxProj(currentTarget, groupMap)
 
 		file:write("      <AdditionalIncludeDirectories>")
 		for jIncludeDir = 1, #config.includedirs do
-			local includeDir = GetFullFilePath(config.includedirs[jIncludeDir])
+			local includeDir = mbwriter.getoutputrelfilepath(config.includedirs[jIncludeDir])
 			file:write(includeDir .. ";")
 		end
 		file:write("</AdditionalIncludeDirectories>\n")
@@ -342,7 +351,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		--Lib directories
 		file:write("      <AdditionalLibraryDirectories>")
 		for jLibDir = 1, #config.libdirs do
-			local libDir = GetFullFilePath(config.libdirs[jLibDir])
+			local libDir = mbwriter.getoutputrelfilepath(config.libdirs[jLibDir])
 			file:write(libDir .. ";")
 		end
 		file:write("</AdditionalLibraryDirectories>\n")
@@ -361,7 +370,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		--Add custom options
 		if config.options.msvclink ~= nil then
 			for jOption = 1, #config.options.msvclink do
-				local keyValue = mbwriter_split(config.options.msvclink[jOption], "=")
+				local keyValue = split(config.options.msvclink[jOption], "=")
 				local key = keyValue[1]
 				local value = keyValue[2]
 
@@ -385,7 +394,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		
 		--Post build event
 		file:write("    <PostBuildEvent>\n")
-		local postbuild = Util_GetKVValue(config.options.msvc, "postbuild")
+		local postbuild = mbutil.getkvvalue(config.options.msvc, "postbuild")
 		if postbuild ~= nil then
 			file:write("	  <Command>" .. postbuild .. "</Command>\n")
 		end
@@ -396,31 +405,7 @@ function WriteVcxProj(currentTarget, groupMap)
 		
 		file:write("  </ItemDefinitionGroup>\n")
 	end
---[[
-	--Shaders
-	file:write("  <ItemGroup>\n")
-	for i = 1, #CompileShaderGroup do
-		local f = CompileShaderGroup[i][1]
-		local fIncludedInBuild = CompileShaderGroup[i][2]
 
-		file:write("    <CompilerShader Include=\"" .. GetFullFilePath(f) .. "\">\n")
-		for iConfig = 1, #currentTarget.configs do
-			local config = currentTarget.configs[iConfig]
-			if fIncludedInBuild == false then 
-				file:write("      <ExcludedFromBuild Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">true</ExcludedFromBuild>\n")
-			else
-				--TODO: something more robust than the below. Sensible file extensions sound good.
-				local profile = "vs_3_0"
-				if string.find(f, "Ps.hlsl") ~= nil then
-					profile = "ps_3_0"
-				end
-				file:write("      <TargetProfile Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">" .. profile .. "</TargetProfile>\n")
-			end
-		end
-		file:write("    </CompilerShader>\n")		
-	end	
-	file:write("  </ItemGroup>\n")
-	]]
 	local filesNotUsingPchMap = {}
 	for i = 1, #currentTarget.nopchfiles do
 		local f = currentTarget.nopchfiles[i]
@@ -429,22 +414,18 @@ function WriteVcxProj(currentTarget, groupMap)
 
 	--New group writing method which isn't horrid and totally hard-coded
 	--TODO - add function pointer approach for intrinsic types.
-	for groupName, group in pairs(groupMap) do 
+	for _, group in ipairs(groups) do 
 		file:write("  <ItemGroup>\n")
-
-		if groupName == "ClCompile" then
+		if group.name == "ClCompile" then
 			for i = 1, #group.fileInfo do
-				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 				for iConfig = 1, #currentTarget.configs do
 					local config = currentTarget.configs[iConfig]
 					file:write("      <CompileAs Condition=\"'$(Configuration)|$(Platform)'=='" .. config.name .. "|" .. msvcPlatform .. "'\">Default</CompileAs>\n")
 				end
-				
 				--If we're using a pch and this is the pch file
 				if pchSourceFile ~= nil then
-					local f =  group.fileInfo[i].filename
-					local path, filename, ext = Util_FilePathDecompose(f)
-					if filename == pchSourceFile then 
+					if group.fileInfo[i].shortName == pchSourceFile then 
 						--For each config ensure we create the pch
 						for iConfig = 1, #currentTarget.configs do
 							local config = currentTarget.configs[iConfig]
@@ -459,51 +440,49 @@ function WriteVcxProj(currentTarget, groupMap)
 					end
 				end
 
-				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 			end
-		elseif groupName == "ClInclude" then
+		elseif group.name == "ClInclude" then
 			for i = 1, #group.fileInfo do
-				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
-				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
+				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 			end
-		elseif groupName == "None" then
+		elseif group.name == "None" then
 			for i = 1, #group.fileInfo do
-				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
-				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+				WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
+				WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 			end
-		--elseif groupName == "CompilerShader" then
 		else
 			if GetCustomGroupRule ~= nil then
 				for i = 1, #group.fileInfo do
 					local fileInfo = group.fileInfo[i]
-					local f = GetFullFilePath(fileInfo.filename)
-					local customRuleWriterFunc = GetCustomGroupRule(groupName, fileInfo.filename)
-					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, fileInfo)
+					local customRuleWriterFunc = GetCustomGroupRule(group.name, fileInfo.shortName)
+					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, fileInfo)
 						if customRuleWriterFunc ~= nil then
-							customRuleWriterFunc(file, currentTarget, msvcPlatform, f)
+							customRuleWriterFunc(file, currentTarget, msvcPlatform, fileInfo.outputRelativeFilename)
 						end
-					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, fileInfo)
+					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, fileInfo)
 				end
 			else
 				for i = 1, #group.fileInfo do
-					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
-					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, groupName, group.fileInfo[i])
+					WriteVcxProjGroupItemHeader(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
+					WriteVcxProjGroupItemFooter(file, currentTarget, msvcPlatform, group.name, group.fileInfo[i])
 				end
 			end
 		end
-
+		
 		file:write("  </ItemGroup>\n")	
 	end
 
 	file:write("  <ItemGroup>\n")
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
 		local projectFilename = filename .. ".vcxproj"
 		file:write("    <ProjectReference Include=\"" .. projectFilename .. "\">\n")
 
-		local projectID = msvcgetprojectid(filename)
+		local projectID = mbwriter.msvcgetprojectid(filename)
 		file:write("      <Project>{" .. projectID .. "}</Project>\n")
 		file:write("    </ProjectReference>\n")
 	end
@@ -525,41 +504,39 @@ function WriteVcxProj(currentTarget, groupMap)
 	file:write("</Project>\n")
 
 	file:close()
-	mbwriter_reportoutputfile(vcxprojName)
+	mbwriter.reportoutputfile(vcxprojName)
+	logprofile("END WriteVcxProj")
 end
 
 function FormatFilterPath(path)
-	while string.find(path, "%.%./") == 1 do
-		path = string.sub(path, 4, length)
-	end
-
-	path = Util_FileTrimTrailingSlash(path)
-	return Util_FileNormaliseWindows(path)
+	path = mbfilepath.trimtrailingslash(path)
+	return mbwriter.normalisetargetfilepath(path)
 end
 
-function WriterVcxProjFilters(currentTarget, groupMap)
-	local vcxProjFiltersFilename = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".vcxproj.filters"
-	local file = io.open(vcxProjFiltersFilename, "w")
+function FolderCompare(a, b)
+	return a.relativePath < b.relativePath
+end
+
+function WriterVcxProjFilters(currentTarget, groups)
+	local vcxProjFiltersFilename = mbwriter.normalisetargetfilepath(mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".vcxproj.filters")
+	local file = mbfile.open(vcxProjFiltersFilename, "w")
 
 	file:write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 	file:write("<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
-
-	local allfiles = {}
-	for groupName, group in pairs(groupMap) do 
-		for i = 1, #group.fileInfo do
-			local filename = group.fileInfo[i].filename
-			table.insert(allfiles, filename)
-		end
-	end
 	
 	local folders = {}
-	InitFolders(folders, allfiles)
+	InitFolders(folders, groups)
 
 	--Write out filter folders
 	file:write("  <ItemGroup>\n")
-	for k, v in pairs(folders) do 
-		local folder = v
-		--print(inspect(folder))
+	
+	local sortedFolderList = {}
+	for _, v in pairs(folders) do 
+		sortedFolderList[#sortedFolderList+1] = v
+	end
+	table.sort(sortedFolderList, FolderCompare)
+	
+	for _, folder in ipairs(sortedFolderList) do	
 		if folder.shortName ~= "" then 
 			local formattedPath = FormatFilterPath(folder.relativePath)
 			if formattedPath ~= "." then
@@ -570,53 +547,41 @@ function WriterVcxProjFilters(currentTarget, groupMap)
 		end
 	end
 	file:write("  </ItemGroup>\n")
-	
-	file:write("  <ItemGroup>\n")
-	for groupName, group in pairs(groupMap) do 
+
+	file:write("  <ItemGroup>\n")	
+	for _, group in ipairs(groups) do 
 		for i = 1, #group.fileInfo do
-		
-			local filename = group.fileInfo[i].filename
-	
-			local f = GetFullFilePath(filename)
-			
-			local path = Util_FilePath(filename)
-	--		print(" none " .. fullFilePath)		
---			path = Util_FileTrimTrailingSlash(path)
-	--		path = Util_FileNormaliseWindows(path)
-		
-			file:write("   <" .. groupName .. " Include=\"" .. Util_FileNormaliseWindows(f) .. "\">\n")
-			file:write("      <Filter>" .. FormatFilterPath(path) .. "</Filter>\n")
-			file:write("   </" .. groupName .. ">\n")				
+			file:write("   <" .. group.name .. " Include=\"" .. group.fileInfo[i].outputRelativeFilename .. "\">\n")
+			file:write("      <Filter>" .. FormatFilterPath(group.fileInfo[i].inputRelativeDir) .. "</Filter>\n")
+			file:write("   </" .. group.name .. ">\n")				
 		end
 	end
 	file:write("  </ItemGroup>\n")
 
 	file:write("</Project>\n")
-
 	file:close()
-	mbwriter_reportoutputfile(vcxProjFiltersFilename)
+	mbwriter.reportoutputfile(vcxProjFiltersFilename)
 end
 
 function WriteSolution(projectList, currentTarget)
-	if writer_solution.msvcversion == nil then
+	if mbwriter.solution.msvcversion == nil then
 		-- TODO ERROR HERE
 	end
 
-	local msvcVersion = Util_GetKVValue(writer_global.options.msvc, "version")
-	local msvcPlatform = Util_GetKVValue(writer_global.options.msvc, "platform")
+	local msvcVersion = mbutil.getkvvalue(mbwriter.global.options.msvc, "version")
+	local msvcPlatform = mbutil.getkvvalue(mbwriter.global.options.msvc, "platform")
 	--if msvcPlatform == nil then
 		-- TODO error
 	--end
 
 	local msvcFormatVersion = "11.00" -- Default to 2010 format
 
-	--print(inspect(writer_global.options))
 	if msvcVersion == "2012" then
 		msvcFormatVersion = "12.00"
 	end
 
-	local slnFilename = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. ".sln"
-	local file = io.open(slnFilename, "w")
+	local slnFilename = mbwriter.normalisetargetfilepath(mbwriter.global.makeoutputdirabs .. "\\" .. currentTarget.name .. ".sln")
+	local file = mbfile.open(slnFilename, "w")
 	if file == nil then
 		print("Failed to open file for writing " .. slnFilename)
 	end
@@ -675,14 +640,14 @@ function WriteSolution(projectList, currentTarget)
 	file:write("EndGlobal\n")
 
 	file:close()
-	mbwriter_reportoutputfile(slnFilename)
+	mbwriter.reportoutputfile(slnFilename)
 end
 
 --[[ MAIN ]]
 
-local customWriter = Util_GetKVValue(writer_global.options.msvc, "customwriter")
+local customWriter = mbutil.getkvvalue(mbwriter.global.options.msvc, "customwriter")
 if customWriter ~= nil then
-	print("Importing custom writer " .. customWriter)
+	--print("Importing custom writer " .. customWriter)
 	import(customWriter)
 end
 
@@ -696,16 +661,17 @@ if GetFileTypeMap ~= nil then
 	g_fileTypeMap = GetFileTypeMap()
 end
 
-local groupMap = BuildFileGroups(g_currentTarget)
+local groups = BuildFileGroups(g_currentTarget)
 --print(inspect(g_fileTypeMap))
+
 --TODO move out this hack for Windows builds
 if g_fileTypeMap["hlsl"] == "CompilerShader" then
 	--print("HLSL support enabled")
 	g_enableHLSL = true
 end
 
-WriteVcxProj(g_currentTarget, groupMap)
-WriterVcxProjFilters(g_currentTarget, groupMap)
+WriteVcxProj(g_currentTarget, groups)
+WriterVcxProjFilters(g_currentTarget, groups)
 
 --Solutions only required by apps
 local projectList = {}
@@ -713,16 +679,16 @@ if g_currentTarget.targettype == "app" then
 	--Create a list of project GUID and name pairs. We'll need this to form the contents of our solution.
 	
 	--Current target.
-	local projectID = msvcgetprojectid(g_currentTarget.name)
-	table.insert(projectList, {projectID, g_currentTarget.name})
+	local projectID = mbwriter.msvcgetprojectid(g_currentTarget.name)
+	projectList[#projectList+1] = {projectID, g_currentTarget.name}
 	
 	--Other targets we require.
 	for i = 1, #g_currentTarget.depends do
 		local dependency = g_currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
-		local projectID = msvcgetprojectid(filename)	
-		table.insert(projectList, {projectID, filename})
+		local projectID = mbwriter.msvcgetprojectid(filename)	
+		projectList[#projectList+1] = {projectID, filename}
 	end
 
 	WriteSolution(projectList, g_currentTarget)
@@ -734,3 +700,5 @@ if CustomPostGenerateRule ~= nil then
 	print("Applying custom post generate rule")
 	CustomPostGenerateRule(projectList, g_currentTarget)
 end
+
+logprofile("SHUTDOWN")

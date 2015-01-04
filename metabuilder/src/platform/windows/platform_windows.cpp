@@ -1,13 +1,22 @@
 #include "metabuilder_pch.h"
 
-#ifdef PLATFORM_WINDOWS
-
 #include <Windows.h>
 #include <direct.h>
 
 #include "platform/platform.h"
 
-bool _mbaCreateDir(const char* osDir)
+namespace Platform
+{
+
+void Init()
+{
+}
+
+void Shutdown()
+{
+}
+
+bool CreateDir(const char* osDir)
 {
     DWORD ftyp = GetFileAttributesA(osDir);
     if (ftyp != INVALID_FILE_ATTRIBUTES)
@@ -15,61 +24,26 @@ bool _mbaCreateDir(const char* osDir)
         if ((ftyp & FILE_ATTRIBUTE_DIRECTORY) != 0)
             return true;
 
-//        Debug::Error("File obstructing dir creation %s", osDir);
+        MB_LOGERROR("File obstructing dir creation %s", osDir);
         return false;
     }
     
     if (!CreateDirectoryA(osDir, NULL) && GetLastError() != ERROR_PATH_NOT_FOUND)
     {
-//        Debug::Error("Mkdir failed for %s", osDir);
+		MB_LOGERROR("Mkdir failed for %s", osDir);
         return false;
     }
     
-//    Debug::Info("Created dir %s", osDir);
     return true;
 }
 
-bool mbaCreateLink(const char* src, const char* dst)
+bool CreateLink(const char* src, const char* dst)
 {
-	/*
-	//mklink /h file3.txt file.txt
-	//>mklink /j c:\linktest\b c:\linktest\a
-
-	//remove existing
-
-	if (mbaGetFileType(src)
-	{
-	}
-
-	if (!result)
-	{
-		mbExitError();
-	}
-//	DWORD lastErr = GetLastError();
-
-	return result;
-	*/
+	MB_LOGERROR("Links not supported");
 	return false;
 }
 
-void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)
-{
-    outFilePath[0] = 0;
-    char* outCursor = outFilePath;
-    for (const char* inCursor = inFilePath; *inCursor; ++inCursor)
-    {
-		char c = *inCursor;
-        //Normalise slashes
-        if (c == '/')
-            c = '\\';
-        
-        *outCursor = c;
-        ++outCursor;
-    }
-	*outCursor = '\0';
-}
-
-E_FileType mbaGetFileType(const std::string& filepath)
+E_FileType GetFileType(const std::string& filepath)
 {
 	DWORD fileAttr = GetFileAttributesA(filepath.c_str());
 	
@@ -82,15 +56,17 @@ E_FileType mbaGetFileType(const std::string& filepath)
 	return E_FileType_File;
 }
 
-bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir)
+bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir)
 {
 	//Process dirs
 	{
 		WIN32_FIND_DATA fdFile;
 		HANDLE hFind = NULL;
-		std::string sPath = mbPathJoin(osInputDir, "*.*");
+
+		char sPath[MB_MAX_PATH];
+		mbHostPathJoin(sPath, osInputDir, "*.*");
     
-		if((hFind = FindFirstFile(sPath.c_str(), &fdFile)) == INVALID_HANDLE_VALUE)
+		if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
 		{
 			return false;
 		}
@@ -104,14 +80,14 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 			{
 				//Build up our file path using the passed in
 				//  [sDir] and the file/foldername we just found:
-				sPath = mbPathJoin(osInputDir, fdFile.cFileName);
+				mbHostPathJoin(sPath, osInputDir, fdFile.cFileName);
             
 				//Is the entity a File or Folder?
 				if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
 					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
 					{
-						mbaBuildFileListRecurse(fileList, sPath.c_str(), includeFilePattern, excludeDir);
+						BuildFileListRecurse(fileList, sPath, includeFilePattern, excludeDir);
 					}
 				}
 			}
@@ -125,9 +101,10 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 	{
 		WIN32_FIND_DATA fdFile;
 		HANDLE hFind = NULL;
-		std::string sPath = mbPathJoin(osInputDir, includeFilePattern);
+		char sPath[MB_MAX_PATH];
+		mbHostPathJoin(sPath, osInputDir, includeFilePattern);
     
-		if((hFind = FindFirstFile(sPath.c_str(), &fdFile)) == INVALID_HANDLE_VALUE)
+		if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
 		{
 			return false;
 		}
@@ -141,14 +118,14 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 			{
 				//Build up our file path using the passed in
 				//  [sDir] and the file/foldername we just found:
-				sPath = mbPathJoin(osInputDir, fdFile.cFileName);
+				mbHostPathJoin(sPath, osInputDir, fdFile.cFileName);
             
 				//Is the entity a File or Folder?
 				if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
 					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
 					{
-						mbaBuildFileListRecurse(fileList, sPath.c_str(), includeFilePattern, excludeDir);
+						BuildFileListRecurse(fileList, sPath, includeFilePattern, excludeDir);
 					}
 				}
 				else
@@ -157,13 +134,13 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 					if (fdFile.cFileName[0] == '.')
 						continue;
             
-					char* fp = (char*)sPath.c_str();
+					char* fp = sPath;
 					if (strstr(fp, "./") == fp)
 					{
 						fp += 2;
 					}
 					char buf[MB_MAX_PATH];
-					mbNormaliseFilePath(buf,fp);
+					mbNormaliseFilePath(buf, fp, '\\');
 					fileList->push_back(buf);
 				}
 			}
@@ -175,39 +152,59 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
     return true;
 }
 
-void mbaFileSetWorkingDir(const std::string& path)
+void FileSetWorkingDir(const std::string& path)
 {
     _chdir(path.c_str());
 }
 
-std::string mbaFileGetWorkingDir()
+std::string FileGetWorkingDir()
 {
     char workingDir[MB_MAX_PATH];
     return _getcwd(workingDir, sizeof(workingDir));
 }
 
-std::string	mbaFileGetAbsPath(const std::string& path)
+std::string	FileGetAbsPath(const std::string& path)
 {
 	char tmp[MB_MAX_PATH];
 	return _fullpath(tmp, path.c_str(), sizeof(tmp));
 }
 
-void mbaLogError(const char* str)
+char GetDirSep()
+{
+	return '\\';
+}
+
+void LogError(const char* str)
 {
 	OutputDebugString(str);
 	printf("%s", str);
 }
 
-void mbaLogInfo(const char* str)
+void LogInfo(const char* str)
 {
 	OutputDebugString(str);
 	printf("%s", str);
 }
 
-void mbaLogDebug(const char* str)
+void LogDebug(const char* str)
 {
 	OutputDebugString(str);
 	printf("%s", str);
 }
 
-#endif
+F64 GetSystemTicksToSecondsScale()
+{
+	LARGE_INTEGER f;
+	QueryPerformanceFrequency(&f);
+	return 1.0 / (F64)f.QuadPart;
+}
+
+U64 GetSystemTicks()
+{
+	LARGE_INTEGER ticks;
+	QueryPerformanceCounter(&ticks);
+	return ticks.QuadPart;
+}
+
+}
+

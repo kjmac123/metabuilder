@@ -3,6 +3,8 @@
 std::vector<KeyValue> g_externalFileReference;
 std::vector<KeyValue> g_externalNativeTarget;
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
 int luaFuncWriterXcodeGenerateID(lua_State* l)
 {
 	char hashStr[256];
@@ -15,23 +17,23 @@ int luaFuncWriterXcodeGenerateID(lua_State* l)
 static int luaFuncRegisterExternalPBXFileReferenceExternal(lua_State* l)
 {
 	g_externalFileReference.push_back(KeyValue());
-	mbLuaToStringExpandMacros(&g_externalFileReference.back().key, l, 1);	//filename
-	mbLuaToStringExpandMacros(&g_externalFileReference.back().value, l, 2);	//id
+	mbLuaToStringExpandMacros(&g_externalFileReference.back().key, NULL, l, 1);	//filename
+	mbLuaToStringExpandMacros(&g_externalFileReference.back().value, NULL, l, 2);	//id
 	return 0;
 }
 
 static int luaFuncRegisterExternalPBXNativeTargetExternal(lua_State* l)
 {
 	g_externalNativeTarget.push_back(KeyValue());
-	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().key, l, 1);	//target
-	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().value, l, 2);	//id
+	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().key, NULL, l, 1);	//target
+	mbLuaToStringExpandMacros(&g_externalNativeTarget.back().value, NULL, l, 2);	//id
 	return 0;
 }
 
 static int luaFuncGetExternalPBXFileReferenceExternal(lua_State* l)
 {
     std::string filename;
-	mbLuaToStringExpandMacros(&filename, l, 1);
+	mbLuaToStringExpandMacros(&filename, NULL, l, 1);
 	
 	for (int i = 0; i < (int)g_externalFileReference.size(); ++i)
 	{
@@ -47,7 +49,7 @@ static int luaFuncGetExternalPBXFileReferenceExternal(lua_State* l)
 static int luaFuncGetExternalPBXNativeTargetExternal(lua_State* l)
 {
     std::string targetName;
-	mbLuaToStringExpandMacros(&targetName, l, 1);
+	mbLuaToStringExpandMacros(&targetName, NULL, l, 1);
 	
 	for (int i = 0; i < (int)g_externalNativeTarget.size(); ++i)
 	{
@@ -60,20 +62,11 @@ static int luaFuncGetExternalPBXNativeTargetExternal(lua_State* l)
 	return 0;
 }
 
-void mbWriterXcodeLuaRegister(lua_State* l)
+void mbWriterXcodeLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)
 {
-    lua_pushcfunction(l, luaFuncWriterXcodeGenerateID);
-    lua_setglobal(l, "xcodegenerateid");
-
-    lua_pushcfunction(l, luaFuncRegisterExternalPBXFileReferenceExternal);
-    lua_setglobal(l, "xcoderegisterpbxfilereference_external");
-
-    lua_pushcfunction(l, luaFuncRegisterExternalPBXNativeTargetExternal);
-    lua_setglobal(l, "xcoderegisterpbxnativetarget_external");
-		
-    lua_pushcfunction(l, luaFuncGetExternalPBXFileReferenceExternal);
-    lua_setglobal(l, "xcodegetpbxfilereference_external");
-
-    lua_pushcfunction(l, luaFuncGetExternalPBXNativeTargetExternal);
-    lua_setglobal(l, "xcodegetpbxnativetarget_external");
+	luaFn->AddFunction("xcodegenerateid",							luaFuncWriterXcodeGenerateID);
+	luaFn->AddFunction("xcoderegisterpbxfilereference_external",	luaFuncRegisterExternalPBXFileReferenceExternal);
+	luaFn->AddFunction("xcoderegisterpbxnativetarget_external",		luaFuncRegisterExternalPBXNativeTargetExternal);
+	luaFn->AddFunction("xcodegetpbxfilereference_external",			luaFuncGetExternalPBXFileReferenceExternal);
+	luaFn->AddFunction("xcodegetpbxnativetarget_external",			luaFuncGetExternalPBXNativeTargetExternal);
 }

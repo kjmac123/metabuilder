@@ -1,26 +1,7 @@
 #ifndef MB_CORE_H
 #define MB_CORE_H
 
-#if defined(__APPLE__) && defined(__MACH__)
-	#include <TargetConditionals.h>
-	#if TARGET_OS_MAC == 1
-		#ifndef PLATFORM_OSX
-			#define PLATFORM_OSX
-		#endif
-		#ifndef PLATFORM_POSIX
-			#define PLATFORM_POSIX
-		#endif
-	#endif
-#endif
-
-#if defined(__linux__)
-	#ifndef PLATFORM_LINUX
-		#define PLATFORM_LINUX
-	#endif
-	#ifndef PLATFORM_POSIX
-		#define PLATFORM_POSIX
-	#endif
-#endif
+//#define MB_ENABLE_PROFILING
 
 typedef unsigned char U8;
 typedef char S8;
@@ -43,6 +24,7 @@ typedef double F64;
 
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <vector>
 #include <string>
@@ -51,6 +33,7 @@ typedef double F64;
 #define stricmp strcasecmp
 #endif
 
+#define MB_LOGSETTIMEENABLED(b)			_mbLogSetTimeEnabled(b)
 #define MB_LOGERROR(...)				_mbLogErrorfLF(__VA_ARGS__)
 #define MB_LOGINFO(...)					_mbLogInfofLF(__VA_ARGS__)
 #define MB_LOGDEBUG(...)				_mbLogDebugfLF(__VA_ARGS__)
@@ -58,12 +41,25 @@ typedef double F64;
 #define MB_CHECKERROR(test, ...)		{ if (!test) { _LogInfofLF(__VA_ARGS__); } }
 #define MB_CHECKEXPECTEDBLOCK(blockExpected, cmdName) mbCheckExpectedBlock(blockExpected, cmdName);
 
+void _mbLogSetTimeEnabled(bool b);
 void _mbLogErrorf(const char* fmt, ...);
 void _mbLogErrorfLF(const char* fmt, ...);
 void _mbLogInfof(const char* fmt, ...);
 void _mbLogInfofLF(const char* fmt, ...);
 void _mbLogDebugf(const char* fmt, ...);
 void _mbLogDebugfLF(const char* fmt, ...);
+
+#define ARRAY_LENGTH(a) (sizeof((a))/sizeof((a)[0]))
+
+#define MB_SECONDS_TO_MILLISECONDS          1000
+#define MB_SECONDS_TO_NANOSECONDS           1000000000
+
+#define MB_GENERAL_STRING_BUFFER_SIZE		(2*1024)
+#define MB_LUAMODULE_MAX_FUNCTIONS			100
+#define MB_ASSERT							assert
+
+void ToUpperStr(char* str);
+void ToLowerStr(char* str);
 
 #include "platform/platform.h"
 

@@ -1,9 +1,10 @@
 #include "metabuilder_pch.h"
 
 #include "configparam.h"
-#include "common.h"
 #include "block.h"
 #include "platformparam.h"
+
+#include <sstream>
 
 static const char* g_stringGroups[] = {
 	STRINGGROUP_FILES,
@@ -17,11 +18,9 @@ static const char* g_stringGroups[] = {
 	NULL
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Free functions
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
-static void AddHeadersAutomatically(StringVector* files) 
+static void AddHeadersAutomatically(StringVector* files)
 {
 	MetaBuilderContext* ctx = mbGetMainContext();
 	
@@ -34,25 +33,51 @@ static void AddHeadersAutomatically(StringVector* files)
 		
 		char fileExt[MB_MAX_PATH];
 		mbPathGetFileExtension(fileExt, filename.c_str());
-		const char* sourceFileExtensions[] = {"cpp", "c", "m", "mm", NULL};
-		for (const char** sourceExtCursor = sourceFileExtensions; *sourceExtCursor; ++sourceExtCursor)
+
+		for (const char** sourceExtCursor = mbGetCAndCPPSourceFileExtensions(); *sourceExtCursor; ++sourceExtCursor)
 		{
 			if (!strcmp(*sourceExtCursor, fileExt))
 			{
-				const char* candidateExt[] = {"h", "inl", NULL};
-				for (const char** candidateExtCursor = candidateExt; *candidateExtCursor; ++candidateExtCursor)
+				//Add headers
 				{
-					char candidateRelativeName[MB_MAX_PATH];
-					mbPathReplaceFileExtension(candidateRelativeName, filename.c_str(), *candidateExtCursor);
-
-					char candidateFilename[MB_MAX_PATH];
-					sprintf(candidateFilename, "%s/%s", ctx->currentMetaMakeDirAbs.c_str(), candidateRelativeName);
-					if (mbFileExists(candidateFilename))
+					const char** candidateExt = mbGetCAndCPPHeaderFileExtensions();
+					for (const char** candidateExtCursor = candidateExt; *candidateExtCursor; ++candidateExtCursor)
 					{
-						MB_LOGDEBUG("Automatically adding header file %s", candidateRelativeName);
-						result.push_back(candidateRelativeName);
+						char candidateRelativeName[MB_MAX_PATH];
+						mbPathReplaceFileExtension(candidateRelativeName, filename.c_str(), *candidateExtCursor);
+
+						char candidateFilename[MB_MAX_PATH];
+						sprintf(candidateFilename, "%s/%s", ctx->currentMetaMakeDirAbs.c_str(), candidateRelativeName);
+						if (mbFileExists(candidateFilename))
+						{
+							MB_LOGDEBUG("Automatically adding header file %s", candidateRelativeName);
+							result.push_back(candidateRelativeName);
+							break;
+						}
 					}
 				}
+
+				//Add inline files
+				{
+					const char** candidateExt = mbGetCAndCPPInlineFileExtensions();
+					for (const char** candidateExtCursor = candidateExt; *candidateExtCursor; ++candidateExtCursor)
+					{
+						char candidateRelativeName[MB_MAX_PATH];
+						mbPathReplaceFileExtension(candidateRelativeName, filename.c_str(), *candidateExtCursor);
+
+						char candidateFilename[MB_MAX_PATH];
+						sprintf(candidateFilename, "%s/%s", ctx->currentMetaMakeDirAbs.c_str(), candidateRelativeName);
+						if (mbFileExists(candidateFilename))
+						{
+							MB_LOGDEBUG("Automatically adding inline file %s", candidateRelativeName);
+							result.push_back(candidateRelativeName);
+							break;
+						}
+					}
+				}
+
+
+				break;
 			}
 		}
 	}
@@ -60,21 +85,19 @@ static void AddHeadersAutomatically(StringVector* files)
 	*files = result;
 }
 
-
 static void ProcessWildcards(StringVector* result, const StringVector& input)
 {
-	int initialResultCount = (int)result->size();
-	std::string baseDir = mbPathGetDir(mbGetAppState()->mainMetaMakeFileAbs);
-
+	int initialResultCount = static_cast<int>(result->size());
+	
 	for (int i = 0; i < (int)input.size(); ++i)
 	{
-		//std::string inputFilepath = baseDir + "/" + input[i];
 		std::string inputFilepath = input[i];
 
 		//Look for wildcard
 		if (inputFilepath.find('*') != std::string::npos)
 		{
 			const char* excludeDirs = NULL;
+#if 0
 			const char* delimiter = "|excludedirs=";
 			char* tmp = (char*)strstr(inputFilepath.c_str(), delimiter);
 			if (tmp)
@@ -82,13 +105,11 @@ static void ProcessWildcards(StringVector* result, const StringVector& input)
 				excludeDirs = tmp + strlen(delimiter);
 				*tmp = '\0';
 			}
-
+#endif
 			std::string dir = mbPathGetDir(inputFilepath);
-
 			std::string filename = mbPathGetFilename(inputFilepath);
-			//dir = mbaFileGetAbsPath(dir);
-			mbaBuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
 
+			Platform::BuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
 			if ((int)result->size() == initialResultCount)
 			{
 				MB_LOGERROR("No files found matching dir %s and filter %s",  dir.c_str(), filename.c_str());
@@ -112,11 +133,46 @@ static int luaFuncSetOption(lua_State* l)
     }
 	
 	std::string group, key, value;
-	mbLuaToStringExpandMacros(&group, l, 1);
-    mbLuaToStringExpandMacros(&key, l, 2);
-	mbLuaToStringExpandMacros(&value, l, 3);
+	mbLuaToStringExpandMacros(&group, block, l, 1);
+	mbLuaToStringExpandMacros(&key, block, l, 2);
+	mbLuaToStringExpandMacros(&value, block, l, 3);
 
-	block->SetOption(group.c_str(), key.c_str(), value.c_str());
+	block->SetOption(group, key, value);
+	return 0;
+}
+
+static int luaFuncSetMacro(lua_State* l)
+{
+	Block* block = mbGetActiveContext()->ActiveBlock();
+	if (!block)
+	{
+		MB_LOGERROR("must be within block");
+		mbExitError();
+	}
+
+	std::string key, value;
+	mbLuaToStringExpandMacros(&key, block, l, 1);
+	mbLuaToStringExpandMacros(&value, block, l, 2);
+
+	block->SetMacro(key.c_str(), value.c_str());
+	return 0;
+}
+
+static int luaFuncAddOption(lua_State* l)
+{
+	Block* block = mbGetActiveContext()->ActiveBlock();
+	if (!block)
+	{
+		MB_LOGERROR("must be within block");
+		mbExitError();
+	}
+
+	std::string group, key, value;
+	mbLuaToStringExpandMacros(&group, block, l, 1);
+	mbLuaToStringExpandMacros(&key, block, l, 2);
+	mbLuaToStringExpandMacros(&value, block, l, 3);
+
+	block->AppendOption(group, key, value, ' ');
 	return 0;
 }
 
@@ -137,7 +193,7 @@ static int luaFuncDefines(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
     }
     block->AddDefines(strings);
     
@@ -161,7 +217,7 @@ static int luaFuncLibs(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
     }
 	block->AddLibs(strings);
 		
@@ -186,7 +242,7 @@ static int luaFuncIncludeDir(lua_State* l)
     {
 		lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
     }
 	block->AddIncludeDirs(strings);
 		
@@ -210,7 +266,7 @@ static int luaFuncLibDir(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
     }
 	block->AddLibDirs(strings);
 		
@@ -234,7 +290,7 @@ static int luaFuncExeDirs(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
     }
 	block->AddExeDirs(strings);
 		
@@ -253,7 +309,7 @@ static int luaFuncFiles(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
 	
 	StringVector filteredList;
@@ -275,7 +331,7 @@ static int luaFuncNoPchFiles(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
 	
 	StringVector filteredList;
@@ -297,7 +353,7 @@ static int luaFuncFrameworks(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
 	
 	b->AddFrameworks(strings);
@@ -317,7 +373,7 @@ static int luaFuncResources(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
 	}
 	
 	StringVector filteredList;
@@ -333,10 +389,16 @@ const char** mbGetStringGroupNames()
 
 void mbBlockLuaRegister(lua_State* l)
 {
-    lua_pushcfunction(l, luaFuncSetOption);
-    lua_setglobal(l, "option");
+    lua_pushcfunction(l, luaFuncAddOption);
+    lua_setglobal(l, "addoption");
 	
-    lua_pushcfunction(l, luaFuncDefines);
+	lua_pushcfunction(l, luaFuncSetOption);
+	lua_setglobal(l, "option");
+
+	lua_pushcfunction(l, luaFuncSetMacro);
+	lua_setglobal(l, "macro");
+	
+	lua_pushcfunction(l, luaFuncDefines);
     lua_setglobal(l, "defines");
 	
     lua_pushcfunction(l, luaFuncIncludeDir);
@@ -364,10 +426,11 @@ void mbBlockLuaRegister(lua_State* l)
     lua_setglobal(l, "resources");
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//FlatConfig
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void FlatConfig::Init()
+{
+}
 
 void FlatConfig::Dump()
 {
@@ -382,13 +445,13 @@ void FlatConfig::Dump()
 	MB_LOGDEBUG("END dumping %s", name.c_str());
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Block
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 Block::Block()
 {
 	m_parent = NULL;
+	m_keyValueGroups.insert(std::make_pair("__macros", KeyValueMap()));
+	m_macroCacheDirty = true;
 }
 
 Block::~Block()
@@ -454,7 +517,7 @@ const char* Block::GetParentConfig() const
 		}
 	 }
 	 
-	 return NULL;
+	return NULL;
 }
 
 const char* Block::GetParentPlatform() const
@@ -470,7 +533,7 @@ const char* Block::GetParentPlatform() const
 		}
 	 }
 	 
-	 return NULL;
+	return NULL;
 }
 
 void Block::AddChild(Block* block)
@@ -575,7 +638,7 @@ const StringVector* Block::GetStringGroup(const char* groupName) const
 	return &it->second;
 }
 
-void Block::SetOption(const std::string& group, const std::string& key, const std::string& value)
+void Block::AppendOption(const std::string& group, const std::string& key, const std::string& value, char seperator)
 {
 	std::map<std::string, KeyValueMap>::iterator it = m_keyValueGroups.find(group);
 	
@@ -589,6 +652,44 @@ void Block::SetOption(const std::string& group, const std::string& key, const st
 	}
 
 	KeyValueMap& kvmap = (*it).second;
+	
+	KeyValueMap::iterator kvit = kvmap.find(key);
+	if (kvit == kvmap.end())
+	{
+		kvmap.insert(std::make_pair(key, value));
+	}
+	else
+	{
+		const std::string& oldValue = kvit->second;
+		
+		std::stringstream ss;
+		ss << oldValue;
+		ss << seperator;
+		ss << value;
+
+		kvit->second = ss.str();
+	}
+}
+
+void Block::SetOption(const std::string& group_, const std::string& key_, const std::string& value_)
+{
+	std::string group, key, value;
+	mbExpandMacros(&group, this, group_.c_str());
+	mbExpandMacros(&key, this, key_.c_str());
+	mbExpandMacros(&value, this, value_.c_str());
+
+	std::map<std::string, KeyValueMap>::iterator it = m_keyValueGroups.find(group);
+
+	if (it == m_keyValueGroups.end())
+	{
+		//Insert new vector as one does not exist already for this platform.
+		std::pair<std::map<std::string, KeyValueMap>::iterator, bool> result =
+			m_keyValueGroups.insert(std::make_pair(group, KeyValueMap()));
+
+		it = result.first;
+	}
+
+	KeyValueMap& kvmap = (*it).second;
 	kvmap[key] = value;
 }
 
@@ -597,11 +698,44 @@ void Block::GetOptions(std::map<std::string, KeyValueMap>* result) const
 	mbMergeOptions(result, m_keyValueGroups);
 }
 
+void Block::SetMacro(const char* key, const char* value)
+{
+	SetOption("__macros", key, value);
+	SetMacroCacheDirty();
+}
+
+const KeyValueMap& Block::GetMacros() const
+{
+	std::map<std::string, KeyValueMap>::const_iterator it = m_keyValueGroups.find("__macros");
+	assert(it != m_keyValueGroups.end());
+	return it->second;
+}
+
+const KeyValueMap& Block::FlattenMacros() const
+{
+	if (!m_macroCacheDirty)
+	{
+		return m_flattenedMacroCache;
+	}
+
+	std::map<std::string, KeyValueMap>::const_iterator it = m_keyValueGroups.find("__macros");
+	assert(it != m_keyValueGroups.end());
+
+	m_flattenedMacroCache.clear();
+	for (const Block* block = this; block; block = block->GetParent())
+	{
+		const KeyValueMap& blockMacros = block->GetMacros();
+		m_flattenedMacroCache.insert(blockMacros.begin(), blockMacros.end());
+	}
+
+	m_macroCacheDirty = false;
+	return m_flattenedMacroCache;
+}
+
 void Block::AddExeDirs(const StringVector& exeDirs)
 {
 	StringVector* existing = AcquireStringGroup(STRINGGROUP_EXEDIRS);
 	mbJoinArrays(existing, exeDirs);
-
 }
 
 ConfigParam* Block::AcquireConfigParam(const char* configName)
@@ -697,7 +831,6 @@ void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformNa
 	}
 }
 
-
 ParamBlock* Block::GetParam(E_BlockType t, const char* name)
 {
 	for (int i = 0; i < (int)m_childParams.size(); ++i)
@@ -722,9 +855,16 @@ void Block::FlattenThis(FlatConfig* result) const
 	GetOptions(&result->options);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//MakeBlock
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void Block::SetMacroCacheDirty() const
+{
+	m_macroCacheDirty = true;
+	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	{
+		m_childParams[i]->SetMacroCacheDirty();
+	}
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 MakeBlock::MakeBlock()
 {
@@ -771,9 +911,7 @@ void MakeBlock::Dump() const
 	Block::Dump();
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//ParamBlock
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 ParamBlock::ParamBlock()
 {

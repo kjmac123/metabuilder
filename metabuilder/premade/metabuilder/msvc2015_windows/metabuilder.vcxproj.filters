@@ -1,20 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="src\platform\posix">
-      <UniqueIdentifier>{31DE8473-7753-ACFC-F9D5-404F5DD2D08C}</UniqueIdentifier>
+    <Filter Include="..">
+      <UniqueIdentifier>{4B0237A2-8DF1-7EEF-233F-2BA0BB5F61D1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\platform\windows">
-      <UniqueIdentifier>{2FA80E4C-0AF6-1BF4-612B-46E31444FFB6}</UniqueIdentifier>
+    <Filter Include="..\external">
+      <UniqueIdentifier>{751D879F-BAF7-572A-553D-C0310AD19A7E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\platform">
+    <Filter Include="..\external\dlmalloc-2.8.6">
+      <UniqueIdentifier>{C2812391-2BC7-6320-9517-E679C55D33A9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\external\freebsd">
       <UniqueIdentifier>{04716E12-E4E4-B086-701E-9901921AA469}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
-      <UniqueIdentifier>{C2812391-2BC7-6320-9517-E679C55D33A9}</UniqueIdentifier>
+      <UniqueIdentifier>{31DE8473-7753-ACFC-F9D5-404F5DD2D08C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform">
+      <UniqueIdentifier>{2FA80E4C-0AF6-1BF4-612B-46E31444FFB6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform\posix">
+      <UniqueIdentifier>{40EB541F-476B-D4C9-BEA4-BC8FA85C5AE2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\platform\windows">
+      <UniqueIdentifier>{1B26E4F2-71BB-8273-4595-E17726990F05}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+   <ClCompile Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp">
+      <Filter>..\external\dlmalloc-2.8.6</Filter>
+   </ClCompile>
+   <ClCompile Include="..\..\..\..\external\freebsd\realpath.cpp">
+      <Filter>..\external\freebsd</Filter>
+   </ClCompile>
    <ClCompile Include="..\..\..\src\block.cpp">
       <Filter>src</Filter>
    </ClCompile>
@@ -27,7 +45,13 @@
    <ClCompile Include="..\..\..\src\core.cpp">
       <Filter>src</Filter>
    </ClCompile>
+   <ClCompile Include="..\..\..\src\luafile.cpp">
+      <Filter>src</Filter>
+   </ClCompile>
    <ClCompile Include="..\..\..\src\main.cpp">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="..\..\..\src\makeglobal.cpp">
       <Filter>src</Filter>
    </ClCompile>
    <ClCompile Include="..\..\..\src\makesetup.cpp">
@@ -57,15 +81,27 @@
    <ClCompile Include="..\..\..\src\target.cpp">
       <Filter>src</Filter>
    </ClCompile>
+   <ClCompile Include="..\..\..\src\timeutil.cpp">
+      <Filter>src</Filter>
+   </ClCompile>
    <ClCompile Include="..\..\..\src\writer.cpp">
       <Filter>src</Filter>
    </ClCompile>
    <ClCompile Include="..\..\..\src\writer_msvc.cpp">
       <Filter>src</Filter>
    </ClCompile>
+   <ClCompile Include="..\..\..\src\writer_utility.cpp">
+      <Filter>src</Filter>
+   </ClCompile>
    <ClCompile Include="..\..\..\src\writer_xcode.cpp">
       <Filter>src</Filter>
    </ClCompile>
+   <ClInclude Include="..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.h">
+      <Filter>..\external\dlmalloc-2.8.6</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\..\external\freebsd\realpath.h">
+      <Filter>..\external\freebsd</Filter>
+   </ClInclude>
    <ClInclude Include="..\..\..\src\block.h">
       <Filter>src</Filter>
    </ClInclude>
@@ -76,6 +112,12 @@
       <Filter>src</Filter>
    </ClInclude>
    <ClInclude Include="..\..\..\src\core.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\luafile.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\makeglobal.h">
       <Filter>src</Filter>
    </ClInclude>
    <ClInclude Include="..\..\..\src\makesetup.h">
@@ -99,14 +141,29 @@
    <ClInclude Include="..\..\..\src\target.h">
       <Filter>src</Filter>
    </ClInclude>
+   <ClInclude Include="..\..\..\src\timeutil.h">
+      <Filter>src</Filter>
+   </ClInclude>
    <ClInclude Include="..\..\..\src\writer.h">
       <Filter>src</Filter>
    </ClInclude>
    <ClInclude Include="..\..\..\src\writer_msvc.h">
       <Filter>src</Filter>
    </ClInclude>
+   <ClInclude Include="..\..\..\src\writer_utility.h">
+      <Filter>src</Filter>
+   </ClInclude>
    <ClInclude Include="..\..\..\src\writer_xcode.h">
       <Filter>src</Filter>
    </ClInclude>
+   <None Include="..\..\..\metabuilder.lua">
+      <Filter></Filter>
+   </None>
+   <None Include="..\..\..\metabuilder_posix.lua">
+      <Filter></Filter>
+   </None>
+   <None Include="..\..\..\metabuilder_windows.lua">
+      <Filter></Filter>
+   </None>
   </ItemGroup>
 </Project>

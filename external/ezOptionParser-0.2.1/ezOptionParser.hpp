@@ -17,6 +17,14 @@ v0.2.1 20130506 Allow disabling doublespace of OPTIONS usage descriptions.
 #ifndef EZ_OPTION_PARSER_H
 #define EZ_OPTION_PARSER_H
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wreorder"
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
 #include <stdlib.h>
 #include <vector>
 #include <list>
@@ -2151,5 +2159,10 @@ void ezOptionParser::prettyPrint(std::string & out) {
   }
 };
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 /* ################################################################### */
 #endif /* EZ_OPTION_PARSER_H */

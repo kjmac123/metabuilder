@@ -1,6 +1,6 @@
 #ifndef WRITER_XCODE_H
 #define WRITER_XCODE_H
 
-void mbWriterXcodeLuaRegister(lua_State* l);
+void mbWriterXcodeLuaRegister(lua_State* l, LuaModuleFunctions* luaFn);
 
 #endif

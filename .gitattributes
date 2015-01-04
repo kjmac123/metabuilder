@@ -1,0 +1,11 @@
+# Make
+Makefile eol=lf
+*.mk eol=lf
+
+# MSVC
+*.filters eol=crlf
+*.vcxproj eol=crlf
+*.sln eol=crlf
+
+# XCode
+*.pbxproj eol=lf

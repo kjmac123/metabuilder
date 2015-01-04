@@ -11,9 +11,9 @@ public:
     virtual E_BlockType		GetType() const;
 	virtual bool			IsA(E_BlockType t) const;		
 				
-	std::string				_metabaseDir;
-    std::string				_intDir;
-    std::string				_outDir;
+	std::string				metabaseDir;
+    std::string				intDir;
+    std::string				outDir;
 
 protected:
 };

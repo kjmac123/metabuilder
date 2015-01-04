@@ -1,6 +1,7 @@
 #include "metabuilder_pch.h"
 
 #include "makesetup.h"
+#include "makeglobal.h"
 #include "writer.h"
 #include "solution.h"
 #include "configparam.h"
@@ -9,8 +10,7 @@
 
 #include "ezOptionParser.hpp"
 
-
-//////////////////////////////////////////////////////////////////////////////////
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 {
@@ -80,6 +80,14 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
             "--outdir"     // Flag token.
             );
 			
+	opt.add(
+            "", // Default.
+            false, // Required?
+            1, // Number of args expected.
+            0, // Delimiter if expecting multiple args.
+            "Line endings style to use", // Help description.
+            "--endstyle"     // Flag token.
+            );
 	
 	opt.parse(argc, argv);
 	std::string usage;
@@ -115,30 +123,35 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	opt.get("--input")->getString(appOptions->_inputFile);
 	opt.get("--gen")->getString(appOptions->_generator);
 	opt.get("--metabase")->getString(appOptions->_metabaseDir);
-	opt.get("--outdir")->getString(appOptions->_makeOutputDir);
+	opt.get("--outdir")->getString(appOptions->_makeOutputTopDir);
+	opt.get("--endstyle")->getString(appOptions->lineEndingStyle);
 	appOptions->verbose = opt.isSet("-v") != 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-
 int main(int argc, const char * argv[])
 {
+	Platform::Init();
+
 	MB_LOGINFO("Metabuilder");
+
+	MB_LOGSETTIMEENABLED(true);
+
 	AppState* appState = mbGetAppState();
 	appState->makeSetup = new MakeSetup();
+	appState->makeGlobal = new MakeGlobal();
 
 	ParseArgs(&appState->cmdSetup, argc, (const char**)argv);
 
 	//---------- GLOBAL SCOPE FUNCTIONS ----------
 	   
 	// build context objects
-    std::string inputFileAbs = mbaFileGetAbsPath(appState->cmdSetup._inputFile);
+    std::string inputFileAbs = Platform::FileGetAbsPath(appState->cmdSetup._inputFile);
 		
 	mbAddMakeFile(inputFileAbs.c_str());
 	
 	// We'll add to this array during iteration
 	const StringVector& makeFiles = mbGetMakeFiles();
-	mbPushDir(appState->makeSetup->_metabaseDir);
+	mbPushDir(appState->makeSetup->metabaseDir);
 			
 	appState->isProcessingPrimaryMakefile = true;
 	for (int i = 0; i < (int)makeFiles.size(); ++i)
@@ -148,28 +161,34 @@ int main(int argc, const char * argv[])
 		{
 			{
 				std::string makedir = mbPathGetDir(makeFiles[i]);
-				ctx->currentMetaMakeDirAbs = mbaFileGetAbsPath(makedir);
+				ctx->currentMetaMakeDirAbs = Platform::FileGetAbsPath(makedir);
+				mbNormaliseFilePath(&ctx->currentMetaMakeDirAbs, mbGetAppState()->makeGlobal->GetTargetDirSep());
 			}
 		
 			lua_State *l;
-			l = luaL_newstate();
+			l = lua_newstate(mbLuaAllocator, NULL);
 			luaL_checkstack(l, MB_LUA_STACK_MAX, "Out of stack!");
 			luaL_openlibs(l);
 
+			LuaModuleFunctions luaGlobalFunctions;
+
 			mbMakeSetupLuaRegister(l);
-			mbCommonLuaRegister(l);
+			mbMakeGlobalLuaRegister(l);
+			mbCommonLuaRegister(l, &luaGlobalFunctions);
 			mbBlockLuaRegister(l);
 			mbMetabaseLuaRegister(l);
 			mbSolutionLuaRegister(l);
 			mbTargetLuaRegister(l);
 			mbConfigParamLuaRegister(l);
 			mbPlatformParamLuaRegister(l);
+
+			luaGlobalFunctions.RegisterLuaGlobal(l);
 			
 			if (!mbGetAppState()->isProcessingPrimaryMakefile)
 			{
 				std::string metabase = appState->cmdSetup._generator + ".lua";
 				//Process metabase
-				mbLuaDoFile(l, metabase.c_str(), NULL);			
+				mbLuaDoFile(l, metabase.c_str(), NULL);
 			}
 			mbPushDir(ctx->currentMetaMakeDirAbs);
 			//Process makefile
@@ -200,5 +219,30 @@ int main(int argc, const char * argv[])
 	mbPopDir();
 	
     MB_LOGINFO("Project generation complete.");
+	Platform::Shutdown();
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,13 +1,18 @@
-package.path = package.path .. ";" .. writer_global.metabasedirabs .. "/?.lua"
+package.path = package.path .. ";" .. mbwriter.global.metabasedirabs .. "/?.lua"
+
+--third party modules
 inspect = require('inspect')
 
-util = require('utility')
+--internal modules
+mbutil = require('mbutil')
+mbstring = require('mbstring')
+mbfilepath = require('mbfilepath')
 
-if writer_global.verbose then 
-	print("writer_global:\n")
-	print(inspect(writer_global))
-	print("\n")
-	print("writer_solution:\n")
-	print(inspect(writer_solution))
+if mbwriter.global.verbose then 
+	loginfo("mbwriter.global:\n")
+	loginfo(inspect(mbwriter.global))
+	loginfo("\n")
+	loginfo("mbwriter.solution:\n")
+	loginfo(inspect(mbwriter.solution))
 end
 

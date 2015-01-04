@@ -1,13 +1,12 @@
-package.path = package.path .. ";" .. writer_global.metabasedirabs .. "/?.lua"
+package.path = package.path .. ";" .. mbwriter.global.metabasedirabs .. "/?.lua"
 local inspect = require('inspect')
-local util = require('utility')
 
-if writer_global.verbose then 
-	print("writer_global:\n")
-	print(inspect(writer_global))
-	print("\n")
-	print("writer_solution:\n")
-	print(inspect(writer_solution))
+if mbwriter.global.verbose then 
+	loginfo("mbwriter.global:\n")
+	loginfo(inspect(mbwriter.global))
+	loginfo("\n")
+	loginfo("mbwriter.solution:\n")
+	loginfo(inspect(mbwriter.solution))
 end
 
 
@@ -15,27 +14,21 @@ end
 g_filePathMap = {}
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, writer_global.currentmetamakedirabs, writer_global.currentmetamakedirabs, "/", g_filePathMap)
-end
-
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --FILE WRITING
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function WriteMakeFile(currentTarget, config)
 
-	local makeDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name
-	mbwriter_mkdir(makeDir)
+	local makeDir = mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name
+	mbwriter.mkdir(makeDir)
 
 	print(inspect(config))
 
 	local makeFilename = makeDir .. "/" .. "build.ninja"
-	local file = io.open(makeFilename, "w")
+	local file = mbfile.open(makeFilename, "w")
 
-	local intdir = writer_global.intdir .. "/" .. currentTarget.name 
-	local outdir = writer_global.outdir  
+	local intdir = mbwriter.global.intdir .. "/" .. currentTarget.name 
+	local outdir = mbwriter.global.outdir  
 
 	file:write("intdir = " .. intdir .. "\n")
 	file:write("outdir = " .. outdir .. "\n")
@@ -55,7 +48,7 @@ function WriteMakeFile(currentTarget, config)
 	end
 
 	for i = 1, #config.includedirs do
-		local includeDir = GetFullFilePath(config.includedirs[i])
+		local includeDir = mbwriter.getoutputrelfilepath(config.includedirs[i])
 		print(includeDir)
 		file:write("  -I" .. includeDir .. " $\n")
 	end
@@ -69,7 +62,7 @@ function WriteMakeFile(currentTarget, config)
 	end
 
 	for i = 1, #config.libdirs do
-		local libDir = GetFullFilePath(config.libdirs[i])
+		local libDir = mbwriter.getoutputrelfilepath(config.libdirs[i])
 		file:write("  -L" .. libDir .. " $\n")
 	end
 	file:write("\n")
@@ -105,8 +98,8 @@ function WriteMakeFile(currentTarget, config)
 
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
-		local dependsDir = writer_global.makeoutputdirabs .. "/" .. filename .. "/" .. config.name
+		local path, filename, ext = mbfilepath.decompose(dependency)
+		local dependsDir = mbwriter.global.makeoutputdirabs .. "/" .. filename .. "/" .. config.name
 		local f = dependsDir .. "/build.ninja"
 
 		file:write("subninja " .. f .. "\n")
@@ -116,11 +109,11 @@ function WriteMakeFile(currentTarget, config)
 	local filesToLink = {}	
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
-		local ext = Util_FileExtension(f)
+		local ext = mbfilepath.getextension(f)
 		if ext == "c" or ext == "cpp" then
-			local shortName = Util_FileShortname(f)
-			local fileToBuild = GetFullFilePath(f)
-		    local fileToLink = Util_FileReplaceExtension(shortName, ext, "o")
+			local shortName = mbfilepath.shortname(f)
+			local fileToBuild = mbwriter.getoutputrelfilepath(f)
+		    local fileToLink = mbfilepath.replaceextension(shortName, ext, "o")
 		    file:write("build $intdir/" .. fileToLink .. ": cxx " .. fileToBuild .. "\n")
 		    table.insert(filesToLink, fileToLink)
 		end
@@ -146,7 +139,7 @@ function WriteMakeFile(currentTarget, config)
 		-- Link with required projects
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
-			local path, filename, ext = Util_FilePathDecompose(dependency)
+			local path, filename, ext = mbfilepath.decompose(dependency)
 			local f = filename .. "_" .. config.name .. ".a"
 			file:write("  $outdir/" .. f .. " $\n")
 		end		
@@ -155,14 +148,14 @@ function WriteMakeFile(currentTarget, config)
 	file:write("\n")
 	file:close()
 
-	mbwriter_reportoutputfile(makeFilename)	
+	mbwriter.reportoutputfile(makeFilename)	
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --MAIN
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local currentTarget = writer_solution.targets[1]
+local currentTarget = mbwriter.solution.targets[1]
 
 for i = 1, #currentTarget.configs do
 	local config = currentTarget.configs[i]

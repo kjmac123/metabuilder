@@ -4,50 +4,31 @@
 
 #include "writer_msvc.h"
 #include "writer_xcode.h"
+#include "writer_utility.h"
 #include "solution.h"
 #include "configparam.h"
 #include "metabase.h"
+#include "makesetup.h"
+#include "makeglobal.h"
+#include "luafile.h"
 
 static std::vector<KeyValue>	g_registeredTargets;
 
-static int luaFuncGlobalImport(lua_State* l)
-{
-    std::string requireFile;
-	mbLuaToStringExpandMacros(&requireFile, l, 1);
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
-    mbLuaDoFile(l, requireFile, NULL);
-    return 0;
-}
 
-static int luaSplit (lua_State* l) 
-{
-  const char *s = luaL_checkstring(l, 1);
-  const char *sep = luaL_checkstring(l, 2);
-  const char *e;
-  int i = 1;
-
-  lua_newtable(l); 
-
-  //for each separator
-  while ((e = strchr(s, *sep)) != NULL) 
-  {
-		lua_pushlstring(l, s, e-s);  //push substring
-		lua_rawseti(l, -2, i++);
-		s = e + 1;  //skip separator
-  }
-
-  //push last substring
-  lua_pushstring(l, s);
-  lua_rawseti(l, -2, i);
-  return 1;
-}
 
 static int luaFuncMkdir(lua_State* l)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
     std::string path;
-	mbLuaToStringExpandMacros(&path, l, 1);
+	mbLuaToStringExpandMacros(&path, b, l, 1);
+
+	char normalisedDir[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedDir, path.c_str());
 	
-	if (!mbCreateDirChain(path.c_str()))
+	if (!mbCreateDirChain(normalisedDir))
 	{
 		mbExitError();
 	}
@@ -57,16 +38,23 @@ static int luaFuncMkdir(lua_State* l)
 
 static int luaFuncMklink(lua_State* l)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
     std::string src, dst;
-	if (!mbLuaToStringExpandMacros(&src, l, 1) || !mbLuaToStringExpandMacros(&dst, l, 2))
+	if (!mbLuaToStringExpandMacros(&src, b, l, 1) || !mbLuaToStringExpandMacros(&dst, b, l, 2))
 	{
 		MB_LOGERROR("Must specify both source and destination when creating link");
 		mbExitError();
 	}
-		
-	if (!mbaCreateLink(src.c_str(), dst.c_str()))
+
+	char normalisedLinkSrc[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedLinkSrc, src.c_str());
+	char normalisedLinkDst[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedLinkDst, dst.c_str());
+
+	if (!Platform::CreateLink(normalisedLinkSrc, normalisedLinkDst))
 	{
-		MB_LOGERROR("Failed to create link %s->%s", src.c_str(), dst.c_str());
+		MB_LOGERROR("Failed to create link %s->%s", normalisedLinkSrc, normalisedLinkDst);
 		mbExitError();
 	}
 	
@@ -76,7 +64,7 @@ static int luaFuncMklink(lua_State* l)
 static int luaFuncGetFileType(lua_State* l)
 {
     const char* filepath = lua_tostring(l, 1);
-	E_FileType fileType = mbaGetFileType(filepath);
+	E_FileType fileType = Platform::GetFileType(filepath);
 	
 	const char* result = "unknown";
 	switch (fileType)
@@ -101,7 +89,7 @@ static int luaFuncGetFileType(lua_State* l)
 static int luaFuncReportOutputFile(lua_State* l)
 {
     std::string filepath;
-	mbLuaToStringExpandMacros(&filepath, l, 1);
+	mbLuaToStringExpandMacros(&filepath, NULL, l, 1);
 	MB_LOGINFO("Wrote file %s", filepath.c_str());
 	
 	return 0;
@@ -118,45 +106,33 @@ static int luaFuncFatalError(lua_State* l)
 	return 0;
 }
 
-#if 0
-static int luaFuncGetRelativeDirTo(lua_State* l)
-{
-    const char* from = mbLuaToStringExpandMacros(l, 1);
-    const char* to = mbLuaToStringExpandMacros(l, 2);
-
-	std::string result;
-	if (mbPathRelativeDirTo(&result, from, to))
-	{
-		lua_pushstring(l, result.c_str());
-		return 1;
-	}
-
-	return 0;
-}
-#endif
-
 static int luaFuncCopyFile(lua_State* l)
 {
-	std::string fromFilename, toFilename;
+	std::string fromFilename_, toFilename_;
 	
-	if (!mbLuaToStringExpandMacros(&fromFilename, l, 1) || !mbLuaToStringExpandMacros(&toFilename, l, 2))
+	if (!mbLuaToStringExpandMacros(&fromFilename_, NULL, l, 1) || !mbLuaToStringExpandMacros(&toFilename_, NULL, l, 2))
 	{
 		MB_LOGERROR("Failed to copy file. Insufficient args");
 		mbExitError();
 		return 0;
 	}
 
-	FILE* fromFile = fopen(fromFilename.c_str(), "rb");
+	char normalisedFromFilename[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedFromFilename, fromFilename_.c_str());
+	char normalisedToFilename[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedToFilename, toFilename_.c_str());
+
+	FILE* fromFile = fopen(normalisedFromFilename, "rb");
 	if (!fromFile)
 	{
-        MB_LOGERROR("cannot open file %s", fromFilename.c_str());
+		MB_LOGERROR("cannot open file %s", normalisedFromFilename);
         mbExitError();
 	}
 	
-	FILE* toFile = fopen(toFilename.c_str(), "wb");
+	FILE* toFile = fopen(normalisedToFilename, "wb");
 	if (!toFile)
 	{
-        MB_LOGERROR("cannot open file %s", toFilename.c_str());
+		MB_LOGERROR("cannot open file %s", normalisedToFilename);
         mbExitError();
 	}
 	
@@ -174,7 +150,7 @@ static int luaFuncCopyFile(lua_State* l)
 		{
 			fclose(toFile);
 			fclose(fromFile);
-			MB_LOGERROR("Failed to read from file %s", fromFilename.c_str());
+			MB_LOGERROR("Failed to read from file %s", normalisedFromFilename);
 			mbExitError();
 		}
 		
@@ -183,7 +159,7 @@ static int luaFuncCopyFile(lua_State* l)
 		{
 			fclose(toFile);
 			fclose(fromFile);
-			MB_LOGERROR("Failed to copy to file %s", toFilename.c_str());
+			MB_LOGERROR("Failed to copy to file %s", normalisedToFilename);
 			mbExitError();
 		}
 		
@@ -199,8 +175,8 @@ static int luaFuncCopyFile(lua_State* l)
 static int luaFuncWriterRegisterTarget(lua_State* l)
 {
 	g_registeredTargets.push_back(KeyValue());
-	mbLuaToStringExpandMacros(&g_registeredTargets.back().key, l, 1);	// target name;
-	mbLuaToStringExpandMacros(&g_registeredTargets.back().value, l, 2);	// target filepath;
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().key, NULL, l, 1);	// target name;
+	mbLuaToStringExpandMacros(&g_registeredTargets.back().value, NULL, l, 2);	// target filepath;
 	MB_LOGINFO("Registered target - name: %s location: %s", g_registeredTargets.back().key.c_str(), g_registeredTargets.back().value.c_str());
 	return 0;
 }
@@ -208,7 +184,7 @@ static int luaFuncWriterRegisterTarget(lua_State* l)
 static int luaFuncWriterGetTarget(lua_State* l)
 {
     std::string target;
-	mbLuaToStringExpandMacros(&target, l, 1);
+	mbLuaToStringExpandMacros(&target, NULL, l, 1);
 	
 	for (int i = 0; i < (int)g_registeredTargets.size(); ++i)
 	{
@@ -226,44 +202,30 @@ static int luaFuncWriterGetTarget(lua_State* l)
 
 void luaRegisterWriterFuncs(lua_State* l)
 {
-	mbWriterXcodeLuaRegister(l);
-	mbWriterMSVCLuaRegister(l);
+	mbLuaFile_Register(l);
 
-    lua_pushcfunction(l, luaFuncGlobalImport);
-    lua_setglobal(l, "import");
+	{
+		LuaModuleFunctions luaFn;
+		mbCommonLuaRegister(l, &luaFn);
+		luaFn.RegisterLuaGlobal(l);
+	}
+
+	{
+		LuaModuleFunctions luaFn;
+		mbWriterXcodeLuaRegister(l, &luaFn);
+		mbWriterMSVCLuaRegister(l, &luaFn);
+		mbWriterUtilityLuaRegister(l, &luaFn);
 	
-	lua_pushcfunction(l, luaFuncAddMacro);
-	lua_setglobal(l, "globalmacro");
-
-	lua_pushcfunction(l, luaFuncExpandMacro);
-	lua_setglobal(l, "expandmacro");
-
-	lua_pushcfunction(l, luaSplit);
-	lua_setglobal(l, "mbwriter_split");
-	
-    lua_pushcfunction(l, luaFuncMkdir);
-    lua_setglobal(l, "mbwriter_mkdir");
-	
-    lua_pushcfunction(l, luaFuncMklink);
-    lua_setglobal(l, "mbwriter_mklink");
-
-    lua_pushcfunction(l, luaFuncGetFileType);
-    lua_setglobal(l, "mbwriter_getfiletype");
-	
-    lua_pushcfunction(l, luaFuncCopyFile);
-    lua_setglobal(l, "mbwriter_copyfile");
-
-    lua_pushcfunction(l, luaFuncReportOutputFile);
-    lua_setglobal(l, "mbwriter_reportoutputfile");
-
-    lua_pushcfunction(l, luaFuncFatalError);
-    lua_setglobal(l, "mbwriter_fatalerror");
-
-    lua_pushcfunction(l, luaFuncWriterRegisterTarget);
-    lua_setglobal(l, "mbwriter_registertarget");
-
-    lua_pushcfunction(l, luaFuncWriterGetTarget);
-    lua_setglobal(l, "mbwriter_gettarget");
+		luaFn.AddFunction("mkdir", luaFuncMkdir);
+		luaFn.AddFunction("mklink", luaFuncMklink);
+		luaFn.AddFunction("getfiletype", luaFuncGetFileType);
+		luaFn.AddFunction("copyfile", luaFuncCopyFile);
+		luaFn.AddFunction("reportoutputfile", luaFuncReportOutputFile);
+		luaFn.AddFunction("fatalerror", luaFuncFatalError);
+		luaFn.AddFunction("registertarget", luaFuncWriterRegisterTarget);
+		luaFn.AddFunction("gettarget", luaFuncWriterGetTarget);
+		luaFn.RegisterLuaModule(l, "mbwriter");
+	}
 }
 
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)
@@ -353,10 +315,11 @@ void mbWriterDo(MetaBuilderContext* ctx)
 	mbPushActiveContext(ctx);
 
 	lua_State *l;
-    l = luaL_newstate();
+	l = lua_newstate(mbLuaAllocator, NULL);
 	luaL_checkstack(l, MB_LUA_STACK_MAX, "Out of stack!");
-
 	luaL_openlibs(l);
+
+	luaRegisterWriterFuncs(l);
 
 	AppState* appState = mbGetAppState();
 
@@ -372,18 +335,25 @@ void mbWriterDo(MetaBuilderContext* ctx)
 	
 	//Global information table
 	{
+		lua_getglobal(l, "mbwriter");
+		MB_ASSERT(lua_istable(l, -1));
+
 		lua_createtable(l, 0, 1);
 
 		lua_pushstring(l, mbGetAppState()->metabaseDirAbs.c_str());
 		lua_setfield(l, -2, "metabasedirabs");
 				
 		{
-			char buf[MB_MAX_PATH];
-			sprintf(buf, "%s/%s/%s", appState->makeOutputDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->GetName().c_str());
-			lua_pushstring(l, buf);
+			{
+				char buf[MB_MAX_PATH];
+				sprintf(buf, "%s/%s/%s", appState->makeOutputTopDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->GetName().c_str());
+				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
+				ctx->makeOutputDirAbs = buf;
+			}
+			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
 			lua_setfield(l, -2, "makeoutputdirabs");
 			
-			if (!mbCreateDirChain(buf))
+			if (!mbCreateDirChain(ctx->makeOutputDirAbs.c_str()))
 			{
 				mbExitError();
 			}
@@ -400,7 +370,15 @@ void mbWriterDo(MetaBuilderContext* ctx)
 
 		lua_pushstring(l, appState->outDir.c_str());
 		lua_setfield(l, -2, "outdir");
-		
+
+		{
+			char tmp[2];
+			tmp[0] = appState->makeGlobal->GetTargetDirSep();
+			tmp[1] = '\0';
+			lua_pushstring(l, tmp);
+			lua_setfield(l, -2, "targetDirSep");
+		}
+
 		//Write out the set of options associated with our metabase node.
 		{
 			std::map<std::string, KeyValueMap> options;
@@ -414,11 +392,14 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		lua_pushboolean(l, ctx->isMainMakefile);
 		lua_setfield(l, -2, "ismainmakefile");
 		
-		lua_setglobal(l, "writer_global");
+		lua_setfield(l, -2, "global");
 	}
 	
 	//Solution table
 	{
+		lua_getglobal(l, "mbwriter");
+		MB_ASSERT(lua_istable(l, -1));
+
 		lua_createtable(l, 0, 4);
 				
 		lua_pushstring(l, solution->GetName().c_str());
@@ -508,6 +489,8 @@ void mbWriterDo(MetaBuilderContext* ctx)
 							{
 								const char* platformName = ctx->metabase->supportedPlatforms[kPlatform].c_str();
 								target->Flatten(&flatConfig, platformName, configName);
+
+								flatConfig.Init();
 							}
 							
 							lua_createtable(l, 0, 0);
@@ -642,7 +625,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		}
 		lua_setfield(l, -2, "targets");
 
-		lua_setglobal(l, "writer_solution");
+		lua_setfield(l, -2, "solution");
 	}
 
 	if (metabase->writerLua.length() == 0)
@@ -651,7 +634,8 @@ void mbWriterDo(MetaBuilderContext* ctx)
         mbExitError();
     }
 	
-    mbLuaDoFile(l, metabase->writerLua, luaRegisterWriterFuncs);
+	//MB_LOGINFO("PROFILE - Writer %s", metabase->writerLua.c_str());
+    mbLuaDoFile(l, metabase->writerLua, NULL);
     
     lua_close(l);
 	

@@ -36,18 +36,18 @@ void Solution::Process()
 
 static int luaFuncSolution(lua_State* l)
 {
+	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
+	assert(!activeBlock);
+
     std::string name;
-	mbLuaToStringExpandMacros(&name, l, 1);
+	mbLuaToStringExpandMacros(&name, activeBlock, l, 1);
     
     if (mbGetActiveContext()->solution)
     {
         MB_LOGERROR("ERROR: Multiple solutions found. This is not supported.");
         mbExitError();
     }
-	
-	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
-	assert(!activeBlock);
-    
+	    
 	mbGetActiveContext()->solution = new Solution();
 	mbGetActiveContext()->metabase->AddChild(mbGetActiveContext()->solution);
 	mbGetActiveContext()->solution->SetName(name.c_str());

@@ -8,6 +8,7 @@ defines
 { 
 	"PLATFORM_OSX", 
 	"PLATFORM_POSIX", 
+	"DARWIN",
 }
 
 config "Debug"

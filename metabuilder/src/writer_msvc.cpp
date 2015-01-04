@@ -2,6 +2,8 @@
 
 std::vector<KeyValue> g_externalProjectReference;
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
 int luaFuncWriterMSVCGenerateID(lua_State* l)
 {
 	U32 a = mbRandomU32();
@@ -22,15 +24,15 @@ int luaFuncWriterMSVCGenerateID(lua_State* l)
 static int luaFuncRegisterProjectID(lua_State* l)
 {
 	g_externalProjectReference.push_back(KeyValue());
-	mbLuaToStringExpandMacros(&g_externalProjectReference.back().key, l, 1);	// target;
-	mbLuaToStringExpandMacros(&g_externalProjectReference.back().value, l, 2);	// id;
+	mbLuaToStringExpandMacros(&g_externalProjectReference.back().key, NULL, l, 1);	// target;
+	mbLuaToStringExpandMacros(&g_externalProjectReference.back().value, NULL, l, 2);	// id;
 	return 0;
 }
 
 static int luaFuncGetProjectID(lua_State* l)
 {
     std::string targetName;
-	mbLuaToStringExpandMacros(&targetName, l, 1);
+	mbLuaToStringExpandMacros(&targetName, NULL, l, 1);
 	
 	for (int i = 0; i < (int)g_externalProjectReference.size(); ++i)
 	{
@@ -46,14 +48,9 @@ static int luaFuncGetProjectID(lua_State* l)
 	return 0;
 }
 
-void mbWriterMSVCLuaRegister(lua_State* l)
+void mbWriterMSVCLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)
 {
-    lua_pushcfunction(l, luaFuncWriterMSVCGenerateID);
-    lua_setglobal(l, "msvcgenerateid");
-
-    lua_pushcfunction(l, luaFuncRegisterProjectID);
-    lua_setglobal(l, "msvcregisterprojectid");
-
-    lua_pushcfunction(l, luaFuncGetProjectID);
-    lua_setglobal(l, "msvcgetprojectid");
+	luaFn->AddFunction("msvcgenerateid",		luaFuncWriterMSVCGenerateID);
+	luaFn->AddFunction("msvcregisterprojectid", luaFuncRegisterProjectID);
+	luaFn->AddFunction("msvcgetprojectid",		luaFuncGetProjectID);
 }

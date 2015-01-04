@@ -21,7 +21,10 @@ struct FlatConfig
 	std::map<std::string, StringVector>	stringGroups;
 	std::map<std::string, KeyValueMap>	options;
 	
+	void Init();
 	void Dump();
+
+private:
 };
 
 class Block
@@ -57,6 +60,7 @@ public:
 	void						AddLibDirs(const StringVector& libs);
 	void						AddExeDirs(const StringVector& defines);
 
+	void						AppendOption(const std::string& group, const std::string& key, const std::string& value, char seperator);
 	void						SetOption(const std::string& group, const std::string& key, const std::string& value);
 	void						GetOptions(std::map<std::string, KeyValueMap>* result) const;
 	
@@ -69,11 +73,18 @@ public:
 	
 	const std::vector<ParamBlock*>&
 								GetParamBlocks() const;
-				
-	void						FlattenThis(FlatConfig* result) const;	
+
+	void						SetMacro(const char* key, const char* value);
+	const KeyValueMap&			FlattenMacros() const;
+
+	void						FlattenThis(FlatConfig* result) const;
+
 protected:
 	StringVector*				AcquireStringGroup(const char* groupName);
 	const StringVector*			GetStringGroup(const char* groupName) const;
+
+	void						SetMacroCacheDirty() const;
+	const KeyValueMap&			GetMacros() const;
 
 	std::string					m_name;
 	
@@ -88,6 +99,9 @@ protected:
 								m_keyValueGroups;
 				
 	std::vector<ParamBlock*>	m_childParams;
+
+	mutable	KeyValueMap			m_flattenedMacroCache;
+	mutable bool				m_macroCacheDirty;
 };
 
 //Generic operations add information to the current context via this interface.
@@ -117,10 +131,8 @@ public:
 								ParamBlock();
 	virtual						~ParamBlock();
 	
-	virtual bool				IsA(E_BlockType t) const;
-	
+	virtual bool				IsA(E_BlockType t) const;	
 	virtual void				Process();
-	
 	virtual void				Dump() const;	
 };
 

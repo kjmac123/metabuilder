@@ -1,18 +1,6 @@
-package.path = package.path .. ";" .. writer_global.metabasedirabs .. "/?.lua"
-local inspect = require('inspect')
-local util = require('utility')
-
-if writer_global.verbose then 
-	print("writer_global:\n")
-	print(inspect(writer_global))
-	print("\n")
-	print("writer_solution:\n")
-	print(inspect(writer_solution))
-end
+import "writer_common.lua"
 
 g_firstTargetWritten = false
-
-g_filePathMap = {}
 
 --Count the number of times a base name appears so that we can avoid filename clashes
 g_sourceFileBaseNameCounts = {}
@@ -42,10 +30,6 @@ g_varOBJ = ""
 g_varDEFINES = ""
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, writer_global.currentmetamakedirabs, writer_global.makeoutputdirabs, "/", g_filePathMap)
-end
 
 function InitVars(currentTarget)
 	g_varBUILDCONFIG	= "BUILDCONFIG"
@@ -89,9 +73,9 @@ function WriteSourceToObjRule(file, buildFile)
 		compiler = GetDollarVar(g_varCXX)
 		compilerFlags = compilerFlags .. " " .. GetDollarVar(g_varCXXFLAGS)
 	else
-		mbwriter_fatalerror("unsupported source file type")
+		mbwriter.fatalerror("unsupported source file type")
 	end
-	basename = Util_StringReplace(buildFile.objFile, ".o", "")
+	basename = mbstring.replace(buildFile.objFile, ".o", "")
 
 	file:write(buildFile.objFile .. " : " .. buildFile.srcFile .. " " .. basename .. ".d \n")
 	file:write("	@echo " .. compiler .. " " .. buildFile.srcFile .. "\n")
@@ -107,10 +91,8 @@ function WriteMakeFileCommonVars(file, currentTarget)
 	file:write(g_varOUTDIR .. 		" := " .. g_outdir .. "\n")
 	file:write("\n")
 	if currentTarget.options.cc == nil then
-		mbwriter_fatalerror("No C compiler set")
+		mbwriter.fatalerror("No C compiler set")
 	end
-	
-	--print(inspect(currentTarget))
 	
 	file:write(g_varCC .. 			" := " .. currentTarget.options.cc[1] .. "\n")
 	if currentTarget.options.cxx == nil then
@@ -120,7 +102,6 @@ function WriteMakeFileCommonVars(file, currentTarget)
 
 	for i = 1, #currentTarget.configs do
 		local config = currentTarget.configs[i]
-		--print(inspect(config))
 
 		--CPPFLAGS is commong to C and C++
 		file:write(g_varCPPFLAGS .. "." .. config.name .. " := \\\n")
@@ -162,8 +143,8 @@ function WriteMakeFileCommonVars(file, currentTarget)
 		--Out include paths are shared between languages, so store in CPPFLAGS
 		file:write(g_varINCLUDES .. "." .. config.name .. " := \\\n")
 		for i = 1, #config.includedirs do
-			local includeDir = GetFullFilePath(config.includedirs[i])
-			file:write("  -I" .. Util_FileQuoted(includeDir) .. " \\\n")
+			local includeDir = mbwriter.getoutputrelfilepath(config.includedirs[i])
+			file:write("  -I" .. mbstring.quoted(includeDir) .. " \\\n")
 		end
 		file:write("\n")
 		file:write(g_varCPPFLAGS .. "." .. config.name .. " += $(" .. g_varINCLUDES .. "." .. config.name .. ")\n")
@@ -178,7 +159,7 @@ function WriteMakeFileAppVars(file, currentTarget)
 	file:write(g_varCFLAGS .. 	" += -c\n")
 	file:write(g_varCXXFLAGS ..	" += -c\n")
 	if currentTarget.options.ld == nil then
-		mbwriter_fatalerror("No linker set")
+		mbwriter.fatalerror("No linker set")
 	end		
 	file:write(g_varLD .. 		" := " .. currentTarget.options.ld[1] .. "\n")
 	file:write("\n")
@@ -197,9 +178,9 @@ function WriteMakeFileAppVars(file, currentTarget)
 
 		--Library directories. Will be stored in LDFLAGS
 		file:write(g_varLIBDIRS .. "." .. config.name .. " := \\\n")
-		if config.options.libdirs ~= nil then
+		if config.libdirs ~= nil then
 			for i = 1, #config.libdirs do
-				local libDir = GetFullFilePath(config.libdirs[i])
+				local libDir = mbwriter.getoutputrelfilepath(config.libdirs[i])
 				file:write("  -L" .. libDir .. " \\\n")
 			end
 		end
@@ -208,10 +189,11 @@ function WriteMakeFileAppVars(file, currentTarget)
 		
 		--Libraries
 		file:write(g_varLIBS .. "." .. config.name .. " := \\\n")
-		if config.options.libs ~= nil then
-			for i = 1, #currentTarget.libs do
-				local lib = GetFullFilePath(config.libs[i])
-				file:write("  " .. lib .. " \\\n")
+		if config.libs ~= nil then
+			for i = 1, #config.libs do
+				local lib = config.libs[i]
+				--file:write("  -l:" .. lib .. " \\\n")
+				file:write(" " .. lib .. " \\\n")
 			end
 		end
 		file:write("\n")
@@ -227,7 +209,7 @@ function WriteMakeFileModuleVars(var1, var2)
 	currentTarget = var2
 	
 	if currentTarget.options.ld == nil then
-		mbwriter_fatalerror("No linker set")
+		mbwriter.fatalerror("No linker set")
 	end
 	file:write(g_varLD .. 		" := " .. currentTarget.options.ld[1] .. "\n")
 	file:write(g_varCFLAGS ..	" += -c\n")
@@ -237,7 +219,7 @@ end
 
 function WriteMakeFileStaticLibVars(file, currentTarget)
 	if currentTarget.options.ar == nil then
-		mbwriter_fatalerror("No archive tool specified")
+		mbwriter.fatalerror("No archive tool specified")
 	end
 	file:write(g_varAR .. " := " .. currentTarget.options.ar[1] .. "\n")
 	file:write("\n")
@@ -292,8 +274,8 @@ function WriteCompileRule(file, currentTarget)
 
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
-		local submakeLinkTargetAbs = mbwriter_gettarget(filename)
+		local path, filename, ext = mbfilepath.decompose(dependency)
+		local submakeLinkTargetAbs = mbwriter.gettarget(filename)
 		
 		file:write(submakeLinkTargetAbs .. " ")
 	end	
@@ -321,7 +303,7 @@ function WriteMakeFileModuleTarget(file, currentTarget)
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
 	file:write("	@echo " .." ld" .. " Creating module obj " .. targetFileName .. "\n")
 	file:write("	@" .. "ld" .. " " .. " -r " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
-	mbwriter_registertarget(currentTarget.name, targetFileName)
+	mbwriter.registertarget(currentTarget.name, targetFileName)
 end
 
 function WriteMakeFileStaticLibTarget(file, currentTarget)
@@ -331,43 +313,47 @@ function WriteMakeFileStaticLibTarget(file, currentTarget)
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
 	file:write("	@echo " .. GetDollarVar(g_varAR) .. " Creating static lib " .. targetFileName .. "\n")
 	file:write("	@" .. GetDollarVar(g_varAR) .. " " .. GetDollarVar(g_varARFLAGS) .. " " .. targetFileName .. " " .. GetDollarVar(g_varOBJ) .. "\n")
-	mbwriter_registertarget(currentTarget.name, targetFileName)
+	mbwriter.registertarget(currentTarget.name, targetFileName)
 end
 
 function WriteMakeFile(currentTarget)
 
-	local makeDir = Util_FilePathJoin(writer_global.makeoutputdirabs, "")
-	mbwriter_mkdir(makeDir)
+	local makeDir = mbfilepath.join(mbwriter.global.makeoutputdirabs, "", mbwriter.global.targetDirSep)
+	mbwriter.mkdir(makeDir)
 	
 	local makeFilename = ""
-	if (writer_global.ismainmakefile) then
-		makeFilename = Util_FilePathJoin(makeDir, "Makefile")
+	if (mbwriter.global.ismainmakefile) then
+		makeFilename = mbfilepath.join(makeDir, "Makefile", mbwriter.global.targetDirSep)
 	else
-		makeFilename = Util_FilePathJoin(makeDir, currentTarget.name .. ".mk")
+		makeFilename = mbfilepath.join(makeDir, currentTarget.name .. ".mk", mbwriter.global.targetDirSep)
 	end
 	
-	local file = io.open(makeFilename, "w")
+	makeFilename = mbwriter.normalisetargetfilepath(makeFilename)
+	local file = mbfile.open(makeFilename, "w")
+	if file == nil then
+		mbwriter.fatalerror("failed to open file " .. makeFilename)
+	end
 	
 	InitVars(currentTarget)	
 
-	g_intdir = writer_global.intdir
-	g_outdir = writer_global.outdir
+	g_intdir = mbwriter.global.intdir
+	g_outdir = mbwriter.global.outdir
 
-	g_intdir = Util_FilePathJoin(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
-	g_outdir = Util_FilePathJoin(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG))
+	g_intdir = mbfilepath.join(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
+	g_outdir = mbfilepath.join(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
 		
 	--write out content we only require once per makefile
 	if (g_firstTargetWritten == false) then
 		g_firstTargetWritten = true
 
 		--write out content we only require at the start of the main makefile
-		if (writer_global.ismainmakefile) then
+		if mbwriter.global.ismainmakefile then
 			WriteMakeFileGlobalVars(file, currentTarget)
 		end
 	end
 	
 	file:write("\n")
-	if (writer_global.ismainmakefile) then
+	if mbwriter.global.ismainmakefile then
 		file:write("default : all \n")
 	end
 		
@@ -375,9 +361,9 @@ function WriteMakeFile(currentTarget)
 	--include submakefiles
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
-		local submakeLinkTarget = mbwriter_gettarget(filename)
+		local submakeLinkTarget = mbwriter.gettarget(filename)
 		local submakefile = filename .. ".mk"
 		
 		file:write("include " .. submakefile .. "\n")
@@ -395,15 +381,15 @@ function WriteMakeFile(currentTarget)
 	elseif currentTarget.targettype == "module" then
 		WriteMakeFileModuleVars(file, currentTarget)
 	else
-		mbwriter_fatalerror("unsupported target type")
+		mbwriter.fatalerror("unsupported target type")
 	end
 		
     local buildFiles = {}
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
-		local path, filename, ext = Util_FilePathDecompose(f)
+		local path, filename, ext = mbfilepath.decompose(f)
 		if ext == "c" or ext == "cpp" then
-			local filenameAbs = GetFullFilePath(f)
+			local filenameAbs = mbwriter.getoutputrelfilepath(f)
 						
 			local fileBaseNameCount = g_sourceFileBaseNameCounts[filename]
 			if (fileBaseNameCount == nil) then
@@ -411,8 +397,8 @@ function WriteMakeFile(currentTarget)
 				fileBaseNameCount = 0				
 			end
 			
-			local obj = Util_StringReplace(filename, ".cpp", "")
-			obj = Util_StringReplace(obj, ".c", "")
+			local obj = mbstring.replace(filename, ".cpp", "")
+			obj = mbstring.replace(obj, ".c", "")
 			obj = GetDollarVar(g_varINTDIR) .. "/" .. obj
 			local objWithCount = obj
 			if (fileBaseNameCount > 0) then
@@ -420,13 +406,13 @@ function WriteMakeFile(currentTarget)
 			end
 			obj = obj .. ".o"
 
-			table.insert(buildFiles, {objFile=obj, srcFile=filenameAbs, ext=ext})
+			buildFiles[#buildFiles+1] = {objFile=obj, srcFile=filenameAbs, ext=ext}
 			g_sourceFileBaseNameCounts[filename] = fileBaseNameCount + 1
 		end
 	end
 	file:write("\n")
 	file:write(g_varSRC .. " := \\\n")
-
+	
 	for i = 1, #buildFiles do
 		file:write("	" .. buildFiles[i].srcFile .. " \\\n")
 	end
@@ -453,12 +439,10 @@ function WriteMakeFile(currentTarget)
 	elseif currentTarget.targettype == "module" then
 		WriteMakeFileModuleTarget(file, currentTarget)
 	else
-		mbwriter_fatalerror("unsupported target type")
+		mbwriter.fatalerror("unsupported target type")
 	end
 
 	file:write("\n")
-	
-	--print(inspect(currentTarget))
 	
 	file:write("\n")
 	file:write(GetDollarVar(g_varOBJ) .. " : | " .. GetDollarVar(g_varINTDIR) .. "\n\n")
@@ -479,7 +463,7 @@ function WriteMakeFile(currentTarget)
 	file:write("clean_" .. currentTarget.name .. " : ")
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 		file:write("clean_" .. filename .. " ")
 	end
 	file:write("\n")
@@ -491,7 +475,7 @@ function WriteMakeFile(currentTarget)
 	file:write("	@if [ -d \"" .. GetDollarVar(g_varOUTDIR) .. "\" ]; then rmdir \"" .. GetDollarVar(g_varOUTDIR) .. "\";fi\n")
 	file:write("\n")
 	
-	if (writer_global.ismainmakefile) then
+	if (mbwriter.global.ismainmakefile) then
 		--write 'all' target for main makefile
 		file:write(".PHONY: all\n")	
 		file:write("all : " .. "all_" .. currentTarget.name .. "\n")
@@ -510,19 +494,19 @@ function WriteMakeFile(currentTarget)
 	
 	for i = 1, #buildFiles do
 		local objFile = buildFiles[i].objFile
-		local depFile = Util_StringReplace(objFile, ".o", ".d")
+		local depFile = mbstring.replace(objFile, ".o", ".d")
 		file:write("-include " .. depFile .. "\n")
 	end	
 	
 	file:write("\n")
 	file:close()
 
-	mbwriter_reportoutputfile(makeFilename)	
+	mbwriter.reportoutputfile(makeFilename)	
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --MAIN
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local currentTarget = writer_solution.targets[1]
+local currentTarget = mbwriter.solution.targets[1]
 WriteMakeFile(currentTarget)

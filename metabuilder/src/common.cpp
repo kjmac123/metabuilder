@@ -1,6 +1,11 @@
 #include "metabuilder_pch.h"
 
+#ifdef MB_DLMALLOC
+#include "dlmalloc.h"
+#endif
+
 #include "makesetup.h"
+#include "makeglobal.h"
 #include "metabase.h"
 
 #include <sys/stat.h>
@@ -8,15 +13,46 @@
 #include <set>
 #include <list>
 #include <algorithm>
-#include <sstream>
+
+struct mbRandomContext
+{
+	mbRandomContext();
+	U32 seed[4];
+};
+
+class StringPtrLess
+{
+public:
+	bool operator()(const std::string* a, const std::string* b) const
+	{
+		return *a < *b;
+	}
+};
+
+typedef std::set<std::string*, StringPtrLess> UniqueStringHashTable;
 
 static AppState								g_appState;
 static StringVector							g_makefiles;
 static std::list<MetaBuilderContext*>		g_contexts; //Has memory ownership of context
 static std::list<MetaBuilderContext*>		g_contextStack;
 static std::stack<std::string>				g_doFileCurrentDirStack;
+static mbRandomContext						g_randomContext;
 
-static std::map<std::string, std::string>	g_macroMap;
+const char* g_cAndCPPSourceExt[] = { "cpp", "cxx", "c", "cc", "m", "mm", NULL };
+const char* g_cAndCPPHeaderExt[] = { "hpp", "hxx", "h", NULL };
+const char* g_cAndCPPInlineExt[] = { "inl", NULL };
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+mbRandomContext::mbRandomContext()
+{
+	seed[0] = 0xfe354cd2;
+	seed[1] = 0xabcde012;
+	seed[2] = 0x458229cd;
+	seed[3] = 0xdeadbeef;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 AppState::AppState()
 {
@@ -29,33 +65,30 @@ AppState::~AppState()
 	delete makeSetup;
 }
 
-void AppState::Process()
+void AppState::ProcessSetup()
 {
 	if (makeSetup)
 	{
-		metabaseDirAbs = makeSetup->_metabaseDir;
-		intDir = makeSetup->_intDir;
-		outDir = makeSetup->_outDir;
+		metabaseDirAbs = makeSetup->metabaseDir;
+		intDir = makeSetup->intDir;
+		outDir = makeSetup->outDir;
 	}
 	
 	generator = cmdSetup._generator;
 
 	//cmdline overrides
 	if (cmdSetup._metabaseDir.length() > 0)		metabaseDirAbs = cmdSetup._metabaseDir;
-	if (cmdSetup._makeOutputDir.length() > 0)	makeOutputDirAbs = cmdSetup._makeOutputDir;
+	if (cmdSetup._makeOutputTopDir.length() > 0)	makeOutputTopDirAbs = cmdSetup._makeOutputTopDir;
 
-	if (!mbCreateDirChain(cmdSetup._makeOutputDir.c_str()))
+	if (!mbCreateDirChain(cmdSetup._makeOutputTopDir.c_str()))
 	{
-		MB_LOGERROR("Failed to create output directory %s", cmdSetup._makeOutputDir.c_str());
+		MB_LOGERROR("Failed to create output directory %s", cmdSetup._makeOutputTopDir.c_str());
 		mbExitError();
 	}
 
-	mainMetaMakeFileAbs = mbaFileGetAbsPath(cmdSetup._inputFile);
-	metabaseDirAbs = mbaFileGetAbsPath(cmdSetup._metabaseDir);
-	makeOutputDirAbs = mbaFileGetAbsPath(cmdSetup._makeOutputDir);
-	mbNormaliseFilePath(&mainMetaMakeFileAbs);
-	mbNormaliseFilePath(&metabaseDirAbs);
-	mbNormaliseFilePath(&makeOutputDirAbs);
+	mainMetaMakeFileAbs = Platform::FileGetAbsPath(cmdSetup._inputFile);
+	metabaseDirAbs = Platform::FileGetAbsPath(cmdSetup._metabaseDir);
+	makeOutputTopDirAbs = Platform::FileGetAbsPath(cmdSetup._makeOutputTopDir);
 
 	//Set defaults if required.
 	if (intDir.size() == 0)
@@ -66,9 +99,51 @@ void AppState::Process()
 	{
 		outDir = "out";
 	}
+
+	lineEndingStyle = E_LineEndingStyle_Default;
+	if (cmdSetup.lineEndingStyle.length() > 0)
+	{
+		if (cmdSetup.lineEndingStyle == "default")
+		{
+			lineEndingStyle = E_LineEndingStyle_Default;
+		}
+		else if (cmdSetup.lineEndingStyle == "windows")
+		{
+			lineEndingStyle = E_LineEndingStyle_Windows;
+		}
+		else if (cmdSetup.lineEndingStyle == "unix")
+		{
+			lineEndingStyle = E_LineEndingStyle_UNIX;
+		}
+		else
+		{
+			MB_LOGERROR("Unknown line ending style, valid values are \"default\", \"windows\" and \"unix\"");
+			mbExitError();
+		}
+	}
 }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+void AppState::ProcessGlobal()
+{
+	char tmp[MB_MAX_PATH];
+	Platform::NormaliseFilePath(tmp, metabaseDirAbs.c_str());
+	metabaseDirAbs = tmp;
+	OnTargetDirSepChanged();
+}
+
+void AppState::OnTargetDirSepChanged()
+{
+	mbNormaliseFilePath(&mainMetaMakeFileAbs,	makeGlobal->GetTargetDirSep());
+	mbNormaliseFilePath(&makeOutputTopDirAbs,	makeGlobal->GetTargetDirSep());
+
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	if (ctx)
+	{
+		ctx->OnTargetDirSepChanged();
+	}
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 MetaBuilderContext::MetaBuilderContext()
 {
@@ -93,7 +168,59 @@ MetaBuilderContext::~MetaBuilderContext()
 	delete metabase;
 }
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Block* MetaBuilderContext::ActiveBlock() const
+{
+	return activeBlockStack.size() > 0 ? activeBlockStack.top() : NULL;
+}
+
+void MetaBuilderContext::PushActiveBlock(Block* block)
+{
+    activeBlockStack.push(block);
+}
+    
+void MetaBuilderContext::PopActiveBlock()
+{
+    activeBlockStack.pop();
+}
+
+void MetaBuilderContext::OnTargetDirSepChanged()
+{
+	mbNormaliseFilePath(&currentMetaMakeDirAbs, mbGetAppState()->makeGlobal->GetTargetDirSep());
+	mbNormaliseFilePath(&makeOutputDirAbs, mbGetAppState()->makeGlobal->GetTargetDirSep());
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+LuaModuleFunctions::LuaModuleFunctions()
+{
+	m_nFunctions = 0;
+	memset(m_luaFunctions, 0, sizeof(m_luaFunctions));
+}
+
+void LuaModuleFunctions::AddFunction(const char* name, lua_CFunction fn)
+{
+	MB_ASSERT(m_nFunctions != MB_LUAMODULE_MAX_FUNCTIONS);
+	m_luaFunctions[m_nFunctions].name = name;
+	m_luaFunctions[m_nFunctions].func = fn;
+	++m_nFunctions;
+}
+
+void LuaModuleFunctions::RegisterLuaGlobal(lua_State* l)
+{
+	for (int i = 0; i < m_nFunctions; ++i)
+	{
+		lua_pushcfunction(l, m_luaFunctions[i].func);
+		lua_setglobal(l, m_luaFunctions[i].name);
+	}
+}
+
+void LuaModuleFunctions::RegisterLuaModule(lua_State* l, const char* moduleName)
+{
+	luaL_newlib(l, m_luaFunctions);  //Create module
+	lua_setglobal(l, moduleName);
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 void mbAddMakeFile(const char* makefile)
 {
@@ -142,41 +269,91 @@ const std::list<MetaBuilderContext*>& mbGetContexts()
 
 static int luaFuncGlobalImport(lua_State* lua)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
 	std::string requireFile;
-	mbLuaToStringExpandMacros(&requireFile, lua, 1);
+	mbLuaToStringExpandMacros(&requireFile, b, lua, 1);
 	mbLuaDoFile(lua, requireFile.c_str(), NULL);
     return 0;
 }
 
-int luaFuncAddMacro(lua_State* lua)
+static int luaFuncExpandMacro(lua_State* l)
 {
-	const char* key = lua_tostring(lua, 1);
-	const char* value = lua_tostring(lua, 2);
-	
-	if (!key || !value)
-	{
-		//TODO - error handling
-		MB_LOGERROR("Must specify both a key and value when adding a macro");
-		mbExitError();
-	}
+	Block* b = mbGetActiveContext()->ActiveBlock();
 
-	if (mbGetAppState()->cmdSetup.verbose)
-	{
-		MB_LOGINFO("Setting global macro %s with a value of %s", key, value);
-	}
-	g_macroMap[key] = value;
-
-	return 0;
-}
-
-int luaFuncExpandMacro(lua_State* l)
-{
 	const char* str = lua_tostring(l, 1);
 
 	std::string expandedString;
-	mbExpandMacros(&expandedString, str);
+	mbExpandMacros(&expandedString, b, str);
 
 	lua_pushstring(l, expandedString.c_str());
+	return 1;
+}
+
+static int luaFuncLogInfo(lua_State* l)
+{
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
+	const char* str = lua_tostring(l, 1);
+
+	std::string expandedString;
+	mbExpandMacros(&expandedString, b, str);
+
+	lua_pushstring(l, expandedString.c_str());
+	MB_LOGINFO("%s", expandedString.c_str());
+	return 0;
+}
+
+static int luaFuncLogProfile(lua_State* l)
+{
+#ifdef MB_ENABLE_PROFILING
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
+	const char* str = lua_tostring(l, 1);
+
+	std::string expandedString;
+	mbExpandMacros(&expandedString, b, str);
+
+	lua_pushstring(l, expandedString.c_str());
+	MB_LOGINFO("%s", expandedString.c_str());
+#endif
+	return 0;
+}
+
+static int luaFuncLogError(lua_State* l)
+{
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
+	const char* str = lua_tostring(l, 1);
+
+	std::string expandedString;
+	mbExpandMacros(&expandedString, b, str);
+
+	lua_pushstring(l, expandedString.c_str());
+	MB_LOGERROR("%s", expandedString.c_str());
+	return 0;
+}
+
+static int luaSplit(lua_State* l)
+{
+	const char *s = luaL_checkstring(l, 1);
+	const char *sep = luaL_checkstring(l, 2);
+	const char *e;
+	int i = 1;
+
+	lua_newtable(l);
+
+	//for each separator
+	while ((e = strchr(s, *sep)) != NULL)
+	{
+		lua_pushlstring(l, s, e - s);  //push substring
+		lua_rawseti(l, -2, i++);
+		s = e + 1;  //skip separator
+	}
+
+	//push last substring
+	lua_pushstring(l, s);
+	lua_rawseti(l, -2, i);
 	return 1;
 }
 
@@ -195,12 +372,12 @@ static int report (lua_State *L, int status)
 	return status;
 }
 
-
-
 static int luaFuncCheckPlatform(lua_State* l)
 {
+	Block* b = mbGetActiveContext()->ActiveBlock();
+
     std::string testPlatform;
-	mbLuaToStringExpandMacros(&testPlatform, l, 1);
+	mbLuaToStringExpandMacros(&testPlatform, b, l, 1);
 	for (int i = 0; i < (int)mbGetActiveContext()->metabase->supportedPlatforms.size(); ++i)
 	{
 		const std::string& test = mbGetActiveContext()->metabase->supportedPlatforms[i];
@@ -215,17 +392,17 @@ static int luaFuncCheckPlatform(lua_State* l)
 	return 1;
 }
 
-
-
 void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc initFunc)
 {
-	const std::string& currentDir = g_doFileCurrentDirStack.top();
+	char normalisedCurrentDir[MB_MAX_PATH];
 
     std::string absPath;
     //Try relative to make file first.
     {
-        std::string tmp = mbPathJoin(currentDir, filepath);
-        if (mbFileExists(tmp))
+		char tmp[MB_MAX_PATH];
+		mbHostPathJoin(tmp, normalisedCurrentDir, filepath.c_str());
+		Platform::NormaliseFilePath(tmp);
+		if (mbFileExists(tmp))
         {
             absPath = tmp;
         }
@@ -234,22 +411,27 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc ini
 	//Attempt to open directly
     if (absPath.length() == 0)
 	{
-		if (mbFileExists(filepath))
+		if (mbFileExists(filepath.c_str()))
 		{
-			absPath = mbaFileGetAbsPath(filepath);
+			absPath = Platform::FileGetAbsPath(filepath);
 		}
 	}
 
     //Fall back to lua base dir
     if (absPath.length() == 0)
     {
-        absPath = mbPathJoin(mbGetAppState()->metabaseDirAbs, filepath);
+		char tmpJoin[MB_MAX_PATH];
+		mbHostPathJoin(tmpJoin, mbGetAppState()->metabaseDirAbs.c_str(), filepath.c_str());
+		absPath = tmpJoin;
     }
 	
 	std::string newDir = mbPathGetDir(absPath.c_str());
 	g_doFileCurrentDirStack.push(newDir);
 	
-	if (report(l, luaL_loadfile(l, absPath.c_str())))
+	char normalisedLuaFile[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalisedLuaFile, absPath.c_str());
+
+	if (report(l, luaL_loadfile(l, normalisedLuaFile)))
 		mbExitError();
 	
 	if (initFunc)
@@ -279,12 +461,42 @@ void mbExitError()
     exit(1);
 }
 
-std::string mbPathJoin(const std::string& a, const std::string& b)
+void mbHostPathJoin(char* result, const char* a, const char* b)
 {
-	if (a.length() > 0)
-		return a + std::string("/") + b;
-		
-	return b;
+	if (a[0] == '\0')
+	{
+		strcpy(result, b);
+	}
+	
+	if (b[0] == '\0')
+	{
+		strcpy(result, a);
+	}
+
+	//Trim leading slash
+	if (b[0] == '/' || b[0] == '\\')
+	{
+		++b;
+	}
+
+	//Trim trailing slash
+	int aLen = (int)strlen(a);
+
+	char trailingSlashToRestore = 0;
+	char* trailingSlashPtr = NULL;
+	if (a[aLen-1] == '/' || a[aLen-1] == '\\')
+	{
+		trailingSlashPtr = const_cast<char*>(a)+aLen-1;
+		trailingSlashToRestore = *trailingSlashPtr;
+		*trailingSlashPtr = '\0';
+	}
+
+	sprintf(result, "%s%c%s", a, Platform::GetDirSep(), b);
+
+	if (trailingSlashPtr)
+	{
+		*trailingSlashPtr = trailingSlashToRestore;
+	}
 }
 
 std::string mbPathGetDir(const std::string& filePath)
@@ -359,61 +571,11 @@ bool mbPathReplaceFileExtension(char* result, const char* filename, const char* 
 	return false;
 }
 
-#if 0
-bool mbPathRelativeDirTo(
-	std::string* result,
-	const std::string& from,
-	const std::string& to)
-{
-	//Find longest common sequence
-	int minLen = from.length() < to.length() ? (int)from.length() : (int)to.length();
-	
-	int commonLen = 0;
-	for (; commonLen < minLen; ++commonLen)
-	{
-		if (from[commonLen] != to[commonLen])
-		{
-			--commonLen;
-			break;
-		}
-	}
-	//Nothing in common
-	if (commonLen <= 0)
-	{
-		return false;
-	}
-	
-	//Must end on dir sep
-	if (from[commonLen] != '/')
-	{
-		return false;
-	}
-	
-	//Go up folders from our 'from' until we get to the common folder.
-	char resultTmp[MB_MAX_PATH] = {0};
-	for (int i = from.size()-1; i >= commonLen; --i)
-	{
-		if (from[i] == '/')
-		{
-			strcat(resultTmp, "../");
-		}
-	}
-	
-	//Now we can move forward into the 'to' folder.
-	const char* toFolderCommonRelative = to.c_str()+commonLen+1;
-	
-	//Now combine the two
-	strcat(resultTmp, toFolderCommonRelative);
-			
-	*result = resultTmp;
-
-	return true;
-}
-#endif
-
 bool mbFileExists(const std::string& filepath)
 {
-    FILE* f = fopen(filepath.c_str(), "rb");
+	char normalised[MB_MAX_PATH];
+	Platform::NormaliseFilePath(normalised, filepath.c_str());
+	FILE* f = fopen(normalised, "rb");
     if (f)
     {
         fclose(f);
@@ -423,49 +585,48 @@ bool mbFileExists(const std::string& filepath)
     return false;
 }
 
-void mbNormaliseFilePath(char* outFilePath, const char* inFilePath)
+void mbNormaliseFilePath(char* filepath, char dirSep)
 {
-    bool preceedingSlash = false;
-    
-    outFilePath[0] = 0;
-    char* outCursor = outFilePath;
-    for (const char* inCursor = inFilePath; *inCursor; ++inCursor)
-    {
-		char c = *inCursor;
-        //Normalise slashes
-        if (c == '\\')
-            c = '/';
-        
-        //Ignore duplicate slashes
-        if (c == '/')
-        {
-            if (preceedingSlash)
-                continue;
-            preceedingSlash = true;
-        }
-        else
-        {
-            preceedingSlash = false;
-        }
-        
-        *outCursor = c;
-        ++outCursor;
-    }
-	*outCursor = '\0';
+	bool preceedingSlash = false;
+
+	char dirSepToReplace = dirSep == '\\' ? '/' : '\\';
+
+	char* cursor = filepath;
+	for (; *cursor; ++cursor)
+	{
+		char c = *cursor;
+		//Normalise slashes
+		if (c == dirSepToReplace)
+			c = dirSep;
+
+		//Ignore duplicate slashes
+		if (c == dirSep)
+		{
+			if (preceedingSlash)
+				continue;
+			preceedingSlash = true;
+		}
+		else
+		{
+			preceedingSlash = false;
+		}
+
+		*cursor = c;
+	}
+	*cursor = '\0';
 }
 
-void mbNormaliseFilePath(std::string* inout)
+void mbNormaliseFilePath(char* outFilePath, const char* inFilePath, char dirSep)
+{
+	strcpy(outFilePath, inFilePath);
+	mbNormaliseFilePath(outFilePath, dirSep);
+}
+
+void mbNormaliseFilePath(std::string* inout, char dirSep)
 {
     char tmp[MB_MAX_PATH];
-	mbNormaliseFilePath(tmp, inout->c_str());
+	mbNormaliseFilePath(tmp, inout->c_str(), dirSep);
 	*inout = tmp;
-}
-
-
-std::string mbGetMakeOutputDirRelativePath(const std::string& path)
-{
-	//TODO. Use abs path for now
-	return mbaFileGetAbsPath(path);
 }
 
 AppState* mbGetAppState()
@@ -480,6 +641,21 @@ void mbCommonInit(lua_State* l, const std::string& path)
 	mbLuaDoFile(l, "metabase.lua", NULL);
 }
 
+const char** mbGetCAndCPPSourceFileExtensions()
+{
+	return g_cAndCPPSourceExt;
+}
+
+const char** mbGetCAndCPPHeaderFileExtensions()
+{
+	return g_cAndCPPHeaderExt;
+}
+
+const char** mbGetCAndCPPInlineFileExtensions()
+{
+	return g_cAndCPPInlineExt;
+}
+
 void mbPushDir(const std::string& path)
 {
 	g_doFileCurrentDirStack.push(path);
@@ -490,34 +666,29 @@ void mbPopDir()
 	g_doFileCurrentDirStack.pop();
 }
 
-
-
-
-
-
-void mbCommonLuaRegister(lua_State* l)
+int luaCreateTable(lua_State* l)
 {
-    lua_pushcfunction(l, luaFuncGlobalImport);
-    lua_setglobal(l, "import");
+	int narr = (int)lua_tonumber(l, 1);
+	int nrec = (int)lua_tonumber(l, 2);
 
-    lua_pushcfunction(l, luaFuncCheckPlatform);
-    lua_setglobal(l, "checkplatform");
+	lua_createtable(l, narr, nrec);
 
-	lua_pushcfunction(l, luaFuncAddMacro);
-	lua_setglobal(l, "globalmacro");
-
-	lua_pushcfunction(l, luaFuncExpandMacro);
-	lua_setglobal(l, "expandmacro");
+	return 1;
 }
 
-void mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
+bool mbStringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
 {
+	bool found = false;
     size_t pos = 0;
     while((pos = str.find(oldStr, pos)) != std::string::npos)
     {
         str.replace(pos, oldStr.length(), newStr);
         pos += newStr.length();
+
+		found = true;
     }
+
+	return found;
 }
 
 void mbLuaDump(lua_State* l)
@@ -600,31 +771,6 @@ void mbMergeOptions(std::map<std::string, KeyValueMap>* result,	const std::map<s
 	}
 }
 
-
-struct mbRandomContext
-{
-	mbRandomContext();
-	U32 seed[4];
-};
-
-
-mbRandomContext::mbRandomContext()
-{
-	seed[0] = 0xfe354cd2;
-	seed[1] = 0xabcde012;
-	seed[2] = 0x458229cd;
-	seed[3] = 0xdeadbeef;
-}
-
-static mbRandomContext g_randomContext;
-
-U32 mbRandomU32(mbRandomContext& ctx);
-
-U32 mbRandomU32()
-{ 
-	return mbRandomU32(g_randomContext);
-}
-
 U32 mbRandomU32(mbRandomContext& ctx)
 {
 // Originally by David Jones, UCL in http://www.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf
@@ -645,6 +791,11 @@ U32 mbRandomU32(mbRandomContext& ctx)
 	return x + y + z; 
 }
 
+U32 mbRandomU32()
+{ 
+	return mbRandomU32(g_randomContext);
+}
+
 void mbCheckExpectedBlock(E_BlockType blockExpected, const char* cmdName)
 {
     if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->GetType() != blockExpected)
@@ -656,6 +807,7 @@ void mbCheckExpectedBlock(E_BlockType blockExpected, const char* cmdName)
 
 void mbJoinArrays(StringVector* a, const StringVector& b)
 {
+	a->reserve(a->size() + b.size());
 	for (int i = 0; i < (int)b.size(); ++i)
 	{
 		a->push_back(b[i]);
@@ -674,14 +826,14 @@ void mbRemoveDuplicates(StringVector* strings_)
 	
 	StringVector tmp;
 	tmp.reserve(strings.size());
-		
-	std::set<std::string> uniqueStrings;
+	
+	UniqueStringHashTable uniqueStrings;
 	for (int i = 0; i < (int)strings.size(); ++i)
 	{
-		std::set<std::string>::iterator it = uniqueStrings.find(strings[i]);
+		UniqueStringHashTable::const_iterator it = uniqueStrings.find(&strings[i]);
 		if (it == uniqueStrings.end())
 		{
-			std::pair<std::set<std::string>::iterator, bool> result = uniqueStrings.insert(strings[i]);
+			std::pair<UniqueStringHashTable::iterator, bool> result = uniqueStrings.insert(&strings[i]);
 			if (!result.second)
 				continue; //Already added.
 				
@@ -689,9 +841,8 @@ void mbRemoveDuplicates(StringVector* strings_)
 		}
 	}
 	
-	strings = tmp;
+	std::swap(tmp, strings);
 }
-
 
 struct StringSortRecord
 {
@@ -699,33 +850,33 @@ struct StringSortRecord
 	std::string originalString;
 };
 
-bool mbCompareNoCase(const StringSortRecord& a, const StringSortRecord& b)
+bool mbCompareNoCase(const StringSortRecord* a, const StringSortRecord* b)
 {
-	return a.lowerCaseString < b.lowerCaseString;
+	return a->lowerCaseString < b->lowerCaseString;
 }
 
 void mbRemoveDuplicatesAndSort(StringVector* strings_)
 {
 	StringVector& strings = *strings_;
 	
-	std::vector<StringSortRecord> tmp;
+	std::vector<StringSortRecord*> tmp;
 	tmp.reserve(strings.size());
 		
-	std::set<std::string> uniqueStrings;
+	UniqueStringHashTable uniqueStrings;
 	for (int i = 0; i < (int)strings.size(); ++i)
 	{
-		uniqueStrings.insert(strings[i]);
+		uniqueStrings.insert(&strings[i]);
 	}
 
-	for (std::set<std::string>::iterator it = uniqueStrings.begin(); it != uniqueStrings.end(); ++it)
+	for (UniqueStringHashTable::const_iterator it = uniqueStrings.begin(); it != uniqueStrings.end(); ++it)
 	{
-		const std::string& currentString = *it;
+		const std::string* currentString = *it;
 
-		tmp.push_back(StringSortRecord());
-		StringSortRecord& r = tmp.back();
-		r.lowerCaseString = currentString;
-		std::transform(r.lowerCaseString.begin(), r.lowerCaseString.end(), r.lowerCaseString.begin(), ::tolower);
-		r.originalString = currentString;
+		StringSortRecord* r = new StringSortRecord();
+		tmp.push_back(r);
+		r->lowerCaseString = *currentString;
+		std::transform(r->lowerCaseString.begin(), r->lowerCaseString.end(), r->lowerCaseString.begin(), ::tolower);
+		r->originalString = *currentString;
 	}
 
 	std::sort(tmp.begin(), tmp.end(), mbCompareNoCase);
@@ -733,7 +884,9 @@ void mbRemoveDuplicatesAndSort(StringVector* strings_)
 	strings.clear();
 	for (int i = 0; i < (int)tmp.size(); ++i)
 	{
-		strings.push_back(tmp[i].originalString);
+		StringSortRecord* r = tmp[i];
+		strings.push_back(r->originalString);
+		delete r;
 	}
 }
 
@@ -747,7 +900,7 @@ bool mbCreateDirChain(const char* osDir_)
 //    Debug::Error("Creating dir chain %s", osDir_);
 
     char osDir[FILENAME_MAX] = {0};
-    mbaNormaliseFilePath(osDir, osDir_);
+    Platform::NormaliseFilePath(osDir, osDir_);
     
     if (osDir[0] == 0)
         return false;
@@ -760,14 +913,14 @@ bool mbCreateDirChain(const char* osDir_)
             *(char*)right = 0;
             const char* partialPath = left;
             
-            if (!_mbaCreateDir(partialPath))
+            if (!Platform::CreateDir(partialPath))
                 return false;
             
             *(char*)right = sep;
         }
     }
     
-    return _mbaCreateDir(osDir);
+    return Platform::CreateDir(osDir);
 }
 
 void mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroups)
@@ -796,33 +949,112 @@ void mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups)
 	}
 }
 
-void mbExpandMacros(std::string* result, const char* str)
+void mbExpandMacros(std::string* result, const std::map<std::string, std::string>& macroMap, const char* str)
 {
 	char macro[1024];
 
 	*result = str;
 
 	//Only process each macro if we know our string contains at least one.
-	if (strstr(str, "$${"))
+	const char* macroStart = strstr(str, "#{");
+	if (macroStart)
 	{
-		for (std::map<std::string, std::string>::const_iterator it = g_macroMap.begin(); it != g_macroMap.end(); ++it)
+		bool found = false;
+		for (std::map<std::string, std::string>::const_iterator it = macroMap.begin(); it != macroMap.end(); ++it)
 		{
-			const std::string& key= it->first;
+			const std::string& key = it->first;
 			const std::string& value = it->second;
 
-			sprintf(macro, "$${%s}", key.c_str());
+			sprintf(macro, "#{%s}", key.c_str());
 
-			mbStringReplace(*result, macro, value);
+			found = mbStringReplace(*result, macro, value);
+			if (found)
+				break;
+		}
+
+		if (!found)
+		{
+			macroStart += 2;
+			char key[1024];
+			const char* macroEnd = strstr(macroStart, "}");
+			int length = static_cast<int>(macroEnd - macroStart);
+
+			memcpy(key, macroStart, length);
+			key[length] = '\0';
+
+			const char* envValue = getenv(key);
+			if (envValue)
+			{
+				sprintf(macro, "#{%s}", key);
+				mbStringReplace(*result, macro, envValue);
+			}
 		}
 	}
 }
 
-const char* mbLuaToStringExpandMacros(std::string* result, lua_State* l, int stackPos)
+void mbExpandMacros(std::string* result, Block* block, const char* str)
+{
+	if (block)
+	{
+		mbExpandMacros(result, block->FlattenMacros(), str);
+	}
+	else
+	{
+		*result = str;
+	}
+}
+
+const char* mbLuaToStringExpandMacros(std::string* result, Block* block, lua_State* l, int stackPos)
 {
 	const char* str = lua_tostring(l, stackPos);
 	if (!str)
+	{
 		return NULL;
-
-	mbExpandMacros(result, str);
+	}
+	
+	mbExpandMacros(result, block, str);
+//	MB_LOGINFO("%s -> %s", str, result->c_str());
 	return result->c_str();
+}
+
+void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
+{
+	//Only an experiment for windows builds right now
+	#ifdef MB_DLMALLOC
+		#define LUA_MALLOC dlmalloc
+		#define LUA_REALLOC dlrealloc
+		#define LUA_FREE dlfree
+	#else
+		#define LUA_MALLOC malloc
+		#define LUA_REALLOC realloc
+		#define LUA_FREE free
+	#endif
+
+	if (nsize == 0)
+		LUA_FREE(ptr);
+	else
+	{
+		if (osize == 0)
+		{
+			return LUA_MALLOC(nsize);
+		}
+		else
+		{
+			return LUA_REALLOC(ptr, nsize);
+		}
+	}
+
+	return NULL;
+}
+
+void mbCommonLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)
+{
+	luaFn->AddFunction("import",		luaFuncGlobalImport);
+	luaFn->AddFunction("checkplatform",	luaFuncCheckPlatform);
+	luaFn->AddFunction("expandmacro",	luaFuncExpandMacro);
+	luaFn->AddFunction("loginfo",		luaFuncLogInfo);
+	luaFn->AddFunction("logerror",		luaFuncLogError);
+	luaFn->AddFunction("logprofile",	luaFuncLogProfile);
+	luaFn->AddFunction("split",			luaSplit);
+	luaFn->AddFunction("createtable",	luaCreateTable);
 }

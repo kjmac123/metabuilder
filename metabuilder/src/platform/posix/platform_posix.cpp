@@ -1,18 +1,29 @@
 #include "metabuilder_pch.h"
 
-#ifdef PLATFORM_POSIX
-
 #include "../platform.h"
+#include "freebsd/realpath.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <errno.h>
 #include <fnmatch.h>
 #include <dirent.h>
+#include <sys/stat.h> 
+#include <fcntl.h>
 
+#if defined(PLATFORM_OSX)
+#include <mach/mach_time.h>
+#endif
 
-bool _mbaCreateDir(const char* osDir)
+namespace Platform
+{
+
+#if defined(PLATFORM_OSX)
+static F64				g_machTimeToNs;
+static mach_timebase_info_data_t	g_timebase;
+#endif
+
+bool CreateDir(const char* osDir)
 {
     struct stat statResult;
     int statresult = stat(osDir, &statResult);
@@ -36,7 +47,19 @@ bool _mbaCreateDir(const char* osDir)
     return true;
 }
 
-bool mbaCreateLink(const char* src, const char* dst)
+void Init()
+{
+#if defined(PLATFORM_OSX)
+	mach_timebase_info(&g_timebase);
+	g_machTimeToNs = ((F64)g_timebase.numer / (F64)g_timebase.denom);
+#endif
+}
+
+void Shutdown()
+{	
+}
+
+bool CreateLink(const char* src, const char* dst)
 {
 	char existingSrcPath[MB_MAX_PATH] = {0};
 	ssize_t readlinkResult = readlink(dst, existingSrcPath, sizeof(existingSrcPath));
@@ -60,38 +83,7 @@ bool mbaCreateLink(const char* src, const char* dst)
 	return false;
 }
 
-void mbaNormaliseFilePath(char* outFilePath, const char* inFilePath)
-{
-    bool preceedingSlash = false;
-    
-    outFilePath[0] = 0;
-    char* outCursor = outFilePath;
-    for (const char* inCursor = inFilePath; *inCursor; ++inCursor)
-    {
-		char c = *inCursor;
-        //Normalise slashes
-        if (c == '\\')
-            c = '/';
-        
-        //Ignore duplicate slashes
-        if (c == '/')
-        {
-            if (preceedingSlash)
-                continue;
-            preceedingSlash = true;
-        }
-        else
-        {
-            preceedingSlash = false;
-        }
-        
-        *outCursor = c;
-        ++outCursor;
-    }
-	*outCursor = '\0';
-}
-
-E_FileType mbaGetFileType(const std::string& filepath)
+E_FileType GetFileType(const std::string& filepath)
 {
 	struct stat statbuf;
     if (stat(filepath.c_str(), &statbuf) == -1)
@@ -107,7 +99,7 @@ E_FileType mbaGetFileType(const std::string& filepath)
 	return E_FileType_File;
 }
 
-bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDirs)
+bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDirs)
 {
 	if (osInputDir[0] == '\0')
 	{
@@ -158,7 +150,7 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 						break;
 					}
 					
-					current = strtok (NULL, ",");
+					current = strtok(NULL, ",");
 				}
 			}
 			
@@ -189,13 +181,13 @@ bool mbaBuildFileListRecurse(std::vector<std::string>* fileList, const char* osI
 
     for (int i = 0; i < (int)dirStack.size(); ++i)
     {
-        mbaBuildFileListRecurse(fileList, dirStack[i].c_str(), includeFilePattern, excludeDirs);
+        BuildFileListRecurse(fileList, dirStack[i].c_str(), includeFilePattern, excludeDirs);
     }
     
     return true;
 }
 
-void mbaFileSetWorkingDir(const std::string& path)
+void FileSetWorkingDir(const std::string& path)
 {
     if (chdir(path.c_str()) != 0)
     {
@@ -204,43 +196,72 @@ void mbaFileSetWorkingDir(const std::string& path)
     }
 }
 
-std::string mbaFileGetWorkingDir()
+std::string FileGetWorkingDir()
 {
-    char workingDir[MB_MAX_PATH];
-    if (getcwd(workingDir, sizeof(workingDir)) == NULL)
-    {
+   	char workingDir[MB_MAX_PATH];
+	if (getcwd(workingDir, sizeof(workingDir)) == NULL)
+ 	{
 		MB_LOGERROR("Failed to query working dir");
 		mbExitError();
-    }
+ 	}
 
-    return workingDir;
+	return workingDir;
 }
 
-std::string mbaFileGetAbsPath(const std::string& path)
+std::string FileGetAbsPath(const std::string& path)
 {
-    char storage[MB_MAX_PATH];
-	if (realpath(path.c_str(), storage) == NULL)
-    {
+   	char storage[MB_MAX_PATH];
+	if (/*FreeBSD::*/realpath(path.c_str(), storage) == NULL)
+   	{
 		MB_LOGERROR("Failed to get absolute path for %s", path.c_str());
 		mbExitError();
-    }
+   	}
 
 	return storage;
 }
 
-void mbaLogError(const char* str)
+char GetDirSep()
+{
+	return '/';
+}
+
+void LogError(const char* str)
 {
 	printf("%s", str);
 }
 
-void mbaLogInfo(const char* str)
+void LogInfo(const char* str)
 {
 	printf("%s", str);
 }
 
-void mbaLogDebug(const char* str)
+void LogDebug(const char* str)
 {
 	printf("%s", str);
 }
 
+F64 GetSystemTicksToSecondsScale()
+{
+#if defined(PLATFORM_OSX)
+	return 1.0 / F64(MB_SECONDS_TO_NANOSECONDS) * g_machTimeToNs;
+#else
+	return 1.0 / F64(MB_SECONDS_TO_NANOSECONDS);
 #endif
+}
+
+U64 GetSystemTicks()
+{
+#if defined(PLATFORM_OSX)
+	return mach_absolute_time();
+#else
+	timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	U64 nanoseconds = (U64)t.tv_nsec;
+	U64 seconds = (U64)t.tv_sec;
+	nanoseconds += seconds * MB_SECONDS_TO_NANOSECONDS;
+	return nanoseconds;
+#endif
+}
+
+}
+

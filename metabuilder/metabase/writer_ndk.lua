@@ -5,12 +5,8 @@ g_filePathMap = {}
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-function GetFullFilePath(filepath)
-	return Util_GetFullFilePath(filepath, writer_global.currentmetamakedirabs, writer_global.currentmetamakedirabs, "/", g_filePathMap)
-end
-
 function GetWorkspaceDir(currentTargetName, configName)
-	return writer_global.makeoutputdirabs .. "/" .. currentTargetName .. "/" .. configName
+	return mbwriter.global.makeoutputdirabs .. "/" .. currentTargetName .. "/" .. configName
 end
 
 function GetJNIDir(currentTargetName, configName)
@@ -18,24 +14,22 @@ function GetJNIDir(currentTargetName, configName)
 end
 
 function CreateLinks(currentTarget, config)
-	local templateDir = Util_GetKVValue(config.options._ndk, "templatedir")
+	local templateDir = mbutil.getkvvalue(config.options._ndk, "templatedir")
 	if templateDir == nil then
 		--TODO proper error here
 		print("Template dir not specified")
 		os.exit(1)
 	end
-	templateDir = GetFullFilePath(templateDir)
+	templateDir = mbwriter.getoutputrelfilepath(templateDir)
 
 	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
-	mbwriter_mkdir(workspaceDir)
+	mbwriter.mkdir(workspaceDir)
 
-	--print(templateDir)
-	--print(workspaceDir)
-	mbwriter_mklink(templateDir .. "/build.xml",								workspaceDir .. "/build.xml")
-	mbwriter_mklink(templateDir .. "/AndroidManifest.xml",						workspaceDir .. "/AndroidManifest.xml")
-	mbwriter_mklink(templateDir .. "/assets",									workspaceDir .. "/assets")
-	mbwriter_mklink(templateDir .. "/res",										workspaceDir .. "/res")
-	mbwriter_mklink(templateDir .. "/src",										workspaceDir .. "/src")
+	mbwriter.mklink(templateDir .. "/build.xml",								workspaceDir .. "/build.xml")
+	mbwriter.mklink(templateDir .. "/AndroidManifest.xml",						workspaceDir .. "/AndroidManifest.xml")
+	mbwriter.mklink(templateDir .. "/assets",									workspaceDir .. "/assets")
+	mbwriter.mklink(templateDir .. "/res",										workspaceDir .. "/res")
+	mbwriter.mklink(templateDir .. "/src",										workspaceDir .. "/src")
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -48,16 +42,16 @@ function WriteApplicationMk(currentTarget, config)
 		--TODO ERROR HERE
 --		return
 
-	local jniDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
-	mbwriter_mkdir(jniDir)
+	local jniDir = mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
+	mbwriter.mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Application.mk"
-	local file = io.open(makeFilename, "w")
+	local file = mbfile.open(makeFilename, "w")
 
 	file:write("APP_MODULES := " .. currentTarget.name .. " ")
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
 		file:write(filename .. " ")
 	end
@@ -65,7 +59,7 @@ function WriteApplicationMk(currentTarget, config)
 
 	if config.options.ndkoptions ~= nil then
 		for jOption = 1, #config.options.ndkoptions do
-			local keyValue = mbwriter_split(config.options.ndkoptions[jOption], "=")
+			local keyValue = split(config.options.ndkoptions[jOption], "=")
 			local key = keyValue[1]
 			local value = keyValue[2]
 
@@ -73,7 +67,7 @@ function WriteApplicationMk(currentTarget, config)
 		end
 	end
 	file:close()
-	mbwriter_reportoutputfile(makeFilename)
+	mbwriter.reportoutputfile(makeFilename)
 end
 
 function WriteAndroidMk(currentTarget, config)
@@ -82,22 +76,18 @@ function WriteAndroidMk(currentTarget, config)
 		--TODO ERROR HERE
 --		return
 
-	local jniDir = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
-	mbwriter_mkdir(jniDir)
+	local jniDir = mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/jni"
+	mbwriter.mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Android.mk"
-	local file = io.open(makeFilename, "w")
+	local file = mbfile.open(makeFilename, "w")
 
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
-		local path, filename, ext = Util_FilePathDecompose(dependency)
+		local path, filename, ext = mbfilepath.decompose(dependency)
 
 		file:write("SOURCE_ROOT := " .. jniDir .. "\n")
 		file:write("include $(SOURCE_ROOT)/../../../" .. filename .. "/" .. config.name .. "/jni/Android.mk\n")
-		--file:write("include ../../../" .. filename .. "/" .. config.name .. "/jni/Android.mk\n")
---		local includeFile = jniDir .. "/../../../" .. filename .. "/" .. config.name .. "/jni/Android.mk"
---		file:write("include " .. includeFile .. "\n")
-
 		file:write("include $(CLEAR_VARS)\n\n")
 	end
 
@@ -120,7 +110,7 @@ function WriteAndroidMk(currentTarget, config)
    	file:write("endif # TARGET_ARCH_ABI == armeabi-v7a\n")
 
 
-	file:write("SOURCE_ROOT := " .. writer_global.currentmetamakedirabs .. "\n")
+	file:write("SOURCE_ROOT := " .. mbwriter.global.currentmetamakedirabs .. "\n")
 	file:write("MY_LOCAL_C_INCLUDES := \\\n")
 	for i = 1, #config.includedirs do
 	    file:write("	$(SOURCE_ROOT)/" .. config.includedirs[i] .. " \\\n")
@@ -130,12 +120,12 @@ function WriteAndroidMk(currentTarget, config)
 	-- Add project lib search paths
 	file:write("MY_LIB_SEARCH_PATHS:= \\\n")
 
-	local abi = Util_GetKVValue(config.options.ndkoptions, "APP_ABI")
+	local abi = mbutil.getkvvalue(config.options.ndkoptions, "APP_ABI")
 	if abi == nil then
 		-- TODO error
 	end
 
-	f = writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi	
+	f = mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi	
 	file:write("	-L" .. f .. " \\\n")
 	file:write("\n")
 
@@ -144,7 +134,7 @@ function WriteAndroidMk(currentTarget, config)
     local staticLibs = {}
 	for i = 1, #config.libs do
 		local f = config.libs[i]
-		local path, filename, ext = Util_FilePathDecompose(f)
+		local path, filename, ext = mbfilepath.decompose(f)
 		if ext == "so" then
 			table.insert(sharedLibs, f)
 		else
@@ -155,30 +145,30 @@ function WriteAndroidMk(currentTarget, config)
 	--Include static libs
 	for i = 1, #staticLibs do
 		local f = staticLibs[i]
-		local path, filename, ext = Util_FilePathDecompose(f)
+		local path, filename, ext = mbfilepath.decompose(f)
 		filename = string.gsub(filename, "%.a", "")
 
 		file:write("include $(CLEAR_VARS)\n")
 		file:write("LOCAL_MODULE            := " .. filename .. "\n")
-		file:write("LOCAL_SRC_FILES         := " .. GetFullFilePath(f) .. "\n")
+		file:write("LOCAL_SRC_FILES         := " .. mbwriter.getoutputrelfilepath(f) .. "\n")
 		file:write("include $(PREBUILT_STATIC_LIBRARY)\n\n")
 	end
 
 	--Include shared libs
 	for i = 1, #sharedLibs do
 		local f = sharedLibs[i]
-		local path, filename, ext = Util_FilePathDecompose(f)
+		local path, filename, ext = mbfilepath.decompose(f)
 
 		file:write("include $(CLEAR_VARS)\n")
 		file:write("LOCAL_MODULE            := " .. filename .. "\n")
-		file:write("LOCAL_SRC_FILES         := " .. GetFullFilePath(f) .. "\n")
+		file:write("LOCAL_SRC_FILES         := " .. mbwriter.getoutputrelfilepath(f) .. "\n")
 		file:write("include $(PREBUILT_SHARED_LIBRARY)\n\n")
 	end
 
 	file:write("MY_LOCAL_SRC_FILES := \\\n")
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
-		local ext = Util_FileExtension(f)
+		local ext = mbfilepath.getextension(f)
 		if ext == "c" or ext == "cpp" then
 		    file:write("	$(SOURCE_ROOT)/" .. f .. "\\\n")
 		end
@@ -202,9 +192,9 @@ function WriteAndroidMk(currentTarget, config)
 		--[[
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
-			local path, filename, ext = Util_FilePathDecompose(dependency)
+			local path, filename, ext = mbfilepath.decompose(dependency)
 
-			local abi = Util_GetKVValue(config.options.ndkoptions, "APP_ABI")
+			local abi = mbutil.getkvvalue(config.options.ndkoptions, "APP_ABI")
 			if abi == nil then
 				-- TODO error
 			end
@@ -214,7 +204,7 @@ function WriteAndroidMk(currentTarget, config)
 				filename = "lib" .. filename
 			end			
 
-			file:write("	-l:" .. writer_global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi .. "/" .. filename .. ".a \\\n")
+			file:write("	-l:" .. mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name .. "/obj/local/" .. abi .. "/" .. filename .. ".a \\\n")
 		end
 ]]
 --[[
@@ -240,7 +230,7 @@ function WriteAndroidMk(currentTarget, config)
 		file:write("LOCAL_SHARED_LIBRARIES := \\\n")
 		for i = 1, #sharedLibs do
 			local f = sharedLibs[i]
-			local path, filename, ext = Util_FilePathDecompose(f)
+			local path, filename, ext = mbfilepath.decompose(f)
 			file:write("	" .. filename .. " \\\n")
 		end
 		file:write("\n")
@@ -252,7 +242,7 @@ function WriteAndroidMk(currentTarget, config)
 
 		for i = 1, #staticLibs do
 			local f = staticLibs[i]
-			local path, filename, ext = Util_FilePathDecompose(f)
+			local path, filename, ext = mbfilepath.decompose(f)
 
 --[[
 			if string.find(f, "-l:") == nil then
@@ -271,7 +261,7 @@ function WriteAndroidMk(currentTarget, config)
 
 		for i = 1, #currentTarget.depends do
 			local dependency = currentTarget.depends[i]
-			local path, filename, ext = Util_FilePathDecompose(dependency)
+			local path, filename, ext = mbfilepath.decompose(dependency)
 			table.insert(libList, filename)
 		end
 		
@@ -290,7 +280,7 @@ function WriteAndroidMk(currentTarget, config)
 	end
 
 	file:close()
-	mbwriter_reportoutputfile(makeFilename)
+	mbwriter.reportoutputfile(makeFilename)
 end
 
 function WriteJNI(currentTarget, config)
@@ -307,7 +297,7 @@ end
 --MAIN
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local currentTarget = writer_solution.targets[1]
+local currentTarget = mbwriter.solution.targets[1]
 
 for i = 1, #currentTarget.configs do
 	local config = currentTarget.configs[i]

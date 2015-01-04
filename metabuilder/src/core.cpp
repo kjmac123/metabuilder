@@ -1,7 +1,8 @@
 #include "metabuilder_pch.h"
-#include <stdarg.h> 
 
-#include "common.h"
+#include "timeutil.h"
+
+#include <stdarg.h> 
 
 #define PLATFORM_FORMAT_LOG_MESSAGE(fn, level)  \
 	char buf[16*1024]; \
@@ -13,6 +14,11 @@
 
 #define PLATFORM_FORMAT_LOG_MESSAGE_LF(fn, level)  \
 	char buf[16*1024]; \
+	if (g_coreLogTimeEnabled) \
+	{ \
+		sprintf(buf, "[%.2f] ", g_coreAppTimer.GetTimeSeconds()); \
+		fn(buf); \
+	} \
     va_list ap; \
     va_start(ap, fmt); \
 	vsprintf(buf, fmt, ap); \
@@ -20,39 +26,61 @@
 	strcat(buf, "\n"); \
 	fn(buf);
 
+static bool		g_coreLogTimeEnabled;
+static Timer	g_coreAppTimer;
 
-void mbaLogError(const char* str);
-void mbaLogInfo(const char* str);
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+void _mbLogSetTimeEnabled(bool b)
+{
+	g_coreLogTimeEnabled = b;
+}
 
 void _mbLogErrorf(const char* fmt, ...)
 {
-	PLATFORM_FORMAT_LOG_MESSAGE(mbaLogError, 0);
+	PLATFORM_FORMAT_LOG_MESSAGE(Platform::LogError, 0);
 }
 
 void _mbLogInfof(const char* fmt, ...)
 {
-	PLATFORM_FORMAT_LOG_MESSAGE(mbaLogInfo, 0);
+	PLATFORM_FORMAT_LOG_MESSAGE(Platform::LogInfo, 0);
 }
 
 void _mbLogDebugf(const char* fmt, ...)
 {
-	PLATFORM_FORMAT_LOG_MESSAGE(mbaLogDebug, 0);
+	PLATFORM_FORMAT_LOG_MESSAGE(Platform::LogDebug, 0);
 }
 
 void _mbLogErrorfLF(const char* fmt, ...)
 {
-	PLATFORM_FORMAT_LOG_MESSAGE_LF(mbaLogError, 0);
+	PLATFORM_FORMAT_LOG_MESSAGE_LF(Platform::LogError, 0);
 }
 
 void _mbLogInfofLF(const char* fmt, ...)
 {
-	PLATFORM_FORMAT_LOG_MESSAGE_LF(mbaLogInfo, 0);
+	PLATFORM_FORMAT_LOG_MESSAGE_LF(Platform::LogInfo, 0);
 }
 
 void _mbLogDebugfLF(const char* fmt, ...)
 {
 	if (mbGetAppState()->cmdSetup.verbose)
 	{
-		PLATFORM_FORMAT_LOG_MESSAGE_LF(mbaLogDebug, 0);
+		PLATFORM_FORMAT_LOG_MESSAGE_LF(Platform::LogDebug, 0);
+	}
+}
+
+void ToUpperStr(char* str)
+{
+	for (char* cursor = str; str; ++str)
+	{
+		*str = toupper(*cursor);
+	}
+}
+
+void ToLowerStr(char* str)
+{
+	for (char* cursor = str; str; ++str)
+	{
+		*str = tolower(*cursor);
 	}
 }
