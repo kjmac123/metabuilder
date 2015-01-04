@@ -11,11 +11,15 @@
 #include <sys/stat.h> 
 #include <fcntl.h>
 
+#if defined(PLATFORM_OSX)
+#include <mach/mach_time.h>
+#endif
+
 namespace Platform
 {
 
-#if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
-static F64							g_machTimeToNs;
+#if defined(PLATFORM_OSX)
+static F64				g_machTimeToNs;
 static mach_timebase_info_data_t	g_timebase;
 #endif
 
@@ -45,9 +49,9 @@ bool CreateDir(const char* osDir)
 
 void Init()
 {
-#if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
-	mach_timebase_info(&PlatformThread_Timebase);
-	g_MachTimeToNs = ((F64)PlatformThread_Timebase.numer / (F64)PlatformThread_Timebase.denom);
+#if defined(PLATFORM_OSX)
+	mach_timebase_info(&g_timebase);
+	g_machTimeToNs = ((F64)g_timebase.numer / (F64)g_timebase.denom);
 #endif
 }
 
@@ -238,7 +242,7 @@ void LogDebug(const char* str)
 
 F64 GetSystemTicksToSecondsScale()
 {
-#if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
+#if defined(PLATFORM_OSX)
 	return 1.0 / F64(MB_SECONDS_TO_NANOSECONDS) * g_machTimeToNs;
 #else
 	return 1.0 / F64(MB_SECONDS_TO_NANOSECONDS);
@@ -247,8 +251,7 @@ F64 GetSystemTicksToSecondsScale()
 
 U64 GetSystemTicks()
 {
-#if defined(PLATFORM_IOS) || defined(PLATFORM_OSX)
-	U64 machTime = mach_absolute_time();
+#if defined(PLATFORM_OSX)
 	return mach_absolute_time();
 #else
 	timespec t;
