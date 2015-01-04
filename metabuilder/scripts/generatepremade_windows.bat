@@ -16,5 +16,7 @@ pushd ..\
 %MBBIN% --input metabuilder.lua --gen msvc2013_windows --metabase metabase --outdir metatmp_premade
 %MBBIN% --input metabuilder.lua --gen msvc2015_windows --metabase metabase --outdir metatmp_premade
 
+%MBBIN% --input metabuilder.lua --gen xcode_osx --metabase metabase --outdir metatmp_premade --endstyle unix
+
 robocopy metatmp_premade premade /s
 popd

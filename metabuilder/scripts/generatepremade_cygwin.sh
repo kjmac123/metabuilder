@@ -19,6 +19,8 @@ ${MBBIN} --input metabuilder.lua --gen msvc2012_windows --metabase metabase --ou
 ${MBBIN} --input metabuilder.lua --gen msvc2013_windows --metabase metabase --outdir metatmp_premade --endstyle windows
 ${MBBIN} --input metabuilder.lua --gen msvc2015_windows --metabase metabase --outdir metatmp_premade --endstyle windows
 
+${MBBIN} --input metabuilder.lua --gen xcode_osx --metabase metabase --outdir metatmp_premade --endstyle unix
+
 cp -rfv metatmp_premade/* premade
 
 popd

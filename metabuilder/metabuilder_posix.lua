@@ -8,9 +8,12 @@ platform "POSIX"
 		"src/platform/posix/platform_posix.cpp",
 	}
 	
-	libs 
-	{ 
-		"-lrt",
-	}
-
+	if checkplatform("OSX") then
+		--Nothing extra for now
+	else
+		libs 
+		{ 
+			"-lrt",
+		}
+	end
 platform_end()
