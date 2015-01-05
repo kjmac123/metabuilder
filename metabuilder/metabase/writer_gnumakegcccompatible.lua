@@ -96,7 +96,7 @@ function WriteMakeFileCommonVars(file, currentTarget)
 	
 	file:write(g_varCC .. 			" := " .. currentTarget.options.cc[1] .. "\n")
 	if currentTarget.options.cxx == nil then
-		mbwriter_fatalerror("No C++ compiler set")
+		mbwriter.fatalerror("No C++ compiler set")
 	end	
 	file:write(g_varCXX ..			" := " .. currentTarget.options.cxx[1] .. "\n")
 

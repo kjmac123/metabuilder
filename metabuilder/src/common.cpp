@@ -366,7 +366,7 @@ static int report (lua_State *L, int status)
 		if (msg == NULL)
 			msg = "(error with no message)";
 
-		fprintf(stderr, "status=%d, %s\n", status, msg);
+		MB_LOGERROR("status=%d, %s\n", status, msg);
 		lua_pop(L, 1);
 	}
 	return status;
@@ -395,6 +395,11 @@ static int luaFuncCheckPlatform(lua_State* l)
 void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc initFunc)
 {
 	char normalisedCurrentDir[MB_MAX_PATH];
+	{
+		const std::string& currentDir = g_doFileCurrentDirStack.top();
+		strcpy(normalisedCurrentDir, currentDir.c_str());
+		Platform::NormaliseFilePath(normalisedCurrentDir);
+	}
 
     std::string absPath;
     //Try relative to make file first.
@@ -506,11 +511,12 @@ std::string mbPathGetDir(const std::string& filePath)
     char* chars = (char*)filePath.c_str();
     for (int i = len-1; i >= 0; --i)
     {
-        if (chars[i] == '/')
+        if (chars[i] == '/' || chars[i] == '\\')
         {
-            chars[i] = 0;
+			char dirSep = chars[i];
+			chars[i] = '\0';
             tmp = chars;
-            chars[i] = '/';
+			chars[i] = dirSep;
             return tmp;
         }
     }
@@ -525,7 +531,7 @@ std::string	mbPathGetFilename(const std::string& filePath)
     char* chars = (char*)filePath.c_str();
     for (int i = len-1; i >= 0; --i)
     {
-        if (chars[i] == '/')
+        if (chars[i] == '/' || chars[i] == '\\')
         {
             chars += i+1;
 			return chars;
@@ -1000,7 +1006,7 @@ void mbExpandMacros(std::string* result, Block* block, const char* str)
 	}
 	else
 	{
-		*result = str;
+		mbExpandMacros(result, std::map<std::string, std::string>(), str);
 	}
 }
 

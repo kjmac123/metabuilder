@@ -22,9 +22,6 @@ g_currentTarget = mbwriter.solution.targets[1]
 g_externalProductID = mbwriter.xcodegenerateid()
 g_pbxNativeTargetID = mbwriter.xcodegenerateid()
 
---used for overriding filepaths, e.g. for frameworks
-g_filePathMap = {}
-
 g_lastKnownFileTypeMap = {}
 
 g_sourceTreeMap = {}
@@ -37,15 +34,6 @@ g_fileListType = {} -- Source, Resource or Framework
 
 g_PBXProjectConfigIDs = {}
 g_PBXNativeTargetConfigIDs = {}
-
-function XCodeGetOutputRelFilePath(inputFilepath)
-	local outputFilepath = g_filePathMap[inputFilepath]
-	if outputFilepath ~= nil then
-		return outputFilepath
-	end
-	
-	return mbwriter.getoutputrelfilepath(inputFilepath)
-end
 
 function GetLastKnownFileType(filepath)
 	local ext = mbfilepath.getextension(filepath)
@@ -434,7 +422,7 @@ function WriteXCBuildConfigurations(file)
 		file:write("					\"$(inherited)\",\n")
 		file:write("					\"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include\",\n")
 		for j = 1, #config.includedirs do
-			file:write("					\"" .. XCodeGetOutputRelFilePath(config.includedirs[j]) .. "\",\n")
+			file:write("					\"" .. mbwriter.getoutputrelfilepath(config.includedirs[j]) .. "\",\n")
 		end
 		file:write("				);\n")
 
@@ -448,7 +436,7 @@ function WriteXCBuildConfigurations(file)
 			local dirCharIndex = string.find(f, "/")
 			if dirCharIndex ~= nil then
 				local frameworkPath = mbfilepath.getdir(f)
-				file:write("					\"" .. XCodeGetOutputRelFilePath(frameworkPath) .. "\",\n")
+				file:write("					\"" .. mbwriter.getoutputrelfilepath(frameworkPath) .. "\",\n")
 			end
 		end
 		file:write("				);\n\n")
@@ -463,7 +451,7 @@ function WriteXCBuildConfigurations(file)
 				file:write("				\"LIBRARY_SEARCH_PATHS" .. sdk .. "\" = (\n")
 			end
 			for jString = 1, #strings do
-				file:write("					\"" .. XCodeGetOutputRelFilePath(strings[jString]) .. "\",\n")
+				file:write("					\"" .. mbwriter.getoutputrelfilepath(strings[jString]) .. "\",\n")
 			end
 			file:write("				);\n\n")
 		end
@@ -487,7 +475,7 @@ function WriteXCBuildConfigurations(file)
 --		if g_currentTarget.pch ~= nil and g_currentTarget.pch ~= "" then
 --			print(g_currentTarget.name .. " PCH " .. g_currentTarget.pch)
 --			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = YES;\n")
---			file:write("				GCC_PREFIX_HEADER = \"" .. XCodeGetOutputRelFilePath(g_currentTarget.pch) .. "\";\n")
+--			file:write("				GCC_PREFIX_HEADER = \"" .. mbwriter.getoutputrelfilepath(g_currentTarget.pch) .. "\";\n")
 --		else
 			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = NO;\n")
 --		end
@@ -495,7 +483,7 @@ function WriteXCBuildConfigurations(file)
 		do
 			local infoplist = mbutil.getkvvalue(config.options._xcode, "infoplist")
 			if infoplist ~= nil then 
-				file:write("				INFOPLIST_FILE = \"" .. XCodeGetOutputRelFilePath(infoplist) .. "\";\n")
+				file:write("				INFOPLIST_FILE = \"" .. mbwriter.getoutputrelfilepath(infoplist) .. "\";\n")
 			end
 		end
 
@@ -572,8 +560,7 @@ for i = 1, #g_currentTarget.frameworks do
 
 	local dirCharIndex = string.find(f, "/")
 	if dirCharIndex == nil then
-		-- TODO, support non system frameworks
-		g_filePathMap[f] = "System/Library/Frameworks/" .. f
+		mbwriter.setoutputfilepathmapping(f, "System/Library/Frameworks/" .. f)
 		g_sourceTreeMap[f] = "SDKROOT"
 	end
 end
@@ -658,8 +645,8 @@ for i = 1, #g_currentTarget.depends do
 	--Xcode projects written adjacent to each other
 	local dependencyPhysicalFilePath = filename .. ".xcodeproj"
 
-	g_filePathMap[dependency] = dependencyPhysicalFilePath
-	g_filePathMap[dependencyPhysicalFilePath] = dependencyPhysicalFilePath
+	mbwriter.setoutputfilepathmapping(dependency, dependencyPhysicalFilePath)
+	mbwriter.setoutputfilepathmapping(dependencyPhysicalFilePath, dependencyPhysicalFilePath)
 end
 
 --[[ CREATE FOLDER TREE ]] --------------------------------------------------------------------------------
@@ -785,14 +772,14 @@ file:write("		" .. g_externalProductID .. " /* " .. g_currentTargetFilenameWithE
 --All files, regardless of whether they're for this platform or not.
 for i = 1, #g_currentTarget.allfiles do
 	local f = g_currentTarget.allfiles[i]
-	file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(f) .. "; name = \"" .. mbfilepath.getshortname(f) .. "\"; path = \"" .. XCodeGetOutputRelFilePath(f) .. "\"; sourceTree = " .. GetSourceTree(f) .. "; };\n")
+	file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(f) .. "; name = \"" .. mbfilepath.getshortname(f) .. "\"; path = \"" .. mbwriter.getoutputrelfilepath(f) .. "\"; sourceTree = " .. GetSourceTree(f) .. "; };\n")
 end
 
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
 	local dependencyXcodeproj = dependency .. ".xcodeproj"
 
-	file:write("		" .. g_PBXFileRefIDMap[dependency] 	.. " /* " .. dependency .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(dependencyXcodeproj) .. "; name = \"" .. mbfilepath.getshortname(dependency) .. ".xcodeproj\"; path = \"" .. XCodeGetOutputRelFilePath(dependency) .. "\"; sourceTree = " .. GetSourceTree(dependency) .. "; };\n")
+	file:write("		" .. g_PBXFileRefIDMap[dependency] 	.. " /* " .. dependency .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(dependencyXcodeproj) .. "; name = \"" .. mbfilepath.getshortname(dependency) .. ".xcodeproj\"; path = \"" .. mbwriter.getoutputrelfilepath(dependency) .. "\"; sourceTree = " .. GetSourceTree(dependency) .. "; };\n")
 end
 
 file:write("/* End PBXFileReference section */\n\n")

@@ -63,8 +63,10 @@ static int luaFuncMklink(lua_State* l)
 
 static int luaFuncGetFileType(lua_State* l)
 {
-    const char* filepath = lua_tostring(l, 1);
-	E_FileType fileType = Platform::GetFileType(filepath);
+	std::string filepath;
+	mbLuaToStringExpandMacros(&filepath, NULL, l, 1);
+
+	E_FileType fileType = Platform::GetFileType(filepath.c_str());
 	
 	const char* result = "unknown";
 	switch (fileType)

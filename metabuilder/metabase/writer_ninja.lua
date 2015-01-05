@@ -9,10 +9,6 @@ if mbwriter.global.verbose then
 	loginfo(inspect(mbwriter.solution))
 end
 
-
---Map relative to absolute path
-g_filePathMap = {}
-
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --FILE WRITING
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -111,7 +107,7 @@ function WriteMakeFile(currentTarget, config)
 		local f = currentTarget.files[i]
 		local ext = mbfilepath.getextension(f)
 		if ext == "c" or ext == "cpp" then
-			local shortName = mbfilepath.shortname(f)
+			local shortName = mbfilepath.getshortname(f)
 			local fileToBuild = mbwriter.getoutputrelfilepath(f)
 		    local fileToLink = mbfilepath.replaceextension(shortName, ext, "o")
 		    file:write("build $intdir/" .. fileToLink .. ": cxx " .. fileToBuild .. "\n")

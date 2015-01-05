@@ -5,6 +5,13 @@
 
 #include "writer_utility.h"
 
+#include <map>
+
+typedef std::map<std::string, std::string> OutputFilePathMapping;
+
+static OutputFilePathMapping g_outputFilePathMapping;
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 static bool mbWriterUtility_FilePathMarkedAsRaw(const char* filepath)
 {
@@ -13,8 +20,7 @@ static bool mbWriterUtility_FilePathMarkedAsRaw(const char* filepath)
 
 static void mbWriterUtility_NormaliseTargetFilePath(char* filepath)
 {
-	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
-	mbNormaliseFilePath(filepath, dirSep);
+	mbNormaliseFilePath(filepath, mbGetAppState()->makeGlobal->GetTargetDirSep());
 }
 
 static int mbWriterUtility_GetNumDirLevels(const char* dir)
@@ -146,10 +152,11 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 static int mbWriterUtility_LuaNormaliseTargetFilePath(lua_State* l)
 {
 	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
-	const char* filepathUnnormalised = lua_tostring(l, 1);
+	std::string filepathUnnormalised;
+	mbLuaToStringExpandMacros(&filepathUnnormalised, NULL, l, 1);
 	
 	char result[MB_MAX_PATH];
-	mbNormaliseFilePath(result, filepathUnnormalised, dirSep);
+	mbNormaliseFilePath(result, filepathUnnormalised.c_str(), dirSep);
 	lua_pushstring(l, result);
 
 	return 1;
@@ -157,36 +164,52 @@ static int mbWriterUtility_LuaNormaliseTargetFilePath(lua_State* l)
 
 static int mbWriterUtility_LuaNormaliseHostFilePath(lua_State* l)
 {
-	const char* filepathUnnormalised = lua_tostring(l, 1);
+	std::string filepathUnnormalised;
+	mbLuaToStringExpandMacros(&filepathUnnormalised, NULL, l, 1);
 
 	char result[MB_MAX_PATH];
-	Platform::NormaliseFilePath(result, filepathUnnormalised);
+	Platform::NormaliseFilePath(result, filepathUnnormalised.c_str());
 	lua_pushstring(l, result);
 
 	return 1;
 }
 
+
+static int mbWriterUtility_LuaSetOutputFilePathMapping(lua_State* l)
+{
+	std::string key;
+	mbLuaToStringExpandMacros(&key, NULL, l, 1);
+
+	std::string val;
+	mbLuaToStringExpandMacros(&val, NULL, l, 2);
+
+	g_outputFilePathMapping.insert(std::make_pair(key, val));
+	return 0;
+}
+
 static int mbWriterUtility_LuaGetOutputRelativeFilePath(lua_State* l)
 {
-	const char* filepathUnnormalised = lua_tostring(l, 1);
+	std::string filepathUnnormalised;
+	mbLuaToStringExpandMacros(&filepathUnnormalised, NULL, l, 1);
 
 	MetaBuilderContext* ctx = mbGetActiveContext();
 	const char* oldBaseDir = ctx->currentMetaMakeDirAbs.c_str();
 	const char* newBaseDir = ctx->makeOutputDirAbs.c_str();
 
 	char result[MB_MAX_PATH];
-	mbWriterUtility_GetRelativeFilePath(result, filepathUnnormalised, oldBaseDir, newBaseDir);
+	mbWriterUtility_GetRelativeFilePath(result, filepathUnnormalised.c_str(), oldBaseDir, newBaseDir);
 	lua_pushstring(l, result);
 	return 1;
 }
 
 static int mbWriterUtility_LuaGetAbsoluteFilePath(lua_State* l)
 {
-	const char* filepath = lua_tostring(l, 1);
+	std::string filepath;
+	mbLuaToStringExpandMacros(&filepath, NULL, l, 1);
 
 	MetaBuilderContext* ctx = mbGetActiveContext();
 	char result[MB_MAX_PATH];
-	mbWriterUtility_FileConvertToAbsolute(result, filepath, ctx->currentMetaMakeDirAbs.c_str());
+	mbWriterUtility_FileConvertToAbsolute(result, filepath.c_str(), ctx->currentMetaMakeDirAbs.c_str());
 	lua_pushstring(l, result);
 	return 1;
 }
@@ -195,6 +218,7 @@ void mbWriterUtilityLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)
 {
 	luaFn->AddFunction("normalisetargetfilepath",	mbWriterUtility_LuaNormaliseTargetFilePath);
 	luaFn->AddFunction("normalisehostfilepath",		mbWriterUtility_LuaNormaliseHostFilePath);
+	luaFn->AddFunction("setoutputfilepathmapping",	mbWriterUtility_LuaSetOutputFilePathMapping);
 	luaFn->AddFunction("getoutputrelfilepath",		mbWriterUtility_LuaGetOutputRelativeFilePath);
 	luaFn->AddFunction("getabsfilepath",			mbWriterUtility_LuaGetAbsoluteFilePath);
 }

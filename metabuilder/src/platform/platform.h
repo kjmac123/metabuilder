@@ -1,13 +1,9 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-#ifdef PLATFORM_POSIX
-#define MB_MAX_PATH PATH_MAX
-#elif PLATFORM_WINDOWS
-#define MB_MAX_PATH 260
-#else
-#define MB_MAX_PATH 260
-#endif
+//Maximum path length is a complete mess. Let's go with 512bytes for now.
+//stackoverflow.com/questions/833291/is-there-an-equivalent-to-winapis-max-path-under-linux-unix
+#define MB_MAX_PATH 512
 
 enum E_FileType
 {
