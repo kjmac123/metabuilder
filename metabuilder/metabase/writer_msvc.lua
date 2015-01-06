@@ -153,6 +153,12 @@ function BuildFileGroups(currentTarget)
 			outputRelativeFilename = mbwriter.getoutputrelfilepath(f)
 		}
 		fileInfo.inputRelativeDir, fileInfo.shortName, fileInfo.ext = mbfilepath.decompose(f)
+		if g_enableHLSL == false then
+			if fileInfo.ext == "hlsl" then
+				loginfo("HLSL support enabled")
+				g_enableHLSL = true
+			end
+		end
 		
 		group.fileInfo[#group.fileInfo+1] = fileInfo
 	end
@@ -661,12 +667,6 @@ end
 
 local groups = BuildFileGroups(g_currentTarget)
 --print(inspect(g_fileTypeMap))
-
---TODO move out this hack for Windows builds
-if g_fileTypeMap["hlsl"] == "CompilerShader" then
-	--print("HLSL support enabled")
-	g_enableHLSL = true
-end
 
 WriteVcxProj(g_currentTarget, groups)
 WriterVcxProjFilters(g_currentTarget, groups)
