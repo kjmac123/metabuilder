@@ -38,7 +38,6 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="hlsl.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -66,7 +65,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
 
-    <CompilerShader/>
     <PostBuildEvent>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -99,7 +97,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
 
-    <CompilerShader/>
     <PostBuildEvent>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -132,7 +129,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
 
-    <CompilerShader/>
     <PostBuildEvent>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -508,6 +504,5 @@
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="hlsl.targets" />
   </ImportGroup>
 </Project>
