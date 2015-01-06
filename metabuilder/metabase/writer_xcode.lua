@@ -102,6 +102,7 @@ function InitFolder(folderList, path, filename)
 			local newFolderID = mbwriter.xcodegenerateid()
 
 			currentFolder = {
+				name = currentPath,
 				shortName = pathComponents[i],
 				id = newFolderID,
 				parentid = currentParentID,
@@ -146,7 +147,11 @@ function InitFolder(folderList, path, filename)
 	end
 end
 
-function InitFolders(folderList, fileList)
+function FolderCompare(a, b)
+	return a.name < b.name
+end
+
+function InitFolders(sortedFolderList, fileList)
 	-- Lazily initialise chains of folders based upon the list of files provided
 	-- For each folder store:
 	--	the short name of the folder
@@ -154,17 +159,21 @@ function InitFolders(folderList, fileList)
 	--	the unique id of its parent
 	--	the filenames of the files within this folder
 
+	local folderTable = {}
 	for i = 1, #fileList do
 		local f = fileList[i]
 		local path, filename, ext = mbfilepath.decompose(f)
 
 		--remove trailing slash
 		local path = string.sub(path, 1, -2)
-
-		InitFolder(folderList, path, filename)
+		
+		InitFolder(folderTable, path, filename)
 	end
 
-	--print(inspect(folderList))
+	for _, v in pairs(folderTable) do 		
+		sortedFolderList[#sortedFolderList+1] = v
+	end
+	table.sort(sortedFolderList, FolderCompare)
 end
 
 function WritePBXGroup(file)
@@ -222,9 +231,8 @@ function WritePBXGroup(file)
 	file:write("			name = Frameworks;\n")
 	file:write("			sourceTree = \"<group>\";\n")
 	file:write("		};\n")
-
-	for k, v in pairs(g_sourceFolders) do 
-		local folder = v
+	
+	for _, folder in ipairs(g_sourceFolders) do
 
 		--special handling for root folder
 		if folder.shortName == "" then

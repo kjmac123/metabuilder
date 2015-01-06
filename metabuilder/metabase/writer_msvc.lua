@@ -157,12 +157,10 @@ function BuildFileGroups(currentTarget)
 		group.fileInfo[#group.fileInfo+1] = fileInfo
 	end
 	
-	local sortedGroups = {}
-	
+	local sortedGroups = {}	
 	for _, group in pairs(groupMap) do 
 		sortedGroups[#sortedGroups+1] = group
 	end
-	
 	table.sort(sortedGroups, FileGroupCompare)
 			
 	logprofile("END BuildFileGroups")
@@ -536,7 +534,7 @@ function WriterVcxProjFilters(currentTarget, groups)
 	end
 	table.sort(sortedFolderList, FolderCompare)
 	
-	for _, folder in ipairs(sortedFolderList) do	
+	for _, folder in ipairs(sortedFolderList) do
 		if folder.shortName ~= "" then 
 			local formattedPath = FormatFilterPath(folder.relativePath)
 			if formattedPath ~= "." then
