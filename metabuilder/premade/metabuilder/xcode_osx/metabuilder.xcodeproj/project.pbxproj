@@ -118,7 +118,7 @@
 		f7c717b9cd2bfb399c7ded7d /* src/writer_utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "writer_utility.h"; path = "../../../src/writer_utility.h"; sourceTree = "<group>"; };
 		35be52e41555a2d22fec85e1 /* src/writer_xcode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "writer_xcode.cpp"; path = "../../../src/writer_xcode.cpp"; sourceTree = "<group>"; };
 		e112411d5401c9170caf6104 /* src/writer_xcode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "writer_xcode.h"; path = "../../../src/writer_xcode.h"; sourceTree = "<group>"; };
-		c1c564e1d05e7392749f8e80 /* ../external/lua-5.2.2/lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.pb-project; name = "lua.xcodeproj"; path = "lua.xcodeproj"; sourceTree = "<group>"; };
+		c1c564e1d05e7392749f8e80 /* ../external/lua-5.2.2/lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.pb-project; name = "lua.xcodeproj"; path = "../../../../external/lua-5.2.2/lua"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,12 +167,24 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		08eae68159fbede9f8a942ff /* posix */ = {
+		BE854EEF18CA1112008EAFCD /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				ddb1dd61976f4a5e230a7d05,
+				7f40cab999ea7a57243a79ef,
+				5f1b3f2aa092fa6e93e8d8ed,
+				5ceb73145c6194f6c613537f,
+				a743e162630c41e5c3a9eba7,
+				532f894891ce23cd38eebef0,
 			);
-			name = "posix";
+			name = "Source";
+			sourceTree = "<group>";
+		};	
+		7f40cab999ea7a57243a79ef /* .. */ = {
+			isa = PBXGroup;
+			children = (
+				e1052612a78941ea08e3d970,
+			);
+			name = "..";
 			sourceTree = "<group>";
 		};
 		e1052612a78941ea08e3d970 /* external */ = {
@@ -191,6 +203,15 @@
 				a0204b4af3dd41a337f43b0c,
 			);
 			name = "dlmalloc-2.8.6";
+			sourceTree = "<group>";
+		};
+		892ba4ed21d7ccabd85a31e3 /* freebsd */ = {
+			isa = PBXGroup;
+			children = (
+				8dedc3b0d40383fbe442f1cf,
+				c849fbdea94f685f7756f729,
+			);
+			name = "freebsd";
 			sourceTree = "<group>";
 		};
 		532f894891ce23cd38eebef0 /* src */ = {
@@ -236,31 +257,6 @@
 			name = "src";
 			sourceTree = "<group>";
 		};
-		7f40cab999ea7a57243a79ef /* .. */ = {
-			isa = PBXGroup;
-			children = (
-				e1052612a78941ea08e3d970,
-			);
-			name = "..";
-			sourceTree = "<group>";
-		};
-		35632adf19a6848271eec37d /* windows */ = {
-			isa = PBXGroup;
-			children = (
-				ecbbc7d5a2e674649d751986,
-			);
-			name = "windows";
-			sourceTree = "<group>";
-		};
-		892ba4ed21d7ccabd85a31e3 /* freebsd */ = {
-			isa = PBXGroup;
-			children = (
-				8dedc3b0d40383fbe442f1cf,
-				c849fbdea94f685f7756f729,
-			);
-			name = "freebsd";
-			sourceTree = "<group>";
-		};
 		3dafb6b812868cbee26565ab /* platform */ = {
 			isa = PBXGroup;
 			children = (
@@ -272,18 +268,22 @@
 			name = "platform";
 			sourceTree = "<group>";
 		};
-		BE854EEF18CA1112008EAFCD /* Source */ = {
+		08eae68159fbede9f8a942ff /* posix */ = {
 			isa = PBXGroup;
 			children = (
-				7f40cab999ea7a57243a79ef,
-				5f1b3f2aa092fa6e93e8d8ed,
-				5ceb73145c6194f6c613537f,
-				a743e162630c41e5c3a9eba7,
-				532f894891ce23cd38eebef0,
+				ddb1dd61976f4a5e230a7d05,
 			);
-			name = "Source";
+			name = "posix";
 			sourceTree = "<group>";
-		};	
+		};
+		35632adf19a6848271eec37d /* windows */ = {
+			isa = PBXGroup;
+			children = (
+				ecbbc7d5a2e674649d751986,
+			);
+			name = "windows";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 /* Begin PBXNativeTarget section */
 		aaca4dc9a29cd7064f5281c2 /* metabuilder */ = {

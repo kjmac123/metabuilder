@@ -158,6 +158,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		BE854EEF18CA1112008EAFCD /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				84d741d99d2002e407be703b,
+				3adfbb3aaef01d4d68595499,
+			);
+			name = "Source";
+			sourceTree = "<group>";
+		};	
 		3adfbb3aaef01d4d68595499 /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -217,15 +226,6 @@
 			name = "src";
 			sourceTree = "<group>";
 		};
-		BE854EEF18CA1112008EAFCD /* Source */ = {
-			isa = PBXGroup;
-			children = (
-				84d741d99d2002e407be703b,
-				3adfbb3aaef01d4d68595499,
-			);
-			name = "Source";
-			sourceTree = "<group>";
-		};	
 /* End PBXGroup section */
 /* Begin PBXNativeTarget section */
 		b6849c608220bcb74870cb8b /* lua */ = {
