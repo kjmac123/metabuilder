@@ -8,7 +8,11 @@ std::vector<KeyValue> g_externalNativeTarget;
 int luaFuncWriterXcodeGenerateID(lua_State* l)
 {
 	char hashStr[256];
-	sprintf(hashStr, "%08x%08x%08x", mbRandomU32(), mbRandomU32(), mbRandomU32());
+	U32 a = mbRandomU32();
+	U32 b = mbRandomU32();
+	U32 c = mbRandomU32();
+
+	sprintf(hashStr, "%08x%08x%08x", a,b,c);
 	
 	lua_pushstring(l, hashStr);
 	return 1;
