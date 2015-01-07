@@ -651,10 +651,10 @@ for i = 1, #g_currentTarget.depends do
 	g_ProductGroupIDs[dependency]				= mbwriter.xcodegenerateid()
 
 	--Xcode projects written adjacent to each other
-	local dependencyPhysicalFilePath = filename .. ".xcodeproj"
-
-	mbwriter.setoutputfilepathmapping(dependency, dependencyPhysicalFilePath)
-	mbwriter.setoutputfilepathmapping(dependencyPhysicalFilePath, dependencyPhysicalFilePath)
+	local inputRelativePath = dependency
+	local outputRelativePath = filename .. ".xcodeproj"
+	
+	mbwriter.setoutputfilepathmapping(inputRelativePath, outputRelativePath)
 end
 
 --[[ CREATE FOLDER TREE ]] --------------------------------------------------------------------------------

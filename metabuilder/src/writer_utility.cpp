@@ -183,6 +183,7 @@ static int mbWriterUtility_LuaSetOutputFilePathMapping(lua_State* l)
 	std::string val;
 	mbLuaToStringExpandMacros(&val, NULL, l, 2);
 
+	//MB_LOGINFO("MAPPING %s %s", key.c_str(), val.c_str());
 	g_outputFilePathMapping.insert(std::make_pair(key, val));
 	return 0;
 }
@@ -192,13 +193,22 @@ static int mbWriterUtility_LuaGetOutputRelativeFilePath(lua_State* l)
 	std::string filepathUnnormalised;
 	mbLuaToStringExpandMacros(&filepathUnnormalised, NULL, l, 1);
 
-	MetaBuilderContext* ctx = mbGetActiveContext();
-	const char* oldBaseDir = ctx->currentMetaMakeDirAbs.c_str();
-	const char* newBaseDir = ctx->makeOutputDirAbs.c_str();
+	OutputFilePathMapping::iterator it = g_outputFilePathMapping.find(filepathUnnormalised);
+	if (it == g_outputFilePathMapping.end())
+	{
+		MetaBuilderContext* ctx = mbGetActiveContext();
+		const char* oldBaseDir = ctx->currentMetaMakeDirAbs.c_str();
+		const char* newBaseDir = ctx->makeOutputDirAbs.c_str();
 
-	char result[MB_MAX_PATH];
-	mbWriterUtility_GetRelativeFilePath(result, filepathUnnormalised.c_str(), oldBaseDir, newBaseDir);
-	lua_pushstring(l, result);
+		char result[MB_MAX_PATH];
+		mbWriterUtility_GetRelativeFilePath(result, filepathUnnormalised.c_str(), oldBaseDir, newBaseDir);
+		lua_pushstring(l, result);
+	}
+	else
+	{
+		lua_pushstring(l, it->second.c_str());
+	}
+	
 	return 1;
 }
 
