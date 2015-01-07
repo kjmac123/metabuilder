@@ -118,7 +118,7 @@
 		9c7ded7dcd2bfb39f7c717b9 /* src/writer_utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "writer_utility.h"; path = "../../../src/writer_utility.h"; sourceTree = "<group>"; };
 		2fec85e11555a2d235be52e4 /* src/writer_xcode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "writer_xcode.cpp"; path = "../../../src/writer_xcode.cpp"; sourceTree = "<group>"; };
 		0caf61045401c917e112411d /* src/writer_xcode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "writer_xcode.h"; path = "../../../src/writer_xcode.h"; sourceTree = "<group>"; };
-		749f8e80d05e7392c1c564e1 /* ../external/lua-5.2.2/lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.pb-project; name = "lua.xcodeproj"; path = "../../../../external/lua-5.2.2/lua"; sourceTree = "<group>"; };
+		749f8e80d05e7392c1c564e1 /* ../external/lua-5.2.2/lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.pb-project; name = "lua.xcodeproj"; path = "lua.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
