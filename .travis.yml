@@ -3,4 +3,4 @@ compiler:
   - gcc
   - clang
 # Change this to your needs
-script: pushd metabuilder/premade/metabuilder/gnumakeclang_posix && make && popd
+script: pushd metabuilder/scripts/ci && ./ci_travis.sh && popd
