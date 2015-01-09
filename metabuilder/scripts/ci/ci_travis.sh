@@ -1,10 +1,13 @@
 #!/bin/bash
 set -e
 
+NUMCORES=`grep -c ^processor /proc/cpuinfo`
+echo BUILDING USING ${NUMCORES} threads
+
 #cat /proc/cpuinfo
 
 SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-TOPDIR=$(SCRIPTDIR)/../..
+TOPDIR=${SCRIPTDIR}/../..
 
 GEN=gnumakegcc_posix
 
@@ -13,13 +16,11 @@ if [ "${CXX}" = "clang++" ]; then
 fi
             
 pushd ${TOPDIR}/premade/metabuilder/${GEN}/
-cat Makefile
+#cat Makefile
 make clean BUILDCONFIG=Release
-make BUILDCONFIG=Release
+make -j ${NUMCORES} BUILDCONFIG=Release
 
 cp out/metabuilder/Release/metabuilder ${TOPDIR}/bin
-${TOPDIR}/scripts/generatepremade_posix.sh
-
 popd
 
-
+${TOPDIR}/scripts/generatepremade_posix.sh
