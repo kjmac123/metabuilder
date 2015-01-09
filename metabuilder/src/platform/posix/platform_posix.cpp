@@ -61,7 +61,7 @@ void Shutdown()
 
 bool CreateLink(const char* src, const char* dst)
 {
-	char existingSrcPath[MB_MAX_PATH] = {0};
+	char existingSrcPath[PATH_MAX] = {0};
 	ssize_t readlinkResult = readlink(dst, existingSrcPath, sizeof(existingSrcPath));
 	if (readlinkResult > 0)
 	{
@@ -139,7 +139,7 @@ bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInpu
 			
 			if (excludeDirs)
 			{
-				char tmp[MB_MAX_PATH];
+				char tmp[PATH_MAX];
 				strcpy(tmp, excludeDirs);
 				char* current = strtok (tmp,",");
 				while (current != NULL)
@@ -198,7 +198,7 @@ void FileSetWorkingDir(const std::string& path)
 
 std::string FileGetWorkingDir()
 {
-   	char workingDir[MB_MAX_PATH];
+   	char workingDir[PATH_MAX];
 	if (getcwd(workingDir, sizeof(workingDir)) == NULL)
  	{
 		MB_LOGERROR("Failed to query working dir");
@@ -210,7 +210,7 @@ std::string FileGetWorkingDir()
 
 std::string FileGetAbsPath(const std::string& path)
 {
-   	char storage[MB_MAX_PATH];
+   	char storage[PATH_MAX];
 	if (/*FreeBSD::*/realpath(path.c_str(), storage) == NULL)
    	{
 		MB_LOGERROR("Failed to get absolute path for %s", path.c_str());
