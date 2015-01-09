@@ -4,7 +4,7 @@ set -e
 #cat /proc/cpuinfo
 
 SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-TOPDIR=../..
+TOPDIR=$(SCRIPTDIR)/../..
 
 GEN=gnumakegcc_posix
 
