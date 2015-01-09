@@ -1,10 +1,9 @@
 #!/bin/bash
 set -e
 
-cat /proc/cpuinfo
+#cat /proc/cpuinfo
 
-SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-TOPDIR=${SCRIPTDIR}/../..
+TOPDIR=../..
 
 GEN=gnumakegcc_posix
 
@@ -13,11 +12,12 @@ if [ "${CXX}" = "clang++" ]; then
 fi
             
 pushd ${TOPDIR}/premade/metabuilder/${GEN}/
+cat Makefile
 make clean BUILDCONFIG=Release
 make BUILDCONFIG=Release
 
 cp out/metabuilder/Release/metabuilder ${TOPDIR}/bin
-${SCRIPTDIR}/generatepremade_posix.sh
+${TOPDIR}/scripts/generatepremade_posix.sh
 
 popd
 
