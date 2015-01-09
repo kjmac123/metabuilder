@@ -293,7 +293,7 @@ function WriteMakeFileAppTarget(file, currentTarget)
 
 	file:write(targetFileName .. " : " .. targetPreLinkFileName  .. "\n")
 	file:write("	@echo " .. GetDollarVar(g_varLD) .. " Linking " .. targetFileName .. "\n")
-	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varLDFLAGS) .. " " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
+	file:write("	@" .. GetDollarVar(g_varLD) .. " " .. GetDollarVar(g_varMODULEOBJ) .. " " .. GetDollarVar(g_varOBJ) .. " " .. GetDollarVar(g_varLDFLAGS) .. " -o '$@' ;\n")
 end
 
 function WriteMakeFileModuleTarget(file, currentTarget)

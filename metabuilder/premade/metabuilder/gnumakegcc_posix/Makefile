@@ -204,7 +204,7 @@ $(metabuilder_INTDIR)/__metabuilder__prelink__ : $(metabuilder_OBJ) $(lua_OUTDIR
 
 $(metabuilder_OUTDIR)/metabuilder : $(metabuilder_INTDIR)/__metabuilder__prelink__
 	@echo $(metabuilder_LD) Linking $(metabuilder_OUTDIR)/metabuilder
-	@$(metabuilder_LD) $(metabuilder_LDFLAGS) $(metabuilder_MODULEOBJ) $(metabuilder_OBJ) -o '$@' ;
+	@$(metabuilder_LD) $(metabuilder_MODULEOBJ) $(metabuilder_OBJ) $(metabuilder_LDFLAGS) -o '$@' ;
 
 
 $(metabuilder_OBJ) : | $(metabuilder_INTDIR)
