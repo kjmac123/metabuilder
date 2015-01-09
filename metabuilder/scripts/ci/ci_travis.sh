@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
+
+cat /proc/cpuinfo
+
 SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-TOPDIR=${SCRIPTDIR}/..
+TOPDIR=${SCRIPTDIR}/../..
 
 GEN=gnumakegcc_posix
 
@@ -11,10 +14,10 @@ fi
             
 pushd ${TOPDIR}/premade/metabuilder/${GEN}/
 make clean BUILDCONFIG=Release
-make -j4 BUILDCONFIG=Release
+make BUILDCONFIG=Release
 
 cp out/metabuilder/Release/metabuilder ${TOPDIR}/bin
-${TOPDIR}/generatepremade_allplatforms_posix.sh
+${SCRIPTDIR}/generatepremade_posix.sh
 
 popd
 
