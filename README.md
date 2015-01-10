@@ -3,6 +3,8 @@ Metabuilder
 
 A Cross-platform meta project/makefile generator.
 
+[![Build Status](https://travis-ci.org/kjmac123/metabuilder.svg?branch=master)](https://travis-ci.org/kjmac123/metabuilder)
+
 Status: A very active work in progress, pre-alpha if you like. That said it was used successfully in the production of Geometry Wars 3 at Lucid Games where it was privately extended to target several games consoles.
 
 Author: Ken Macleod  
