@@ -16,14 +16,15 @@ option("msvccompile", "TreatWarningAsError", "false")
 option("msvccompile", "IntrinsicFunctions", "true")
 
 config "Debug"
+	option("msvccompile", "RuntimeLibrary", "MultiThreadedDebug")
 	option("msvccompile", "Optimization", "Disabled")
 	option("msvclink", "GenerateDebugInformation", "true")
 config_end()
 
 config "Release"
+	option("msvccompile", "RuntimeLibrary", "MultiThreaded")
 	option("msvccompile", "Optimization", "MaxSpeed")
 	option("msvccompile", "FunctionLevelLinking", "true")
-	option("msvccompile", "IntrinsicFunctions", "true")
 
 	option("msvclink", "GenerateDebugInformation", "true")
 	option("msvclink", "EnableCOMDATFolding", "true")
@@ -31,9 +32,9 @@ config "Release"
 config_end()
 
 config "Profile"
+	option("msvccompile", "RuntimeLibrary", "MultiThreaded")
 	option("msvccompile", "Optimization", "MaxSpeed")
 	option("msvccompile", "FunctionLevelLinking", "true")
-	option("msvccompile", "IntrinsicFunctions", "true")
 
 	option("msvclink", "GenerateDebugInformation", "true")
 	option("msvclink", "EnableCOMDATFolding", "true")
@@ -41,9 +42,9 @@ config "Profile"
 config_end()
 
 config "Master"
+	option("msvccompile", "RuntimeLibrary", "MultiThreaded")
 	option("msvccompile", "Optimization", "MaxSpeed")
 	option("msvccompile", "FunctionLevelLinking", "true")
-	option("msvccompile", "IntrinsicFunctions", "true")
 
 	option("msvclink", "GenerateDebugInformation", "false")
 	option("msvclink", "EnableCOMDATFolding", "true")
