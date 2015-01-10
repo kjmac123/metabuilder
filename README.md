@@ -5,7 +5,7 @@ A Cross-platform meta project/makefile generator.
 
 Status: A very active work in progress, pre-alpha if you like. That said it was used successfully in the production of Geometry Wars 3 at Lucid Games where it was privately extended to target several games consoles.
 
-Author: Ken Macleod
+Author: Ken Macleod  
 Email: kjmac123@gmail.com  
 Twitter: @PanzerGnome  
 
