@@ -3,6 +3,8 @@ Metabuilder
 
 A Cross-platform meta project/makefile generator.
 
+Status: A very active work in progress, pre-alpha if you like. That said it was used successfully in the production of Geometry Wars 3 at Lucid Games where it was privately extended to target several games consoles.
+
 Author: Ken Macleod:  
 Email: kjmac123@gmail.com  
 Twitter: @PanzerGnome  
@@ -16,6 +18,7 @@ The version of Metabuilder on Github is able to generate the following project t
 * MSVC 2010, 2012, 2013, 2015 for Windows x86 and x64
 * XCode for OSX and iOS. Versions 5 and 6 of Xcode have been tested.
 * Android NDK. Currently supported under OSX only. No examples available just yet.
+* GNU Make with GCC and Clang (not properly battle tested yet!)
 
 Metabuilder has been used successfully in commercial projects and behind closed doors it has been extended to support the generation of projects for a number of games consoles. This was achieved purely by adding new Metabase files. 
 
