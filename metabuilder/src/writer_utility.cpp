@@ -109,34 +109,50 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 		mbWriterUtility_FileConvertToAbsolute(normalisedFilepathAbs, oldBaseDir, filepath);
 		const char* normalisedMakeOutputDirAbs = newBaseDir;
 
-		//baseDir is the common path fragment shared by the makefile output directory and 'filepath'
-		char baseDir[MB_MAX_PATH];
+		//baseDirLength is the common path length shared by the makefile output directory and 'filepath'
 		int baseDirLength = 0;
-		baseDir[0] = '\0';
+		char baseDir[MB_MAX_PATH];
 		{
 			int commonSubSequenceLength = mbWriterUtility_GetLongestCommonSequenceLengthFromStart(normalisedFilepathAbs, normalisedMakeOutputDirAbs);
-			char commonSubSequence[MB_MAX_PATH];
-			memcpy(commonSubSequence, normalisedFilepathAbs, commonSubSequenceLength);
-			commonSubSequence[commonSubSequenceLength] = '\0';
+			memcpy(baseDir, normalisedFilepathAbs, commonSubSequenceLength);
 
-			//Look for last dir sep character in order to ignore a partial path or file match
-			char* lastDirSep = strrchr(commonSubSequence, dirSep);
-			if (lastDirSep != NULL)
+			//If entire sequence is a directory match
+			if (normalisedFilepathAbs[commonSubSequenceLength] == dirSep)
 			{
-				//Take sequence up to last dir sep as our base dir
-				*lastDirSep = '\0';
-				baseDirLength = (int)(lastDirSep - commonSubSequence);
+				baseDirLength = commonSubSequenceLength;
+			}
+			//Partial match, find dir
+			else
+			{
+				baseDir[commonSubSequenceLength] = '\0';
+
+				//Look for last dir sep character in order to ignore a partial path or file match
+				char* lastDirSep = strrchr(baseDir, dirSep);
+				if (lastDirSep != NULL)
+				{
+					//Take sequence up to last dir sep as our base dir
+					*lastDirSep = '\0';
+					baseDirLength = (int)(lastDirSep - baseDir);
+				}
 			}
 		}
 
-		if (baseDir != NULL)
+		if (baseDirLength > 0)
 		{
-			const char* pathFromBaseToOutDir = normalisedMakeOutputDirAbs + baseDirLength + 1;
-			int nDirLevels = mbWriterUtility_GetNumDirLevels(pathFromBaseToOutDir) + 1;
+			const char* pathFromBaseToOutDir = normalisedMakeOutputDirAbs + baseDirLength;
+
+			int nDirLevels = 0;
 			//Path back from make output dir to base dir
 			char pathBack[MB_MAX_PATH];
-			mbWriterUtility_BuildPathBack(pathBack, nDirLevels);
-
+			if (*pathFromBaseToOutDir == dirSep)
+			{
+				nDirLevels = mbWriterUtility_GetNumDirLevels(pathFromBaseToOutDir) + 1;
+				mbWriterUtility_BuildPathBack(pathBack, nDirLevels);
+			}
+			else
+			{
+				pathBack[0] = '\0';
+			}
 			const char* filepathBaseRelative = normalisedFilepathAbs + baseDirLength + 1;
 			sprintf(result, "%s%s", pathBack, filepathBaseRelative);
 		}
@@ -174,6 +190,34 @@ static int mbWriterUtility_LuaNormaliseHostFilePath(lua_State* l)
 	return 1;
 }
 
+static int mbWriterUtility_LuaNormaliseWindowsFilePath(lua_State* l)
+{
+	std::string filepathUnnormalised;
+	mbLuaToStringExpandMacros(&filepathUnnormalised, NULL, l, 1);
+
+	char result[MB_MAX_PATH];
+	mbNormaliseFilePath(result, filepathUnnormalised.c_str(), '\\');
+	lua_pushstring(l, result);
+
+	return 1;
+}
+
+static int mbWriterUtility_LuaNormaliseUnixFilePath(lua_State* l)
+{
+	std::string filepathUnnormalised;
+	mbLuaToStringExpandMacros(&filepathUnnormalised, NULL, l, 1);
+
+	char result[MB_MAX_PATH];
+	mbNormaliseFilePath(result, filepathUnnormalised.c_str(), '/');
+	lua_pushstring(l, result);
+
+	return 1;
+}
+
+static int mbWriterUtility_LuaNormaliseMbFilePath(lua_State* l)
+{
+	return mbWriterUtility_LuaNormaliseUnixFilePath(l);
+}
 
 static int mbWriterUtility_LuaSetOutputFilePathMapping(lua_State* l)
 {
@@ -228,6 +272,9 @@ void mbWriterUtilityLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)
 {
 	luaFn->AddFunction("normalisetargetfilepath",	mbWriterUtility_LuaNormaliseTargetFilePath);
 	luaFn->AddFunction("normalisehostfilepath",		mbWriterUtility_LuaNormaliseHostFilePath);
+	luaFn->AddFunction("normalisewindowsfilepath",	mbWriterUtility_LuaNormaliseWindowsFilePath);
+	luaFn->AddFunction("normaliseunixfilepath",		mbWriterUtility_LuaNormaliseUnixFilePath);
+	luaFn->AddFunction("normalisembfilepath",		mbWriterUtility_LuaNormaliseMbFilePath);
 	luaFn->AddFunction("setoutputfilepathmapping",	mbWriterUtility_LuaSetOutputFilePathMapping);
 	luaFn->AddFunction("getoutputrelfilepath",		mbWriterUtility_LuaGetOutputRelativeFilePath);
 	luaFn->AddFunction("getabsfilepath",			mbWriterUtility_LuaGetAbsoluteFilePath);

@@ -20,6 +20,32 @@ struct mbRandomContext
 	U32 seed[4];
 };
 
+void LuaStackDump(lua_State *l) 
+{
+	MB_LOGINFO("LUA STACK DUMP BEGIN");
+	for (int i = lua_gettop(l); i >= 0; --i)
+	{
+		int type = lua_type(l, i);
+		switch(type)
+		{
+		case LUA_TBOOLEAN:
+			MB_LOGINFO("%i : %s", i, lua_toboolean(l, i) ? "true" : "false");
+			break;
+		case LUA_TNUMBER:
+			MB_LOGINFO("%i : %i", i, lua_tonumber(l, i));
+			break;
+		case LUA_TSTRING:
+			MB_LOGINFO("%i : %s", i, lua_tostring(l, i));
+			break;
+		default:
+			MB_LOGINFO("%i : %s", i, lua_typename(l, type));
+			break;
+		}
+	}
+	MB_LOGINFO("LUA STACK DUMP END");
+}
+
+
 class StringPtrLess
 {
 public:

@@ -140,7 +140,7 @@ bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInpu
 						fp += 2;
 					}
 					char buf[MB_MAX_PATH];
-					mbNormaliseFilePath(buf, fp, '\\');
+					mbNormaliseFilePath(buf, fp, '/');
 					fileList->push_back(buf);
 				}
 			}

@@ -14,9 +14,11 @@
 
 static std::vector<KeyValue>	g_registeredTargets;
 
+void luaRegisterWriterFuncs(lua_State* l);
+
+//TODO http://lua-users.org/wiki/ReadOnlyTables
+
 //-----------------------------------------------------------------------------------------------------------------------------------------
-
-
 
 static int luaFuncMkdir(lua_State* l)
 {
@@ -202,32 +204,33 @@ static int luaFuncWriterGetTarget(lua_State* l)
 	return 0;
 }
 
-void luaRegisterWriterFuncs(lua_State* l)
+static int luaFuncWriterSetMakeOutputDirAbs(lua_State* l)
 {
-	mbLuaFile_Register(l);
-
-	{
-		LuaModuleFunctions luaFn;
-		mbCommonLuaRegister(l, &luaFn);
-		luaFn.RegisterLuaGlobal(l);
-	}
-
-	{
-		LuaModuleFunctions luaFn;
-		mbWriterXcodeLuaRegister(l, &luaFn);
-		mbWriterMSVCLuaRegister(l, &luaFn);
-		mbWriterUtilityLuaRegister(l, &luaFn);
+	std::string newMakeOutputDir;
+	mbLuaToStringExpandMacros(&newMakeOutputDir, NULL, l, 1);
+	lua_pop(l, 1);
 	
-		luaFn.AddFunction("mkdir", luaFuncMkdir);
-		luaFn.AddFunction("mklink", luaFuncMklink);
-		luaFn.AddFunction("getfiletype", luaFuncGetFileType);
-		luaFn.AddFunction("copyfile", luaFuncCopyFile);
-		luaFn.AddFunction("reportoutputfile", luaFuncReportOutputFile);
-		luaFn.AddFunction("fatalerror", luaFuncFatalError);
-		luaFn.AddFunction("registertarget", luaFuncWriterRegisterTarget);
-		luaFn.AddFunction("gettarget", luaFuncWriterGetTarget);
-		luaFn.RegisterLuaModule(l, "mbwriter");
+	lua_getglobal(l, "mbwriter");
+	MB_ASSERT(lua_istable(l, -1));
+
+	lua_getfield(l, -1, "global");
+	MB_ASSERT(lua_istable(l, -1));
+	
+	lua_pushstring(l, "makeoutputdirabs");
+	lua_pushstring(l, newMakeOutputDir.c_str());
+
+	//Store new normalised dir
+	{
+		AppState* appState = mbGetAppState();
+		MetaBuilderContext* ctx = mbGetActiveContext();
+		char buf[MB_MAX_PATH];
+		strcpy(buf, newMakeOutputDir.c_str());
+		mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
+		ctx->makeOutputDirAbs = buf;
 	}
+
+	lua_settable(l, -3);
+	return 0;
 }
 
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)
@@ -346,6 +349,37 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		lua_setfield(l, -2, "metabasedirabs");
 				
 		{
+			//Root of output directory
+			{
+				char buf[MB_MAX_PATH];
+				strcpy(buf, appState->makeOutputTopDirAbs.c_str());
+				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
+				ctx->makeOutputDirAbs = buf;
+			}
+			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
+			lua_setfield(l, -2, "makeoutputdirbaseabs");
+
+			//Solution name
+			{
+				char buf[MB_MAX_PATH];
+				strcpy(buf, appState->makeOutputTopDirAbs.c_str());
+				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
+				ctx->makeOutputDirAbs = buf;
+			}
+			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
+			lua_setfield(l, -2, "solutionname");
+			
+			//Name of metabase configuration used
+			{
+				char buf[MB_MAX_PATH];
+				strcpy(buf, appState->makeOutputTopDirAbs.c_str());
+				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
+				ctx->makeOutputDirAbs = buf;
+			}
+			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
+			lua_setfield(l, -2, "metabasename");
+			
+			//Default directory to use for make output directory, a combination of the root output directory, solution name and metabase config name.
 			{
 				char buf[MB_MAX_PATH];
 				sprintf(buf, "%s/%s/%s", appState->makeOutputTopDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->GetName().c_str());
@@ -642,4 +676,33 @@ void mbWriterDo(MetaBuilderContext* ctx)
     lua_close(l);
 	
 	mbPopActiveContext();
+}
+
+void luaRegisterWriterFuncs(lua_State* l)
+{
+	mbLuaFile_Register(l);
+
+	{
+		LuaModuleFunctions luaFn;
+		mbCommonLuaRegister(l, &luaFn);
+		luaFn.RegisterLuaGlobal(l);
+	}
+
+	{
+		LuaModuleFunctions luaFn;
+		mbWriterXcodeLuaRegister(l, &luaFn);
+		mbWriterMSVCLuaRegister(l, &luaFn);
+		mbWriterUtilityLuaRegister(l, &luaFn);
+
+		luaFn.AddFunction("mkdir", luaFuncMkdir);
+		luaFn.AddFunction("mklink", luaFuncMklink);
+		luaFn.AddFunction("getfiletype", luaFuncGetFileType);
+		luaFn.AddFunction("copyfile", luaFuncCopyFile);
+		luaFn.AddFunction("reportoutputfile", luaFuncReportOutputFile);
+		luaFn.AddFunction("fatalerror", luaFuncFatalError);
+		luaFn.AddFunction("registertarget", luaFuncWriterRegisterTarget);
+		luaFn.AddFunction("gettarget", luaFuncWriterGetTarget);
+		luaFn.AddFunction("setmakeoutputdirabs", luaFuncWriterSetMakeOutputDirAbs);
+		luaFn.RegisterLuaModule(l, "mbwriter");
+	}
 }

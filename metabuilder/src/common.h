@@ -147,6 +147,8 @@ public:
 	void		OnTargetDirSepChanged();
 
     std::string					currentMetaMakeDirAbs;
+	std::string					makeOutputBaseAbs;
+//	std::string					makeOutputDirAbs;
 	std::string					makeOutputDirAbs;
 	Metabase*					metabase;
     Solution*					solution;
