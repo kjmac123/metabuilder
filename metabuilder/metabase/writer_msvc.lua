@@ -17,17 +17,18 @@ g_fileTypeMap["hpp"]		= "ClInclude"
 g_fileTypeMap["inl"]		= "ClInclude"
 g_fileTypeMap["rc"]			= "ResourceCompile"
 
-function GetFileType(filepath)
+function MSVCGetFileMappingType(filepath)
 	local fileType = nil
 
-	if GetFileTypeMap ~= nil then
-		fileType = GetFileTypeMap(filepath)
+	if MSVCGetFileMappingTypeHook then
+		fileType = MSVCGetFileMappingTypeHook(filepath)
 	else
 		local ext = mbfilepath.getextension(filepath)
 		fileType = g_fileTypeMap[ext]
-		if fileType == nil then
-			fileType = "None"
-		end
+	end
+
+	if fileType == nil then
+		fileType = "None"
 	end
 
 	return fileType
@@ -139,7 +140,7 @@ function MSVCBuildFileGroups(currentTarget)
 			fIncludedInBuild = false
 		end
 
-		fileType = GetFileType(mbNormalisedPath)
+		fileType = MSVCGetFileMappingType(mbNormalisedPath)
 
 		local group = groupMap[fileType]
 		if group == nil then
@@ -171,6 +172,7 @@ function MSVCBuildFileGroups(currentTarget)
 	for _, group in pairs(groupMap) do
 		sortedGroups[#sortedGroups+1] = group
 	end
+	
 	table.sort(sortedGroups, MSVCFileGroupCompare)
 
 	logprofile("END MSVCBuildFileGroups")

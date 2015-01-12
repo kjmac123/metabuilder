@@ -1,15 +1,15 @@
 mbwriter.setmakeoutputdirabs(mbwriter.global.makeoutputdirbaseabs)
 
 local g_simpleFileTypeMap = {}
-g_simpleFileTypeMap["c"]						= "ClCompile"
+g_simpleFileTypeMap["c"]					= "ClCompile"
 g_simpleFileTypeMap["cpp"]					= "ClCompile"
-g_simpleFileTypeMap["h"]						= "ClInclude"
+g_simpleFileTypeMap["h"]					= "ClInclude"
 g_simpleFileTypeMap["hpp"]					= "ClInclude"
 g_simpleFileTypeMap["inl"]					= "ClInclude"
 g_simpleFileTypeMap["java"]					= "JCompile"
 
 local g_androidBuildMagicFiles = {}
-g_androidBuildMagicFiles["AndroidManifest.xml"]			= "AndroidBuild"
+g_androidBuildMagicFiles["AndroidManifest.xml"]		= "AndroidBuild"
 g_androidBuildMagicFiles["res/values/strings.xml"]	= "AndroidBuild"
 
 function MSVCGetProjSlnOutputDir()
@@ -22,7 +22,7 @@ function MSVCRootHook(file)
 	file:write("  </PropertyGroup>\n")
 end
 
-function GetFileTypeMap(filepath)
+function MSVCGetFileMappingTypeHook(filepath)
 	local ext = mbfilepath.getextension(filepath)
 	local fileType = g_simpleFileTypeMap[ext]
 

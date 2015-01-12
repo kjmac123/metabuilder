@@ -1,16 +1,21 @@
-function GetFileTypeMap()
-	local fileTypeMap = {}
-	fileTypeMap["c"]		= "ClCompile"
-	fileTypeMap["cpp"]		= "ClCompile"
-	fileTypeMap["h"]		= "ClInclude"
-	fileTypeMap["hpp"]		= "ClInclude"
-	fileTypeMap["inl"]		= "ClInclude"
-	fileTypeMap["hlsl"]		= "CompilerShader"
-	fileTypeMap["vsh"]		= "CompilerShader"
-	fileTypeMap["psh"]		= "CompilerShader"
-	fileTypeMap["rc"]		= "ResourceCompile"
+local g_windowsFileTypeMap = {}
+	g_windowsFileTypeMap["c"]		= "ClCompile"
+	g_windowsFileTypeMap["cpp"]		= "ClCompile"
+	g_windowsFileTypeMap["h"]		= "ClInclude"
+	g_windowsFileTypeMap["hpp"]		= "ClInclude"
+	g_windowsFileTypeMap["inl"]		= "ClInclude"
+	g_windowsFileTypeMap["hlsl"]	= "CompilerShader"
+	g_windowsFileTypeMap["vsh"]		= "CompilerShader"
+	g_windowsFileTypeMap["psh"]		= "CompilerShader"
+	g_windowsFileTypeMap["rc"]		= "ResourceCompile"
 
-	return fileTypeMap;
+function MSVCGetProjSlnOutputDir()
+	return mbwriter.global.makeoutputdirbaseabs
+end
+
+function MSVCGetFileMappingTypeHook(filepath)
+	local ext = mbfilepath.getextension(filepath)
+	return g_windowsFileTypeMap[ext]
 end
 
 function WriteCustomRuleShader(file, target, msvcPlatform, inputfilename, shaderType)
