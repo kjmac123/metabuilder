@@ -89,6 +89,7 @@ int mbWriterUtility_GetLongestCommonSequenceLengthFromStart(const char* str1, co
 	return commonCount;
 }
 
+
 static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepathUnnormalised, const char* oldBaseDir, const char* newBaseDir)
 {
 	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
@@ -111,10 +112,10 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 
 		//baseDirLength is the common path length shared by the makefile output directory and 'filepath'
 		int baseDirLength = 0;
-		char baseDir[MB_MAX_PATH];
 		{
+			char commonSubSequence[MB_MAX_PATH];
 			int commonSubSequenceLength = mbWriterUtility_GetLongestCommonSequenceLengthFromStart(normalisedFilepathAbs, normalisedMakeOutputDirAbs);
-			memcpy(baseDir, normalisedFilepathAbs, commonSubSequenceLength);
+			memcpy(commonSubSequence, normalisedFilepathAbs, commonSubSequenceLength);
 
 			//If entire sequence is a directory match
 			if (normalisedFilepathAbs[commonSubSequenceLength] == dirSep)
@@ -124,37 +125,36 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 			//Partial match, find dir
 			else
 			{
-				baseDir[commonSubSequenceLength] = '\0';
+				commonSubSequence[commonSubSequenceLength] = '\0';
 
 				//Look for last dir sep character in order to ignore a partial path or file match
-				char* lastDirSep = strrchr(baseDir, dirSep);
+				char* lastDirSep = strrchr(commonSubSequence, dirSep);
 				if (lastDirSep != NULL)
 				{
 					//Take sequence up to last dir sep as our base dir
 					*lastDirSep = '\0';
-					baseDirLength = (int)(lastDirSep - baseDir);
+					baseDirLength = (int)(lastDirSep - commonSubSequence);
 				}
 			}
 		}
 
 		if (baseDirLength > 0)
 		{
-			const char* pathFromBaseToOutDir = normalisedMakeOutputDirAbs + baseDirLength;
+			const char* filepathBaseRelative = normalisedFilepathAbs + baseDirLength + 1;
 
-			int nDirLevels = 0;
-			//Path back from make output dir to base dir
-			char pathBack[MB_MAX_PATH];
-			if (*pathFromBaseToOutDir == dirSep)
+			if (*(normalisedMakeOutputDirAbs + baseDirLength) == '\0')
 			{
-				nDirLevels = mbWriterUtility_GetNumDirLevels(pathFromBaseToOutDir) + 1;
-				mbWriterUtility_BuildPathBack(pathBack, nDirLevels);
+				strcpy(result, filepathBaseRelative);
 			}
 			else
 			{
-				pathBack[0] = '\0';
+				const char* pathFromBaseToOutDir = normalisedMakeOutputDirAbs + baseDirLength + 1;
+				int nDirLevels = mbWriterUtility_GetNumDirLevels(pathFromBaseToOutDir) + 1;
+				//Path back from make output dir to base dir
+				char pathBack[MB_MAX_PATH];
+				mbWriterUtility_BuildPathBack(pathBack, nDirLevels);
+				sprintf(result, "%s%s", pathBack, filepathBaseRelative);
 			}
-			const char* filepathBaseRelative = normalisedFilepathAbs + baseDirLength + 1;
-			sprintf(result, "%s%s", pathBack, filepathBaseRelative);
 		}
 		else
 		{

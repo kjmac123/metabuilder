@@ -17,6 +17,10 @@ g_fileTypeMap["hpp"]		= "ClInclude"
 g_fileTypeMap["inl"]		= "ClInclude"
 g_fileTypeMap["rc"]			= "ResourceCompile"
 
+function MSVCGetProjSlnOutputDir()
+	return mbwriter.global.makeoutputdirabs
+end
+
 function MSVCGetFileMappingType(filepath)
 	local fileType = nil
 
@@ -43,6 +47,7 @@ function MSVCInitFolder(folderList, path_, filename)
 		pathComponents = split(path, "\\")
 		table.insert(pathComponents, 1, "")
 	end
+	--print(inspect(pathComponents))
 
 	local currentPath = ""
 	local currentParentID = g_mainGroupID
@@ -134,13 +139,14 @@ function MSVCBuildFileGroups(currentTarget)
 
 	for i = 1, #currentTarget.allsourcefiles do
 		local mbNormalisedPath = currentTarget.allsourcefiles[i]
+		local winNormFilepath = mbwriter.normalisewindowsfilepath(mbNormalisedPath)
 
-		local fIncludedInBuild = fileIncludedInBuild[f]
+		local fIncludedInBuild = fileIncludedInBuild[mbNormalisedPath]
 		if fIncludedInBuild == nil then
 			fIncludedInBuild = false
 		end
 
-		fileType = MSVCGetFileMappingType(mbNormalisedPath)
+		fileType = MSVCGetFileMappingType(winNormFilepath)
 
 		local group = groupMap[fileType]
 		if group == nil then
@@ -149,6 +155,8 @@ function MSVCBuildFileGroups(currentTarget)
 			group = newGroup
 		end
 
+		print("TEST " .. mbNormalisedPath .. " -> " .. mbwriter.getoutputrelfilepath(mbNormalisedPath))
+
 		local fileInfo = {
 			winNormInputRelativeDir	= nil,
 			shortName								= nil,
@@ -156,7 +164,7 @@ function MSVCBuildFileGroups(currentTarget)
 			includedInBuild = fIncludedInBuild,
 			winNormOutputRelativeFilename = mbwriter.normalisewindowsfilepath(mbwriter.getoutputrelfilepath(mbNormalisedPath))
 		}
-		fileInfo.winNormInputRelativeDir, fileInfo.shortName, fileInfo.ext = mbfilepath.decompose(fileInfo.winNormOutputRelativeFilename)
+		fileInfo.winNormInputRelativeDir, fileInfo.shortName, fileInfo.ext = mbfilepath.decompose(winNormFilepath)
 
 		if g_enableHLSL == false then
 			if fileInfo.ext == "hlsl" then
@@ -574,6 +582,7 @@ function MSVCWriterVcxProjFilters(currentTarget, groups)
 	file:write("  <ItemGroup>\n")
 	for _, group in ipairs(groups) do
 		for i = 1, #group.fileInfo do
+			print(inspect(group.fileInfo[i]))
 			file:write("   <" .. group.name .. " Include=\"" .. group.fileInfo[i].winNormOutputRelativeFilename .. "\">\n")
 			file:write("      <Filter>" .. MSVCFormatFilterPath(group.fileInfo[i].winNormInputRelativeDir) .. "</Filter>\n")
 			file:write("   </" .. group.name .. ">\n")

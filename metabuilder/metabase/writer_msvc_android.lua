@@ -12,10 +12,6 @@ local g_androidBuildMagicFiles = {}
 g_androidBuildMagicFiles["AndroidManifest.xml"]		= "AndroidBuild"
 g_androidBuildMagicFiles["res/values/strings.xml"]	= "AndroidBuild"
 
-function MSVCGetProjSlnOutputDir()
-	return mbwriter.global.makeoutputdirbaseabs
-end
-
 function MSVCRootHook(file)
 	file:write("  <PropertyGroup Label=\"NsightTegraProject\">\n")
     file:write("    <NsightTegraProjectRevisionNumber>9</NsightTegraProjectRevisionNumber>\n")

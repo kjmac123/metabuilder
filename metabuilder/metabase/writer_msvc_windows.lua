@@ -9,10 +9,6 @@ local g_windowsFileTypeMap = {}
 	g_windowsFileTypeMap["psh"]		= "CompilerShader"
 	g_windowsFileTypeMap["rc"]		= "ResourceCompile"
 
-function MSVCGetProjSlnOutputDir()
-	return mbwriter.global.makeoutputdirbaseabs
-end
-
 function MSVCGetFileMappingTypeHook(filepath)
 	local ext = mbfilepath.getextension(filepath)
 	return g_windowsFileTypeMap[ext]

@@ -299,6 +299,7 @@ static int luaFuncGlobalImport(lua_State* lua)
 
 	std::string requireFile;
 	mbLuaToStringExpandMacros(&requireFile, b, lua, 1);
+	//MB_LOGINFO("DOFILE %s", requireFile.c_str());
 	mbLuaDoFile(lua, requireFile.c_str(), NULL);
     return 0;
 }
