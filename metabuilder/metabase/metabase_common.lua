@@ -4,8 +4,8 @@ defines
 }
 
 targetfilename	"#{MB_TARGET_NAME}"
-targetintdir	"int/#{MB_CONFIG_NAME}"
-targetoutdir	"out/#{MB_CONFIG_NAME}"
+targetintdir	"int/#{MB_TARGET_NAME}/#{MB_CONFIG_NAME}"
+targetoutdir	"out/#{MB_TARGET_NAME}/#{MB_CONFIG_NAME}"
 
 config "Debug"
 	defines 
