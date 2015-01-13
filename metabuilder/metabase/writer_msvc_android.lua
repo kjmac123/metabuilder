@@ -13,12 +13,7 @@ g_androidBuildMagicFiles["AndroidManifest.xml"]		= "AndroidBuild"
 g_androidBuildMagicFiles["res/values/strings.xml"]	= "AndroidBuild"
 
 function MSVCGetTargetFilenameHook(currentTarget, filename)
-	
-	if currentTarget.targettype == "staticlib" or currentTarget.targettype == "module" then
-		return "lib" .. filename
-	end
-
-	return filename
+	return "lib" .. filename
 end
 
 function MSVCRootHook(file)
