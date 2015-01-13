@@ -12,6 +12,15 @@ local g_androidBuildMagicFiles = {}
 g_androidBuildMagicFiles["AndroidManifest.xml"]		= "AndroidBuild"
 g_androidBuildMagicFiles["res/values/strings.xml"]	= "AndroidBuild"
 
+function MSVCGetTargetFilenameHook(currentTarget, filename)
+	
+	if currentTarget.targettype == "staticlib" or currentTarget.targettype == "module" then
+		return "lib" .. filename
+	end
+
+	return filename
+end
+
 function MSVCRootHook(file)
 	file:write("  <PropertyGroup Label=\"NsightTegraProject\">\n")
     file:write("    <NsightTegraProjectRevisionNumber>9</NsightTegraProjectRevisionNumber>\n")

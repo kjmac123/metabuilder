@@ -322,9 +322,14 @@ function MSVCWriteVcxProj(currentTarget, groups)
 			file:write(mbwriter.getoutputrelfilepath(config.exedirs[jExeDir]) .. ";")
 		end
 		file:write("$(ExecutablePath)</ExecutablePath>\n")
-	    file:write("    <IntDir>"		.. mbwriter.normalisewindowsfilepath(config.targetintdir)	.. "</IntDir>\n")
-	    file:write("    <OutDir>"		.. mbwriter.normalisewindowsfilepath(config.targetoutdir)	.. "</OutDir>\n")
-	    file:write("    <TargetName>"	.. mbwriter.normalisewindowsfilepath(config.targetfilename)	.. "</TargetName>\n")
+
+		local targetFilename = config.targetfilename
+		if MSVCGetTargetFilenameHook then
+			targetFilename = MSVCGetTargetFilenameHook(currentTarget, mbwriter.normalisewindowsfilepath(config.targetfilename))
+		end
+	    file:write("    <IntDir>"		.. mbwriter.normalisewindowsfilepath(config.targetintdir) .. "\\</IntDir>\n")
+	    file:write("    <OutDir>"		.. mbwriter.normalisewindowsfilepath(config.targetoutdir)	.. "\\</OutDir>\n")
+	    file:write("    <TargetName>"	.. targetFilename .. "</TargetName>\n")
 
 		MSVCWriteVcxProjPropertyGroupOptions(file, config.options.msvcpropertygroup)
 		MSVCWriteVcxProjRawXMLBlocks(file, config.options.msvcpropertygrouprawxml)
