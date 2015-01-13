@@ -60,7 +60,7 @@ class Block;
 class Metabase;
 class Solution;
 class ConfigParam;
-class MakeSetup;
+//class MakeSetup;
 class MakeGlobal;
 class PlatformParam;
 class ParamBlock;
@@ -104,12 +104,10 @@ public:
     std::string				generator;
 	std::string				metabaseDirAbs;
 	std::string				makeOutputTopDirAbs;
-    std::string				intDir;
-    std::string				outDir;
 	E_LineEndingStyle		lineEndingStyle;
 	
 	CmdSetup				cmdSetup;
-	MakeSetup*				makeSetup;
+	//MakeSetup*				makeSetup;
 	MakeGlobal*				makeGlobal;
 	
 	bool					isProcessingPrimaryMakefile;
@@ -140,6 +138,8 @@ public:
 	MetaBuilderContext();
 	~MetaBuilderContext();
 	
+	void		PushNewMetabase();
+
     Block*		ActiveBlock() const;
     void		PushActiveBlock(Block* block);
     void		PopActiveBlock();
@@ -241,7 +241,7 @@ bool				mbCreateDirChain(const char* osDir_);
 void				mbDebugDumpKeyValueGroups(const std::map<std::string, KeyValueMap>& kvGroups);
 void				mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups);
 
-void				mbExpandMacros(std::string* result, const std::map<std::string, std::string>& macroMap, const char* str);
+void				mbExpandMacros(std::string* result, const KeyValueMap& macroMap, const char* str);
 void				mbExpandMacros(std::string* result, Block* block, const char* str);
 const char*			mbLuaToStringExpandMacros(std::string* result, Block* block, lua_State* l, int stackPos);
 

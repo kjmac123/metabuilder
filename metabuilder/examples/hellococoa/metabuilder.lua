@@ -1,8 +1,3 @@
-makesetup ""
-	intdir "int"
-	outdir "out"	
-makesetup_end()
-
 solution "hellococoa"
 
 	target "hellococoa"

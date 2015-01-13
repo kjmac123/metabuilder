@@ -3,6 +3,8 @@
 
 #include "block.h"
 
+/*
+
 class MakeSetup : public Block
 {
 public:
@@ -19,5 +21,5 @@ protected:
 };
 
 void mbMakeSetupLuaRegister(lua_State* lua);
-
+*/
 #endif

@@ -19,6 +19,12 @@ bool ConfigParam::IsA(E_BlockType t) const
 	return t == E_BlockType_ConfigParam;
 }
 
+void ConfigParam::SetName(const char* name)
+{
+	ParamBlock::SetName(name);
+	SetMacro(MACRO_SEMANTIC_CONFIG_NAME, name);
+}
+
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 static int luaFuncConfig(lua_State* l)

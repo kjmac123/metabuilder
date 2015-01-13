@@ -25,6 +25,12 @@ void Target::Process()
 	Block::Process();
 }
 
+void Target::SetName(const char* name)
+{
+	MakeBlock::SetName(name);
+	SetMacro(MACRO_SEMANTIC_TARGET_NAME, name);
+}
+
 void Target::FlattenFiles(StringVector* result, const char* platformName) const
 {
 	FlattenStringGroup(result, STRINGGROUP_FILES, platformName);

@@ -36,6 +36,21 @@ void Solution::Process()
 
 static int luaFuncSolution(lua_State* l)
 {
+	//Finalise processing of metabase setup, which must happen before we process the solution.
+	{
+		AppState* appState = mbGetAppState();
+		if (appState->isProcessingPrimaryMakefile)
+		{
+			appState->ProcessSetup();
+
+			std::string metabase = appState->cmdSetup._generator + ".lua";
+			//Process metabase
+			mbLuaDoFile(l, metabase.c_str(), NULL);
+
+			appState->ProcessGlobal();
+		}
+	}
+
 	Block* activeBlock = mbGetActiveContext()->ActiveBlock();
 	assert(!activeBlock);
 

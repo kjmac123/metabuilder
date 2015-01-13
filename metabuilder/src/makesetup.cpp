@@ -1,5 +1,5 @@
 #include "metabuilder_pch.h"
-
+/*
 #include "makesetup.h"
 
 MakeSetup::MakeSetup()
@@ -43,17 +43,6 @@ static int luaFuncMakeSetupEnd(lua_State* l)
 {
 	mbGetActiveContext()->activeBlockStack.pop();
 
-	AppState* appState = mbGetAppState();
-	if (appState->isProcessingPrimaryMakefile)
-	{
-		appState->ProcessSetup();
-		
-		std::string metabase = appState->cmdSetup._generator + ".lua";
-		//Process metabase
-		mbLuaDoFile(l, metabase.c_str(), NULL);
-
-		appState->ProcessGlobal();
-	}
 	return 0;
 }
 
@@ -104,3 +93,5 @@ void mbMakeSetupLuaRegister(lua_State* l)
     lua_pushcfunction(l, luaFuncMakeSetupOutputDir);
     lua_setglobal(l, "outdir");
 }
+
+*/

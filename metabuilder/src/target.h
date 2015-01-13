@@ -18,6 +18,8 @@ public:
 	virtual bool		IsA(E_BlockType t) const;	
 	
 	virtual void		Process();
+
+	virtual void		SetName(const char* name);
 	
 	//Config and platform specific
 	void				Flatten(FlatConfig* result, const char* platformName, const char* configName) const;

@@ -1,9 +1,3 @@
---setup output directories
-makesetup ""
-	intdir "int"
-	outdir "out"	
-makesetup_end()
-
 solution "metabuilder"
 
 	target "metabuilder"
@@ -36,7 +30,6 @@ solution "metabuilder"
 			"src/luafile.cpp",
 			"src/main.cpp",
 			"src/makeglobal.cpp",
-			"src/makesetup.cpp",
 			"src/metabase.cpp",
 			"src/metabuilder_pch.cpp",
 			"src/platformparam.cpp",

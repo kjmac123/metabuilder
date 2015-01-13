@@ -83,23 +83,24 @@ mbRandomContext::mbRandomContext()
 AppState::AppState()
 {
 	isProcessingPrimaryMakefile = false;
-	makeSetup = NULL;
+//	makeSetup = NULL;
 }
 	
 AppState::~AppState()
 {
-	delete makeSetup;
+	//delete makeSetup;
 }
 
 void AppState::ProcessSetup()
 {
+	/*
 	if (makeSetup)
 	{
 		metabaseDirAbs = makeSetup->metabaseDir;
 		intDir = makeSetup->intDir;
 		outDir = makeSetup->outDir;
 	}
-	
+	*/
 	generator = cmdSetup._generator;
 
 	//cmdline overrides
@@ -115,7 +116,7 @@ void AppState::ProcessSetup()
 	mainMetaMakeFileAbs = Platform::FileGetAbsPath(cmdSetup._inputFile);
 	metabaseDirAbs = Platform::FileGetAbsPath(cmdSetup._metabaseDir);
 	makeOutputTopDirAbs = Platform::FileGetAbsPath(cmdSetup._makeOutputTopDir);
-
+	/*
 	//Set defaults if required.
 	if (intDir.size() == 0)
 	{
@@ -125,7 +126,7 @@ void AppState::ProcessSetup()
 	{
 		outDir = "out";
 	}
-
+	*/
 	lineEndingStyle = E_LineEndingStyle_Default;
 	if (cmdSetup.lineEndingStyle.length() > 0)
 	{
@@ -982,47 +983,106 @@ void mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups)
 	}
 }
 
-void mbExpandMacros(std::string* result, const std::map<std::string, std::string>& macroMap, const char* str)
+static int mbExpandSingleMacro(char* result, const KeyValueMap& macroMap, const char* macroKey)
 {
-	char macro[1024];
+	int length = 0;
 
-	*result = str;
-
-	//Only process each macro if we know our string contains at least one.
-	const char* macroStart = strstr(str, "#{");
-	if (macroStart)
+	KeyValueMap::const_iterator it = macroMap.find(macroKey);
+	if (it != macroMap.end())
 	{
-		bool found = false;
-		for (std::map<std::string, std::string>::const_iterator it = macroMap.begin(); it != macroMap.end(); ++it)
+		const std::string& value = it->second;
+		memcpy(result, value.c_str(), value.length());
+		length = (int)value.length();
+	}
+
+	if (length == 0)
+	{
+		const char* envValue = getenv(macroKey);
+		if (envValue)
 		{
-			const std::string& key = it->first;
-			const std::string& value = it->second;
-
-			sprintf(macro, "#{%s}", key.c_str());
-
-			found = mbStringReplace(*result, macro, value);
-			if (found)
-				break;
-		}
-
-		if (!found)
-		{
-			macroStart += 2;
-			char key[1024];
-			const char* macroEnd = strstr(macroStart, "}");
-			int length = static_cast<int>(macroEnd - macroStart);
-
-			memcpy(key, macroStart, length);
-			key[length] = '\0';
-
-			const char* envValue = getenv(key);
-			if (envValue)
-			{
-				sprintf(macro, "#{%s}", key);
-				mbStringReplace(*result, macro, envValue);
-			}
+			length = (int)strlen(envValue);
+			memcpy(result, envValue, length);
 		}
 	}
+
+	if (length == 0)
+	{
+		length = sprintf(result, "#{%s}", macroKey);
+	}
+
+	result[length] = '\0';
+	return length;
+}
+
+void mbExpandMacros(std::string* result, const KeyValueMap& macroMap, const char* str)
+{
+	if (macroMap.size() == 0)
+	{
+		*result = str;
+		return;
+	}
+
+	char resultBuilderBuf[MB_MAX_STRING_BUFFER_SIZE];
+	char* resultCursor = resultBuilderBuf;
+	*resultCursor = '\0';
+
+	char currentMacroKey[MB_MAX_STRING_BUFFER_SIZE];
+	char* currentMacroCursor = NULL;
+
+	int bracketDepth = 0;
+
+	const char* srcCursorStart = str;
+	for (const char* srcCursor = srcCursorStart; *srcCursor; ++srcCursor)
+	{
+		if (srcCursor != str && *(srcCursor - 1) == '#' && *srcCursor == '{')
+		{
+			++bracketDepth;
+
+			//Skip bracket and rewind result cursor to erase #
+			++srcCursor;
+			resultCursor--;
+			*resultCursor = '\0';
+
+			//Begin macro cursor
+			currentMacroCursor = currentMacroKey;
+
+			//start reading the macro key.
+			for (; *srcCursor; ++srcCursor)
+			{
+				if (*srcCursor == '}')
+				{
+					--bracketDepth;
+					//Terminate current macro.
+					*currentMacroCursor = '\0';
+
+					//Perform replacement
+					int expandedMacroLength = mbExpandSingleMacro(resultCursor, macroMap, currentMacroKey);
+					resultCursor += expandedMacroLength;
+
+					currentMacroCursor = NULL;
+					break;
+				}
+				else
+				{
+					*currentMacroCursor++ = *srcCursor;
+				}
+			}
+		}
+		else
+		{
+			*resultCursor++ = *srcCursor;
+		}
+	}
+	
+
+	if (bracketDepth != 0)
+	{
+		MB_LOGERROR("Error during macro expansion for string %s", str);
+		mbExitError();
+	}
+
+	*resultCursor = '\0';
+	*result = resultBuilderBuf;
 }
 
 void mbExpandMacros(std::string* result, Block* block, const char* str)

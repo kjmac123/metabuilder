@@ -54,7 +54,7 @@ void _mbLogDebugfLF(const char* fmt, ...);
 #define MB_SECONDS_TO_MILLISECONDS          1000
 #define MB_SECONDS_TO_NANOSECONDS           1000000000
 
-#define MB_GENERAL_STRING_BUFFER_SIZE		(2*1024)
+#define MB_MAX_STRING_BUFFER_SIZE			(16*1024)
 #define MB_LUAMODULE_MAX_FUNCTIONS			100
 #define MB_ASSERT							assert
 

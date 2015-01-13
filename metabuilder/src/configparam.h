@@ -10,6 +10,8 @@ public:
 	
     virtual E_BlockType		GetType() const;
 	virtual bool			IsA(E_BlockType t) const;
+
+	virtual void			SetName(const char* name);
 	
 protected:
 };

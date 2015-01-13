@@ -137,7 +137,7 @@ int main(int argc, const char * argv[])
 	MB_LOGSETTIMEENABLED(true);
 
 	AppState* appState = mbGetAppState();
-	appState->makeSetup = new MakeSetup();
+//	appState->makeSetup = new MakeSetup();
 	appState->makeGlobal = new MakeGlobal();
 
 	ParseArgs(&appState->cmdSetup, argc, (const char**)argv);
@@ -151,7 +151,8 @@ int main(int argc, const char * argv[])
 	
 	// We'll add to this array during iteration
 	const StringVector& makeFiles = mbGetMakeFiles();
-	mbPushDir(appState->makeSetup->metabaseDir);
+//	mbPushDir(appState->makeSetup->metabaseDir);
+	mbPushDir("");
 			
 	appState->isProcessingPrimaryMakefile = true;
 	for (int i = 0; i < (int)makeFiles.size(); ++i)
@@ -172,7 +173,7 @@ int main(int argc, const char * argv[])
 
 			LuaModuleFunctions luaGlobalFunctions;
 
-			mbMakeSetupLuaRegister(l);
+//			mbMakeSetupLuaRegister(l);
 			mbMakeGlobalLuaRegister(l);
 			mbCommonLuaRegister(l, &luaGlobalFunctions);
 			mbBlockLuaRegister(l);

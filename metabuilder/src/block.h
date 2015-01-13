@@ -11,6 +11,9 @@
 #define STRINGGROUP_RESOURCES				"resources"
 #define STRINGGROUP_FRAMEWORKS				"frameworks"
 
+#define MACRO_SEMANTIC_TARGET_NAME			"MB_TARGET_NAME"
+#define MACRO_SEMANTIC_CONFIG_NAME			"MB_CONFIG_NAME"
+
 const char**	mbGetStringGroupNames();
 void			mbBlockLuaRegister(lua_State* l);
 
@@ -21,7 +24,7 @@ struct FlatConfig
 	std::map<std::string, StringVector>	stringGroups;
 	std::map<std::string, KeyValueMap>	options;
 	
-	void Init();
+	void Init(const char* configName);
 	void Dump();
 
 private:
@@ -44,7 +47,7 @@ public:
 	Block*						GetParent();
 	const Block*				GetParent() const;
 
-	void						SetName(const char* name);
+	virtual void				SetName(const char* name);
 	const std::string&			GetName() const;
 	
 	const char*					GetParentConfig() const;
@@ -62,6 +65,7 @@ public:
 
 	void						AppendOption(const std::string& group, const std::string& key, const std::string& value, char seperator);
 	void						SetOption(const std::string& group, const std::string& key, const std::string& value);
+	const char*					GetOption(const std::string& group, const std::string& key) const;
 	void						GetOptions(std::map<std::string, KeyValueMap>* result) const;
 	
 	ConfigParam*				AcquireConfigParam(const char* name);
@@ -73,6 +77,10 @@ public:
 	
 	const std::vector<ParamBlock*>&
 								GetParamBlocks() const;
+
+	void						SetTargetOutDir(const char* targetOutDir);
+	void						SetTargetIntDir(const char* targetIntDir);
+	void						SetTargetFilename(const char* targetFilename);
 
 	void						SetMacro(const char* key, const char* value);
 	const KeyValueMap&			FlattenMacros() const;

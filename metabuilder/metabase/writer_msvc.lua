@@ -47,7 +47,6 @@ function MSVCInitFolder(folderList, path_, filename)
 		pathComponents = split(path, "\\")
 		table.insert(pathComponents, 1, "")
 	end
-	--print(inspect(pathComponents))
 
 	local currentPath = ""
 	local currentParentID = g_mainGroupID
@@ -155,7 +154,7 @@ function MSVCBuildFileGroups(currentTarget)
 			group = newGroup
 		end
 
-		print("TEST " .. mbNormalisedPath .. " -> " .. mbwriter.getoutputrelfilepath(mbNormalisedPath))
+		--print(mbNormalisedPath .. " -> " .. mbwriter.getoutputrelfilepath(mbNormalisedPath))
 
 		local fileInfo = {
 			winNormInputRelativeDir	= nil,
@@ -272,6 +271,7 @@ function MSVCWriteVcxProj(currentTarget, groups)
 
 	for iConfig = 1, #currentTarget.configs do
 		local config = currentTarget.configs[iConfig]
+				
 		file:write("    <ProjectConfiguration Include=\"" .. config.name .. "|" .. msvcPlatform .. "\">\n")
 		file:write("      <Configuration>" .. config.name .. "</Configuration>\n")
 		file:write("      <Platform>" .. msvcPlatform .. "</Platform>\n")
@@ -322,9 +322,9 @@ function MSVCWriteVcxProj(currentTarget, groups)
 			file:write(mbwriter.getoutputrelfilepath(config.exedirs[jExeDir]) .. ";")
 		end
 		file:write("$(ExecutablePath)</ExecutablePath>\n")
-	    file:write("    <IntDir>" .. mbwriter.normalisewindowsfilepath(mbwriter.global.intdir) .. "\\$(ProjectName)\\$(Configuration)\\</IntDir>\n")
-	    file:write("    <OutDir>" .. mbwriter.normalisewindowsfilepath(mbwriter.global.outdir) .. "\\$(ProjectName)\\</OutDir>\n")
-	    file:write("    <TargetName>$(ProjectName)_$(Configuration)</TargetName>\n")
+	    file:write("    <IntDir>"		.. mbwriter.normalisewindowsfilepath(config.targetintdir)	.. "</IntDir>\n")
+	    file:write("    <OutDir>"		.. mbwriter.normalisewindowsfilepath(config.targetoutdir)	.. "</OutDir>\n")
+	    file:write("    <TargetName>"	.. mbwriter.normalisewindowsfilepath(config.targetfilename)	.. "</TargetName>\n")
 
 		MSVCWriteVcxProjPropertyGroupOptions(file, config.options.msvcpropertygroup)
 		MSVCWriteVcxProjRawXMLBlocks(file, config.options.msvcpropertygrouprawxml)
@@ -582,7 +582,6 @@ function MSVCWriterVcxProjFilters(currentTarget, groups)
 	file:write("  <ItemGroup>\n")
 	for _, group in ipairs(groups) do
 		for i = 1, #group.fileInfo do
-			print(inspect(group.fileInfo[i]))
 			file:write("   <" .. group.name .. " Include=\"" .. group.fileInfo[i].winNormOutputRelativeFilename .. "\">\n")
 			file:write("      <Filter>" .. MSVCFormatFilterPath(group.fileInfo[i].winNormInputRelativeDir) .. "</Filter>\n")
 			file:write("   </" .. group.name .. ">\n")

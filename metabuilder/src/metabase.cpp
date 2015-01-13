@@ -50,13 +50,14 @@ static int luaFuncMetabaseEnd(lua_State* lua)
 
 static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
 {
-    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->GetType() != E_BlockType_Metabase)
-    {
-        MB_LOGERROR("must be within solution block");
-        mbExitError();
-    }
-    
-    Metabase* gen = (Metabase*)mbGetActiveContext()->ActiveBlock();
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (b != ctx->metabase)
+	{
+		MB_LOGERROR("must be within metabase block");
+		mbExitError();
+	}
+	Metabase* metabase = (Metabase*)b;
 	
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
@@ -64,8 +65,8 @@ static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-		gen->supportedPlatforms.push_back(std::string());
-		mbLuaToStringExpandMacros(&gen->supportedPlatforms.back(), gen, l, -1);
+		metabase->supportedPlatforms.push_back(std::string());
+		mbLuaToStringExpandMacros(&metabase->supportedPlatforms.back(), metabase, l, -1);
     }
 		
 	return 0;
@@ -73,17 +74,18 @@ static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
 
 static int luaFuncMetabaseWriter(lua_State* l)
 {
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (b != ctx->metabase)
+	{
+		MB_LOGERROR("must be within metabase block");
+		mbExitError();
+	}
+	Metabase* metabase = (Metabase*)b;
 
-    if (!mbGetActiveContext()->ActiveBlock() || mbGetActiveContext()->ActiveBlock()->GetType() != E_BlockType_Metabase)
-    {
-        MB_LOGERROR("must be within solution block");
-        mbExitError();
-    }
-    
-    Metabase* gen = (Metabase*)mbGetActiveContext()->ActiveBlock();
 	std::string writer;
-	mbLuaToStringExpandMacros(&writer, gen, l, 1);
-	gen->writerLua = writer;
+	mbLuaToStringExpandMacros(&writer, metabase, l, 1);
+	metabase->writerLua = writer;
 	
 	return 0;
 }

@@ -1,8 +1,3 @@
-makesetup ""
-	intdir "int"
-	outdir "out"	
-makesetup_end()
-
 solution "game_ios"
 
 	target "game_ios"

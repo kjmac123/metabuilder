@@ -233,6 +233,42 @@ static int luaFuncWriterSetMakeOutputDirAbs(lua_State* l)
 	return 0;
 }
 
+static void mbWriterSetOptionsInline(lua_State* l, const KeyValueMap& keyValueMap)
+{
+	for (KeyValueMap::const_iterator optionIt = keyValueMap.begin(); optionIt != keyValueMap.end(); ++optionIt)
+	{
+		const char* key = optionIt->first.c_str();
+		const char* value = optionIt->second.c_str();
+		lua_pushstring(l, value);
+		lua_setfield(l, -2, key);
+	}
+}
+
+static void mbWriterSetOptions(lua_State* l, const KeyValueMap& keyValueMap)
+{
+	int jOption = 0;
+	for (KeyValueMap::const_iterator optionIt = keyValueMap.begin(); optionIt != keyValueMap.end(); ++optionIt, ++jOption)
+	{
+		const char* key = optionIt->first.c_str();
+		const char* value = optionIt->second.c_str();
+
+		if (value[0] == '\0')
+		{
+			//No key/value pair
+			lua_pushstring(l, key);
+		}
+		else
+		{
+			//Key/value pair
+			char buf[4096];
+			sprintf(buf, "%s=%s", key, value);
+			lua_pushstring(l, buf);
+		}
+
+		lua_rawseti(l, -2, jOption + 1);
+	}
+}
+
 static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValueMap>& options)
 {
 	//	mbDebugDumpKeyValueGroups(options);
@@ -243,31 +279,16 @@ static void mbWriterSetOptions(lua_State* l, const std::map<std::string, KeyValu
 		for (std::map<std::string, KeyValueMap>::const_iterator optionGroupIt = options.begin(); optionGroupIt != options.end(); ++optionGroupIt, ++jOptionGroup)
 		{
 			const std::string& groupName = optionGroupIt->first;
-			const KeyValueMap& keyValueMap = optionGroupIt->second;
+			//Skip special internal groups.
+			if (groupName.length() > 1 && groupName[0] == '_' && groupName[1] == '_')
+			{
+				continue;
+			}
 
 			lua_createtable(l, 0, 0);
 			{
-				int jOption = 0;
-				for (KeyValueMap::const_iterator optionIt = keyValueMap.begin(); optionIt != keyValueMap.end(); ++optionIt, ++jOption)
-				{
-					const char* key = optionIt->first.c_str();
-					const char* value = optionIt->second.c_str();
-					
-					if (value[0] == '\0')
-					{
-						//No key/value pair
-						lua_pushstring(l, key);
-					}
-					else
-					{
-						//Key/value pair
-						char buf[4096];
-						sprintf(buf, "%s=%s", key, value);
-						lua_pushstring(l, buf);
-					}
-
-					lua_rawseti(l, -2, jOption+1);
-				}
+				const KeyValueMap& keyValueMap = optionGroupIt->second;
+				mbWriterSetOptions(l, keyValueMap);
 			}
 			lua_setfield(l, -2, groupName.c_str());
 		}
@@ -401,11 +422,13 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		lua_pushstring(l, ctx->currentMetaMakeDirAbs.c_str());
 		lua_setfield(l, -2, "currentmetamakedirabs");
 
+		/*
 		lua_pushstring(l, appState->intDir.c_str());
 		lua_setfield(l, -2, "intdir");
 
 		lua_pushstring(l, appState->outDir.c_str());
 		lua_setfield(l, -2, "outdir");
+		*/
 
 		{
 			char tmp[2];
@@ -514,7 +537,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 						mbRemoveDuplicates(&configNames);
 					}
 					
-					//Write out configs, with embedded expanded out data per SDK platform.
+					//Write out configs, with embedded expanded out data per platform.
 					lua_createtable(l, 0, 0);
 					{
 						for (int jConfig = 0; jConfig < (int)configNames.size(); ++jConfig)
@@ -526,11 +549,22 @@ void mbWriterDo(MetaBuilderContext* ctx)
 								const char* platformName = ctx->metabase->supportedPlatforms[kPlatform].c_str();
 								target->Flatten(&flatConfig, platformName, configName);
 
-								flatConfig.Init();
+								flatConfig.Init(configName);
 							}
 							
 							lua_createtable(l, 0, 0);
 							mbWriterWriteConfigTable(l, flatConfig);
+
+							//Formalised config specific options
+							{
+								std::map<std::string, KeyValueMap>::iterator it = flatConfig.options.find("__config");
+								if (it != flatConfig.options.end())
+								{
+									const KeyValueMap& keyValueMap = it->second;
+									mbWriterSetOptionsInline(l, keyValueMap);
+								}
+							}
+
 							lua_rawseti(l, -2, jConfig+1);
 						}
 					}
@@ -654,6 +688,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 						const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
 						target->Flatten(&flatTarget, platformName, NULL);
 					}
+
 					mbWriterSetOptions(l, flatTarget.options);
 				}
 			}

@@ -125,65 +125,65 @@ static void ProcessWildcards(StringVector* result, const StringVector& input)
 
 static int luaFuncSetOption(lua_State* l)
 {
-	Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
-    {
-        MB_LOGERROR("must be within block");
-        mbExitError();
-    }
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
 	
 	std::string group, key, value;
-	mbLuaToStringExpandMacros(&group, block, l, 1);
-	mbLuaToStringExpandMacros(&key, block, l, 2);
-	mbLuaToStringExpandMacros(&value, block, l, 3);
+	mbLuaToStringExpandMacros(&group, b, l, 1);
+	mbLuaToStringExpandMacros(&key, b, l, 2);
+	mbLuaToStringExpandMacros(&value, b, l, 3);
 
-	block->SetOption(group, key, value);
+	b->SetOption(group, key, value);
 	return 0;
 }
 
 static int luaFuncSetMacro(lua_State* l)
 {
-	Block* block = mbGetActiveContext()->ActiveBlock();
-	if (!block)
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
 	{
-		MB_LOGERROR("must be within block");
+		MB_LOGERROR("must be within a block");
 		mbExitError();
 	}
 
 	std::string key, value;
-	mbLuaToStringExpandMacros(&key, block, l, 1);
-	mbLuaToStringExpandMacros(&value, block, l, 2);
+	mbLuaToStringExpandMacros(&key, b, l, 1);
+	mbLuaToStringExpandMacros(&value, b, l, 2);
 
-	block->SetMacro(key.c_str(), value.c_str());
+	b->SetMacro(key.c_str(), value.c_str());
 	return 0;
 }
 
 static int luaFuncAddOption(lua_State* l)
 {
-	Block* block = mbGetActiveContext()->ActiveBlock();
-	if (!block)
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
 	{
-		MB_LOGERROR("must be within block");
+		MB_LOGERROR("must be within a block");
 		mbExitError();
 	}
 
 	std::string group, key, value;
-	mbLuaToStringExpandMacros(&group, block, l, 1);
-	mbLuaToStringExpandMacros(&key, block, l, 2);
-	mbLuaToStringExpandMacros(&value, block, l, 3);
+	mbLuaToStringExpandMacros(&group, b, l, 1);
+	mbLuaToStringExpandMacros(&key, b, l, 2);
+	mbLuaToStringExpandMacros(&value, b, l, 3);
 
-	block->AppendOption(group, key, value, ' ');
+	b->AppendOption(group, key, value, ' ');
 	return 0;
 }
 
 static int luaFuncDefines(lua_State* l)
 {
-    Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
-    {
-        MB_LOGERROR("must be set within a block!");
-        mbExitError();
-    }
+    Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
     
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
@@ -193,21 +193,21 @@ static int luaFuncDefines(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
-    block->AddDefines(strings);
+    b->AddDefines(strings);
     
     return 0;
 }
 
 static int luaFuncLibs(lua_State* l)
 {
-	Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
-    {
-        MB_LOGERROR("must be within block");
-        mbExitError();
-    }
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
 	
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
@@ -217,22 +217,21 @@ static int luaFuncLibs(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
-	block->AddLibs(strings);
+	b->AddLibs(strings);
 		
     return 0;
 }
 
 static int luaFuncIncludeDir(lua_State* l)
 {
-	Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
+	Block* b = mbGetActiveContext()->ActiveBlock();
+    if (!b)
     {
         MB_LOGERROR("must be within block");
         mbExitError();
     }
-
 	
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
@@ -242,21 +241,21 @@ static int luaFuncIncludeDir(lua_State* l)
     {
 		lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
-	block->AddIncludeDirs(strings);
+	b->AddIncludeDirs(strings);
 		
     return 0;
 }
 
 static int luaFuncLibDir(lua_State* l)
 {
-	Block* block = mbGetActiveContext()->ActiveBlock();
-    if (!block)
-    {
-        MB_LOGERROR("must be within block");
-        mbExitError();
-    }
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
 	
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
@@ -266,21 +265,21 @@ static int luaFuncLibDir(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
-	block->AddLibDirs(strings);
+	b->AddLibDirs(strings);
 		
     return 0;
 }
 
 static int luaFuncExeDirs(lua_State* l)
 {
-	Block* block = mbGetActiveContext()->ActiveBlock();	
-    if (!block)
-    {
-        MB_LOGERROR("must be within block");
-        mbExitError();
-    }
+	Block* b = mbGetActiveContext()->ActiveBlock();	
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
 	
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
@@ -290,9 +289,9 @@ static int luaFuncExeDirs(lua_State* l)
     {
         lua_rawgeti(l, 1, i);
 		strings.push_back(std::string());
-		mbLuaToStringExpandMacros(&strings.back(), block, l, -1);
+		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
-	block->AddExeDirs(strings);
+	b->AddExeDirs(strings);
 		
     return 0;
 }
@@ -300,7 +299,12 @@ static int luaFuncExeDirs(lua_State* l)
 static int luaFuncFiles(lua_State* l)
 {
     Block* b = mbGetActiveContext()->ActiveBlock();
-	
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
+
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
@@ -322,7 +326,12 @@ static int luaFuncFiles(lua_State* l)
 static int luaFuncNoPchFiles(lua_State* l)
 {
     Block* b = mbGetActiveContext()->ActiveBlock();
-	
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
+
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
@@ -344,7 +353,12 @@ static int luaFuncNoPchFiles(lua_State* l)
 static int luaFuncFrameworks(lua_State* l)
 {
     Block* b = mbGetActiveContext()->ActiveBlock();
-	
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
+
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
@@ -364,6 +378,11 @@ static int luaFuncFrameworks(lua_State* l)
 static int luaFuncResources(lua_State* l)
 {
     Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
 	
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
@@ -382,54 +401,89 @@ static int luaFuncResources(lua_State* l)
     return 0;
 }
 
+static int luaFuncBlockTargetIntermediateDir(lua_State* l)
+{
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
+
+	std::string intermediateDir;
+	mbLuaToStringExpandMacros(&intermediateDir, b, l, 1);
+
+	b->SetTargetIntDir(intermediateDir.c_str());
+	return 0;
+}
+
+static int luaFuncBlockTargetOutputDir(lua_State* l)
+{
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
+
+	std::string outputDir;
+	mbLuaToStringExpandMacros(&outputDir, b, l, 1);
+
+	b->SetTargetOutDir(outputDir.c_str());
+	return 0;
+}
+
+static int luaFuncBlockTargetFilename(lua_State* l)
+{
+	MetaBuilderContext* ctx = mbGetActiveContext();
+	Block* b = mbGetActiveContext()->ActiveBlock();
+	if (!b)
+	{
+		MB_LOGERROR("must be within a block");
+		mbExitError();
+	}
+
+	std::string targetFilename;
+	mbLuaToStringExpandMacros(&targetFilename, b, l, 1);
+
+	b->SetTargetFilename(targetFilename.c_str());
+	return 0;
+}
+
 const char** mbGetStringGroupNames()
 {
 	return g_stringGroups;
 }
 
-void mbBlockLuaRegister(lua_State* l)
-{
-    lua_pushcfunction(l, luaFuncAddOption);
-    lua_setglobal(l, "addoption");
-	
-	lua_pushcfunction(l, luaFuncSetOption);
-	lua_setglobal(l, "option");
-
-	lua_pushcfunction(l, luaFuncSetMacro);
-	lua_setglobal(l, "macro");
-	
-	lua_pushcfunction(l, luaFuncDefines);
-    lua_setglobal(l, "defines");
-	
-    lua_pushcfunction(l, luaFuncIncludeDir);
-    lua_setglobal(l, "includedirs");
-
-    lua_pushcfunction(l, luaFuncLibDir);
-    lua_setglobal(l, "libdirs");
-	
-    lua_pushcfunction(l, luaFuncLibs);
-    lua_setglobal(l, "libs");
-
-    lua_pushcfunction(l, luaFuncExeDirs);
-    lua_setglobal(l, "exedirs");
-	
-    lua_pushcfunction(l, luaFuncFiles);
-    lua_setglobal(l, "files");
-
-    lua_pushcfunction(l, luaFuncNoPchFiles);
-    lua_setglobal(l, "nopchfiles");
-
-    lua_pushcfunction(l, luaFuncFrameworks);
-    lua_setglobal(l, "frameworks");
-
-    lua_pushcfunction(l, luaFuncResources);
-    lua_setglobal(l, "resources");
-}
-
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-void FlatConfig::Init()
+void FlatConfig::Init(const char* configName)
 {
+	std::string macroGroupName = "__macros";
+	KeyValueMap* macroMap = NULL;
+	{
+		std::map<std::string, KeyValueMap>::iterator it = options.find(macroGroupName);
+		if (it == options.end())
+			return;
+
+		macroMap = &it->second;
+	}
+
+	for (std::map<std::string, KeyValueMap>::iterator groupIt = options.begin(); groupIt != options.end(); ++groupIt)
+	{
+		if (groupIt->first == macroGroupName)
+			continue;
+
+		KeyValueMap& kvMap = groupIt->second;
+		for (KeyValueMap::iterator kvIt = kvMap.begin(); kvIt != kvMap.end(); ++kvIt)
+		{
+			std::string& value = kvIt->second;
+			std::string tmp = value;
+			mbExpandMacros(&value, *macroMap, tmp.c_str());
+		}
+	}
 }
 
 void FlatConfig::Dump()
@@ -698,6 +752,21 @@ void Block::GetOptions(std::map<std::string, KeyValueMap>* result) const
 	mbMergeOptions(result, m_keyValueGroups);
 }
 
+void Block::SetTargetOutDir(const char* targetOutDir)
+{
+	SetOption("__config", "targetoutdir", targetOutDir);
+}
+
+void Block::SetTargetIntDir(const char* targetIntDir)
+{
+	SetOption("__config", "targetintdir", targetIntDir);
+}
+
+void Block::SetTargetFilename(const char* targetFilename)
+{
+	SetOption("__config", "targetfilename", targetFilename);
+}
+
 void Block::SetMacro(const char* key, const char* value)
 {
 	SetOption("__macros", key, value);
@@ -746,20 +815,20 @@ ConfigParam* Block::AcquireConfigParam(const char* configName)
 
 	config = new ConfigParam();
 	AddChild(config);
-    config->m_name = configName;
+    config->SetName(configName);
 	return config;
 }
 
 PlatformParam* Block::AcquirePlatformParam(const char* configName)
 {
-	PlatformParam* config = (PlatformParam*)GetParam(E_BlockType_PlatformParam, configName);
-	if (config)
-		return config;
+	PlatformParam* platform = (PlatformParam*)GetParam(E_BlockType_PlatformParam, configName);
+	if (platform)
+		return platform;
 
-	config = new PlatformParam();
-	AddChild(config);
-    config->m_name = configName;
-	return config;
+	platform = new PlatformParam();
+	AddChild(platform);
+	platform->SetName(configName);
+	return platform;
 }
 
 //When a config or param is specified, then not only will this include content specific to that platform or config, but also all generic platform or config data
@@ -939,4 +1008,52 @@ void ParamBlock::Dump() const
 	Block::Dump();
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
+void mbBlockLuaRegister(lua_State* l)
+{
+	lua_pushcfunction(l, luaFuncAddOption);
+	lua_setglobal(l, "addoption");
+
+	lua_pushcfunction(l, luaFuncSetOption);
+	lua_setglobal(l, "option");
+
+	lua_pushcfunction(l, luaFuncSetMacro);
+	lua_setglobal(l, "macro");
+
+	lua_pushcfunction(l, luaFuncDefines);
+	lua_setglobal(l, "defines");
+
+	lua_pushcfunction(l, luaFuncIncludeDir);
+	lua_setglobal(l, "includedirs");
+
+	lua_pushcfunction(l, luaFuncLibDir);
+	lua_setglobal(l, "libdirs");
+
+	lua_pushcfunction(l, luaFuncLibs);
+	lua_setglobal(l, "libs");
+
+	lua_pushcfunction(l, luaFuncExeDirs);
+	lua_setglobal(l, "exedirs");
+
+	lua_pushcfunction(l, luaFuncFiles);
+	lua_setglobal(l, "files");
+
+	lua_pushcfunction(l, luaFuncNoPchFiles);
+	lua_setglobal(l, "nopchfiles");
+
+	lua_pushcfunction(l, luaFuncFrameworks);
+	lua_setglobal(l, "frameworks");
+
+	lua_pushcfunction(l, luaFuncResources);
+	lua_setglobal(l, "resources");
+
+	lua_pushcfunction(l, luaFuncBlockTargetIntermediateDir);
+	lua_setglobal(l, "targetintdir");
+
+	lua_pushcfunction(l, luaFuncBlockTargetOutputDir);
+	lua_setglobal(l, "targetoutdir");
+
+	lua_pushcfunction(l, luaFuncBlockTargetFilename);
+	lua_setglobal(l, "targetfilename");
+}

@@ -1,10 +1,3 @@
-makesetup ""
-	--subdir for intermediate files
-	intdir "int"
-	--subdir for final output files
-	outdir "out"	
-makesetup_end()
-
 solution "helloworld"
 
 	--Currently metabuilder supports only a single target per solution
