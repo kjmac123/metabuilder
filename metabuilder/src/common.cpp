@@ -4,7 +4,6 @@
 #include "dlmalloc.h"
 #endif
 
-#include "makesetup.h"
 #include "makeglobal.h"
 #include "metabase.h"
 

@@ -42,9 +42,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>out\$(ProjectName)\</OutDir>
-    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <IntDir>int\lua\Debug\</IntDir>
+    <OutDir>out\lua\Debug\</OutDir>
+    <TargetName>lua</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -72,9 +72,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>out\$(ProjectName)\</OutDir>
-    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <IntDir>int\lua\Release\</IntDir>
+    <OutDir>out\lua\Release\</OutDir>
+    <TargetName>lua</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -105,9 +105,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(DXSDK_DIR)Utilities\bin\x86;$(ExecutablePath)</ExecutablePath>
-    <IntDir>int\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>out\$(ProjectName)\</OutDir>
-    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <IntDir>int\lua\Master\</IntDir>
+    <OutDir>out\lua\Master\</OutDir>
+    <TargetName>lua</TargetName>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />

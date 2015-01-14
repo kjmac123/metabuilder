@@ -8,7 +8,6 @@
 #include "solution.h"
 #include "configparam.h"
 #include "metabase.h"
-#include "makesetup.h"
 #include "makeglobal.h"
 #include "luafile.h"
 

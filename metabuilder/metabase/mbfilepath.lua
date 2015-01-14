@@ -87,6 +87,10 @@ function module.removeextension(filepath)
 	local path, filename, ext = module.decompose(filepath)
 
 	return path .. filename
-end	
+end
+
+function module.containsdirsep(filepath)
+	return string.find(filepath, "/") or string.find(filepath, "\\") 
+end
 
 return module

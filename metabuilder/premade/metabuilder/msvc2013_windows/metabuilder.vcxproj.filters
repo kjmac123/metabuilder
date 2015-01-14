@@ -54,9 +54,6 @@
    <ClCompile Include="..\..\..\src\makeglobal.cpp">
       <Filter>src</Filter>
    </ClCompile>
-   <ClCompile Include="..\..\..\src\makesetup.cpp">
-      <Filter>src</Filter>
-   </ClCompile>
    <ClCompile Include="..\..\..\src\metabase.cpp">
       <Filter>src</Filter>
    </ClCompile>
@@ -118,9 +115,6 @@
       <Filter>src</Filter>
    </ClInclude>
    <ClInclude Include="..\..\..\src\makeglobal.h">
-      <Filter>src</Filter>
-   </ClInclude>
-   <ClInclude Include="..\..\..\src\makesetup.h">
       <Filter>src</Filter>
    </ClInclude>
    <ClInclude Include="..\..\..\src\metabase.h">

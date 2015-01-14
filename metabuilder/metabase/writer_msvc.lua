@@ -166,7 +166,7 @@ function MSVCBuildFileGroups(currentTarget)
 		fileInfo.winNormInputRelativeDir, fileInfo.shortName, fileInfo.ext = mbfilepath.decompose(winNormFilepath)
 
 		if g_enableHLSL == false then
-			if fileInfo.ext == "hlsl" then
+			if fileInfo.includedInBuild and fileInfo.ext == "hlsl" then
 				loginfo("HLSL support enabled")
 				g_enableHLSL = true
 			end
@@ -381,8 +381,7 @@ function MSVCWriteVcxProj(currentTarget, groups)
 		--Lib directories
 		file:write("      <AdditionalLibraryDirectories>")
 		for jLibDir = 1, #config.libdirs do
-			local libDir = mbwriter.getoutputrelfilepath(config.libdirs[jLibDir])
-			file:write(libDir .. ";")
+			file:write(mbwriter.getoutputrelfilepath(config.libdirs[jLibDir]) .. ";")
 		end
 		file:write("</AdditionalLibraryDirectories>\n")
 
@@ -391,7 +390,13 @@ function MSVCWriteVcxProj(currentTarget, groups)
 		if currentTarget.targettype == "app" then
 	 	    file:write("      <AdditionalDependencies>")
 			for jLib = 1, #config.libs do
-				local lib = config.libs[jLib]
+				local lib = nil
+				if mbfilepath.containsdirsep(config.libs[jLib]) then
+					lib = mbwriter.getoutputrelfilepath(config.libs[jLib])
+					--loginfo("convert " .. config.libs[jLib] .. " to " .. lib)
+				else
+					lib = config.libs[jLib]
+				end
 				file:write(lib .. ";")
 			end
 	 	    file:write("</AdditionalDependencies>\n")

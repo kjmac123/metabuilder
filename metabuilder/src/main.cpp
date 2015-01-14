@@ -1,6 +1,5 @@
 #include "metabuilder_pch.h"
 
-#include "makesetup.h"
 #include "makeglobal.h"
 #include "writer.h"
 #include "solution.h"
