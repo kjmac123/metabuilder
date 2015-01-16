@@ -154,10 +154,10 @@ static int luaFuncTargetSubsystem(lua_State* l)
 	return 0;
 }
 
-static int luaFuncTargetPCH(lua_State*)
+static int luaFuncTargetPCH(lua_State*l )
 {
-    //Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
-    //const char* pch = mbLuaToStringExpandMacros(&target->pch , l, 1);
+    Target* target = (Target*)mbGetActiveContext()->ActiveBlock();
+	mbLuaToStringExpandMacros(&target->pch, target, l, 1);
     return 0;
 }
 

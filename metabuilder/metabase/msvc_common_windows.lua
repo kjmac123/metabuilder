@@ -16,13 +16,11 @@ option("msvccompile", "TreatWarningAsError", "false")
 option("msvccompile", "IntrinsicFunctions", "true")
 
 config "Debug"
-	option("msvccompile", "RuntimeLibrary", "MultiThreadedDebug")
 	option("msvccompile", "Optimization", "Disabled")
 	option("msvclink", "GenerateDebugInformation", "true")
 config_end()
 
 config "Release"
-	option("msvccompile", "RuntimeLibrary", "MultiThreaded")
 	option("msvccompile", "Optimization", "MaxSpeed")
 	option("msvccompile", "FunctionLevelLinking", "true")
 
@@ -32,7 +30,6 @@ config "Release"
 config_end()
 
 config "Profile"
-	option("msvccompile", "RuntimeLibrary", "MultiThreaded")
 	option("msvccompile", "Optimization", "MaxSpeed")
 	option("msvccompile", "FunctionLevelLinking", "true")
 
@@ -42,7 +39,6 @@ config "Profile"
 config_end()
 
 config "Master"
-	option("msvccompile", "RuntimeLibrary", "MultiThreaded")
 	option("msvccompile", "Optimization", "MaxSpeed")
 	option("msvccompile", "FunctionLevelLinking", "true")
 

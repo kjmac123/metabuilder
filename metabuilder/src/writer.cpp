@@ -259,7 +259,7 @@ static void mbWriterSetOptions(lua_State* l, const KeyValueMap& keyValueMap)
 		else
 		{
 			//Key/value pair
-			char buf[4096];
+			char buf[MB_MAX_STRING_BUFFER_SIZE];
 			sprintf(buf, "%s=%s", key, value);
 			lua_pushstring(l, buf);
 		}

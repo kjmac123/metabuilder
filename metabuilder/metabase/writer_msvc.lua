@@ -363,10 +363,9 @@ function MSVCWriteVcxProj(currentTarget, groups)
 			file:write(config.defines[jDefine] .. ";")
 		end
 		file:write("%(PreprocessorDefinitions)</PreprocessorDefinitions>\n")
-
 		file:write("      <AdditionalIncludeDirectories>")
 		for jIncludeDir = 1, #config.includedirs do
-			local includeDir = mbwriter.getoutputrelfilepath(config.includedirs[jIncludeDir])
+			print(config.includedirs[jIncludeDir] .. " -> " .. includeDir)
 			file:write(includeDir .. ";")
 		end
 		file:write("</AdditionalIncludeDirectories>\n")
