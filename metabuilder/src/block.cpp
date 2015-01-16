@@ -404,7 +404,7 @@ static int luaFuncResources(lua_State* l)
 static int luaFuncBlockTargetIntermediateDir(lua_State* l)
 {
 	MetaBuilderContext* ctx = mbGetActiveContext();
-	Block* b = mbGetActiveContext()->ActiveBlock();
+	Block* b = ctx->ActiveBlock();
 	if (!b)
 	{
 		MB_LOGERROR("must be within a block");
@@ -421,7 +421,7 @@ static int luaFuncBlockTargetIntermediateDir(lua_State* l)
 static int luaFuncBlockTargetOutputDir(lua_State* l)
 {
 	MetaBuilderContext* ctx = mbGetActiveContext();
-	Block* b = mbGetActiveContext()->ActiveBlock();
+	Block* b = ctx->ActiveBlock();
 	if (!b)
 	{
 		MB_LOGERROR("must be within a block");
@@ -438,7 +438,7 @@ static int luaFuncBlockTargetOutputDir(lua_State* l)
 static int luaFuncBlockTargetFilename(lua_State* l)
 {
 	MetaBuilderContext* ctx = mbGetActiveContext();
-	Block* b = mbGetActiveContext()->ActiveBlock();
+	Block* b = ctx->ActiveBlock();
 	if (!b)
 	{
 		MB_LOGERROR("must be within a block");
