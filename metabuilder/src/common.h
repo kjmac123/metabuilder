@@ -99,7 +99,7 @@ public:
 	void ProcessSetup();
 	void ProcessGlobal();
 	
-	std::string				mainSolutionName;
+	Block*					mainSolution;
     std::string				mainMetaMakeFileAbs;
     std::string				generator;
 	std::string				metabaseDirAbs;

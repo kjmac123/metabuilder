@@ -1,5 +1,7 @@
 solution "metabuilder"
 
+	import "solution_windows.lua"
+
 	target "metabuilder"
 		target_type "app"
 		target_subsystem "console"
@@ -58,13 +60,9 @@ solution "metabuilder"
 			}
 		config_end()
 		
-		if checkplatform("Windows") == true then
-			pch "metabuilder_pch"
-		end
-
 		import "metabuilder_posix.lua"
 		import "metabuilder_windows.lua"
-		
+	
  	target_end()
-
+	
  solution_end()

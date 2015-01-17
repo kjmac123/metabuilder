@@ -68,6 +68,12 @@ void Target::Flatten(FlatConfig* result, const char* platformName, const char* c
 	{
 		blocks.push_back(block);
 	}
+	//Special case - if we're not processing the primary make file then also include
+	//the contents of the primary makefile's solution
+	if (!mbGetAppState()->isProcessingPrimaryMakefile)
+	{
+		blocks.push_back(mbGetAppState()->mainSolution);
+	}
 
 	for (int iBlock = 0; iBlock < (int)blocks.size(); ++iBlock)
 	{

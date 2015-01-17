@@ -15,12 +15,7 @@ platform "Windows"
 		"src/platform/windows/platform_windows.cpp",
 	}
 	
-config "Debug"
-	option("msvccompile", "RuntimeLibrary", "MultiThreadedDebug")
-config_end()
-
-config "Release"
-	option("msvccompile", "RuntimeLibrary", "MultiThreaded")
-config_end()
-
+	--Can't use this unless dlmalloc is moved into its own library, which I should probably do.
+	--pch "metabuilder_pch"
+	
 platform_end()

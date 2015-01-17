@@ -796,6 +796,15 @@ const KeyValueMap& Block::FlattenMacros() const
 		const KeyValueMap& blockMacros = block->GetMacros();
 		m_flattenedMacroCache.insert(blockMacros.begin(), blockMacros.end());
 	}
+	//Special case - if we're not processing the primary make file then also include
+	//the contents of the primary makefile's solution
+	if (!mbGetAppState()->isProcessingPrimaryMakefile)
+	{
+		Block* block = mbGetAppState()->mainSolution;
+		const KeyValueMap& blockMacros = block->GetMacros();
+		m_flattenedMacroCache.insert(blockMacros.begin(), blockMacros.end());
+	}
+
 
 	m_macroCacheDirty = false;
 	return m_flattenedMacroCache;

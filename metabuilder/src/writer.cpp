@@ -402,7 +402,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 			//Default directory to use for make output directory, a combination of the root output directory, solution name and metabase config name.
 			{
 				char buf[MB_MAX_PATH];
-				sprintf(buf, "%s/%s/%s", appState->makeOutputTopDirAbs.c_str(), appState->mainSolutionName.c_str(), metabase->GetName().c_str());
+				sprintf(buf, "%s/%s/%s", appState->makeOutputTopDirAbs.c_str(), appState->mainSolution->GetName().c_str(), metabase->GetName().c_str());
 				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
 				ctx->makeOutputDirAbs = buf;
 			}

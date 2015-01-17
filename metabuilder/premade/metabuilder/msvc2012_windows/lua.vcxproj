@@ -23,17 +23,17 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-      <CharacterSet>Unicode</CharacterSet>
+      <CharacterSet>NotSet</CharacterSet>
       <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-      <CharacterSet>Unicode</CharacterSet>
+      <CharacterSet>NotSet</CharacterSet>
       <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-      <CharacterSet>Unicode</CharacterSet>
+      <CharacterSet>NotSet</CharacterSet>
       <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -55,6 +55,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>METABUILDER;PLATFORM_WINDOWS;WIN32;_CRT_SECURE_NO_WARNINGS;_WINDOWS;BUILD_CONFIG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -85,6 +86,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>METABUILDER;PLATFORM_WINDOWS;WIN32;_CRT_SECURE_NO_WARNINGS;_WINDOWS;BUILD_CONFIG_RELEASE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>

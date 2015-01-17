@@ -70,7 +70,7 @@ static int luaFuncSolution(lua_State* l)
 	AppState* appState = mbGetAppState();
 	if (appState->isProcessingPrimaryMakefile)
 	{
-		appState->mainSolutionName = name;
+		appState->mainSolution = mbGetActiveContext()->solution;
 	}
     
     mbGetActiveContext()->activeBlockStack.push(mbGetActiveContext()->solution);
