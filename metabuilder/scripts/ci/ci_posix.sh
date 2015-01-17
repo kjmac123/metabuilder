@@ -14,7 +14,6 @@ if [ "${CXX}" = "clang++" ]; then
 fi
             
 pushd ${TOPDIR}/premade/metabuilder/${GEN}/
-#cat Makefile
 make clean BUILDCONFIG=Release
 make -j ${NUMCORES} BUILDCONFIG=Release
 

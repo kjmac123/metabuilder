@@ -13,5 +13,5 @@ SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 TOPDIR=${SCRIPTDIR}/../..
 
 echo Launching build script for platform ${platform}
-${TOPDIR}/scripts/generatepremade_${platform}.sh
+${TOPDIR}/scripts/ci/ci_${platform}.sh
 

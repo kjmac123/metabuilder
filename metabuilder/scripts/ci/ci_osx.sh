@@ -1,10 +1,8 @@
 #!/bin/bash
 set -e
 
-NUMCORES=`grep -c ^processor /proc/cpuinfo`
+NUMCORES=1
 echo BUILDING USING ${NUMCORES} threads
-
-#cat /proc/cpuinfo
 
 SCRIPTDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 TOPDIR=${SCRIPTDIR}/../..
