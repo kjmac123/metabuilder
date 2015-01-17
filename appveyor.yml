@@ -118,8 +118,7 @@ before_build:
 after_build:
  
 # to run your custom scripts instead of automatic MSBuild
-build_script:
-metabuilder\metabuilder\scripts\buildall_windows.bat
+build_script: metabuilder\metabuilder\scripts\buildall_windows.bat
  
 # to disable automatic builds
 #build: off
