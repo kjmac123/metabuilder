@@ -1,8 +1,8 @@
 
 lua_MODULEOBJ := 
 
-lua_CC := gcc
-lua_CXX := g++
+lua_CC := clang
+lua_CXX := clang++
 
 lua_INTDIR.Debug := int/lua/Debug
 lua_OUTDIR.Debug := out/lua/Debug
@@ -17,7 +17,9 @@ lua_CXXFLAGS.Debug := \
 
 lua_DEFINES.Debug := \
   -DMETABUILDER \
+  -DPLATFORM_OSX \
   -DPLATFORM_POSIX \
+  -DDARWIN \
   -DBUILD_CONFIG_DEBUG \
 
 lua_CPPFLAGS.Debug += $(lua_DEFINES.Debug)
@@ -38,7 +40,9 @@ lua_CXXFLAGS.Release := \
 
 lua_DEFINES.Release := \
   -DMETABUILDER \
+  -DPLATFORM_OSX \
   -DPLATFORM_POSIX \
+  -DDARWIN \
   -DBUILD_CONFIG_RELEASE \
 
 lua_CPPFLAGS.Release += $(lua_DEFINES.Release)
@@ -59,7 +63,9 @@ lua_CXXFLAGS.Master := \
 
 lua_DEFINES.Master := \
   -DMETABUILDER \
+  -DPLATFORM_OSX \
   -DPLATFORM_POSIX \
+  -DDARWIN \
   -DBUILD_CONFIG_MASTER \
 
 lua_CPPFLAGS.Master += $(lua_DEFINES.Master)
@@ -70,7 +76,7 @@ lua_CPPFLAGS.Master += $(lua_INCLUDES.Master)
 lua_CPPFLAGS	:= -MMD -MP $(lua_CPPFLAGS.$(BUILDCONFIG))
 lua_CFLAGS	:= $(lua_CFLAGS.$(BUILDCONFIG))
 lua_CXXFLAGS	:= $(lua_CXXFLAGS.$(BUILDCONFIG))
-lua_LD := g++
+lua_LD := clang++
 lua_CFLAGS += -c
 lua_CXXFLAGS += -c
 lua_LDFLAGS := 

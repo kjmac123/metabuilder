@@ -5,57 +5,62 @@ g_firstTargetWritten = false
 --Count the number of times a base name appears so that we can avoid filename clashes
 g_sourceFileBaseNameCounts = {}
 
-g_intdir = ""
-g_outdir = ""
-
-g_varBUILDCONFIG = ""
-g_varINTDIR = ""
-g_varOUTDIR = ""
-g_varMODULEOBJ = ""
-g_varCFLAGS = ""
-g_varCPPFLAGS = ""
-g_varCXXFLAGS = ""
-g_varINCLUDES = ""
-g_varLIBS = ""
-g_varLDLIBS = ""
-g_varLIBDIRS = ""
-g_varLDFLAGS = ""
-g_varARFLAGS = ""
-g_varCC = ""
-g_varCXX = ""
-g_varAR = ""
-g_varLD = ""
-g_varSRC = ""
-g_varOBJ = ""
-g_varDEFINES = ""
+g_varBUILDCONFIG		= ""
+g_varINTDIR					= ""
+g_varOUTDIR					= ""
+g_varMODULEOBJ			= ""
+g_varCFLAGS					= ""
+g_varCPPFLAGS				= ""
+g_varCXXFLAGS				= ""
+g_varINCLUDES				= ""
+g_varLIBS						= ""
+g_varLDLIBS					= ""
+g_varLIBDIRS				= ""
+g_varLDFLAGS				= ""
+g_varARFLAGS				= ""
+g_varCC							= ""
+g_varCXX						= ""
+g_varAR							= ""
+g_varLD							= ""
+g_varSRC						= ""
+g_varOBJ						= ""
+g_varDEFINES				= ""
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function InitVars(currentTarget)
 	g_varBUILDCONFIG	= "BUILDCONFIG"
-	g_varINTDIR			= currentTarget.name .. "_INTDIR"
-	g_varOUTDIR			= currentTarget.name .. "_OUTDIR"
-	g_varMODULEOBJ 		= currentTarget.name .. "_MODULEOBJ"
-	g_varCFLAGS 		= currentTarget.name .. "_CFLAGS"
-	g_varCPPFLAGS		= currentTarget.name .. "_CPPFLAGS"
-	g_varCXXFLAGS		= currentTarget.name .. "_CXXFLAGS"
-	g_varINCLUDES		= currentTarget.name .. "_INCLUDES"
-	g_varLIBS			= currentTarget.name .. "_LIBS"
-	g_varLDLIBS			= currentTarget.name .. "_LDLIBS"
-	g_varLIBDIRS		= currentTarget.name .. "_LIBDIRS"
-	g_varLDFLAGS		= currentTarget.name .. "_LDFLAGS"
-	g_varARFLAGS		= currentTarget.name .. "_ARFLAGS"
-	g_varCC				= currentTarget.name .. "_CC"
-	g_varCXX			= currentTarget.name .. "_CXX"
-	g_varAR				= currentTarget.name .. "_AR"
-	g_varLD				= currentTarget.name .. "_LD"
-	g_varSRC			= currentTarget.name .. "_SRC"
-	g_varOBJ			= currentTarget.name .. "_OBJ"
-	g_varDEFINES		= currentTarget.name .. "_DEFINES"
+	g_varINTDIR				= currentTarget.name .. "_INTDIR"
+	g_varOUTDIR				= currentTarget.name .. "_OUTDIR"
+	g_varMODULEOBJ		= currentTarget.name .. "_MODULEOBJ"
+	g_varCFLAGS 			= currentTarget.name .. "_CFLAGS"
+	g_varCPPFLAGS			= currentTarget.name .. "_CPPFLAGS"
+	g_varCXXFLAGS			= currentTarget.name .. "_CXXFLAGS"
+	g_varINCLUDES			= currentTarget.name .. "_INCLUDES"
+	g_varLIBS					= currentTarget.name .. "_LIBS"
+	g_varLDLIBS				= currentTarget.name .. "_LDLIBS"
+	g_varLIBDIRS			= currentTarget.name .. "_LIBDIRS"
+	g_varLDFLAGS			= currentTarget.name .. "_LDFLAGS"
+	g_varARFLAGS			= currentTarget.name .. "_ARFLAGS"
+	g_varCC						= currentTarget.name .. "_CC"
+	g_varCXX					= currentTarget.name .. "_CXX"
+	g_varAR						= currentTarget.name .. "_AR"
+	g_varLD						= currentTarget.name .. "_LD"
+	g_varSRC					= currentTarget.name .. "_SRC"
+	g_varOBJ					= currentTarget.name .. "_OBJ"
+	g_varDEFINES			= currentTarget.name .. "_DEFINES"
 end
 
 function GetDollarVar(var)
 	return "$(" .. var .. ")"
+end
+
+function GetDollarVarIntDir()
+	return GetDollarVar(g_varINTDIR .. ".$(BUILDCONFIG)")
+end
+
+function GetDollarVarOutDir()
+	return GetDollarVar(g_varOUTDIR .. ".$(BUILDCONFIG)")
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,7 +68,7 @@ end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function WriteSourceToObjRule(file, buildFile)
-	
+
 	local compiler = ""
 	local compilerFlags = GetDollarVar(g_varCPPFLAGS)
 	if buildFile.ext == "c" then
@@ -87,23 +92,25 @@ function WriteMakeFileGlobalVars(file, currentTarget)
 end
 
 function WriteMakeFileCommonVars(file, currentTarget)
-	file:write(g_varINTDIR .. 		" := " .. g_intdir .. "\n")
-	file:write(g_varOUTDIR .. 		" := " .. g_outdir .. "\n")
-	file:write("\n")
-	if currentTarget.options.cc == nil then
+		if currentTarget.options.cc == nil then
 		mbwriter.fatalerror("No C compiler set")
 	end
-	
+
 	file:write(g_varCC .. 			" := " .. currentTarget.options.cc[1] .. "\n")
 	if currentTarget.options.cxx == nil then
 		mbwriter.fatalerror("No C++ compiler set")
-	end	
+	end
 	file:write(g_varCXX ..			" := " .. currentTarget.options.cxx[1] .. "\n")
+	file:write("\n")
 
 	for i = 1, #currentTarget.configs do
 		local config = currentTarget.configs[i]
 
-		--CPPFLAGS is commong to C and C++
+		file:write(g_varINTDIR .. "." .. config.name .. " := " .. config.targetintdir .. "\n")
+		file:write(g_varOUTDIR .. "." .. config.name .. " := " .. config.targetoutdir .. "\n")
+		file:write("\n")
+
+		--CPPFLAGS is common to C and C++
 		file:write(g_varCPPFLAGS .. "." .. config.name .. " := \\\n")
 		if config.options.cppflags ~= nil then
 			for i = 1, #config.options.cppflags do
@@ -160,7 +167,7 @@ function WriteMakeFileAppVars(file, currentTarget)
 	file:write(g_varCXXFLAGS ..	" += -c\n")
 	if currentTarget.options.ld == nil then
 		mbwriter.fatalerror("No linker set")
-	end		
+	end
 	file:write(g_varLD .. 		" := " .. currentTarget.options.ld[1] .. "\n")
 	file:write("\n")
 
@@ -186,7 +193,7 @@ function WriteMakeFileAppVars(file, currentTarget)
 		end
 		file:write("\n")
 		file:write(g_varLDFLAGS .. "." .. config.name .. " += $(" .. g_varLIBDIRS .. "." .. config.name .. ")\n")
-		
+
 		--Libraries
 		file:write(g_varLIBS .. "." .. config.name .. " := \\\n")
 		if config.libs ~= nil then
@@ -207,7 +214,7 @@ end
 function WriteMakeFileModuleVars(var1, var2)
 	file = var1
 	currentTarget = var2
-	
+
 	if currentTarget.options.ld == nil then
 		mbwriter.fatalerror("No linker set")
 	end
@@ -232,12 +239,12 @@ function WriteMakeFileStaticLibVars(file, currentTarget)
 			for i = 1, #config.options.arflags do
 				file:write("  " .. config.options.arflags[i] .. " \\\n")
 			end
-		end	
+		end
 		file:write("\n")
 	end
 
 	file:write(g_varARFLAGS .. " := $(" .. g_varARFLAGS .. "." .. GetDollarVar(g_varBUILDCONFIG) .. ")\n")
-	
+
 	file:write(g_varCFLAGS .. " += -c\n")
 	file:write(g_varCXXFLAGS .. " += -c\n")
 end
@@ -254,16 +261,16 @@ function GetTargetOutputFilename(currentTarget)
 	else
 	end
 
-	local targetName = GetDollarVar(g_varOUTDIR) .. "/" .. currentTarget.name
+	local targetName = GetDollarVarOutDir() .. "/" .. currentTarget.name
 	if (ext ~= nil) then
 		targetName = targetName .. ext
 	end
 
-	return targetName	
+	return targetName
 end
 
-function GetPreLinkFileName(currentTarget)
-	local targetFileName = GetDollarVar(g_varINTDIR) .. "/__" .. currentTarget.name .. "__prelink__"
+function GetPreLinkFileName(currentTarget, config)
+	local targetFileName = GetDollarVarIntDir() .. "/__" .. currentTarget.name .. "__prelink__"
 	return targetFileName
 end
 
@@ -276,9 +283,9 @@ function WriteCompileRule(file, currentTarget)
 		local dependency = currentTarget.depends[i]
 		local path, filename, ext = mbfilepath.decompose(dependency)
 		local submakeLinkTargetAbs = mbwriter.gettarget(filename)
-		
+
 		file:write(submakeLinkTargetAbs .. " ")
-	end	
+	end
 	file:write("\n")
 	file:write("	@echo " .. "ld" .. " Creating prelink obj " .. targetFileName .. "\n")
 	file:write("	@" .. "ld" .. " " .. " -r " .. " " .. GetDollarVar(g_varOBJ) .. " -o '$@' ;\n")
@@ -320,29 +327,23 @@ function WriteMakeFile(currentTarget)
 
 	local makeDir = mbfilepath.join(mbwriter.global.makeoutputdirabs, "", mbwriter.global.targetDirSep)
 	mbwriter.mkdir(makeDir)
-	
+
 	local makeFilename = ""
 	if (mbwriter.global.ismainmakefile) then
 		makeFilename = mbfilepath.join(makeDir, "Makefile", mbwriter.global.targetDirSep)
 	else
 		makeFilename = mbfilepath.join(makeDir, currentTarget.name .. ".mk", mbwriter.global.targetDirSep)
 	end
-	
+
 	makeFilename = mbwriter.normalisetargetfilepath(makeFilename)
 	local file = mbfile.open(makeFilename, "w")
 	if file == nil then
 		mbwriter.fatalerror("failed to open file " .. makeFilename)
 	end
-	
-	InitVars(currentTarget)	
 
-	g_intdir = mbwriter.global.intdir
-	g_outdir = mbwriter.global.outdir
+	InitVars(currentTarget)
 
-	g_intdir = mbfilepath.join(g_intdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
-	g_outdir = mbfilepath.join(g_outdir, currentTarget.name .. "/" .. GetDollarVar(g_varBUILDCONFIG), mbwriter.global.targetDirSep)
-		
-	--write out content we only require once per makefile
+		--write out content we only require once per makefile
 	if (g_firstTargetWritten == false) then
 		g_firstTargetWritten = true
 
@@ -351,12 +352,12 @@ function WriteMakeFile(currentTarget)
 			WriteMakeFileGlobalVars(file, currentTarget)
 		end
 	end
-	
+
 	file:write("\n")
 	if mbwriter.global.ismainmakefile then
 		file:write("default : all \n")
 	end
-		
+
 	file:write(g_varMODULEOBJ .. " := \n")
 	--include submakefiles
 	for i = 1, #currentTarget.depends do
@@ -365,12 +366,12 @@ function WriteMakeFile(currentTarget)
 
 		local submakeLinkTarget = mbwriter.gettarget(filename)
 		local submakefile = filename .. ".mk"
-		
+
 		file:write("include " .. submakefile .. "\n")
 		file:write(g_varMODULEOBJ .. " += " .. submakeLinkTarget .. "\n")
 	end
 	file:write("\n")
-			
+
 	WriteMakeFileCommonVars(file, currentTarget)
 
 	--Write out variables for current target type
@@ -383,23 +384,24 @@ function WriteMakeFile(currentTarget)
 	else
 		mbwriter.fatalerror("unsupported target type")
 	end
-		
-    local buildFiles = {}
+
+	--Generate list of object files and their source files
+	local buildFiles = {}
 	for i = 1, #currentTarget.files do
 		local f = currentTarget.files[i]
 		local path, filename, ext = mbfilepath.decompose(f)
 		if ext == "c" or ext == "cpp" then
 			local filenameAbs = mbwriter.getoutputrelfilepath(f)
-						
+
 			local fileBaseNameCount = g_sourceFileBaseNameCounts[filename]
 			if (fileBaseNameCount == nil) then
 				g_sourceFileBaseNameCounts[filename] = 0
-				fileBaseNameCount = 0				
+				fileBaseNameCount = 0
 			end
-			
+
 			local obj = mbstring.replace(filename, ".cpp", "")
 			obj = mbstring.replace(obj, ".c", "")
-			obj = GetDollarVar(g_varINTDIR) .. "/" .. obj
+			obj = GetDollarVarIntDir() .. "/" .. obj
 			local objWithCount = obj
 			if (fileBaseNameCount > 0) then
 				obj = obj .. "__" .. fileBaseNameCount
@@ -412,12 +414,12 @@ function WriteMakeFile(currentTarget)
 	end
 	file:write("\n")
 	file:write(g_varSRC .. " := \\\n")
-	
+
 	for i = 1, #buildFiles do
 		file:write("	" .. buildFiles[i].srcFile .. " \\\n")
 	end
 	file:write("\n")
-	
+
 	file:write(g_varOBJ .. " := \\\n")
 	for i = 1, #buildFiles do
 		file:write("	" .. buildFiles[i].objFile .. " \\\n")
@@ -428,9 +430,9 @@ function WriteMakeFile(currentTarget)
 	for i = 1, #buildFiles do
 		WriteSourceToObjRule(file, buildFiles[i]);
 	end
-	
+
 	file:write("\n")
-	
+
 	--Write out target
 	if currentTarget.targettype == "app" then
 		WriteMakeFileAppTarget(file, currentTarget)
@@ -443,23 +445,23 @@ function WriteMakeFile(currentTarget)
 	end
 
 	file:write("\n")
-	
+
 	file:write("\n")
-	file:write(GetDollarVar(g_varOBJ) .. " : | " .. GetDollarVar(g_varINTDIR) .. "\n\n")
-	file:write(GetDollarVar(g_varINTDIR) .. ":\n")
-	file:write("	mkdir -p " .. GetDollarVar(g_varINTDIR) .. "\n")
-	file:write("	mkdir -p " .. GetDollarVar(g_varOUTDIR) .. "\n")
+	file:write(GetDollarVar(g_varOBJ) .. " : | " .. GetDollarVarIntDir() .. "\n\n")
+	file:write(GetDollarVarIntDir() .. ":\n")
+	file:write("	mkdir -p " .. GetDollarVarIntDir().. "\n")
+	file:write("	mkdir -p " .. GetDollarVarOutDir() .. "\n")
 	file:write("\n")
-		
+
 	--write 'all' target for current target
-	file:write(".PHONY: all_" .. currentTarget.name .. "\n")	
+	file:write(".PHONY: all_" .. currentTarget.name .. "\n")
 	file:write("all_" .. currentTarget.name .. " : ")
 	file:write(GetTargetOutputFilename(currentTarget) .. " ")
 	file:write("\n")
 	file:write("\n")
 
 	--write 'clean' target for current target
-	file:write(".PHONY: clean_" .. currentTarget.name .. "\n")	
+	file:write(".PHONY: clean_" .. currentTarget.name .. "\n")
 	file:write("clean_" .. currentTarget.name .. " : ")
 	for i = 1, #currentTarget.depends do
 		local dependency = currentTarget.depends[i]
@@ -467,20 +469,20 @@ function WriteMakeFile(currentTarget)
 		file:write("clean_" .. filename .. " ")
 	end
 	file:write("\n")
-	file:write("	@echo Cleaning " .. GetDollarVar(g_varINTDIR) .. "\n")
-	file:write("	@rm -f \"" .. GetDollarVar(g_varINTDIR) .. "\"/*\n")
-	file:write("	@if [ -d \"" .. GetDollarVar(g_varINTDIR) .. "\" ]; then rmdir \"" .. GetDollarVar(g_varINTDIR) .. "\";fi\n")
-	file:write("	@echo Cleaning " .. GetDollarVar(g_varOUTDIR) .. "\n")
-	file:write("	@rm -f \"" .. GetDollarVar(g_varOUTDIR) .. "\"/*\n")
-	file:write("	@if [ -d \"" .. GetDollarVar(g_varOUTDIR) .. "\" ]; then rmdir \"" .. GetDollarVar(g_varOUTDIR) .. "\";fi\n")
+	file:write("	@echo Cleaning " .. GetDollarVarIntDir() .. "\n")
+	file:write("	@rm -f \"" .. GetDollarVarIntDir() .. "\"/*\n")
+	file:write("	@if [ -d \"" .. GetDollarVarIntDir() .. "\" ]; then rmdir \"" .. GetDollarVarIntDir() .. "\";fi\n")
+	file:write("	@echo Cleaning " .. GetDollarVarOutDir() .. "\n")
+	file:write("	@rm -f \"" .. GetDollarVarOutDir() .. "\"/*\n")
+	file:write("	@if [ -d \"" .. GetDollarVarOutDir() .. "\" ]; then rmdir \"" .. GetDollarVarOutDir() .. "\";fi\n")
 	file:write("\n")
-	
+
 	if (mbwriter.global.ismainmakefile) then
 		--write 'all' target for main makefile
-		file:write(".PHONY: all\n")	
+		file:write(".PHONY: all\n")
 		file:write("all : " .. "all_" .. currentTarget.name .. "\n")
 		file:write("\n")
-	
+
 		file:write("\n")
 		--write 'clean' target for main makefile
 		file:write(".PHONY: clean\n")
@@ -488,20 +490,20 @@ function WriteMakeFile(currentTarget)
 	end
 
 	file:write("\n")
-	
+
 	--Avoid 'no rule to make target' errors
 	file:write("%.d: ;\n")
-	
+
 	for i = 1, #buildFiles do
 		local objFile = buildFiles[i].objFile
 		local depFile = mbstring.replace(objFile, ".o", ".d")
 		file:write("-include " .. depFile .. "\n")
-	end	
-	
+	end
+
 	file:write("\n")
 	file:close()
 
-	mbwriter.reportoutputfile(makeFilename)	
+	mbwriter.reportoutputfile(makeFilename)
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------

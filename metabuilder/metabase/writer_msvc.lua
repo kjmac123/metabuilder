@@ -179,7 +179,7 @@ function MSVCBuildFileGroups(currentTarget)
 	for _, group in pairs(groupMap) do
 		sortedGroups[#sortedGroups+1] = group
 	end
-	
+
 	table.sort(sortedGroups, MSVCFileGroupCompare)
 
 	logprofile("END MSVCBuildFileGroups")
@@ -271,7 +271,7 @@ function MSVCWriteVcxProj(currentTarget, groups)
 
 	for iConfig = 1, #currentTarget.configs do
 		local config = currentTarget.configs[iConfig]
-				
+
 		file:write("    <ProjectConfiguration Include=\"" .. config.name .. "|" .. msvcPlatform .. "\">\n")
 		file:write("      <Configuration>" .. config.name .. "</Configuration>\n")
 		file:write("      <Platform>" .. msvcPlatform .. "</Platform>\n")
@@ -365,7 +365,7 @@ function MSVCWriteVcxProj(currentTarget, groups)
 		file:write("%(PreprocessorDefinitions)</PreprocessorDefinitions>\n")
 		file:write("      <AdditionalIncludeDirectories>")
 		for jIncludeDir = 1, #config.includedirs do
-			print(config.includedirs[jIncludeDir] .. " -> " .. includeDir)
+			local includeDir = mbwriter.getoutputrelfilepath(config.includedirs[jIncludeDir])
 			file:write(includeDir .. ";")
 		end
 		file:write("</AdditionalIncludeDirectories>\n")

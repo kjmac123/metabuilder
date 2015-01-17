@@ -6,8 +6,8 @@ metabuilder_MODULEOBJ :=
 include lua.mk
 metabuilder_MODULEOBJ += $(lua_OUTDIR.$(BUILDCONFIG))/lua
 
-metabuilder_CC := gcc
-metabuilder_CXX := g++
+metabuilder_CC := clang
+metabuilder_CXX := clang++
 
 metabuilder_INTDIR.Debug := int/metabuilder/Debug
 metabuilder_OUTDIR.Debug := out/metabuilder/Debug
@@ -23,7 +23,9 @@ metabuilder_CXXFLAGS.Debug := \
 
 metabuilder_DEFINES.Debug := \
   -DMETABUILDER \
+  -DPLATFORM_OSX \
   -DPLATFORM_POSIX \
+  -DDARWIN \
   -DBUILD_CONFIG_DEBUG \
 
 metabuilder_CPPFLAGS.Debug += $(metabuilder_DEFINES.Debug)
@@ -49,7 +51,9 @@ metabuilder_CXXFLAGS.Release := \
 
 metabuilder_DEFINES.Release := \
   -DMETABUILDER \
+  -DPLATFORM_OSX \
   -DPLATFORM_POSIX \
+  -DDARWIN \
   -DBUILD_CONFIG_RELEASE \
 
 metabuilder_CPPFLAGS.Release += $(metabuilder_DEFINES.Release)
@@ -66,7 +70,7 @@ metabuilder_CFLAGS	:= $(metabuilder_CFLAGS.$(BUILDCONFIG))
 metabuilder_CXXFLAGS	:= $(metabuilder_CXXFLAGS.$(BUILDCONFIG))
 metabuilder_CFLAGS += -c
 metabuilder_CXXFLAGS += -c
-metabuilder_LD := g++
+metabuilder_LD := clang++
 
 metabuilder_LDFLAGS.Debug := \
  \
@@ -75,7 +79,6 @@ metabuilder_LIBDIRS.Debug := \
 
 metabuilder_LDFLAGS.Debug += $(metabuilder_LIBDIRS.Debug)
 metabuilder_LIBS.Debug := \
- -lrt \
 
 metabuilder_LDLIBS.Debug += $(metabuilder_LIBS.Debug)
 
@@ -86,7 +89,6 @@ metabuilder_LIBDIRS.Release := \
 
 metabuilder_LDFLAGS.Release += $(metabuilder_LIBDIRS.Release)
 metabuilder_LIBS.Release := \
- -lrt \
 
 metabuilder_LDLIBS.Release += $(metabuilder_LIBS.Release)
 
