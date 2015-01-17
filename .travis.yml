@@ -3,6 +3,10 @@
 #  only:
 #    - master
 
+os:
+  - linux
+  - osx
+
 language: cpp
 compiler:
   - gcc
