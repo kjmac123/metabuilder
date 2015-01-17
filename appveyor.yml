@@ -118,13 +118,9 @@ before_build:
 after_build:
  
 # to run your custom scripts instead of automatic MSBuild
-build_script: metabuilder\metabuilder\scripts\buildall_windows.bat
+build_script: 
+  - cmd: metabuilder\metabuilder\scripts\buildall_windows.bat
  
-# to disable automatic builds
-#build: off
-
-test: off
-  
 #---------------------------------#
 # global handlers #
 #---------------------------------#
@@ -141,15 +137,3 @@ on_failure:
 on_finish:
 - do something
  
-#---------------------------------#
-# notifications #
-#---------------------------------#
-notifications:
- 
-# Email
-- provider: Email
-to:
-- kjmac123@gmail.com
-subject: 'Build {{status}}' # optional
-message: "{{message}}, {{commitId}}, ..." # optional
-on_build_status_changed: true
