@@ -10,6 +10,11 @@ platform "iOS"
 		"projects/iOS/main.m",
 	}
 
+	files
+	{
+		"src/platform/ios/platform_ios.cpp",
+	}
+
 	resources
 	{
 		"projects/iOS/Base.lproj/LaunchScreen.xib",

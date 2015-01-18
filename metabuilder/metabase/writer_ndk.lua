@@ -17,8 +17,7 @@ function CreateLinks(currentTarget, config)
 	local templateDir = mbutil.getkvvalue(config.options._ndk, "templatedir")
 	if templateDir == nil then
 		--TODO proper error here
-		print("Template dir not specified")
-		os.exit(1)
+		mbwriter.fatalerror("Template dir not specified")
 	end
 	templateDir = mbwriter.getoutputrelfilepath(templateDir)
 

@@ -1,8 +1,9 @@
 #include "mylib.h"
-#include <stdio.h>
+#include "core.h"
 
 void CommonCodeTest()
 {
+	Platform::Init();
 	int result = thisIsMyFunctionThereAreManyLikeItButThisOneIsMine(21);
-	printf("CommonCodeTest result: %i\n", result);
+	MB_LOGINFO("CommonCodeTest result: %i\n", result);
 }

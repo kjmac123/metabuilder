@@ -8,6 +8,7 @@ solution "mobileapp"
 		includedirs 
 		{ 
 			"../hellolib",
+			"src",
 			".",
 		}
 		
@@ -16,7 +17,10 @@ solution "mobileapp"
 			"metabuilder.lua",
 			"metabuilder_android.lua",
 			"metabuilder_ios.lua",
+			"src/platform/platform.cpp",
 			"src/common.cpp",
+			"src/core.cpp",
+			"src/timeutil.cpp",
 		}
 
 		config "Debug"

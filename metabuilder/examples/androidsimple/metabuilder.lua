@@ -23,13 +23,7 @@ solution "androidsimple"
 
 		config "Release"
 		config_end()
---[[		
-		config "Profile"
-		config_end()
 
-		config "Master"
-		config_end()
-	]]					
- 	target_end()
+		target_end()
 
 solution_end()

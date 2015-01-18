@@ -8,6 +8,13 @@ platform "Android"
 		"projects/android/AndroidManifest.xml",
 	}
 
-	androidsettargetapi("android-15")
+	files
+	{
+		"src/platform/android/platform_android.cpp",
+	}
+
+	if checkplatform("TADP") then
+		option("msvconfiguration", "AndroidTargetAPI", "android-15")
+	end
 
 platform_end()

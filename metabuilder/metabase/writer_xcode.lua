@@ -115,7 +115,7 @@ function InitFolder(folderList, path, filename)
 				table.insert(parentFolder.childIDs, newFolderID)
 			end
 
-			--print("created " .. currentPath .. " parent id " .. currentParentID)
+			--loginfo("created " .. currentPath .. " parent id " .. currentParentID)
 
 			--update our parent for the next folder
 			currentParentID = newFolderID
@@ -135,10 +135,10 @@ function InitFolder(folderList, path, filename)
 	do
 		local currentFolder = folderList[path]
 		if currentFolder == nil then	
-			print("Failed to lookup folder:\n")
+			mbwriter.fatalerror("Failed to lookup folder:\n")
 
 			for k, v in pairs(folderList) do 
-				print(k .. " " .. inspect(v))
+				loginfo(k .. " " .. inspect(v))
 			end
 		end
 
@@ -513,9 +513,7 @@ function WriteXCBuildConfigurations(file)
 		file:write("				PRODUCT_NAME = \"$(TARGET_NAME)\";\n")
 		if g_currentTarget.targettype == "app" then
 			if g_currentTarget.targetsubsystem == "console" then 
-			--	print("console")
 			else
-			--	print("app")
 				file:write("				WRAPPER_EXTENSION = app;\n")
 			end
 		elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
@@ -687,7 +685,6 @@ end
 
 g_projectoutputfile = mbwriter.global.makeoutputdirabs .. "/" .. mbwriter.solution.name .. ".xcodeproj"
 
---print("Creating project dir " .. g_projectoutputfile)
 mbwriter.mkdir(g_projectoutputfile)
 
 local pbxprojFilename = g_projectoutputfile .. "/project.pbxproj"

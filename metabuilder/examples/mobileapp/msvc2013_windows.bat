@@ -1,7 +1,7 @@
 @SETLOCAL
 @set TOPDIR=%~dp0..\..
-@set MBDIR=metatmp
-@set GEN=msvc2013_android
+@set MBDIR=projects\android
+@set GEN=msvc2013tadp_android
 
 @REM Grab current dir name (not full path)
 @for %%* in (.) do set PROJECTNAME=%%~n*

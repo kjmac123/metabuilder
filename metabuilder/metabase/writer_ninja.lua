@@ -18,7 +18,7 @@ function WriteMakeFile(currentTarget, config)
 	local makeDir = mbwriter.global.makeoutputdirabs .. "/" .. currentTarget.name .. "/" .. config.name
 	mbwriter.mkdir(makeDir)
 
-	print(inspect(config))
+	loginfo(inspect(config))
 
 	local makeFilename = makeDir .. "/" .. "build.ninja"
 	local file = mbfile.open(makeFilename, "w")
@@ -45,7 +45,7 @@ function WriteMakeFile(currentTarget, config)
 
 	for i = 1, #config.includedirs do
 		local includeDir = mbwriter.getoutputrelfilepath(config.includedirs[i])
-		print(includeDir)
+		loginfo(includeDir)
 		file:write("  -I" .. includeDir .. " $\n")
 	end
 	file:write("\n")

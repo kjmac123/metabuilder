@@ -154,7 +154,7 @@ function MSVCBuildFileGroups(currentTarget)
 			group = newGroup
 		end
 
-		--print(mbNormalisedPath .. " -> " .. mbwriter.getoutputrelfilepath(mbNormalisedPath))
+		--loginfo(mbNormalisedPath .. " -> " .. mbwriter.getoutputrelfilepath(mbNormalisedPath))
 
 		local fileInfo = {
 			winNormInputRelativeDir	= nil,
