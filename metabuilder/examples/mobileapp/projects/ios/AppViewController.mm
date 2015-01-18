@@ -1,5 +1,7 @@
-#import "GameViewController.h"
+#import "AppViewController.h"
 #import <OpenGLES/ES2/glext.h>
+#include "src/core.h"
+#include "src/common.h"
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
@@ -67,7 +69,7 @@ GLfloat gCubeVertexData[216] =
     -0.5f, 0.5f, -0.5f,        0.0f, 0.0f, -1.0f
 };
 
-@interface GameViewController () {
+@interface AppViewController () {
     GLuint _program;
     
     GLKMatrix4 _modelViewProjectionMatrix;
@@ -89,7 +91,7 @@ GLfloat gCubeVertexData[216] =
 - (BOOL)validateProgram:(GLuint)prog;
 @end
 
-@implementation GameViewController
+@implementation AppViewController
 
 - (void)viewDidLoad
 {
@@ -141,6 +143,8 @@ GLfloat gCubeVertexData[216] =
 
 - (void)setupGL
 {
+    Platform::Init();
+
     [EAGLContext setCurrentContext:self.context];
     
     [self loadShaders];
@@ -164,6 +168,8 @@ GLfloat gCubeVertexData[216] =
     glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
     
     glBindVertexArrayOES(0);
+    
+    CommonCodeTest();
 }
 
 - (void)tearDownGL
@@ -179,6 +185,8 @@ GLfloat gCubeVertexData[216] =
         glDeleteProgram(_program);
         _program = 0;
     }
+    
+    Platform::Shutdown();
 }
 
 #pragma mark - GLKView and GLKViewController delegate methods

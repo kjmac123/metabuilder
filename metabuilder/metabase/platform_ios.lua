@@ -1,39 +1,47 @@
 supportedplatforms
 {
-	"GLES",	
+	"GLES",
 	"iOS",
 	"POSIX",
 }
 
-defines 
-{ 
+defines
+{
 	"PLATFORM_GLES",
-	"PLATFORM_IOS", 
-	"PLATFORM_POSIX", 
+	"PLATFORM_IOS",
+	"PLATFORM_POSIX",
 }
 
 config "Debug"
-	defines 
-	{ 
+	defines
+	{
 		"DEBUG=1",
-		"CFG_DEBUG" 
+		"CFG_DEBUG"
 	}
 config_end()
 
 config "Release"
-	defines 
-	{ 
+	defines
+	{
 	}
 config_end()
 
 config "Profile"
-	defines 
-	{ 
+	defines
+	{
 	}
 config_end()
 
 config "Master"
-	defines 
-	{ 
+	defines
+	{
 	}
 config_end()
+
+--------------------------------------------------------------------------------
+
+xcode = {}
+
+function xcode.setinfoplist(plistFile)
+	option("_xcode", "INFOPLIST_FILE", plistFile)
+end
