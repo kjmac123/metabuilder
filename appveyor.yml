@@ -1,5 +1,4 @@
 version: 1.0.{build}
 build_script:
-- set
-- C:\projects\metabuilder\metabuilder\scripts\buildall_windows.bat
+- C:\projects\metabuilder\metabuilder\scripts\ci_appveyor.bat
 test: off
