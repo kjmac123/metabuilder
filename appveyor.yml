@@ -1,4 +1,4 @@
 version: 1.0.{build}
 build_script:
-- C:\projects\metabuilder\metabuilder\scripts\ci_appveyor.bat
+- C:\projects\metabuilder\metabuilder\scripts\ci\ci_appveyor.bat
 test: off
