@@ -29,17 +29,14 @@ typedef double F64;
 #endif
 
 #define MB_LOGSETTIMEENABLED(b)			_mbLogSetTimeEnabled(b)
-#define MB_LOGERROR(...)				_mbLogErrorfLF(__VA_ARGS__)
-#define MB_LOGINFO(...)					_mbLogInfofLF(__VA_ARGS__)
-#define MB_LOGDEBUG(...)				_mbLogDebugfLF(__VA_ARGS__)
+#define MB_LOGERROR(...)				_mbLogErrorfNewLine(__VA_ARGS__)
+#define MB_LOGINFO(...)					_mbLogInfofNewLine(__VA_ARGS__)
+#define MB_LOGDEBUG(...)				_mbLogDebugfNewLine(__VA_ARGS__)
 
 void _mbLogSetTimeEnabled(bool b);
-void _mbLogErrorf(const char* fmt, ...);
-void _mbLogErrorfLF(const char* fmt, ...);
-void _mbLogInfof(const char* fmt, ...);
-void _mbLogInfofLF(const char* fmt, ...);
-void _mbLogDebugf(const char* fmt, ...);
-void _mbLogDebugfLF(const char* fmt, ...);
+void _mbLogErrorfNewLine(const char* fmt, ...);
+void _mbLogInfofNewLine(const char* fmt, ...);
+void _mbLogDebugfNewLine(const char* fmt, ...);
 
 #define ARRAY_LENGTH(a) (sizeof((a))/sizeof((a)[0]))
 

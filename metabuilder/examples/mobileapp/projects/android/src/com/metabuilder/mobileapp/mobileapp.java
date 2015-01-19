@@ -3,7 +3,7 @@ package com.metabuilder.mobileapp;
 import android.app.Activity;
 import android.os.Bundle;
 
-public class MobileApp extends Activity
+public class mobileapp extends Activity
 {
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -11,10 +11,10 @@ public class MobileApp extends Activity
 		super.onCreate(savedInstanceState);
 
 		System.out.println("Init");
-		MobileAppNative_Init();
+		mobileappNativeInit();
 
 		System.out.println("Running native code test function");
-		MobileAppNative_Run();
+		mobileappNativeRun();
 	}
 
 	@Override
@@ -23,13 +23,13 @@ public class MobileApp extends Activity
 		super.onDestroy();
 
 		System.out.println("Shutdown");
-		MobileAppNative_Shutdown();
+		mobileappNativeShutdown();
 	}
 
 	//Native API
-	public native void MobileAppNative_Init();
-	public native void MobileAppNative_Shutdown();
-	public native void MobileAppNative_Run();
+	public native void mobileappNativeInit();
+	public native void mobileappNativeShutdown();
+	public native void mobileappNativeRun();
 
 	//Load the native library
 	static {

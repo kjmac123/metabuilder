@@ -20,17 +20,17 @@ namespace Platform
 	{
 	}
 
-	void LogError(const char* str)
+	void LogErrorNewLine(const char* str)
 	{
 		__android_log_print(ANDROID_LOG_ERROR, "mobileapp", "%s", str);
 	}
 
-	void LogInfo(const char* str)
+	void LogInfoNewLine(const char* str)
 	{
 		__android_log_print(ANDROID_LOG_INFO, "mobileapp", "%s", str);
 	}
 
-	void LogDebug(const char* str)
+	void LogDebugNewLine(const char* str)
 	{
 		__android_log_print(ANDROID_LOG_DEBUG, "mobileapp", "%s", str);
 	}
