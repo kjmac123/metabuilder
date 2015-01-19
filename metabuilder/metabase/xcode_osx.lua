@@ -34,23 +34,25 @@ metabase "xcode_osx"
 	option("compiler", "COMBINE_HIDPI_IMAGES", "YES")
 	option("compiler", "GCC_PRECOMPILE_PREFIX_HEADER", "NO")
 	option("compiler", "PRODUCT_NAME", "\"$(TARGET_NAME)\"")
+	option("compiler", "DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
 
 	config "Debug"
 		option("compiler", "COPY_PHASE_STRIP", "NO")
 		option("compiler", "GCC_C_LANGUAGE_STANDARD", "gnu99")
 		option("compiler", "GCC_DYNAMIC_NO_PIC", "NO")
+		option("compiler", "GCC_OPTIMIZATION_LEVEL", "0")
 	config_end()
 
 	config "Release"
 		option("compiler", "COPY_PHASE_STRIP", "YES")
-		option("compiler", "DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
 		option("compiler", "ENABLE_NS_ASSERTIONS", "NO")
+		option("compiler", "GCC_OPTIMIZATION_LEVEL", "2")
 	config_end()
 
 	config "Master"
 		option("compiler", "COPY_PHASE_STRIP", "YES")
-		option("compiler", "DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
 		option("compiler", "ENABLE_NS_ASSERTIONS", "NO")
+		option("compiler", "GCC_OPTIMIZATION_LEVEL", "2")
 	config_end()
 
 metabase_end()

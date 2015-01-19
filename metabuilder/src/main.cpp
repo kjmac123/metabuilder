@@ -129,7 +129,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 
 int main(int argc, const char * argv[])
 {
-	Platform::Init();
+    mbCore_Init();
 
 	MB_LOGINFO("Metabuilder");
 
@@ -219,7 +219,7 @@ int main(int argc, const char * argv[])
 	mbPopDir();
 	
     MB_LOGINFO("Project generation complete.");
-	Platform::Shutdown();
+    mbCore_Shutdown();
     return 0;
 }
 

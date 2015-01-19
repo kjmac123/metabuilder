@@ -16,7 +16,7 @@
 	char buf[16*1024]; \
 	if (g_coreLogTimeEnabled) \
 	{ \
-		sprintf(buf, "[%.2f] ", g_coreAppTimer.GetTimeSeconds()); \
+		sprintf(buf, "[%.2f] ", g_coreAppTimer->GetTimeSeconds()); \
 		fn(buf); \
 	} \
     va_list ap; \
@@ -27,7 +27,7 @@
 	fn(buf);
 
 static bool		g_coreLogTimeEnabled;
-static Timer	g_coreAppTimer;
+static Timer*	g_coreAppTimer;
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -83,4 +83,18 @@ void ToLowerStr(char* str)
 	{
 		*str = tolower(*cursor);
 	}
+}
+
+void mbCore_Init()
+{
+    Platform::Init();
+    
+    g_coreAppTimer = new Timer();
+}
+
+void mbCore_Shutdown()
+{
+    Platform::Shutdown();
+    
+    delete g_coreAppTimer;
 }

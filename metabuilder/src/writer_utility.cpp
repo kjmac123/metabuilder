@@ -91,6 +91,11 @@ int mbWriterUtility_GetLongestCommonSequenceLengthFromStart(const char* str1, co
 
 static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepathUnnormalised, const char* oldBaseDir, const char* newBaseDir)
 {
+    if (strstr(filepathUnnormalised, "libssl.a"))
+    {
+        int x = 0;x;
+    }
+    
 	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
 
 	char filepath[MB_MAX_PATH];
@@ -240,6 +245,7 @@ static int mbWriterUtility_LuaGetOutputRelativeFilePath(lua_State* l)
 	if (it == g_outputFilePathMapping.end())
 	{
 		MetaBuilderContext* ctx = mbGetActiveContext();
+        MB_ASSERT(ctx);
 		const char* oldBaseDir = ctx->currentMetaMakeDirAbs.c_str();
 		const char* newBaseDir = ctx->makeOutputDirAbs.c_str();
 
@@ -262,7 +268,7 @@ static int mbWriterUtility_LuaGetAbsoluteFilePath(lua_State* l)
 
 	MetaBuilderContext* ctx = mbGetActiveContext();
 	char result[MB_MAX_PATH];
-	mbWriterUtility_FileConvertToAbsolute(result, filepath.c_str(), ctx->currentMetaMakeDirAbs.c_str());
+	mbWriterUtility_FileConvertToAbsolute(result, ctx->currentMetaMakeDirAbs.c_str(), filepath.c_str());
 	lua_pushstring(l, result);
 	return 1;
 }
