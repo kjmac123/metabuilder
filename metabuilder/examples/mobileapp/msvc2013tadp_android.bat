@@ -5,7 +5,7 @@
 
 @REM Grab current dir name (not full path)
 @for %%* in (.) do set PROJECTNAME=%%~n*
-@set SOLUTION=%MBDIR%\%PROJECTNAME%\%GEN%\%PROJECTNAME%.sln
+@set SOLUTION=%MBDIR%\%PROJECTNAME%.sln
 
 "%TOPDIR%\bin\windows\metabuilder.exe" --input "%~dp0metabuilder.lua" --gen %GEN% --metabase "%TOPDIR%\metabase" --outdir "%MBDIR%"
 @IF %ERRORLEVEL% neq 0 GOTO error
