@@ -38,6 +38,18 @@ function MSVCGetFileMappingType(filepath)
 	return fileType
 end
 
+function MSVCGetLibLinkerInputArg(config, lib)
+	if MSVCGetLibLinkerInputArgHook then
+		return MSVCGetLibLinkerInputArgHook(config, lib)
+	end
+
+	if mbfilepath.containsdirsep(lib) then
+		return bwriter.getoutputrelfilepath(lib)
+	end
+
+	return lib
+end
+
 function MSVCInitFolder(folderList, path_, filename)
 	local path = mbfilepath.trimtrailingslash(path_)
 
@@ -384,19 +396,11 @@ function MSVCWriteVcxProj(currentTarget, groups)
 		end
 		file:write("</AdditionalLibraryDirectories>\n")
 
-		--Add hardwired options
-		--TODO: The below is not ideal, linkage only possible on final app target.
+		--Linkage only possible on final app target.
 		if currentTarget.targettype == "app" then
 	 	    file:write("      <AdditionalDependencies>")
 			for jLib = 1, #config.libs do
-				local lib = nil
-				if mbfilepath.containsdirsep(config.libs[jLib]) then
-					lib = mbwriter.getoutputrelfilepath(config.libs[jLib])
-					--loginfo("convert " .. config.libs[jLib] .. " to " .. lib)
-				else
-					lib = config.libs[jLib]
-				end
-				file:write(lib .. ";")
+				file:write(MSVCGetLibLinkerInputArg(config, config.libs[jLib]) .. ";")
 			end
 	 	    file:write("</AdditionalDependencies>\n")
  		end

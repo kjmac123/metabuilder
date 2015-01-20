@@ -1,9 +1,9 @@
 mbwriter.setmakeoutputdirabs(mbwriter.global.makeoutputdirbaseabs)
 
 local g_simpleFileTypeMap = {}
-g_simpleFileTypeMap["c"]					= "ClCompile"
+g_simpleFileTypeMap["c"]						= "ClCompile"
 g_simpleFileTypeMap["cpp"]					= "ClCompile"
-g_simpleFileTypeMap["h"]					= "ClInclude"
+g_simpleFileTypeMap["h"]						= "ClInclude"
 g_simpleFileTypeMap["hpp"]					= "ClInclude"
 g_simpleFileTypeMap["inl"]					= "ClInclude"
 g_simpleFileTypeMap["java"]					= "JCompile"
@@ -35,6 +35,19 @@ function MSVCGetFileMappingTypeHook(filepath)
 	end
 
 	return fileType
+end
+
+function MSVCGetLibLinkerInputArgHook(config, lib)
+	local length = string.len(lib)
+	if string.find(lib, "-l") then
+		return string.sub(lib, 3, length)
+	end
+
+	if mbfilepath.containsdirsep(lib) then
+		return mbwriter.getoutputrelfilepath(lib)
+	end
+
+	return lib
 end
 
 function PostGenerateEvent()
