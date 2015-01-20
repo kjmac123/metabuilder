@@ -430,6 +430,14 @@ function MSVCWriteVcxProj(currentTarget, groups)
 			file:write("    <CompilerShader/>\n")
 		end
 
+		--Pre build event
+		file:write("    <PreBuildEvent>\n")
+		local prebuild = mbutil.getkvvalue(config.options.msvc, "prebuild")
+		if prebuild ~= nil then
+			file:write("	  <Command>" .. prebuild .. "</Command>\n")
+		end
+		file:write("    </PreBuildEvent>\n")
+
 		--Post build event
 		file:write("    <PostBuildEvent>\n")
 		local postbuild = mbutil.getkvvalue(config.options.msvc, "postbuild")
