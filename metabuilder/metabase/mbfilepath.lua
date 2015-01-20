@@ -47,6 +47,20 @@ function module.trimtrailingslash(filepath)
 	return filepath
 end
 
+function module.trimleadingslash(filepath)
+	local length = string.len(filepath)
+	if length == 0 then
+		return filepath
+	end
+
+	local firstChar = string.sub(filepath, 1, 1)
+	if firstChar == '\\' or firstChar == '/' then
+		return string.sub(filepath, 2, length)
+	end
+
+	return filepath
+end
+
 function module.trimrawmarker(filepath)
 	local length = string.len(filepath)
 	if length == 0 then
