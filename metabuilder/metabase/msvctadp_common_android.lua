@@ -11,8 +11,8 @@ writer "writer_msvc.lua"
 option("msvc", "customwriter", "/writer_msvctadp_android.lua")
 option("msvc", "platform", "Tegra-Android")
 option("msvccompile", "MultiProcessorCompilation", "true")
-option("msvccompile", "CppLanguageStandard", "gnu++11")
 
+option("msvccompile", "CppLanguageStandard", "gnu++11")
 config "Debug"
 config_end()
 
@@ -27,3 +27,9 @@ config_end()
 
 config "MasterSymbols"
 config_end()
+
+tadp = {}
+
+function tadp.settargetapi(targetapi)
+	option("msvconfiguration", "AndroidTargetAPI", targetapi)
+end

@@ -5,9 +5,8 @@ supportedplatforms
 	"GLES",
 }
 
-defines { 
-	"PLATFORM_ANDROID", 
-	"PLATFORM_POSIX", 
-	"PLATFORM_GLES", 
+defines {
+	"PLATFORM_ANDROID",
+	"PLATFORM_POSIX",
+	"PLATFORM_GLES",
 }
-
