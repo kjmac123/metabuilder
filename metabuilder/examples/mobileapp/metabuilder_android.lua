@@ -14,7 +14,7 @@ platform "Android"
 	}
 
 	if checkplatform("TADP") then
-		option("msvconfiguration", "AndroidTargetAPI", "android-15")
+		tadp.settargetapi("android-15")
 	end
 
 platform_end()
