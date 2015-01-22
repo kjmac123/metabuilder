@@ -90,12 +90,7 @@ int mbWriterUtility_GetLongestCommonSequenceLengthFromStart(const char* str1, co
 
 
 static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepathUnnormalised, const char* oldBaseDir, const char* newBaseDir)
-{
-    if (strstr(filepathUnnormalised, "libssl.a"))
-    {
-        int x = 0;x;
-    }
-    
+{    
 	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
 
 	char filepath[MB_MAX_PATH];

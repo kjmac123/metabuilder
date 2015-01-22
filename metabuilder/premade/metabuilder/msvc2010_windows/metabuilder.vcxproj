@@ -59,6 +59,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
 
+    <PreBuildEvent>
+    </PreBuildEvent>
     <PostBuildEvent>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -94,6 +96,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
 
+    <PreBuildEvent>
+    </PreBuildEvent>
     <PostBuildEvent>
     </PostBuildEvent>
   </ItemDefinitionGroup>

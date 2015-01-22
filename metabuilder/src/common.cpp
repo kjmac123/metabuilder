@@ -985,7 +985,7 @@ void mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroups)
 static int mbExpandSingleMacro(char* result, const KeyValueMap& macroMap, const char* macroKey)
 {
 	int length = 0;
-
+    
 	KeyValueMap::const_iterator it = macroMap.find(macroKey);
 	if (it != macroMap.end())
 	{
@@ -1015,12 +1015,6 @@ static int mbExpandSingleMacro(char* result, const KeyValueMap& macroMap, const 
 
 void mbExpandMacros(std::string* result, const KeyValueMap& macroMap, const char* str)
 {
-	if (macroMap.size() == 0)
-	{
-		*result = str;
-		return;
-	}
-
 	char resultBuilderBuf[MB_MAX_STRING_BUFFER_SIZE];
 	char* resultCursor = resultBuilderBuf;
 	*resultCursor = '\0';
