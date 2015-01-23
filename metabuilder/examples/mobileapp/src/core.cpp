@@ -9,7 +9,7 @@
 	char buf[16*1024]; \
 	if (g_coreLogTimeEnabled) \
 		{ \
-		sprintf(buf, "[%.2f] ", g_coreAppTimer.GetTimeSeconds()); \
+		sprintf(buf, "[%.2f] ", g_coreAppTimer->GetTimeSeconds()); \
 		fn(buf); \
 		} \
     va_list ap; \
@@ -19,7 +19,7 @@
 	fn(buf);
 
 static bool		g_coreLogTimeEnabled;
-static Timer	g_coreAppTimer;
+static Timer*	g_coreAppTimer;
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -41,4 +41,23 @@ void _mbLogInfofNewLine(const char* fmt, ...)
 void _mbLogDebugfNewLine(const char* fmt, ...)
 {
 	PLATFORM_FORMAT_LOG_MESSAGE(Platform::LogDebugNewLine, 0);
+}
+
+void Core_Init()
+{
+    Platform::Init();
+    
+    g_coreAppTimer = new Timer();
+}
+
+void Core_Shutdown()
+{
+    Platform::Shutdown();
+    
+    delete g_coreAppTimer;
+}
+
+double Core_GetElapsedTimeSeconds()
+{
+    return g_coreAppTimer->GetTimeSeconds();
 }

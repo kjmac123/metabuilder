@@ -21,5 +21,5 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_metabuilder_mobileapp_mobileapp_mobileappNativeRun(JNIEnv* env, jobject obj)
 {
-	CommonCodeTest();
+	Core_GetElapsedTimeSeconds();
 }

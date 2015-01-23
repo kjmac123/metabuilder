@@ -47,6 +47,11 @@ void _mbLogDebugfNewLine(const char* fmt, ...);
 #define MB_LUAMODULE_MAX_FUNCTIONS			100
 #define MB_ASSERT							assert
 
+void    Core_Init();
+void    Core_Shutdown();
+
+double  Core_GetElapsedTimeSeconds();
+
 #include "platform/platform.h"
 
 #endif
