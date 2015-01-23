@@ -17,8 +17,8 @@ end
 function CreateLinks(currentTarget, config)
 	local templateDir = mbutil.getkvvalue(config.options._ndk, "templatedir")
 	if templateDir == nil then
-		--TODO proper error here
-		mbwriter.fatalerror("Template dir not specified")
+		return
+		--mbwriter.fatalerror("Template dir not specified")
 	end
 
 	--NOTE: templateDir needs to remain relative to working directory, not output
@@ -27,7 +27,6 @@ function CreateLinks(currentTarget, config)
 	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
 	mbwriter.mkdir(workspaceDir)
 
-print(templateDir .. "/build.xml")
 	mbwriter.mklink(templateDir .. "/build.xml",							workspaceDir .. "/build.xml")
 	mbwriter.mklink(templateDir .. "/AndroidManifest.xml",		workspaceDir .. "/AndroidManifest.xml")
 
