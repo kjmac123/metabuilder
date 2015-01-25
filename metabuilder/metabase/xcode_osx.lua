@@ -27,7 +27,7 @@ metabase "xcode_osx"
 	option("compiler", "GCC_WARN_UNUSED_VARIABLE", "YES")
 	option("compiler", "MACOSX_DEPLOYMENT_TARGET", "10.9")
 	option("compiler", "ONLY_ACTIVE_ARCH", "YES")
-	option("compiler", "SDKROOT", "macosx")	
+	option("compiler", "SDKROOT", "macosx")
 
 	option("compiler", "ASSETCATALOG_COMPILER_APPICON_NAME", "AppIcon")
 	option("compiler", "ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME", "LaunchImage")
@@ -39,18 +39,21 @@ metabase "xcode_osx"
 		option("compiler", "COPY_PHASE_STRIP", "NO")
 		option("compiler", "GCC_C_LANGUAGE_STANDARD", "gnu99")
 		option("compiler", "GCC_DYNAMIC_NO_PIC", "NO")
+		option("compiler", "GCC_OPTIMIZATION_LEVEL", 0)
 	config_end()
 
 	config "Release"
 		option("compiler", "COPY_PHASE_STRIP", "YES")
 		option("compiler", "DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
 		option("compiler", "ENABLE_NS_ASSERTIONS", "NO")
+		option("compiler", "GCC_OPTIMIZATION_LEVEL", 2)
 	config_end()
 
 	config "Master"
 		option("compiler", "COPY_PHASE_STRIP", "YES")
 		option("compiler", "DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
 		option("compiler", "ENABLE_NS_ASSERTIONS", "NO")
+		option("compiler", "GCC_OPTIMIZATION_LEVEL", 2)
 	config_end()
 
 metabase_end()

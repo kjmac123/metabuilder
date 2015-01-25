@@ -114,6 +114,8 @@ metabase "xcode_ios"
 		option("compiler", "GCC_OPTIMIZATION_LEVEL", "fast")
 		option("compiler", "GCC_UNROLL_LOOPS", "YES")
 		option("compiler", "LLVM_LTO", "YES")
+
+		option("compiler", "CODE_SIGN_IDENTITY", "\"iPhone Distribution\"")
 	config_end()
 
 metabase_end()

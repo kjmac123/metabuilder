@@ -1,27 +1,39 @@
 platform "iOS"
 
+	local plistFile = "projects/ios/Info.plist"
+
 	files
 	{
-		"projects/iOS/AppDelegate.h",
-		"projects/iOS/AppDelegate.m",
-		"projects/iOS/AppViewController.h",
-		"projects/iOS/AppViewController.m",
-		"projects/iOS/Info.plist",
-		"projects/iOS/main.m",
+		"projects/ios/AppDelegate.h",
+		"projects/ios/AppDelegate.mm",
+		"projects/ios/AppViewController.h",
+		"projects/ios/AppViewController.mm",
+		plistFile,
+		"projects/ios/main.mm",
+	}
+
+	files
+	{
+		"src/platform/ios/platform_ios.cpp",
 	}
 
 	resources
 	{
-		"projects/iOS/Base.lproj/LaunchScreen.xib",
-		"projects/iOS/Base.lproj/Main.storyboard",
-		"projects/iOS/Images.xcassets/*",
-		"projects/iOS/Shaders/*",
+		"projects/ios/Base.lproj/LaunchScreen.xib",
+		"projects/ios/Base.lproj/Main.storyboard",
+		"projects/ios/Images.xcassets/*",
 	}
 
 	frameworks
 	{
+		"CoreAudio.framework",
+		"Foundation.framework",
+		"CoreGraphics.framework",
+		"UIKit.framework",
 	}
 
-	option("compiler", "INFOPLIST_FILE", "projects/iOS/Info.plist")	
+	if checkplatform("iOS") then
+		xcode.setinfoplist(plistFile)
+	end
 
 platform_end()

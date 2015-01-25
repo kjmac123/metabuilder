@@ -2,12 +2,17 @@ metabase "ndk_android"
 	import "metabase_common.lua"
 	import "platform_android.lua"
 
+	supportedplatforms
+	{
+		"NDK",
+	}
+
 	writer "writer_ndk.lua"
 
-	option("ndkoptions", "APP_ABI",					"armeabi-v7a")
-	option("ndkoptions", "APP_PLATFORM",			"android-14")
+	option("ndkoptions", "APP_ABI",								"all") --armeabi-v7a
+	option("ndkoptions", "APP_PLATFORM",					"android-14")
 	option("ndkoptions", "NDK_TOOLCHAIN_VERSION",	"clang")
-	option("ndkoptions", "APP_STL", 				"stlport_static")
+	option("ndkoptions", "APP_STL", 							"stlport_static")
 
 	myCommonCFlags = "-Wno-multichar -fno-rtti -fno-exceptions -marm -fpic -Wno-unused-variable -Wno-unused-value "
 
@@ -32,3 +37,15 @@ metabase "ndk_android"
 	config_end()
 
 metabase_end()
+
+android = {}
+
+function android.settargetapi(targetapi)
+	option("ndkoptions", "APP_PLATFORM", targetapi)
+end
+
+ndk = {}
+
+function ndk.setprojectdir(dir)
+	option("_ndk", "ProjectDir", dir)
+end

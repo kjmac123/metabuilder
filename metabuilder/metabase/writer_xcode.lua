@@ -10,10 +10,10 @@ g_buildPhaseFrameworkID = mbwriter.xcodegenerateid()
 g_PBXBuildFileIDMap = {}
 g_PBXFileRefIDMap = {}
 
-g_PBXContainerItemProxyIDMap	= {} 
-g_PBXReferenceProxyIDMap 		= {} 
-g_PBXTargetDependencyIDMap		= {} 
-g_PBXTargetProxy				= {} 
+g_PBXContainerItemProxyIDMap	= {}
+g_PBXReferenceProxyIDMap 		= {}
+g_PBXTargetDependencyIDMap		= {}
+g_PBXTargetProxy				= {}
 g_ProductGroupIDs				= {}
 
 g_currentTarget = mbwriter.solution.targets[1]
@@ -70,8 +70,8 @@ end
 
 function InitFolder(folderList, path, filename)
 	local pathComponents = { "" }
-	
-	if (path ~= "") then 
+
+	if (path ~= "") then
 		pathComponents = split(path, "/")
 		table.insert(pathComponents, 1, "")
 	end
@@ -90,7 +90,7 @@ function InitFolder(folderList, path, filename)
 			currentPath = pathComponents[i]
 		elseif i == 2 then
 			currentPath = pathComponents[i]
-		else			
+		else
 			currentPath = currentPath .. "/" .. pathComponents[i]
 		end
 
@@ -115,7 +115,7 @@ function InitFolder(folderList, path, filename)
 				table.insert(parentFolder.childIDs, newFolderID)
 			end
 
-			--print("created " .. currentPath .. " parent id " .. currentParentID)
+			--loginfo("created " .. currentPath .. " parent id " .. currentParentID)
 
 			--update our parent for the next folder
 			currentParentID = newFolderID
@@ -134,11 +134,11 @@ function InitFolder(folderList, path, filename)
 	--Add child file within current folder
 	do
 		local currentFolder = folderList[path]
-		if currentFolder == nil then	
-			print("Failed to lookup folder:\n")
+		if currentFolder == nil then
+			mbwriter.fatalerror("Failed to lookup folder:\n")
 
-			for k, v in pairs(folderList) do 
-				print(k .. " " .. inspect(v))
+			for k, v in pairs(folderList) do
+				loginfo(k .. " " .. inspect(v))
 			end
 		end
 
@@ -166,11 +166,11 @@ function InitFolders(sortedFolderList, fileList)
 
 		--remove trailing slash
 		local path = string.sub(path, 1, -2)
-		
+
 		InitFolder(folderTable, path, filename)
 	end
 
-	for _, v in pairs(folderTable) do 		
+	for _, v in pairs(folderTable) do
 		sortedFolderList[#sortedFolderList+1] = v
 	end
 	table.sort(sortedFolderList, FolderCompare)
@@ -191,7 +191,7 @@ function WritePBXGroup(file)
 	for i = 1, #g_currentTarget.depends do
 		local dependency = g_currentTarget.depends[i]
 		file:write("				" .. g_PBXFileRefIDMap[dependency] .. " /* " .. dependency .. "*/,\n")
-	end	
+	end
 
 	file:write("			);\n")
 	file:write("			sourceTree = \"<group>\";\n")
@@ -216,7 +216,7 @@ function WritePBXGroup(file)
 		file:write("			);\n")
 		file:write("			name = Products;\n")
 		file:write("			sourceTree = \"<group>\";\n")
-		file:write("		};\n")	
+		file:write("		};\n")
 	end
 
 	--frameworks
@@ -226,12 +226,12 @@ function WritePBXGroup(file)
 	for i = 1, #g_currentTarget.frameworks do
 		local f = g_currentTarget.frameworks[i]
 		file:write("				" .. g_PBXFileRefIDMap[f] 	.. " /* " .. g_currentTarget.frameworks[i] .. " */,\n")
-	end	
+	end
 	file:write("			);\n")
 	file:write("			name = Frameworks;\n")
 	file:write("			sourceTree = \"<group>\";\n")
 	file:write("		};\n")
-	
+
 	for _, folder in ipairs(g_sourceFolders) do
 
 		--special handling for root folder
@@ -246,7 +246,7 @@ function WritePBXGroup(file)
 			file:write("			);\n")
 			file:write("			name = \"Source\";\n")
 			file:write("			sourceTree = \"<group>\";\n")
-			file:write("		};	\n")			
+			file:write("		};	\n")
 		else
 			file:write("		" .. folder.id .. " /* " .. folder.shortName .. " */ = {\n")
 			file:write("			isa = PBXGroup;\n")
@@ -255,22 +255,22 @@ function WritePBXGroup(file)
 				local f = folder.childIDs[i]
 				file:write("				" .. f .. ",\n")
 			end
-			file:write("			);\n")		
+			file:write("			);\n")
 			file:write("			name = \"" .. folder.shortName .. "\";\n")
 			file:write("			sourceTree = \"<group>\";\n")
 			file:write("		};\n")
 		end
 	end
 
-	for k, v in pairs(g_resourceFolders) do 
+	for k, v in pairs(g_resourceFolders) do
 		local folder = v
 
 		--special handling for root folder
-		if folder.shortName == "" then		
+		if folder.shortName == "" then
 			file:write("		BE854EE418CA1337008EAFCD /* Resources */ = {\n")
 			file:write("			isa = PBXGroup;\n")
 			file:write("			children = (\n")
-	
+
 			for i = 1, #folder.childIDs do
 				local f = folder.childIDs[i]
 				file:write("				" .. f .. ",\n")
@@ -287,12 +287,12 @@ function WritePBXGroup(file)
 				local f = folder.childIDs[i]
 				file:write("				" .. f .. ",\n")
 			end
-			file:write("			);\n")		
+			file:write("			);\n")
 			file:write("			name = \"" .. folder.shortName .. "\";\n")
 			file:write("			sourceTree = \"<group>\";\n")
 			file:write("		};\n")
 		end
-	end	
+	end
 
 	file:write("/* End PBXGroup section */\n")
 end
@@ -358,7 +358,7 @@ function BuildListPerSDK(stringList)
 	--Duplicate common strings per SDK
 	local commonStrings = stringListsPerSDK[""]
 --	print(inspect(commonStrings))
-	if commonStrings ~= nil then 
+	if commonStrings ~= nil then
 		for i = 1, #sdkNames do
 			local sdk = sdkNames[i]
 			local sdkStringList = stringListsPerSDK[sdk]
@@ -391,8 +391,20 @@ function WriteXCBuildConfigurations(file)
 		file:write("			isa = XCBuildConfiguration;\n")
 		file:write("			buildSettings = {\n")
 
+		-- Add internal options (set using xcode specific metabuilder API)
+		if config.options._xcode ~= nil then
+			for j = 1, #config.options._xcode do
+				local option = config.options._xcode[j]
+
+				if mbutil.kvhaskey(option, "INFOPLIST_FILE") then
+					option = mbutil.kvsetvalue(option, mbwriter.getoutputrelfilepath(mbutil.kvgetvalue(option)))
+				end
+				file:write("				" .. option .. ";\n")
+			end
+		end
+
 		-- Add custom compiler options
-		if config.options.compiler ~= nil then 
+		if config.options.compiler ~= nil then
 			for j = 1, #config.options.compiler do
 				local compilerOption = config.options.compiler[j]
 				file:write("				" .. compilerOption .. ";\n")
@@ -401,15 +413,15 @@ function WriteXCBuildConfigurations(file)
 
 		-- App specific compiler options
 		if g_currentTarget.targettype == "app" then
-			if config.options.compiler_app ~= nil then 
+			if config.options.compiler_app ~= nil then
 				for j = 1, #config.options.compiler_app do
 					local compilerOption = config.options.compiler_app[j]
 					file:write("				" .. compilerOption .. ";\n")
 				end
 			end
 		-- Static lib specific compiler options
-		elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then 
-			if config.options.compiler_staticlib ~= nil then 
+		elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
+			if config.options.compiler_staticlib ~= nil then
 				for j = 1, #config.options.compiler_staticlib do
 					local compilerOption = config.options.compiler_staticlib[j]
 					file:write("				" .. compilerOption .. ";\n")
@@ -440,7 +452,7 @@ function WriteXCBuildConfigurations(file)
 
 		for i = 1, #g_currentTarget.frameworks do
 			local f = g_currentTarget.frameworks[i]
-	
+
 			local dirCharIndex = string.find(f, "/")
 			if dirCharIndex ~= nil then
 				local frameworkPath = mbfilepath.getdir(f)
@@ -453,7 +465,7 @@ function WriteXCBuildConfigurations(file)
 		for iSDK = 1, #sdkNames do
 			local sdk =  sdkNames[iSDK]
 			local strings = stringListsPerSDK[sdk]
-			if sdk == "" then 
+			if sdk == "" then
 				file:write("				LIBRARY_SEARCH_PATHS = (\n")
 			else
 				file:write("				\"LIBRARY_SEARCH_PATHS" .. sdk .. "\" = (\n")
@@ -470,7 +482,7 @@ function WriteXCBuildConfigurations(file)
 	end
 
 	for i = 1, #g_currentTarget.configs do
-		local config = g_currentTarget.configs[i]	
+		local config = g_currentTarget.configs[i]
 		local configID = g_PBXNativeTargetConfigIDs[config.name]
 
 		file:write("		" .. configID .. " /* " .. config.name .. " */ = {\n")
@@ -488,18 +500,11 @@ function WriteXCBuildConfigurations(file)
 			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = NO;\n")
 --		end
 
-		do
-			local infoplist = mbutil.getkvvalue(config.options._xcode, "infoplist")
-			if infoplist ~= nil then 
-				file:write("				INFOPLIST_FILE = \"" .. mbwriter.getoutputrelfilepath(infoplist) .. "\";\n")
-			end
-		end
-
 		local stringListsPerSDK, sdkNames = BuildListPerSDK(config.libs)
 		for iSDK = 1, #sdkNames do
 			local sdk =  sdkNames[iSDK]
 			local strings = stringListsPerSDK[sdk]
-			if sdk == "" then 
+			if sdk == "" then
 				file:write("				OTHER_LDFLAGS = (\n")
 			else
 				file:write("				\"OTHER_LDFLAGS" .. sdk .. "\" = (\n")
@@ -512,10 +517,8 @@ function WriteXCBuildConfigurations(file)
 
 		file:write("				PRODUCT_NAME = \"$(TARGET_NAME)\";\n")
 		if g_currentTarget.targettype == "app" then
-			if g_currentTarget.targetsubsystem == "console" then 
-			--	print("console")
+			if g_currentTarget.targetsubsystem == "console" then
 			else
-			--	print("app")
 				file:write("				WRAPPER_EXTENSION = app;\n")
 			end
 		elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
@@ -523,7 +526,7 @@ function WriteXCBuildConfigurations(file)
 		end
 		file:write("			};\n")
 		file:write("			name = " .. config.name .. ";\n")
-		file:write("		};\n")		
+		file:write("		};\n")
 	end
 
 	file:write("/* End XCBuildConfiguration section */\n\n")
@@ -534,9 +537,9 @@ function WriteXCConfigurationList(file)
 
 	file:write("		BE854EDD18CA1112008EAFCD /* Build configuration list for PBXProject " .. g_currentTarget.name .. " */ = {\n")
 	file:write("			isa = XCConfigurationList;\n")
-	file:write("			buildConfigurations = (\n")	
+	file:write("			buildConfigurations = (\n")
 	for i = 1, #g_currentTarget.configs do
-		local config = g_currentTarget.configs[i]	
+		local config = g_currentTarget.configs[i]
 		local configID = g_PBXProjectConfigIDs[config.name]
 		file:write("				" .. configID .. " /* " .. config.name .. " */,\n")
 	end
@@ -548,7 +551,7 @@ function WriteXCConfigurationList(file)
 	file:write("			isa = XCConfigurationList;\n")
 	file:write("			buildConfigurations = (\n")
 	for i = 1, #g_currentTarget.configs do
-		local config = g_currentTarget.configs[i]	
+		local config = g_currentTarget.configs[i]
 		local configID = g_PBXNativeTargetConfigIDs[config.name]
 		file:write("				" .. configID .. " /* " .. config.name .. " */,\n")
 	end
@@ -563,7 +566,7 @@ end
 -- Create IDs for frameworks
 for i = 1, #g_currentTarget.frameworks do
 	local f = g_currentTarget.frameworks[i]
-	
+
 	g_PBXBuildFileIDMap[f]		= mbwriter.xcodegenerateid()
 
 	local dirCharIndex = string.find(f, "/")
@@ -575,25 +578,25 @@ end
 
 -- CREATE IDs for static libs
 for i = 1, #g_currentTarget.depends do
-	local f = g_currentTarget.depends[i]	
+	local f = g_currentTarget.depends[i]
 	g_PBXBuildFileIDMap[f]		= mbwriter.xcodegenerateid()
 end
 
 -- Create IDs for resources
 for i = 1, #g_currentTarget.resources do
-	local f = g_currentTarget.resources[i]	
+	local f = g_currentTarget.resources[i]
 	g_PBXBuildFileIDMap[f]		= mbwriter.xcodegenerateid()
 end
 
 -- Create REF IDs for ALL files
 for i = 1, #g_currentTarget.allfiles do
-	local f = g_currentTarget.allfiles[i]	
+	local f = g_currentTarget.allfiles[i]
 	g_PBXFileRefIDMap[f]		= mbwriter.xcodegenerateid()
 end
 
 -- Create BUILD IDs for files we're going to build
 for i = 1, #g_currentTarget.files do
-	local f = g_currentTarget.files[i]	
+	local f = g_currentTarget.files[i]
 	g_PBXBuildFileIDMap[f]		= mbwriter.xcodegenerateid()
 end
 
@@ -637,7 +640,7 @@ end
 -- Assign IDs for dependencies
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
-	
+
 	local path, filename, ext = mbfilepath.decompose(dependency)
 
 	--store relative filepath
@@ -653,7 +656,7 @@ for i = 1, #g_currentTarget.depends do
 	--Xcode projects written adjacent to each other
 	local inputRelativePath = dependency
 	local outputRelativePath = filename .. ".xcodeproj"
-	
+
 	mbwriter.setoutputfilepathmapping(inputRelativePath, outputRelativePath)
 end
 
@@ -687,7 +690,6 @@ end
 
 g_projectoutputfile = mbwriter.global.makeoutputdirabs .. "/" .. mbwriter.solution.name .. ".xcodeproj"
 
---print("Creating project dir " .. g_projectoutputfile)
 mbwriter.mkdir(g_projectoutputfile)
 
 local pbxprojFilename = g_projectoutputfile .. "/project.pbxproj"
@@ -843,7 +845,7 @@ file:write("			productReference = " .. g_externalProductID .. " /* " .. g_curren
 if g_currentTarget.targettype == "app" then
 	if g_currentTarget.targetsubsystem == "console" then
 		file:write("			productType = \"com.apple.product-type.tool\";\n")
-	else	
+	else
 		file:write("			productType = \"com.apple.product-type.application\";\n")
 	end
 elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
@@ -928,7 +930,7 @@ file:write("			files = (\n")
 for i = 1, #g_currentTarget.files do
 	local f = g_currentTarget.files[i]
 	local ext = mbfilepath.getextension(f)
-	
+
 	if ext == "m" or ext == "mm" or ext == "c" or ext == "cpp" then
 		file:write("				" .. g_PBXBuildFileIDMap[f] 	.. " /* " .. g_currentTarget.files[i] .. " */,\n")
 	end

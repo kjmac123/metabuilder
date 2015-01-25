@@ -1,8 +1,8 @@
 @SETLOCAL
+@set TOPDIR=%~dp0..
+
 @call "%VS120COMNTOOLS%\VsDevCmd.bat"
 @IF %ERRORLEVEL% neq 0 GOTO error
-
-@set TOPDIR=%~dp0..
 
 @set GEN=msvc2013_windows
 @set PROJECTNAME=metabuilder

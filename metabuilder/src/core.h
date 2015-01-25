@@ -61,6 +61,9 @@ void _mbLogDebugfLF(const char* fmt, ...);
 void ToUpperStr(char* str);
 void ToLowerStr(char* str);
 
+void mbCore_Init();
+void mbCore_Shutdown();
+
 #include "platform/platform.h"
 
 #endif

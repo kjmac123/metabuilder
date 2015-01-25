@@ -57,7 +57,6 @@ function GetCustomGroupRule(groupName, inputfilename)
 		return WriteCustomRuleVertexShader
 	end
 
-	--print("no custom rule")
 	return nil	
 end
 

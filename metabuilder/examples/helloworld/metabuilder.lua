@@ -1,5 +1,7 @@
 solution "helloworld"
 
+	loginfo("#{USER}")
+
 	--Currently metabuilder supports only a single target per solution
 	target "helloworld"
 		--this is an application (as opposed to a module for example)

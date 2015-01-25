@@ -7,7 +7,7 @@ function module.join(a, b, dirSep)
 	if b == "" then
 		return a
 	end
-	
+
 	module.trimtrailingslash(a)
 	module.trimleadingslash(b)
 
@@ -54,11 +54,25 @@ function module.trimleadingslash(filepath)
 	end
 
 	local firstChar = string.sub(filepath, 1, 1)
-	if lastChar == '\\' or lastChar == '/' then
-		return string.sub(filepath, 1, length-1)
+	if firstChar == '\\' or firstChar == '/' then
+		return string.sub(filepath, 2, length)
 	end
 
-	return path
+	return filepath
+end
+
+function module.trimrawmarker(filepath)
+	local length = string.len(filepath)
+	if length == 0 then
+		return filepath
+	end
+
+	local firstChar = string.sub(filepath, 1, 1)
+	if firstChar == '!' then
+		return string.sub(filepath, 2, length)
+	end
+
+	return filepath
 end
 
 function module.trimtrailingdot(path)
@@ -90,7 +104,7 @@ function module.removeextension(filepath)
 end
 
 function module.containsdirsep(filepath)
-	return string.find(filepath, "/") or string.find(filepath, "\\") 
+	return string.find(filepath, "/") or string.find(filepath, "\\")
 end
 
 return module

@@ -251,7 +251,6 @@ end
 
 function GetTargetOutputFilename(currentTarget)
 	local ext = ""
-	--print(inspect(currentTarget))
 	if currentTarget.targettype == "app" then
 		if (currentTarget.options.appfileextension ~= nil) then
 			ext = "." .. currentTarget.options.appfileextension[1]

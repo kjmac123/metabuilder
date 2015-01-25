@@ -1,5 +1,5 @@
 platform "Android"
-		
+
 	files
 	{
 		"projects/android/jni/*",
@@ -8,6 +8,22 @@ platform "Android"
 		"projects/android/AndroidManifest.xml",
 	}
 
-	androidsettargetapi("android-15")
+	files
+	{
+		"src/platform/android/platform_android.cpp",
+	}
+
+	libs
+	{
+		"-llog",
+	}
+
+	if checkplatform("Android") then
+		android.settargetapi("android-14")
+	end
+
+	if checkplatform("NDK") then
+		ndk.setprojectdir("projects/android")
+	end
 
 platform_end()
