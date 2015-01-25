@@ -19,7 +19,7 @@ platform "Android"
 	}
 
 	if checkplatform("Android") then
-		android.settargetapi("android-15")
+		android.settargetapi("android-14")
 	end
 
 	if checkplatform("NDK") then

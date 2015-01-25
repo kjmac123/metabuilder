@@ -7,19 +7,19 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_metabuilder_mobileapp_mobileapp_mobileappNativeInit(JNIEnv* env, jobject obj)
 {
-	Platform::Init();
+	Core_Init();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_metabuilder_mobileapp_mobileapp_mobileappNativeShutdown(JNIEnv* env, jobject obj)
 {
-	Platform::Shutdown();
+	Core_Shutdown();
 }
 
 extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORT double JNICALL
 Java_com_metabuilder_mobileapp_mobileapp_mobileappNativeRun(JNIEnv* env, jobject obj)
 {
-	Core_GetElapsedTimeSeconds();
+    return Core_GetElapsedTimeSeconds();
 }
