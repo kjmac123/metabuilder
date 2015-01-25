@@ -2,8 +2,6 @@ package com.metabuilder.mobileapp;
 
 import android.os.Handler;
 import android.util.Log;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import android.app.Activity;
 import android.os.Bundle;
