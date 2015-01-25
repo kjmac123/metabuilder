@@ -51,12 +51,12 @@ function WriteApplicationMk(currentTarget, config)
 
 	NDKSetMakeOutputDir(g_makeOutputDirAbsTargetConfig)
 
+	local jniDir = GetJNIDir(currentTarget.name, config.name)
+	mbwriter.mkdir(jniDir)
+
 	local wsDir = GetWorkspaceDir(currentTarget.name, config.name)
 	local markerFile = mbfile.open(wsDir .. "/BUILD_CONFIG_" .. config.name, "w")
 	markerFile:close()
-
-	local jniDir = GetJNIDir(currentTarget.name, config.name)
-	mbwriter.mkdir(jniDir)
 
 	local makeFilename = jniDir .. "/Application.mk"
 	local file = mbfile.open(makeFilename, "w")
