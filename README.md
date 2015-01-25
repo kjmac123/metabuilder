@@ -51,13 +51,6 @@ Once open in XCode if you need to add/remove files you’ll again need to re-run
 ##Example Metabuilder make file
 From metabuilder/examples/helloworld/metabuilder.lua
 ```
-	makesetup ""
-		--subdir for intermediate files
-		intdir "int"
-		--subdir for final output files
-		outdir "out"	
-	makesetup_end()
-	
 	solution "helloworld"
 	
 		--Currently metabuilder supports only a single target per solution
