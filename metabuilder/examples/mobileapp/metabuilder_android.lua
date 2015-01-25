@@ -1,5 +1,5 @@
 platform "Android"
-		
+
 	files
 	{
 		"projects/android/jni/*",
@@ -13,8 +13,17 @@ platform "Android"
 		"src/platform/android/platform_android.cpp",
 	}
 
-	if checkplatform("TADP") then
-		tadp.settargetapi("android-15")
+	libs
+	{
+		"-llog",
+	}
+
+	if checkplatform("Android") then
+		android.settargetapi("android-15")
+	end
+
+	if checkplatform("NDK") then
+		ndk.setprojectdir("projects/android")
 	end
 
 platform_end()

@@ -28,8 +28,10 @@ config_end()
 config "MasterSymbols"
 config_end()
 
+android = {}
+
 tadp = {}
 
-function tadp.settargetapi(targetapi)
+function android.settargetapi(targetapi)
 	option("msvconfiguration", "AndroidTargetAPI", targetapi)
 end

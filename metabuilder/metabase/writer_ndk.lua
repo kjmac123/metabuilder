@@ -15,10 +15,9 @@ function GetJNIDir(currentTargetName, configName)
 end
 
 function CreateLinks(currentTarget, config)
-	local templateDir = mbutil.getkvvalue(config.options._ndk, "templatedir")
+	local templateDir = mbutil.getkvvalue(config.options._ndk, "ProjectDir")
 	if templateDir == nil then
-		return
-		--mbwriter.fatalerror("Template dir not specified")
+		mbwriter.fatalerror("ndk project dir not specified")
 	end
 
 	--NOTE: templateDir needs to remain relative to working directory, not output
@@ -27,7 +26,7 @@ function CreateLinks(currentTarget, config)
 	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
 	mbwriter.mkdir(workspaceDir)
 
-	mbwriter.mklink(templateDir .. "/build.xml",							workspaceDir .. "/build.xml")
+	--mbwriter.mklink(templateDir .. "/build.xml",							workspaceDir .. "/build.xml")
 	mbwriter.mklink(templateDir .. "/AndroidManifest.xml",		workspaceDir .. "/AndroidManifest.xml")
 
 	if mbwriter.getfiletype(templateDir .. "/assets") ~= "missing" then
