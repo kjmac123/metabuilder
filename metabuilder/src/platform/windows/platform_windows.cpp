@@ -39,8 +39,25 @@ bool CreateDir(const char* osDir)
 
 bool CreateLink(const char* src, const char* dst)
 {
-	MB_LOGERROR("Links not supported");
-	return false;
+	DWORD flags = 0;
+
+	E_FileType fileType = GetFileType(src);
+	if (fileType == E_FileType_Missing)
+	{
+		MB_LOGERROR("Failed to create link from %s to %s (source is missing)", src, dst);
+		return false;
+	}
+	
+	if (fileType == E_FileType_Dir)
+		flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
+	
+	if (CreateSymbolicLinkA(dst, src, flags) == 0)
+	{
+		MB_LOGERROR("Failed to create link from %s to %s", src, dst);
+		return false;
+	}
+	
+	return true;
 }
 
 E_FileType GetFileType(const std::string& filepath)
