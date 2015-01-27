@@ -39,24 +39,48 @@ bool CreateDir(const char* osDir)
 
 bool CreateLink(const char* src, const char* dst)
 {
-	DWORD flags = 0;
+	//Cleanup
+	{
+		E_FileType fileType = GetFileType(dst);
+		if (fileType == E_FileType_Dir)
+		{
+			if (RemoveDirectoryA(dst) == 0)
+			{
+				MB_LOGERROR("Failed to remove old dir link at %s", dst);
+				return false;
+			}
+		}
+		else if (fileType == E_FileType_File)
+		{
+			if (DeleteFileA(dst) == 0)
+			{
+				MB_LOGERROR("Failed to remove old file link at %s", dst);
+				return false;
+			}
+		}
+	}
 
-	E_FileType fileType = GetFileType(src);
-	if (fileType == E_FileType_Missing)
+	//Create new link
 	{
-		MB_LOGERROR("Failed to create link from %s to %s (source is missing)", src, dst);
-		return false;
+		DWORD flags = 0;
+
+		E_FileType fileType = GetFileType(src);
+		if (fileType == E_FileType_Missing)
+		{
+			MB_LOGERROR("Failed to create link from %s to %s (source is missing)", src, dst);
+			return false;
+		}
+
+		if (fileType == E_FileType_Dir)
+			flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
+
+		if (CreateSymbolicLinkA(dst, src, flags) == 0)
+		{
+			MB_LOGERROR("Failed to create link from %s to %s", src, dst);
+			return false;
+		}
 	}
-	
-	if (fileType == E_FileType_Dir)
-		flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
-	
-	if (CreateSymbolicLinkA(dst, src, flags) == 0)
-	{
-		MB_LOGERROR("Failed to create link from %s to %s", src, dst);
-		return false;
-	}
-	
+
 	return true;
 }
 

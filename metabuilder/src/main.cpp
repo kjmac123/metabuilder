@@ -93,11 +93,13 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	std::vector<std::string> badOptions;
 
 	if(!opt.gotExpected(badOptions)) {
-		for(size_t i=0; i < badOptions.size(); ++i)
-			std::cerr << "ERROR: Got unexpected number of arguments for option " << badOptions[i] << "\n\n";
+		for (size_t i = 0; i < badOptions.size(); ++i)
+		{
+			MB_LOGERROR("ERROR: Got unexpected number of arguments for option %s\n", badOptions[i].c_str());
+		}
 
 		opt.getUsage(usage);
-		std::cout << usage;
+		MB_LOGERROR("%s", usage.c_str());
 		mbExitError();
 	}
 	
@@ -106,7 +108,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	{
 		for(size_t i=0; i < requiredOptions.size(); ++i)
 		{
-			std::cerr << "ERROR: required option missing: " << requiredOptions[i] << "\n";
+			MB_LOGERROR("ERROR: required option missing: %s", requiredOptions[i].c_str());
 		}
 
 		mbExitError();

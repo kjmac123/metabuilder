@@ -21,26 +21,37 @@ function CreateLinks(currentTarget, config)
 	end
 
 	--NOTE: templateDir needs to remain relative to working directory, not output
-	--files as links are made withing the metabuilder app itself
+	--files as links are made within the metabuilder app itself
 
 	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
 	mbwriter.mkdir(workspaceDir)
 
-	--mbwriter.mklink(templateDir .. "/build.xml",							workspaceDir .. "/build.xml")
-	mbwriter.mklink(templateDir .. "/AndroidManifest.xml",		workspaceDir .. "/AndroidManifest.xml")
-
-	if mbwriter.getfiletype(templateDir .. "/assets") ~= "missing" then
-		mbwriter.mklink(templateDir .. "/assets",									workspaceDir .. "/assets")
-	else
-		loginfo("Not creating link for Android " .. templateDir .. "/assets" .. " folder as does not exist")
+	--Create stubs for missing files
+	if mbwriter.getfiletype(templateDir .. "/build.xml") == "missing" then
+		local file = mbfile.open(templateDir .. "/build.xml", "w")
+		file:close()
 	end
-	mbwriter.mklink(templateDir .. "/res",										workspaceDir .. "/res")
-	mbwriter.mklink(templateDir .. "/src",										workspaceDir .. "/src")
-end
-
-function NDKSetMakeOutputDir(outputDir)
-	--mbwriter.setmakeoutputdirabs(outputDir)
-	--print("NDKSetMakeOutputDir " .. outputDir)
+	if mbwriter.getfiletype(templateDir .. "/AndroidManifest.xml") == "missing" then
+		local file = mbfile.open(templateDir .. "/AndroidManifest.xml", "w")
+		file:close()
+	end	
+	--Create stubs for missing dirs
+	if mbwriter.getfiletype(templateDir .. "/assets") == "missing" then
+		mbwriter.mkdir(templateDir .. "/assets")
+	end
+	if mbwriter.getfiletype(templateDir .. "/res") == "missing" then
+		mbwriter.mkdir(templateDir .. "/res")
+	end
+	if mbwriter.getfiletype(templateDir .. "/src") == "missing" then
+		mbwriter.mkdir(templateDir .. "/src")
+	end
+	
+	--Create minimal set of links we require.
+	mbwriter.mklink(templateDir .. "/build.xml",				workspaceDir .. "/build.xml")
+	mbwriter.mklink(templateDir .. "/AndroidManifest.xml",		workspaceDir .. "/AndroidManifest.xml")	
+	mbwriter.mklink(templateDir .. "/assets",					workspaceDir .. "/assets")
+	mbwriter.mklink(templateDir .. "/res",						workspaceDir .. "/res")
+	mbwriter.mklink(templateDir .. "/src",						workspaceDir .. "/src")
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -48,8 +59,6 @@ end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function WriteApplicationMk(currentTarget, config)
-
-	NDKSetMakeOutputDir(g_makeOutputDirAbsTargetConfig)
 
 	local jniDir = GetJNIDir(currentTarget.name, config.name)
 	mbwriter.mkdir(jniDir)
@@ -81,8 +90,6 @@ function WriteApplicationMk(currentTarget, config)
 	end
 	file:close()
 	mbwriter.reportoutputfile(makeFilename)
-
-	NDKSetMakeOutputDir(g_makeOutputDirAbsRoot)
 end
 
 function WriteAndroidMk(currentTarget, config)
@@ -106,8 +113,6 @@ function WriteAndroidMk(currentTarget, config)
 			end
 		end
 	end
-
-	NDKSetMakeOutputDir(g_makeOutputDirAbsTargetConfig)
 
 	local jniDir = GetJNIDir(currentTarget.name, config.name)
 	mbwriter.mkdir(jniDir)
@@ -253,8 +258,6 @@ function WriteAndroidMk(currentTarget, config)
 
 	file:close()
 	mbwriter.reportoutputfile(makeFilename)
-
-	NDKSetMakeOutputDir(g_makeOutputDirAbsRoot)
 end
 
 function WriteJNI(currentTarget, config)
