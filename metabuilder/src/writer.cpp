@@ -57,7 +57,7 @@ static int luaFuncMklink(lua_State* l)
     
 	if (!Platform::CreateLink(srcRealPath.c_str(), normalisedLinkDst))
 	{
-		MB_LOGERROR("Failed to create link %s->%s", normalisedLinkSrc, normalisedLinkDst);
+		MB_LOGERROR("Failed to create link %s -> %s", normalisedLinkSrc, normalisedLinkDst);
 		mbExitError();
 	}
 	

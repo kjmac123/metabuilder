@@ -50,6 +50,18 @@ function MSVCGetLibLinkerInputArg(config, lib)
 	return lib
 end
 
+function MSVCWriteRootCustomXML(file)
+	if MSVCRootHook then
+		MSVCRootHook(file)
+	end
+end
+
+function MSVCWriteConfigCustomXML(file, config)
+	if MSVCRootConfigHook then
+		MSVCRootConfigHook(file, config)
+	end
+end
+
 function MSVCInitFolder(folderList, path_, filename)
 	local path = mbfilepath.trimtrailingslash(path_)
 
@@ -275,9 +287,8 @@ function MSVCWriteVcxProj(currentTarget, groups)
 
 	file:write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 	file:write("<Project DefaultTargets=\"Build\" ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
-	if MSVCRootHook then
-		MSVCRootHook(file)
-	end
+	
+	MSVCWriteRootCustomXML(file)
 
 	file:write("  <ItemGroup Label=\"ProjectConfigurations\">\n")
 
@@ -449,6 +460,8 @@ function MSVCWriteVcxProj(currentTarget, groups)
 		MSVCWriteVcxProjPropertyGroupOptions(file, config.options.msvcitemdef)
 		MSVCWriteVcxProjRawXMLBlocks(file, config.options.msvcitemdefrawxml)
 
+		MSVCWriteConfigCustomXML(file, config)
+		
 		file:write("  </ItemDefinitionGroup>\n")
 	end
 

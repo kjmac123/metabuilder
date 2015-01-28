@@ -19,7 +19,8 @@ platform "Android"
 	}
 
 	if checkplatform("Android") then
-		android.settargetapi("android-14")
+		android.setminapi("android-14")
+		android.settargetapi("android-21")
 	end
 
 	if checkplatform("NDK") then

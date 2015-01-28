@@ -22,7 +22,7 @@ public class mobileapp extends Activity
             mUpdateHandler.postDelayed(this, 100);
             TextView mainLabel = (TextView)findViewById(id.MainLabel);
     		double test = mobileappNativeRun();
-    		mainLabel.setText(String.format("%.2f seconds", test));
+    		mainLabel.setText(String.format("%.1f seconds", test));
         }
     };
     
@@ -36,11 +36,6 @@ public class mobileapp extends Activity
 		
         setContentView(R.layout.activity_main);
         mUpdateHandler.postDelayed(mUpdateRunnable, 100);
-
-		System.out.println("Running native code test function");
-		double test = mobileappNativeRun();
-		TextView mainLabel = (TextView)findViewById(id.MainLabel);
-		mainLabel.setText(String.format("Up time: %fs", test));
 	}
 
 	@Override

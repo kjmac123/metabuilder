@@ -14,6 +14,28 @@ function GetJNIDir(currentTargetName, configName)
 	return GetWorkspaceDir(currentTargetName, configName) .. "/jni"
 end
 
+function InitRequiredFileOrDir(templateDir, workspaceDir, relativeFilename)
+	
+	local templateFilename = templateDir .. "/" .. relativeFilename
+	local workspaceFilename = workspaceDir .. "/" .. relativeFilename
+	
+	--If file not already present in workspace
+	if mbwriter.getfiletype(workspaceFilename) == "missing" then
+		--Look for link candidate in template dir
+		if mbwriter.getfiletype(templateFilename) == "missing" then
+			--Error: Missing link source
+			mbwriter.fatalerror("Required file/dir missing: " .. workspaceFilename)
+		else
+			--Link source exists, so create the link
+			mbwriter.mklink(templateFilename, workspaceFilename)
+			loginfo("Created link from " .. templateFilename .. " -> " .. workspaceFilename)
+		end
+	end
+	
+	--Use existing file in workspace
+	loginfo("Required file/dir " .. relativeFilename .. " found in " .. workspaceDir .. "/" .. relativeFilename)
+end
+
 function CreateLinks(currentTarget, config)
 	local templateDir = mbutil.getkvvalue(config.options._ndk, "ProjectDir")
 	if templateDir == nil then
@@ -26,32 +48,12 @@ function CreateLinks(currentTarget, config)
 	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
 	mbwriter.mkdir(workspaceDir)
 
-	--Create stubs for missing files
-	if mbwriter.getfiletype(templateDir .. "/build.xml") == "missing" then
-		local file = mbfile.open(templateDir .. "/build.xml", "w")
-		file:close()
-	end
-	if mbwriter.getfiletype(templateDir .. "/AndroidManifest.xml") == "missing" then
-		local file = mbfile.open(templateDir .. "/AndroidManifest.xml", "w")
-		file:close()
-	end	
-	--Create stubs for missing dirs
-	if mbwriter.getfiletype(templateDir .. "/assets") == "missing" then
-		mbwriter.mkdir(templateDir .. "/assets")
-	end
-	if mbwriter.getfiletype(templateDir .. "/res") == "missing" then
-		mbwriter.mkdir(templateDir .. "/res")
-	end
-	if mbwriter.getfiletype(templateDir .. "/src") == "missing" then
-		mbwriter.mkdir(templateDir .. "/src")
-	end
-	
-	--Create minimal set of links we require.
-	mbwriter.mklink(templateDir .. "/build.xml",				workspaceDir .. "/build.xml")
-	mbwriter.mklink(templateDir .. "/AndroidManifest.xml",		workspaceDir .. "/AndroidManifest.xml")	
-	mbwriter.mklink(templateDir .. "/assets",					workspaceDir .. "/assets")
-	mbwriter.mklink(templateDir .. "/res",						workspaceDir .. "/res")
-	mbwriter.mklink(templateDir .. "/src",						workspaceDir .. "/src")
+	InitRequiredFileOrDir(templateDir, workspaceDir, "build.xml")
+	InitRequiredFileOrDir(templateDir, workspaceDir, "AndroidManifest.xml")
+	InitRequiredFileOrDir(templateDir, workspaceDir, "project.properties")
+	InitRequiredFileOrDir(templateDir, workspaceDir, "assets")
+	InitRequiredFileOrDir(templateDir, workspaceDir, "res")
+	InitRequiredFileOrDir(templateDir, workspaceDir, "src")
 end
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------

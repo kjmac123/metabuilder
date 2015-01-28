@@ -1,7 +1,7 @@
 #ifndef MB_CORE_H
 #define MB_CORE_H
 
-#define MB_ENABLE_PROFILING
+//#define MB_ENABLE_PROFILING
 
 typedef unsigned char U8;
 typedef char S8;

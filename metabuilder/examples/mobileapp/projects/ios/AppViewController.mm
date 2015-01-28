@@ -18,7 +18,7 @@ NSTimer *m_timer;
 - (void)timerTick
 {
     double timeSeconds = Core_GetElapsedTimeSeconds();
-    self.label.text = [NSString stringWithFormat:@"%.2f seconds", timeSeconds];
+    self.label.text = [NSString stringWithFormat:@"%.1f seconds", timeSeconds];
 }
 
 - (void)viewDidLoad

@@ -30,8 +30,22 @@ config_end()
 
 android = {}
 
-tadp = {}
+function android.setminapi(minapi)
+	option("msvconfiguration", "AndroidMinAPI", minapi)
+end
 
 function android.settargetapi(targetapi)
 	option("msvconfiguration", "AndroidTargetAPI", targetapi)
 end
+
+function android.setproguardenabled(proguardEnabled)
+	local tmp = nil
+	if proguardEnabled then
+		tmp = "true"
+	else
+		tmp = "false"
+	end
+	option("_android", "ProguardEnabled", tmp)
+end
+
+tadp = {}

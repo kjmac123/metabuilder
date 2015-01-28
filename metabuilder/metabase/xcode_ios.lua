@@ -64,6 +64,7 @@ metabase "xcode_ios"
 		option("compiler", "GCC_WARN_UNUSED_VARIABLE", "YES")
 		option("compiler", "VALIDATE_PRODUCT",  "YES")
 		option("compiler", "GCC_OPTIMIZATION_LEVEL", "fast")
+		option("compiler", "ONLY_ACTIVE_ARCH", "YES")
 	config_end()
 
 	config "Profile"
@@ -88,6 +89,7 @@ metabase "xcode_ios"
 		option("compiler", "GCC_WARN_UNUSED_VARIABLE", "YES")
 		option("compiler", "VALIDATE_PRODUCT",  "YES")
 		option("compiler", "GCC_OPTIMIZATION_LEVEL", "fast")
+		option("compiler", "ONLY_ACTIVE_ARCH", "YES")
 	config_end()
 
 	config "Master"
