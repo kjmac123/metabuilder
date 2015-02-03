@@ -38,14 +38,24 @@ function android.settargetapi(targetapi)
 	option("msvconfiguration", "AndroidTargetAPI", targetapi)
 end
 
-function android.setproguardenabled(proguardEnabled)
+function android.setproguardenabled(value)
 	local tmp = nil
-	if proguardEnabled then
+	if value then
 		tmp = "true"
 	else
 		tmp = "false"
 	end
 	option("_android", "ProguardEnabled", tmp)
+end
+
+function android.setdebuggable(value)
+	local tmp = nil
+	if value then
+		tmp = "true"
+	else
+		tmp = "false"
+	end
+	option("_android", "Debuggable", tmp)
 end
 
 tadp = {}

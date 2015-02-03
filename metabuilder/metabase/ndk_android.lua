@@ -48,7 +48,10 @@ function android.settargetapi(targetapi)
 	--option("ndkoptions", "APP_PLATFORM", targetapi)
 end
 
-function android.setproguardenabled(proguardEnabled)
+function android.setproguardenabled(value)
+end
+
+function android.setdebuggable(value)
 end
 
 ndk = {}

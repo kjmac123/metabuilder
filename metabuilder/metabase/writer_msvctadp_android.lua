@@ -25,7 +25,6 @@ end
 function MSVCRootConfigHook(file, config)
 	file:write("  <AntBuild>\n")
 	
-	local msvcPlatform = mbutil.getkvvalue(mbwriter.global.options.msvc, "platform")
 	local proguardEnabled = mbutil.getkvvalue(config.options._android, "ProguardEnabled")
 	if proguardEnabled == nil then
 		proguardEnabled = "false"
@@ -33,6 +32,13 @@ function MSVCRootConfigHook(file, config)
 	
 	file:write("    <ProGuardConfigLocation>$(ProjectDir)\\proguard-project.txt</ProGuardConfigLocation>\n")
 	file:write("    <EnableProGuard>" .. proguardEnabled .. "</EnableProGuard>\n")
+	
+	local debuggable = mbutil.getkvvalue(config.options._android, "Debuggable")
+	if debuggable == nil then
+		debuggable = "false"
+	end
+	file:write("    <Debuggable>" .. debuggable .. "</Debuggable>\n")
+	
 	file:write("  </AntBuild>\n")
 end
 
