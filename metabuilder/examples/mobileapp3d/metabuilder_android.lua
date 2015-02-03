@@ -1,5 +1,5 @@
 platform "Android"
-		
+
 	files
 	{
 		"projects/android/jni/*",
@@ -9,7 +9,11 @@ platform "Android"
 	}
 
 	if checkplatform("TADP") then
-		tadp.settargetapi("android-15")
+		tadp.settargetapi("android-21")
+	end
+
+	if checkplatform("NDK") then
+		ndk.setprojectdir("projects/android")
 	end
 
 platform_end()

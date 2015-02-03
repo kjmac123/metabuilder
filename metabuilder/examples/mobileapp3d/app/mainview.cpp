@@ -6,7 +6,11 @@
 
 #include "maths.h"
 
-#include <OpenGLES/ES2/glext.h>
+#ifdef PLATFORM_IOS
+#include <OpenGLES/ES2/gl.h>
+#else
+#include <GLES2/gl2.h>
+#endif
 
 #define NEAR_CLIP 0.1f
 #define FAR_CLIP 100.f
