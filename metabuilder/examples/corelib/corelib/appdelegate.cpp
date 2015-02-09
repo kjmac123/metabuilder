@@ -11,36 +11,23 @@ CoreAppDelegate::~CoreAppDelegate()
     
 }
 
-void CoreAppDelegate::OnLaunched()
+void CoreAppDelegate::OnInit(void* initData)
 {
-    Core_Init();
+    Core_Init(initData);
+    MB_LOGINFO("CoreAppDelegate::Init");
 }
 
-void CoreAppDelegate::OnWillResignActive()
+void CoreAppDelegate::OnShutdown()
 {
-    
+    MB_LOGINFO("CoreAppDelegate::Shutdown");
 }
 
-void CoreAppDelegate::OnDidEnterBackground()
+void CoreAppDelegate::OnPause()
 {
-    
+    MB_LOGINFO("CoreAppDelegate::Pause");
 }
 
-void CoreAppDelegate::OnWillEnterForeground()
+void CoreAppDelegate::OnResume()
 {
-    
-}
-
-void CoreAppDelegate::OnDidBecomeActive()
-{
-    
-}
-
-void CoreAppDelegate::OnWillTerminate()
-{
-}
-
-void CoreAppDelegate::Update()
-{
-    
+    MB_LOGINFO("CoreAppDelegate::Resume");
 }

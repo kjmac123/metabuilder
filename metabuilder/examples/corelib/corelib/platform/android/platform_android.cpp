@@ -2,6 +2,8 @@
 #include "corelib/platform/platform.h"
 
 #include <android/log.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,10 +12,20 @@
 #include <dirent.h>
 #include <fcntl.h>
 
+#include <jni.h>
+#include "jnihelpers.h"
+
 namespace Platform
 {
-	void Init()
+    AAssetManager* g_assetManager;
+    
+	void Init(void* infoPtr)
 	{
+        JNIInitInfo* initInfo = static_cast<JNIInitInfo*>(infoPtr);
+        MB_ASSERT(infoPtr);
+        g_assetManager = AAssetManager_fromJava(initInfo->env, initInfo->assetManager);
+        MB_ASSERT(g_assetManager);
+        MB_LOGINFO("Platform::Init complete");
 	}
 
 	void Shutdown()

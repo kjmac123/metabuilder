@@ -45,12 +45,12 @@ void _mbLogDebugfNewLine(const char* fmt, ...)
 
 void private_CoreAbort()
 {
-    _exit(1);
+    abort();
 }
 
-void Core_Init()
+void Core_Init(void* initData)
 {
-    Platform::Init();
+    Platform::Init(initData);
     
     g_coreAppTimer = new Timer();
 }

@@ -1,8 +1,22 @@
 #ifndef LOGICALFS_H
 #define LOGICALFS_H
 
-#include "corelib/platform/platformfile.h"
+enum E_FileMode
+{
+    E_FileMode_ReadBinary
+};
 
-Platform::File* LogicalFS_OpenBundleFile(const char* filepath, Platform::E_FileMode mode);
+class ILogicalFile
+{
+public:
+    virtual         ~ILogicalFile();
+    
+    virtual S64     Read(void* dst, S64 toRead) = 0;
+    virtual S64     Write(S64 toWrite, void* data) = 0;
+    
+    virtual S64     GetLength() const = 0;
+};
+
+ILogicalFile* LogicalFS_OpenBundleFile(const char* filepath);
 
 #endif

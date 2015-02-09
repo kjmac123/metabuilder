@@ -23,6 +23,14 @@ MainView* g_mainView;
 {
     [super viewDidLoad];
     
+    UIDevice* device = [UIDevice currentDevice];
+    [device beginGeneratingDeviceOrientationNotifications];
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self
+           selector:@selector(orientationChanged:)
+               name:UIDeviceOrientationDidChangeNotification
+             object:device];
+    
     self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 
     if (!self.context) {
@@ -61,6 +69,15 @@ MainView* g_mainView;
     }
 }
 
+- (void)orientationChanged:(NSNotification*) note
+{
+    ViewSettings viewSettings;
+    viewSettings.width = self.view.bounds.size.width;
+    viewSettings.height = self.view.bounds.size.height;
+    
+    g_mainView->OnSurfaceChanged(viewSettings);
+}
+
 - (BOOL)prefersStatusBarHidden {
     return YES;
 }
@@ -70,31 +87,28 @@ MainView* g_mainView;
     [EAGLContext setCurrentContext:self.context];
 
     g_mainView = new MainView();
-    g_mainView->Init();
+    
+    ViewSettings viewSettings;
+    viewSettings.width = self.view.bounds.size.width;
+    viewSettings.height = self.view.bounds.size.height;
+    
+    g_mainView->OnInit();
+    g_mainView->OnSurfaceChanged(viewSettings);
 }
 
 - (void)tearDownGL
 {
     [EAGLContext setCurrentContext:self.context];
  
-    g_mainView->Shutdown();
+    g_mainView->OnShutdown();
     
     delete g_mainView;
     g_mainView = NULL;
 }
 
-- (void)update
-{
-    g_mainView->Update();
-}
-
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
-    ViewSettings viewSettings;
-    viewSettings.width = self.view.bounds.size.width;
-    viewSettings.height = self.view.bounds.size.height;
-
-    g_mainView->Render(viewSettings);
+    g_mainView->OnDrawFrame();
 }
 
 

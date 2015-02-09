@@ -5,7 +5,7 @@
 
 namespace Platform
 {
-	void		Init();
+	void		Init(void* initData);
 	void		Shutdown();
 
 	bool		LogAutoNewLine();

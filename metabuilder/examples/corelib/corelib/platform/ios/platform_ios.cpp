@@ -11,7 +11,7 @@ namespace Platform
 static F64                          g_machTimeToNs;
 static mach_timebase_info_data_t	g_timebase;
 
-void Init()
+void Init(void*)
 {
 	mach_timebase_info(&g_timebase);
 	g_machTimeToNs = ((F64)g_timebase.numer / (F64)g_timebase.denom);

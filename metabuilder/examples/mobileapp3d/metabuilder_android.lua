@@ -8,6 +8,13 @@ platform "Android"
 		"projects/android/AndroidManifest.xml",
 	}
 
+    libs
+    {
+        "-llog",
+        "-lGLESv2",
+        "-landroid",
+    }
+
 	if checkplatform("TADP") then
 		tadp.settargetapi("android-21")
 	end

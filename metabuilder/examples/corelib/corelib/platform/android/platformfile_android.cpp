@@ -1,13 +1,12 @@
-#ifndef PLATFORM_H
-#define PLATFORM_H
+#include "corelib/core.h"
+#include "corelib/logicalfs.h"
 
 namespace Platform
 {
-    const char* File_GetBundleRoot()
+    ILogicalFile* ApkFile_OpenFile(const char* filepath);
+    
+    ILogicalFile* File_OpenOSBundleFile(const char* filepath)
     {
-        
+        return ApkFile_OpenFile(filepath);
     }
-
 }
-
-#endif

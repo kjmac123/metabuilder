@@ -13,33 +13,31 @@ CoreAppDelegate* g_coreAppDelegate;
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     g_coreAppDelegate = new CoreAppDelegate;
-    g_coreAppDelegate->OnLaunched();
+    g_coreAppDelegate->OnInit(NULL);
     return YES;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application
 {
-    g_coreAppDelegate->OnWillResignActive();
+    g_coreAppDelegate->OnPause();
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
-    g_coreAppDelegate->OnDidEnterBackground();
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-    g_coreAppDelegate->OnWillEnterForeground();
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-    g_coreAppDelegate->OnWillResignActive();
+    g_coreAppDelegate->OnResume();
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-    g_coreAppDelegate->OnWillTerminate();
+    g_coreAppDelegate->OnShutdown();
     delete g_coreAppDelegate;
 }
 

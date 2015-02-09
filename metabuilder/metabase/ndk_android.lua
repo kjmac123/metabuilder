@@ -9,9 +9,9 @@ metabase "ndk_android"
 
 	writer "writer_ndk.lua"
 
-	option("ndkoptions", "APP_ABI",								"armeabi-v7a")
-	option("ndkoptions", "APP_PLATFORM",						"android-14")
-	option("ndkoptions", "NDK_TOOLCHAIN_VERSION",				"clang")
+	option("ndkoptions", "APP_ABI",								"all")
+	option("ndkoptions", "APP_PLATFORM",					"android-14")
+	option("ndkoptions", "NDK_TOOLCHAIN_VERSION",	"clang")
 	option("ndkoptions", "APP_STL", 							"stlport_static")
 
 	local appCFLAGSCommon = "-Wno-multichar -fno-rtti -fno-exceptions -marm -fpic -Wno-unused-variable -Wno-unused-value "

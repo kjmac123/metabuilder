@@ -49,7 +49,7 @@ void private_CoreAbort();
 #define MB_MAX_STRING_BUFFER_SIZE			(16*1024)
 #define MB_ASSERT							assert
 
-void    Core_Init();
+void    Core_Init(void* initData);
 void    Core_Shutdown();
 
 double  Core_GetElapsedTimeSeconds();

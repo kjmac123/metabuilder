@@ -15,10 +15,10 @@ public:
     MainView();
     ~MainView();
     
-    void Init();
-    void Shutdown();
-    void Update();
-    void Render(const ViewSettings& viewSettings);
+    void OnInit();
+    void OnShutdown();
+    void OnSurfaceChanged(const ViewSettings& viewSettings);
+    void OnDrawFrame();
     
 private:
     MainViewImpl* m_impl;

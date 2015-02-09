@@ -79,7 +79,7 @@ public:
         //Load and compile vertex shader
         while(result)
         {
-            Platform::File* file = LogicalFS_OpenBundleFile(vertexShaderSourceFilePath, Platform::E_FileMode_ReadBinary);
+            ILogicalFile* file = LogicalFS_OpenBundleFile(vertexShaderSourceFilePath);
             if (!file)
             {
                 break;
@@ -106,7 +106,7 @@ public:
         //Load and compile fragment shader
         while (result)
         {
-            Platform::File* file = LogicalFS_OpenBundleFile(fragmentShaderSourceFilePath, Platform::E_FileMode_ReadBinary);
+            ILogicalFile* file = LogicalFS_OpenBundleFile(fragmentShaderSourceFilePath);
             if (!file)
             {
                 break;
@@ -271,7 +271,7 @@ public:
     {
     }
 
-    void Init()
+    void OnInit()
     {
         bool result = m_shader.Init("shader.vsh", "shader.fsh");
         MB_ASSERT(result);
@@ -330,26 +330,17 @@ public:
         m_triCount = triCount;
     }
     
-    void Shutdown()
+    void OnSurfaceChanged(const ViewSettings& viewSettings)
+    {
+        m_viewSettings = viewSettings;
+    }
+    
+    void OnShutdown()
     {
         glUseProgram(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         
         glDeleteBuffers(1, &m_vbObject);
-    }
-    
-    void Update()
-    {
-        const double kRadsPerSec = MATHS_PI/4;
-        double currentTime = Core_GetElapsedTimeSeconds();
-        double dt = currentTime - m_lastFrameTime;
-        //Clamp max dt
-        if (dt > 0.25)
-            dt = 0.25;
-        
-        m_cameraRotationY += kRadsPerSec * dt;
-     
-        m_lastFrameTime = currentTime;
     }
     
     void DrawCube(const Matrix44& modelMatrix, const Matrix44& viewMatrix, const Matrix44& projMatrix)
@@ -379,8 +370,10 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, vtxCount);
     }
     
-    void Render(const ViewSettings& viewSettings)
+    void OnDrawFrame()
     {
+        Update();
+        
         glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
@@ -393,7 +386,7 @@ public:
         glVertexAttribPointer(E_ShaderAttribute_Position, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), 0);
         glVertexAttribPointer(E_ShaderAttribute_Normal, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (const char*)12);
         
-        float aspect = fabsf(viewSettings.width / viewSettings.height);
+        float aspect = fabsf(m_viewSettings.width / m_viewSettings.height);
 
         Matrix44 viewRX = Matrix44::MakeRotationX(0.3f);
         Matrix44 viewRY = Matrix44::MakeRotationY(m_cameraRotationY);
@@ -423,6 +416,23 @@ public:
     }
     
 private:
+    void Update()
+    {
+        const double kRadsPerSec = MATHS_PI/4;
+        double currentTime = Core_GetElapsedTimeSeconds();
+        double dt = currentTime - m_lastFrameTime;
+        //Clamp max dt
+        if (dt > 0.25)
+            dt = 0.25;
+        
+        m_cameraRotationY += kRadsPerSec * dt;
+        
+        m_lastFrameTime = currentTime;
+    }
+    
+    ViewSettings
+            m_viewSettings;
+    
     Shader  m_shader;
     
     double  m_lastFrameTime;
@@ -444,23 +454,23 @@ MainView::~MainView()
     delete m_impl;
 }
     
-void MainView::Init()
+void MainView::OnInit()
 {
-    m_impl->Init();
+    m_impl->OnInit();
 }
     
-void MainView::Shutdown()
+void MainView::OnShutdown()
 {
-    m_impl->Shutdown();
+    m_impl->OnShutdown();
 }
 
-void MainView::Update()
+void MainView::OnSurfaceChanged(const ViewSettings& viewSettings)
 {
-    m_impl->Update();
+    m_impl->OnSurfaceChanged(viewSettings);
 }
 
-void MainView::Render(const ViewSettings& viewSettings)
+void MainView::OnDrawFrame()
 {
-    m_impl->Render(viewSettings);
+    m_impl->OnDrawFrame();
 }
 

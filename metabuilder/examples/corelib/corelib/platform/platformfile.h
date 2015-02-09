@@ -1,16 +1,13 @@
 #ifndef CORELIB_PLATFORMFILE_H
 #define CORELIB_PLATFORMFILE_H
 
+#include "corelib/logicalfs.h"
+
 namespace Platform
 {
-    enum E_FileMode
-    {
-        E_FileMode_ReadBinary
-    };
-    
     class FileImpl;
     
-    class File
+    class File : public ILogicalFile
     {
     public:
                         ~File();
@@ -24,17 +21,16 @@ namespace Platform
                         File();
         void            Close();
         
-        friend File*    File_OpenOSFile(const char* filepath, E_FileMode mode);
+        friend ILogicalFile*    File_OpenOSFile(const char* filepath, E_FileMode mode);
         
         FileImpl*       m_impl;
     };
     
 	void		File_Init();
 	void		File_Shutdown();
-    
-    const char* File_GetBundleRoot();
 
-    File*       File_OpenOSFile(const char* filepath, E_FileMode mode);
+    ILogicalFile*       File_OpenOSBundleFile(const char* filepath);
+    ILogicalFile*       File_OpenOSFile(const char* filepath, E_FileMode mode);
 }
 
 #endif

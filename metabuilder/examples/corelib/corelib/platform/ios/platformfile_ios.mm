@@ -1,18 +1,22 @@
 #include "corelib/core.h"
-#include "corelib/platform/platform.h"
+#include "corelib/logicalfs.h"
+#include "corelib/platform/platformfile.h"
 
 #import <Foundation/Foundation.h>
+
+class ILogicalFile;
 
 namespace Platform
 {
     static char g_bundleRoot[PLATFORM_MAX_PATH];
-    
-    const char* File_GetBundleRoot()
+
+    ILogicalFile* File_OpenOSBundleFile(const char* filepath)
     {
-        return g_bundleRoot;
+        char osFilePath[PLATFORM_MAX_PATH];
+        core_sprintf(osFilePath, sizeof(osFilePath), "%s/%s", g_bundleRoot, filepath);
+        
+        return File_OpenOSFile(osFilePath, E_FileMode_ReadBinary);
     }
-
-
     
     void File_Init()
     {

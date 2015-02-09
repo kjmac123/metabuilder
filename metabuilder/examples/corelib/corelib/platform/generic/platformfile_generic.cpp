@@ -61,7 +61,7 @@ namespace Platform
         fclose(m_impl->handle);
     }
 
-    File* File_OpenOSFile(const char* filepath, E_FileMode mode)
+    ILogicalFile* File_OpenOSFile(const char* filepath, E_FileMode mode)
     {
         MB_ASSERT(mode == E_FileMode_ReadBinary);
         
@@ -75,5 +75,4 @@ namespace Platform
         
         return NULL;
     }
-    
 }

@@ -15,10 +15,10 @@ function GetJNIDir(currentTargetName, configName)
 end
 
 function InitRequiredFileOrDir(templateDir, workspaceDir, relativeFilename)
-	
+
 	local templateFilename = templateDir .. "/" .. relativeFilename
 	local workspaceFilename = workspaceDir .. "/" .. relativeFilename
-	
+
 	--If file not already present in workspace
 	if mbwriter.getfiletype(workspaceFilename) == "missing" then
 		--Look for link candidate in template dir
@@ -31,7 +31,7 @@ function InitRequiredFileOrDir(templateDir, workspaceDir, relativeFilename)
 			loginfo("Created link from " .. templateFilename .. " -> " .. workspaceFilename)
 		end
 	end
-	
+
 	--Use existing file in workspace
 	loginfo("Required file/dir " .. relativeFilename .. " found in " .. workspaceDir .. "/" .. relativeFilename)
 end
