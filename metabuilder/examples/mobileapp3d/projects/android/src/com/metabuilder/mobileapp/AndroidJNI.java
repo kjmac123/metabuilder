@@ -11,6 +11,7 @@ public class AndroidJNI
 	public static native void OnAppResume();
 	
 	public static native void OnViewInit();
+	public static native void OnViewShutdown();
 
 	public static native void OnSurfaceChanged(int w, int h);
 

@@ -58,6 +58,10 @@ JNIEXPORT void JNICALL Java_com_metabuilder_mobileapp_AndroidJNI_OnSurfaceChange
  */
 JNIEXPORT void JNICALL Java_com_metabuilder_mobileapp_AndroidJNI_OnDrawFrame
   (JNIEnv *, jobject);
+    
+JNIEXPORT void JNICALL Java_com_metabuilder_mobileapp_AndroidJNI_OnViewShutdown
+    (JNIEnv *, jobject);
+    
 
 #ifdef __cplusplus
 }

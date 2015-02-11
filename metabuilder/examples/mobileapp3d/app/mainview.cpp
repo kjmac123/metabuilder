@@ -46,35 +46,27 @@ class Shader
 public:
     Shader()
     {
-        m_shaderProgram = -1;
-        m_vertexShader = -1;
-        m_fragmentShader = -1;
+        m_shaderProgram = 0;
         
         memset(m_uniforms, 0, sizeof(m_uniforms));
     }
     
     ~Shader()
     {
-        if (m_shaderProgram != -1)
+        glUseProgram(0);
+     
+        if (m_shaderProgram != 0)
         {
-            if (m_vertexShader != -1)
-            {
-                glDetachShader(m_shaderProgram, m_vertexShader);
-                glDeleteShader(m_vertexShader);
-            }
-            if (m_fragmentShader != -1)
-            {
-                glDetachShader(m_shaderProgram, m_fragmentShader);
-                glDeleteShader(m_fragmentShader);
-            }
-            
             glDeleteProgram(m_shaderProgram);
+            m_shaderProgram = 0;
         }
     }
     
     bool Init(const char* vertexShaderSourceFilePath, const char* fragmentShaderSourceFilePath)
     {
         bool result = true;
+        GLuint vertexShader;
+        GLuint fragmentShader;
         
         //Load and compile vertex shader
         while(result)
@@ -96,7 +88,7 @@ public:
             tmp[fileSize] = '\0';
             delete file;
             
-            result = CompileShader(&m_vertexShader, tmp, GL_VERTEX_SHADER);
+            result = CompileShader(&vertexShader, tmp, GL_VERTEX_SHADER);
 
             delete[] tmp;
 
@@ -123,7 +115,7 @@ public:
             tmp[fileSize] = '\0';
             delete file;
             
-            result = CompileShader(&m_fragmentShader, tmp, GL_FRAGMENT_SHADER);
+            result = CompileShader(&fragmentShader, tmp, GL_FRAGMENT_SHADER);
             
             delete[] tmp;
             
@@ -135,9 +127,10 @@ public:
             GLenum glError;
             
             m_shaderProgram = glCreateProgram();
-            glAttachShader(m_shaderProgram, m_vertexShader);
+            
+            glAttachShader(m_shaderProgram, vertexShader);
             glError = glGetError();
-            glAttachShader(m_shaderProgram, m_fragmentShader);
+            glAttachShader(m_shaderProgram, fragmentShader);
             glError = glGetError();
             
             glBindAttribLocation(m_shaderProgram, E_ShaderAttribute_Position, "position");
@@ -146,6 +139,12 @@ public:
             glError = glGetError();
             
             glLinkProgram(m_shaderProgram);
+            
+            glDetachShader(m_shaderProgram, vertexShader);
+            glError = glGetError();
+            glDetachShader(m_shaderProgram, fragmentShader);
+            glError = glGetError();
+            
             {
                 GLint linkResult = GL_FALSE;
                 glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &linkResult);
@@ -157,8 +156,8 @@ public:
                     glGetProgramInfoLog(m_shaderProgram, sizeof(tmp), &logLength, tmp);
                     MB_LOGINFO("%s", tmp);
 
-                    glDeleteShader(m_fragmentShader);
-                    glDeleteShader(m_vertexShader);
+                    glDeleteShader(fragmentShader);
+                    glDeleteShader(vertexShader);
                     glDeleteProgram(m_shaderProgram);
                     result = false;
                 }
@@ -174,6 +173,7 @@ public:
             }
             
             break;
+         
         }
         
         return result;
@@ -249,8 +249,7 @@ private:
     }
     
     GLuint m_shaderProgram;
-    GLuint m_vertexShader;
-    GLuint m_fragmentShader;
+
     int m_uniforms[E_ShaderUniform_Count];
 };
 
@@ -324,23 +323,25 @@ public:
         };
         
         glGenBuffers(1, &m_vbObject);
+        MB_ASSERT(m_vbObject);
         glBindBuffer(GL_ARRAY_BUFFER, m_vbObject);
         glBufferData(GL_ARRAY_BUFFER, sizeof(SimpleVertex)*vtxCount, vertices, GL_STATIC_DRAW);
-        
         m_triCount = triCount;
     }
     
     void OnSurfaceChanged(const ViewSettings& viewSettings)
     {
         m_viewSettings = viewSettings;
+        glViewport(0, 0, viewSettings.width, viewSettings.height);
     }
     
     void OnShutdown()
     {
         glUseProgram(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        
+
         glDeleteBuffers(1, &m_vbObject);
+        m_vbObject = 0;
     }
     
     void DrawCube(const Matrix44& modelMatrix, const Matrix44& viewMatrix, const Matrix44& projMatrix)
@@ -379,7 +380,7 @@ public:
         
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
-        
+
         glEnableVertexAttribArray(E_ShaderAttribute_Position);
         glEnableVertexAttribArray(E_ShaderAttribute_Normal);
 
@@ -397,7 +398,10 @@ public:
         Matrix44 projMatrix;
         CalcProjMatrixGL(projMatrix, DegToRad(90), aspect, NEAR_CLIP, FAR_CLIP);
         
+        MB_ASSERT(m_vbObject != 0);
+
         glBindBuffer(GL_ARRAY_BUFFER, m_vbObject);
+
         m_shader.Bind();
         
         int size = 3;
@@ -413,6 +417,7 @@ public:
             Matrix44 modelMatrix = Matrix44::MakeTranslate(Vec3(x, y, z));
             DrawCube(modelMatrix, viewMatrix, projMatrix);
         }
+ 
     }
     
 private:
@@ -446,26 +451,31 @@ private:
 
 MainView::MainView()
 {
-    m_impl = new MainViewImpl();
+    MB_LOGINFO("MainView::MainView()");
+    m_impl = new MainViewImpl;
 }
 
 MainView::~MainView()
 {
+    MB_LOGINFO("MainView::~MainView()");
     delete m_impl;
 }
     
 void MainView::OnInit()
 {
+    MB_LOGINFO("MainView::OnInit()");
     m_impl->OnInit();
 }
     
 void MainView::OnShutdown()
 {
+    MB_LOGINFO("MainView::OnShutdown()");
     m_impl->OnShutdown();
 }
 
 void MainView::OnSurfaceChanged(const ViewSettings& viewSettings)
 {
+    MB_LOGINFO("MainView::OnSurfaceChanged()");
     m_impl->OnSurfaceChanged(viewSettings);
 }
 

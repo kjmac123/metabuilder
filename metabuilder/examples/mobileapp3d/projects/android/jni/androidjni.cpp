@@ -42,17 +42,30 @@ extern "C"
         g_mainView->OnInit();
     }
 
+    JNIEXPORT void JNICALL Java_com_metabuilder_mobileapp_AndroidJNI_OnViewShutdown(JNIEnv *, jobject)
+    {
+        g_mainView->OnShutdown();
+        delete g_mainView;
+        g_mainView = NULL;
+    }
+    
     JNIEXPORT void JNICALL Java_com_metabuilder_mobileapp_AndroidJNI_OnSurfaceChanged(JNIEnv *, jobject, jint w, jint h)
     {
-        ViewSettings viewSettings;
-        viewSettings.width = w;
-        viewSettings.height = h;
-        g_mainView->OnSurfaceChanged(viewSettings);
+        if (g_mainView)
+        {
+            ViewSettings viewSettings;
+            viewSettings.width = w;
+            viewSettings.height = h;
+            g_mainView->OnSurfaceChanged(viewSettings);
+        }
     }
 
     JNIEXPORT void JNICALL Java_com_metabuilder_mobileapp_AndroidJNI_OnDrawFrame(JNIEnv *, jobject)
     {
-        g_mainView->OnDrawFrame();
+        if (g_mainView)
+        {
+            g_mainView->OnDrawFrame();
+        }
     }
 
 }

@@ -1,4 +1,3 @@
-
 #include "corelib/core.h"
 #include "corelib/platform/platform.h"
 #include "corelib/platform/platformfile.h"
