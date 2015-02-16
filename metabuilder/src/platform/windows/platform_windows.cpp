@@ -97,7 +97,7 @@ E_FileType GetFileType(const std::string& filepath)
 	return E_FileType_File;
 }
 
-bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir)
+bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* filepath)
 {
 	//Process dirs
 	{
@@ -128,7 +128,7 @@ bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInpu
 				{
 					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
 					{
-						BuildFileListRecurse(fileList, sPath, includeFilePattern, excludeDir);
+						BuildFileListRecurse(fileList, sPath);
 					}
 				}
 			}
@@ -166,7 +166,7 @@ bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInpu
 				{
 					if (!excludeDir || strcmp(fdFile.cFileName, excludeDir) != 0)
 					{
-						BuildFileListRecurse(fileList, sPath, includeFilePattern, excludeDir);
+						BuildFileListRecurse(fileList, sPath);
 					}
 				}
 				else

@@ -35,6 +35,36 @@ function InitRequiredFileOrDir(templateDir, workspaceDir, relativeFilename)
 	--Use existing file in workspace
 	loginfo("Required file/dir " .. relativeFilename .. " found in " .. workspaceDir .. "/" .. relativeFilename)
 end
+--[[
+function CreateResourceDirLink(currentTarget, config, relativeFilename)
+
+	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
+	mbwriter.mkdir(workspaceDir)
+
+	local srcFilename = relativeFilename
+	local workspaceFilename = workspaceDir .. "/" .. relativeFilename
+
+	--If file not already present in workspace
+	if mbwriter.getfiletype(workspaceFilename) == "missing" then
+		--Look for link candidate in template dir
+		if mbwriter.getfiletype(srcFilename) == "missing" then
+			--Error: Missing link source
+			logerror("Missing resource dir " .. srcFilename)
+		else
+			--Link source exists, so create the link
+			local filetype = mbwriter.getfiletype(srcFilename)
+			if filetype == "dir" then
+				mbwriter.mklink(srcFilename, workspaceFilename)
+				loginfo("Created link from " .. srcFilename .. " -> " .. workspaceFilename)
+			else
+				mbwriter.fatalerror("Cannot use file " .. relativeFilename .. " as a resource for NDK builds. NDK resources must be directories only.")
+			end
+		end
+	end
+
+	loginfo("Resource dir " .. relativeFilename .. " found in " .. workspaceFilename)
+end
+]]
 
 function CreateLinks(currentTarget, config)
 	local templateDir = mbutil.getkvvalue(config.options._ndk, "ProjectDir")
@@ -51,7 +81,7 @@ function CreateLinks(currentTarget, config)
 	InitRequiredFileOrDir(templateDir, workspaceDir, "build.xml")
 	InitRequiredFileOrDir(templateDir, workspaceDir, "AndroidManifest.xml")
 	InitRequiredFileOrDir(templateDir, workspaceDir, "project.properties")
-	InitRequiredFileOrDir(templateDir, workspaceDir, "assets")
+	--InitRequiredFileOrDir(templateDir, workspaceDir, "assets")
 	InitRequiredFileOrDir(templateDir, workspaceDir, "res")
 	InitRequiredFileOrDir(templateDir, workspaceDir, "src")
 end
@@ -115,6 +145,14 @@ function WriteAndroidMk(currentTarget, config)
 			end
 		end
 	end
+
+--[[
+	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
+	for i = 1, #currentTarget.resources do
+		local f = currentTarget.resources[i]
+		CreateResourceDirLink(currentTarget, config, f)
+	end
+]]
 
 	local jniDir = GetJNIDir(currentTarget.name, config.name)
 	mbwriter.mkdir(jniDir)

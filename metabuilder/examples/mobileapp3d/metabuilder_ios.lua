@@ -16,8 +16,9 @@ platform "iOS"
 	{
 		"projects/ios/Base.lproj/LaunchScreen.xib",
 		"projects/ios/Base.lproj/Main.storyboard",
-		"projects/ios/Images.xcassets/*",
-		"projects/ios/Shaders/*",
+		"projects/ios/Images.xcassets",
+
+		"data",
 	}
 
 	frameworks

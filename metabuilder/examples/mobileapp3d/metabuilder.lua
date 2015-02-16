@@ -18,7 +18,7 @@ solution "mobileapp3d"
 			"metabuilder_ios.lua",
 
 			"app/mainview.cpp",
-            "app/app.cpp",
+      "app/app.cpp",
 			"app/maths.cpp",
 		}
 

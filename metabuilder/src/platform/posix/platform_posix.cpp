@@ -90,27 +90,35 @@ E_FileType GetFileType(const std::string& filepath)
 	{
 		return E_FileType_Missing;
 	}
-	
-	if(S_ISDIR(statbuf.st_mode))
+	else if(S_ISDIR(statbuf.st_mode))
 	{
 		return E_FileType_Dir;
 	}
+    else if(S_ISREG(statbuf.st_mode))
+    {
+        return E_FileType_File;
+    }
 	
-	return E_FileType_File;
+    return E_FileType_Unknown;
 }
 
-bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDirs)
+void BuildFileListRecurse(std::vector<std::string>* fileList, const char* parentFilepath)
 {
-	if (osInputDir[0] == '\0')
+    if (GetFileType(parentFilepath) == E_FileType_File)
+    {
+        fileList->push_back(parentFilepath);
+        return;
+    }
+
+	if (parentFilepath[0] == '\0')
 	{
-		osInputDir = ".";
+		parentFilepath = ".";
 	}
 	
-	DIR* dir = opendir(osInputDir);
+	DIR* dir = opendir(parentFilepath);
 	if (!dir)
     {
-//        Debug::Error("Failed to open directory %s", osInputDir);
-        return false;
+        return;
     }
     
     struct dirent* dirEntry;
@@ -121,43 +129,12 @@ bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInpu
 		if (!strcmp(dirEntry->d_name, ".") || !strcmp(dirEntry->d_name, ".."))
 			continue;
         
-        char filePath[FILENAME_MAX];
-		
-        sprintf(filePath, "%s/%s", osInputDir, dirEntry->d_name);
+        char childFilepath[FILENAME_MAX];
+        sprintf(childFilepath, "%s/%s", parentFilepath, dirEntry->d_name);
         
-        struct stat statResult;
-		if (stat(filePath, &statResult) == -1)
+        if (GetFileType(childFilepath) == E_FileType_Dir)
         {
-//            Debug::Error("Stat failed for %s", filePath);
-            return false;
-		}
-        
-        if (S_ISDIR(statResult.st_mode))
-        {
-			//If not excluded...
-			bool filterMatched = false;
-			
-			if (excludeDirs)
-			{
-				char tmp[PATH_MAX];
-				strcpy(tmp, excludeDirs);
-				char* current = strtok (tmp,",");
-				while (current != NULL)
-				{
-					if (strcmp(current, dirEntry->d_name) == 0)
-					{
-						filterMatched = true;
-						break;
-					}
-					
-					current = strtok(NULL, ",");
-				}
-			}
-			
-			if (!filterMatched)
-			{
-				dirStack.push_back(filePath);
-			}
+            dirStack.push_back(childFilepath);
         }
         else
         {
@@ -165,15 +142,12 @@ bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInpu
             if (dirEntry->d_name[0] == '.')
                 continue;
             
-            if (!includeFilePattern || fnmatch(includeFilePattern, dirEntry->d_name, 0) == 0)
+            char* fp = childFilepath;
+            if (strstr(fp, "./") == fp)
             {
-				char* fp = filePath;
-				if (strstr(fp, "./") == fp)
-				{
-					fp += 2;
-				}
-				fileList->push_back(fp);
+                fp += 2;
             }
+            fileList->push_back(fp);
         }
     }
     
@@ -181,10 +155,8 @@ bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInpu
 
     for (int i = 0; i < (int)dirStack.size(); ++i)
     {
-        BuildFileListRecurse(fileList, dirStack[i].c_str(), includeFilePattern, excludeDirs);
+        BuildFileListRecurse(fileList, dirStack[i].c_str());
     }
-    
-    return true;
 }
 
 void FileSetWorkingDir(const std::string& path)
@@ -224,7 +196,7 @@ char GetDirSep()
 {
 	return '/';
 }
-
+    
 void LogError(const char* str)
 {
 	printf("%s", str);

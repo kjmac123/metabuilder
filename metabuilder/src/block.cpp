@@ -87,39 +87,9 @@ static void AddHeadersAutomatically(StringVector* files)
 
 static void ProcessWildcards(StringVector* result, const StringVector& input)
 {
-	int initialResultCount = static_cast<int>(result->size());
-	
-	for (int i = 0; i < (int)input.size(); ++i)
+    for (int i = 0; i < (int)input.size(); ++i)
 	{
-		std::string inputFilepath = input[i];
-
-		//Look for wildcard
-		if (inputFilepath.find('*') != std::string::npos)
-		{
-			const char* excludeDirs = NULL;
-#if 0
-			const char* delimiter = "|excludedirs=";
-			char* tmp = (char*)strstr(inputFilepath.c_str(), delimiter);
-			if (tmp)
-			{
-				excludeDirs = tmp + strlen(delimiter);
-				*tmp = '\0';
-			}
-#endif
-			std::string dir = mbPathGetDir(inputFilepath);
-			std::string filename = mbPathGetFilename(inputFilepath);
-
-			Platform::BuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
-			if ((int)result->size() == initialResultCount)
-			{
-				MB_LOGERROR("No files found matching dir %s and filter %s",  dir.c_str(), filename.c_str());
-				mbExitError();
-			}
-		}
-		else
-		{
-			result->push_back(inputFilepath);
-		}
+        Platform::BuildFileListRecurse(result, input[i].c_str());
 	}
 }
 

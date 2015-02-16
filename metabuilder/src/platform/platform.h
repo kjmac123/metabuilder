@@ -24,7 +24,7 @@ bool		CreateLink(const char* src, const char* dst);
 void		NormaliseFilePath(char* outFilePath, const char* inFilePath);
 void		NormaliseFilePath(char* filePath);
 E_FileType	GetFileType(const std::string& filepath);
-bool		BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDir);
+void		BuildFileListRecurse(std::vector<std::string>* fileList, const char* filepath);
 
 void		FileSetWorkingDir(const std::string& path);
 std::string	FileGetWorkingDir();
