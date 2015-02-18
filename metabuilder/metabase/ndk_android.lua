@@ -39,19 +39,19 @@ metabase "ndk_android"
 
 metabase_end()
 
-android = {}
+ndk = {}
 
-function android.setminapi(minapi)
+function ndk.setminapi(minapi)
 end
 
-function android.settargetapi(targetapi)
+function ndk.settargetapi(targetapi)
 	--option("ndkoptions", "APP_PLATFORM", targetapi)
 end
 
-function android.setproguardenabled(value)
+function ndk.setproguardenabled(value)
 end
 
-function android.setdebuggable(value)
+function ndk.setdebuggable(value)
 end
 
 ndk = {}

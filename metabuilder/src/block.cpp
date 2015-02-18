@@ -89,7 +89,7 @@ static void ProcessWildcards(StringVector* result, const StringVector& input)
 {
     for (int i = 0; i < (int)input.size(); ++i)
 	{
-        Platform::BuildFileListRecurse(result, input[i].c_str());
+        Platform::BuildFileList(result, input[i].c_str());
 	}
 }
 

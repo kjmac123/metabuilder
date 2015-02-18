@@ -28,17 +28,17 @@ config_end()
 config "MasterSymbols"
 config_end()
 
-android = {}
+tadp = {}
 
-function android.setminapi(minapi)
+function tadp.setminapi(minapi)
 	option("msvconfiguration", "AndroidMinAPI", minapi)
 end
 
-function android.settargetapi(targetapi)
+function tadp.settargetapi(targetapi)
 	option("msvconfiguration", "AndroidTargetAPI", targetapi)
 end
 
-function android.setproguardenabled(value)
+function tadp.setproguardenabled(value)
 	local tmp = nil
 	if value then
 		tmp = "true"
@@ -48,7 +48,7 @@ function android.setproguardenabled(value)
 	option("_android", "ProguardEnabled", tmp)
 end
 
-function android.setdebuggable(value)
+function tadp.setdebuggable(value)
 	local tmp = nil
 	if value then
 		tmp = "true"
@@ -57,5 +57,3 @@ function android.setdebuggable(value)
 	end
 	option("_android", "Debuggable", tmp)
 end
-
-tadp = {}

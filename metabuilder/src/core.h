@@ -41,6 +41,8 @@ typedef double F64;
 #define MB_CHECKERROR(test, ...)		{ if (!test) { _LogInfofLF(__VA_ARGS__); } }
 #define MB_CHECKEXPECTEDBLOCK(blockExpected, cmdName) mbCheckExpectedBlock(blockExpected, cmdName);
 
+#define MB_ABORT(...)
+
 void _mbLogSetTimeEnabled(bool b);
 void _mbLogErrorf(const char* fmt, ...);
 void _mbLogErrorfLF(const char* fmt, ...);
