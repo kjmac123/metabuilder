@@ -1,4 +1,5 @@
-#include "core.h"
+#include "metabuilder_pch.h"
+
 #include "mbstring.h"
 
 MBString::MBString()

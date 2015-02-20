@@ -1,4 +1,6 @@
-#include "core.h"
+#include "metabuilder_pch.h"
+
+#include "corestring.h"
 #include <cstdarg>
 
 #ifdef _MSC_VER

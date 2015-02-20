@@ -1,4 +1,5 @@
-#include "core.h"
+#include "metabuilder_pch.h"
+
 #include "filepath.h"
 
 FilePath::FilePath()
