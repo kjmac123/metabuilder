@@ -98,10 +98,11 @@ void FilePath::GetFileExtension(FilePath* outExt) const
 	}
 }
 
-void FilePath::SplitDirFilename(FilePath* outDir, FilePath* outFilename) const
+bool FilePath::SplitDirFilename(FilePath* outDir, FilePath* outFilename) const
 {
 	Normalise();
 
+	bool split = false;
 	size_t len = m_storage.length();
 	const char* chars = m_storage.c_str();
 	for (int i = len - 1; i >= 0; --i)
@@ -116,9 +117,18 @@ void FilePath::SplitDirFilename(FilePath* outDir, FilePath* outFilename) const
 
 			*outFilename = FilePath(chars+i+1);
 			outFilename->m_normalised = true;
+			split = true;
 			break;
 		}
 	}
+
+	if (!split)
+	{
+		*outDir = FilePath();
+		*outFilename = *this;
+	}
+
+	return split;
 }
 
 void FilePath::Join(const FilePath& rhs)

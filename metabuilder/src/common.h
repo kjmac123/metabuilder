@@ -247,4 +247,6 @@ const char*			mbLuaToStringExpandMacros(std::string* result, Block* block, lua_S
 
 void*				mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
 
+const std::string&	mbGetCurrentLuaDir();
+
 #endif

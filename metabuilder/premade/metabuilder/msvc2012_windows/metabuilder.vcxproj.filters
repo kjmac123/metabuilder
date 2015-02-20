@@ -45,6 +45,12 @@
    <ClCompile Include="..\..\..\src\core.cpp">
       <Filter>src</Filter>
    </ClCompile>
+   <ClCompile Include="..\..\..\src\corestring.cpp">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="..\..\..\src\filepath.cpp">
+      <Filter>src</Filter>
+   </ClCompile>
    <ClCompile Include="..\..\..\src\luafile.cpp">
       <Filter>src</Filter>
    </ClCompile>
@@ -52,6 +58,9 @@
       <Filter>src</Filter>
    </ClCompile>
    <ClCompile Include="..\..\..\src\makeglobal.cpp">
+      <Filter>src</Filter>
+   </ClCompile>
+   <ClCompile Include="..\..\..\src\mbstring.cpp">
       <Filter>src</Filter>
    </ClCompile>
    <ClCompile Include="..\..\..\src\metabase.cpp">
@@ -111,10 +120,19 @@
    <ClInclude Include="..\..\..\src\core.h">
       <Filter>src</Filter>
    </ClInclude>
+   <ClInclude Include="..\..\..\src\corestring.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\filepath.h">
+      <Filter>src</Filter>
+   </ClInclude>
    <ClInclude Include="..\..\..\src\luafile.h">
       <Filter>src</Filter>
    </ClInclude>
    <ClInclude Include="..\..\..\src\makeglobal.h">
+      <Filter>src</Filter>
+   </ClInclude>
+   <ClInclude Include="..\..\..\src\mbstring.h">
       <Filter>src</Filter>
    </ClInclude>
    <ClInclude Include="..\..\..\src\metabase.h">

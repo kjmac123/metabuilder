@@ -108,6 +108,7 @@ namespace Platform
 		const FilePath& filepath, 
 		DWORD fileAttr)
 	{
+//		MB_LOGINFO("%s %s", parentDir.c_str(), filename.c_str());
 		if (fileAttr & FILE_ATTRIBUTE_HIDDEN)
 			return;
 

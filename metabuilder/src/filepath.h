@@ -19,7 +19,7 @@ public:
 	void GetFilename(FilePath* outFilename) const;
 	void GetFileExtension(FilePath* outExt) const;
 
-	void SplitDirFilename(FilePath* outDir, FilePath* outFilename) const;
+	bool SplitDirFilename(FilePath* outDir, FilePath* outFilename) const;
 
 	void Join(const FilePath& rhs);
 

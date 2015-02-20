@@ -1133,6 +1133,11 @@ void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
 	return NULL;
 }
 
+const std::string& mbGetCurrentLuaDir()
+{
+	return g_doFileCurrentDirStack.top();
+}
+
 void mbCommonLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)
 {
 	luaFn->AddFunction("import",		luaFuncGlobalImport);

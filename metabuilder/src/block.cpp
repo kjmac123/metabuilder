@@ -87,10 +87,13 @@ static void AddHeadersAutomatically(StringVector* files)
 
 static void ProcessWildcards(StringVector* result, const StringVector& input)
 {
+	std::string workingDir = Platform::FileGetWorkingDir();
+	Platform::FileSetWorkingDir(mbGetCurrentLuaDir());
     for (int i = 0; i < (int)input.size(); ++i)
 	{
         Platform::BuildFileList(result, input[i].c_str());
 	}
+	Platform::FileSetWorkingDir(workingDir);
 }
 
 static int luaFuncSetOption(lua_State* l)
