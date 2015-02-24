@@ -103,18 +103,22 @@ namespace Platform
 
 	void BuildFileListAddFile(
 		std::vector<std::string>* fileList, 
-		const FilePath& parentDir, 
 		const FilePath& filename,
 		const FilePath& filepath, 
 		DWORD fileAttr)
 	{
-//		MB_LOGINFO("%s %s", parentDir.c_str(), filename.c_str());
-		if (fileAttr & FILE_ATTRIBUTE_HIDDEN)
+		if ((fileAttr != INVALID_FILE_ATTRIBUTES) && (fileAttr & FILE_ATTRIBUTE_HIDDEN))
+		{
+			MB_LOGINFO("HIDDEN");
 			return;
+		}
 
 		//Ignore posix style hidden files.
 		if (filename.c_str()[0] == '.')
+		{
+			MB_LOGINFO("HIDDEN UNIX");
 			return;
+		}
 
 		//Convert current-dir syntax into empty path to avoid confusing some build systems.
 		const char* fp = filepath.c_str();
@@ -134,7 +138,7 @@ namespace Platform
 	{
 		if (strcmp(filename, ".") == 0 ||
 			strcmp(filename, "..") == 0 ||
-			fileAttr & FILE_ATTRIBUTE_HIDDEN)
+			(fileAttr != INVALID_FILE_ATTRIBUTES) && fileAttr & FILE_ATTRIBUTE_HIDDEN)
 		{
 			return true;
 		}
@@ -200,7 +204,7 @@ namespace Platform
 						childFilePath.Join(parentDir);
 						childFilePath.Join(childFilename);
 
-						BuildFileListAddFile(fileList, parentDir, childFilename, childFilePath, fdFile.dwFileAttributes);
+						BuildFileListAddFile(fileList, childFilename, childFilePath, fdFile.dwFileAttributes);
 					}
 				}
 			} 
@@ -220,9 +224,9 @@ namespace Platform
 
 			FilePath dir;
 			FilePath filename;
-			fp.SplitDirFilename(&dir, &filename);
+			fp.SplitLast(&dir, &filename);
 
-			BuildFileListAddFile(fileList, dir, filename, FilePath(filePatternOrDir), fileAttr);
+			BuildFileListAddFile(fileList, filename, FilePath(filePatternOrDir), fileAttr);
 		}
 		else
 		{
@@ -234,8 +238,29 @@ namespace Platform
 			}
 			else
 			{
-				FilePath fp(filePatternOrDir);
-				fp.SplitDirFilename(&dir, &pattern);
+				//If contains wildcard...
+				if (strstr(filePatternOrDir, "*"))
+				{
+					FilePath fp(filePatternOrDir);
+					fp.SplitLast(&dir, &pattern);
+				}
+				//Else we treat the input as a missing file (we add it to the project regardless)
+				else
+				{
+					//MB_LOGINFO("Adding missing file %s", filePatternOrDir);
+					FilePath fp(filePatternOrDir);
+
+					FilePath dir;
+					FilePath filename;
+					if (fp.SplitLast(&dir, &filename))
+					{
+						BuildFileListAddFile(fileList, filename, fp, fileAttr);
+					}
+					else
+					{
+						BuildFileListAddFile(fileList, fp, fp, fileAttr);
+					}
+				}
 			}
 			BuildFileListRecurse(fileList, dir, pattern);
 		}

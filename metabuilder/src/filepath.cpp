@@ -99,7 +99,7 @@ void FilePath::GetFileExtension(FilePath* outExt) const
 	}
 }
 
-bool FilePath::SplitDirFilename(FilePath* outDir, FilePath* outFilename) const
+bool FilePath::SplitLast(FilePath* outDir, FilePath* outFilename) const
 {
 	Normalise();
 
