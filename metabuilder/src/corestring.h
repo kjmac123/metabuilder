@@ -27,9 +27,10 @@ char* core_strcpyfix(char (&out)[n], const char* src)
         MB_ABORT();
     }
     
-    memmove(out, src, srcLen);
-    out[srcLen] = '0';
+    memmove(out, src, srcLen+1);
     return out;
 }
+
+bool StringWildcardMatch(const char* str, int stringLength, const char* pattern, int patternLength);
 
 #endif

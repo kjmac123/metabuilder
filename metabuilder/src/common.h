@@ -125,6 +125,7 @@ struct KeyValue
 };
 
 typedef std::vector<std::string>			StringVector;
+typedef std::vector<FilePath>				FilePathVector;
 typedef std::vector<ParamBlock*>			ParamVector;
 typedef std::vector<ConfigParam*>			ConfigParamVector;
 typedef std::vector<PlatformParam*>			PlatformParamVector;
@@ -243,7 +244,9 @@ void				mbDebugDumpGroups(const std::map<std::string, StringVector>& stringGroup
 
 void				mbExpandMacros(std::string* result, const KeyValueMap& macroMap, const char* str);
 void				mbExpandMacros(std::string* result, Block* block, const char* str);
+void				mbExpandMacros(FilePath* result, Block* block, const char* str);
 const char*			mbLuaToStringExpandMacros(std::string* result, Block* block, lua_State* l, int stackPos);
+const char*			mbLuaToStringExpandMacros(FilePath* result, Block* block, lua_State* l, int stackPos);
 
 void*				mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
 

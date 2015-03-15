@@ -16,7 +16,7 @@ public:
 	int GetLength() const;
 
 	void GetDir(FilePath* outDir) const;
-	void GetFilename(FilePath* outFilename) const;
+	bool GetFilename(FilePath* outFilename) const;
 	void GetFileExtension(FilePath* outExt) const;
 
 	bool SplitLast(FilePath* result1, FilePath* result2) const;

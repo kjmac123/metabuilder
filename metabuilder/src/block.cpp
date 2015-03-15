@@ -1,5 +1,6 @@
 #include "metabuilder_pch.h"
 
+#include "corestring.h"
 #include "configparam.h"
 #include "block.h"
 #include "platformparam.h"
@@ -19,6 +20,49 @@ static const char* g_stringGroups[] = {
 };
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
+
+struct BuildFileListCtx
+{
+	StringVector*		filePathArray;
+	const FilePath*		inputFullPath;
+	FilePath			pattern;
+};
+
+static void FilterAndAppendFilepathArray(const Platform::FileInfo& fileInfo, void* data)
+{
+	BuildFileListCtx* ctx = static_cast<BuildFileListCtx*>(data);
+	MB_ASSERT(ctx);
+
+	//Ignore hidden unix files.
+	if (fileInfo.filename.c_str()[0] == '.')
+		return;
+
+	//Ignore hidden files
+	if (fileInfo.attributes.hidden)
+		return;
+
+	if (!StringWildcardMatch(fileInfo.filename.c_str(), fileInfo.filename.GetLength(), ctx->pattern.c_str(), ctx->pattern.GetLength()))
+	{
+		//No match
+		return;
+	}
+		
+	FilePath dirAndFilename = fileInfo.parentDir;
+	dirAndFilename.Join(fileInfo.filename);
+
+	//An ugly little hack to avoid breaking some build systems that don't understand ./ syntax under some circumstances.
+	//MSVC seems to have issues.
+	const char* fp = dirAndFilename.c_str();
+	if (strstr(fp, "./") == fp)
+	{
+		fp += 2;
+		ctx->filePathArray->push_back(fp);
+	}
+	else
+	{
+		ctx->filePathArray->push_back(dirAndFilename.c_str());
+	}
+}
 
 static void AddHeadersAutomatically(StringVector* files)
 {
@@ -85,13 +129,29 @@ static void AddHeadersAutomatically(StringVector* files)
 	*files = result;
 }
 
-static void ProcessWildcards(StringVector* result, const StringVector& input)
+static void BuildFileList(StringVector* result, const FilePathVector& input)
 {
 	std::string workingDir = Platform::FileGetWorkingDir();
 	Platform::FileSetWorkingDir(mbGetCurrentLuaDir());
     for (int i = 0; i < (int)input.size(); ++i)
 	{
-        Platform::BuildFileList(result, input[i].c_str());
+		BuildFileListCtx buildFileListCtx;
+		buildFileListCtx.filePathArray = result;
+		buildFileListCtx.inputFullPath = &input[i];
+
+		FilePath split1, split2, dir;
+		if (!buildFileListCtx.inputFullPath->SplitLast(&split1, &split2))
+		{
+			buildFileListCtx.pattern = split1;
+			dir = FilePath(".");
+		}
+		else
+		{
+			dir = split1;
+			buildFileListCtx.pattern = split2;
+		}
+
+		Platform::DirWalk(dir, FilterAndAppendFilepathArray, &buildFileListCtx);
 	}
 	Platform::FileSetWorkingDir(workingDir);
 }
@@ -281,18 +341,18 @@ static int luaFuncFiles(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector strings;
-    for (int i = 1; i <= tableLen; ++i)
+	FilePathVector strings;
+	for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-		strings.push_back(std::string());
+		strings.push_back(FilePath());
 		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
-    }
+	}
 	
-	StringVector filteredList;
-	ProcessWildcards(&filteredList, strings);
-	b->AddFiles(filteredList);
-		
+	StringVector files;
+	BuildFileList(&files, strings);
+	b->AddFiles(files);
+
     return 0;
 }
 
@@ -308,16 +368,16 @@ static int luaFuncNoPchFiles(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector strings;
+	FilePathVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-		strings.push_back(std::string());
+		strings.push_back(FilePath());
 		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
 	
 	StringVector filteredList;
-	ProcessWildcards(&filteredList, strings);
+	BuildFileList(&filteredList, strings);
 	b->AddNoPchFiles(filteredList);
 		
     return 0;
@@ -360,16 +420,16 @@ static int luaFuncResources(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector strings;
+	FilePathVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-		strings.push_back(std::string());
+		strings.push_back(FilePath());
 		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
 	}
 	
 	StringVector filteredList;
-	ProcessWildcards(&filteredList, strings);
+	BuildFileList(&filteredList, strings);
 	b->AddResources(filteredList);
     return 0;
 }

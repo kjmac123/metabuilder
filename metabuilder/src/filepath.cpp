@@ -64,9 +64,11 @@ void FilePath::GetDir(FilePath* outDir) const
 
 }
 
-void FilePath::GetFilename(FilePath* outFilename) const
+bool FilePath::GetFilename(FilePath* outFilename) const
 {
 	Normalise();
+
+	bool result = false;
 
 	size_t len = m_storage.length();
 	const char* chars = m_storage.c_str();
@@ -77,9 +79,12 @@ void FilePath::GetFilename(FilePath* outFilename) const
 			chars += i + 1;
 			*outFilename = FilePath(chars);
 			outFilename->m_normalised = true;
+			result = true;
 			break;
 		}
 	}
+
+	return result;
 }
 
 void FilePath::GetFileExtension(FilePath* outExt) const
@@ -99,7 +104,7 @@ void FilePath::GetFileExtension(FilePath* outExt) const
 	}
 }
 
-bool FilePath::SplitLast(FilePath* outDir, FilePath* outFilename) const
+bool FilePath::SplitLast(FilePath* split1, FilePath* split2) const
 {
 	Normalise();
 
@@ -112,12 +117,12 @@ bool FilePath::SplitLast(FilePath* outDir, FilePath* outFilename) const
 		{
 			char& c = const_cast<char&>(chars[i]);
 			c = '\0';
-			*outDir = FilePath(m_storage);
-			outDir->m_normalised = true;
+			*split1 = FilePath(m_storage);
+			split1->m_normalised = true;
 			c = '/';
 
-			*outFilename = FilePath(chars+i+1);
-			outFilename->m_normalised = true;
+			*split2 = FilePath(chars + i + 1);
+			split2->m_normalised = true;
 			split = true;
 			break;
 		}
@@ -125,8 +130,8 @@ bool FilePath::SplitLast(FilePath* outDir, FilePath* outFilename) const
 
 	if (!split)
 	{
-		*outDir = FilePath();
-		*outFilename = *this;
+		*split2 = FilePath();
+		*split1 = *this;
 	}
 
 	return split;

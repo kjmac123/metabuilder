@@ -102,43 +102,28 @@ namespace Platform
 	}
 
 	void BuildFileListAddFile(
-		std::vector<std::string>* fileList, 
-		const FilePath& filename,
-		const FilePath& filepath, 
-		DWORD fileAttr)
+		const FilePath& parentDir,
+		const FilePath& filename, 
+		const FilePath& fullPath,
+		DWORD fileAttr,
+		DirWalkFileInfoFunc fileInfoFunc,
+		void* userdata)
 	{
-		if ((fileAttr != INVALID_FILE_ATTRIBUTES) && (fileAttr & FILE_ATTRIBUTE_HIDDEN))
-		{
-			MB_LOGINFO("HIDDEN");
-			return;
-		}
+		FileInfo fileInfo;
+		fileInfo.attributes.hidden = (fileAttr != INVALID_FILE_ATTRIBUTES) && (fileAttr & FILE_ATTRIBUTE_HIDDEN);
+		fileInfo.parentDir = parentDir;
+		fileInfo.filename = filename;
+		fileInfo.fullPath = fullPath;
+		fileInfo.fileType = GetFileType(fileAttr);
 
-		//Ignore posix style hidden files.
-		if (filename.c_str()[0] == '.')
-		{
-			MB_LOGINFO("HIDDEN UNIX");
-			return;
-		}
-
-		//Convert current-dir syntax into empty path to avoid confusing some build systems.
-		const char* fp = filepath.c_str();
-		
-		if (filepath.GetLength() > 1)
-		{
-			if (fp[0] == '.' && fp[1] == '/')
-			{
-				fp += 2;
-			}
-		}
-		
-		fileList->push_back(fp);
+		fileInfoFunc(fileInfo, userdata);
 	}
 
 	static bool IgnoreSpecial(const char* filename, DWORD fileAttr)
 	{
 		if (strcmp(filename, ".") == 0 ||
 			strcmp(filename, "..") == 0 ||
-			(fileAttr != INVALID_FILE_ATTRIBUTES) && fileAttr & FILE_ATTRIBUTE_HIDDEN)
+			(fileAttr != INVALID_FILE_ATTRIBUTES) && (fileAttr & FILE_ATTRIBUTE_HIDDEN))
 		{
 			return true;
 		}
@@ -146,16 +131,16 @@ namespace Platform
 		return false;
 	}
 
-	void BuildFileListRecurse(std::vector<std::string>* fileList, const FilePath& parentDir, const FilePath& pattern)
+	void DirWalk(const FilePath& parentDir, const FilePath& dir, DirWalkFileInfoFunc fileInfoFunc, void* userdata)
 	{
 		//Recurse directories
 		{
 			WIN32_FIND_DATA fdFile;
 			HANDLE hFind;
-			FilePath filePathAndPattern;
-			filePathAndPattern.Join(parentDir);
-			filePathAndPattern.Join(FilePath("*"));
-			if ((hFind = FindFirstFile(filePathAndPattern.c_str(), &fdFile)) == INVALID_HANDLE_VALUE)
+			FilePath thisSearchPattern;
+			thisSearchPattern.Join(dir);
+			thisSearchPattern.Join(FilePath("*"));
+			if ((hFind = FindFirstFile(thisSearchPattern.c_str(), &fdFile)) == INVALID_HANDLE_VALUE)
 			{
 				return;
 			}
@@ -166,13 +151,10 @@ namespace Platform
 				{
 					if (!IgnoreSpecial(fdFile.cFileName, fdFile.dwFileAttributes))
 					{
-						FilePath childFilename(fdFile.cFileName);
-
-						FilePath childFilePath;
-						childFilePath.Join(parentDir);
-						childFilePath.Join(childFilename);
-
-						BuildFileListRecurse(fileList, childFilePath, pattern);
+						FilePath childDir = dir;
+						childDir.Join(FilePath(fdFile.cFileName));
+						
+						DirWalk(dir, childDir, fileInfoFunc, userdata);
 					}
 				}
 			} 
@@ -184,10 +166,10 @@ namespace Platform
 		{
 			WIN32_FIND_DATA fdFile;
 			HANDLE hFind;
-			FilePath filePathAndPattern;
-			filePathAndPattern.Join(parentDir);
-			filePathAndPattern.Join(pattern);
-			if ((hFind = FindFirstFile(filePathAndPattern.c_str(), &fdFile)) == INVALID_HANDLE_VALUE)
+			FilePath thisSearchPattern;
+			thisSearchPattern.Join(dir);
+			thisSearchPattern.Join(FilePath("*"));
+			if ((hFind = FindFirstFile(thisSearchPattern.c_str(), &fdFile)) == INVALID_HANDLE_VALUE)
 			{
 				return;
 			}
@@ -200,11 +182,10 @@ namespace Platform
 					{
 						FilePath childFilename(fdFile.cFileName);
 
-						FilePath childFilePath;
-						childFilePath.Join(parentDir);
-						childFilePath.Join(childFilename);
-
-						BuildFileListAddFile(fileList, childFilename, childFilePath, fdFile.dwFileAttributes);
+						FilePath childFullPath;
+						childFullPath.Join(parentDir);
+						childFullPath.Join(childFilename);
+						BuildFileListAddFile(parentDir, childFilename, childFullPath, fdFile.dwFileAttributes, fileInfoFunc, userdata);
 					}
 				}
 			} 
@@ -214,56 +195,9 @@ namespace Platform
 		}
 	}
 
-	void BuildFileList(std::vector<std::string>* fileList, const char* filePatternOrDir)
+	void DirWalk(const FilePath& dir, DirWalkFileInfoFunc fileInfoFunc, void* userdata)
 	{
-		DWORD fileAttr = GetFileAttributesA(filePatternOrDir);
-		E_FileType fileType = GetFileType(fileAttr);
-		if (fileType == E_FileType_File)
-		{
-			FilePath fp(filePatternOrDir);
-
-			FilePath dir;
-			FilePath filename;
-			fp.SplitLast(&dir, &filename);
-
-			BuildFileListAddFile(fileList, filename, FilePath(filePatternOrDir), fileAttr);
-		}
-		else
-		{
-			FilePath dir;
-			FilePath pattern;
-			if (fileType == E_FileType_Dir)
-			{
-				dir = FilePath(filePatternOrDir);
-			}
-			else
-			{
-				//If contains wildcard...
-				if (strstr(filePatternOrDir, "*"))
-				{
-					FilePath fp(filePatternOrDir);
-					fp.SplitLast(&dir, &pattern);
-				}
-				//Else we treat the input as a missing file (we add it to the project regardless)
-				else
-				{
-					//MB_LOGINFO("Adding missing file %s", filePatternOrDir);
-					FilePath fp(filePatternOrDir);
-
-					FilePath dir;
-					FilePath filename;
-					if (fp.SplitLast(&dir, &filename))
-					{
-						BuildFileListAddFile(fileList, filename, fp, fileAttr);
-					}
-					else
-					{
-						BuildFileListAddFile(fileList, fp, fp, fileAttr);
-					}
-				}
-			}
-			BuildFileListRecurse(fileList, dir, pattern);
-		}
+		DirWalk(FilePath(""), dir, fileInfoFunc, userdata);
 	}
 
 	void FileSetWorkingDir(const std::string& path)

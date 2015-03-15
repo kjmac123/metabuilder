@@ -1,9 +1,7 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-//Maximum path length is a complete mess. Let's go with 512bytes for now.
-//stackoverflow.com/questions/833291/is-there-an-equivalent-to-winapis-max-path-under-linux-unix
-#define MB_MAX_PATH 512
+#include "FilePath.h"
 
 enum E_FileType
 {
@@ -16,6 +14,25 @@ enum E_FileType
 namespace Platform
 {
 
+//TODO - SAX style approach so we avoid having to store potentiall large strings
+struct FileInfo
+{
+	struct Attributes
+	{
+		bool hidden : 1;
+	};
+
+	FilePath	parentDir;
+	FilePath	filename;
+	FilePath	fullPath;
+
+	E_FileType	fileType;
+
+	Attributes	attributes;
+};
+
+typedef void(*DirWalkFileInfoFunc)(const FileInfo&, void*);
+
 void		Init();
 void		Shutdown();
 
@@ -24,7 +41,7 @@ bool		CreateLink(const char* src, const char* dst);
 void		NormaliseFilePath(char* outFilePath, const char* inFilePath);
 void		NormaliseFilePath(char* filePath);
 E_FileType	GetFileType(const std::string& filepath);
-void		BuildFileList(std::vector<std::string>* fileList, const char* filePatternOrDir);
+void		DirWalk(const FilePath& dir, DirWalkFileInfoFunc fileInfoFunc, void* userdata);
 
 void		FileSetWorkingDir(const std::string& path);
 std::string	FileGetWorkingDir();

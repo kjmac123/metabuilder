@@ -29,9 +29,9 @@ typedef double F64;
 #include <vector>
 #include <string>
 
-#if defined(PLATFORM_OSX) || defined(PLATFORM_LINUX)
-#define stricmp strcasecmp
-#endif
+//Maximum path length is a complete mess. Let's go with 512bytes for now.
+//stackoverflow.com/questions/833291/is-there-an-equivalent-to-winapis-max-path-under-linux-unix
+#define MB_MAX_PATH 512
 
 #define MB_LOGSETTIMEENABLED(b)			_mbLogSetTimeEnabled(b)
 #define MB_LOGERROR(...)				_mbLogErrorfLF(__VA_ARGS__)

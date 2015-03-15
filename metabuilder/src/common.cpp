@@ -1078,7 +1078,27 @@ void mbExpandMacros(std::string* result, const KeyValueMap& macroMap, const char
 	*result = resultBuilderBuf;
 }
 
+void mbExpandMacros(FilePath* result, const KeyValueMap& macroMap, const char* str)
+{
+	//TODO - remove std::string usage
+	std::string tmp(result->c_str());
+	mbExpandMacros(&tmp, macroMap, str);
+	*result = FilePath(tmp);
+}
+
 void mbExpandMacros(std::string* result, Block* block, const char* str)
+{
+	if (block)
+	{
+		mbExpandMacros(result, block->FlattenMacros(), str);
+	}
+	else
+	{
+		mbExpandMacros(result, std::map<std::string, std::string>(), str);
+	}
+}
+
+void mbExpandMacros(FilePath* result, Block* block, const char* str)
 {
 	if (block)
 	{
@@ -1099,7 +1119,18 @@ const char* mbLuaToStringExpandMacros(std::string* result, Block* block, lua_Sta
 	}
 	
 	mbExpandMacros(result, block, str);
-//	MB_LOGINFO("%s -> %s", str, result->c_str());
+	return result->c_str();
+}
+
+const char* mbLuaToStringExpandMacros(FilePath* result, Block* block, lua_State* l, int stackPos)
+{
+	const char* str = lua_tostring(l, stackPos);
+	if (!str)
+	{
+		return NULL;
+	}
+
+	mbExpandMacros(result, block, str);
 	return result->c_str();
 }
 
