@@ -69,7 +69,6 @@ namespace Platform
         ApkFile* f = NULL;
 
         MB_LOGINFO("ApkFile_OpenFile %s", filepath);
-        MB_ASSERT(mode == E_FileMode_ReadBinary);
         AAsset* asset = AAssetManager_open(g_assetManager, filepath, AASSET_MODE_UNKNOWN);
         
         if (asset)
