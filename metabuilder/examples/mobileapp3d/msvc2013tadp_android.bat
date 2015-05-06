@@ -13,6 +13,7 @@
 @SET MSVCLOCATION_PRO=%VS120COMNTOOLS%\..\IDE\devenv.exe
 @IF EXIST "%MSVCLOCATION_PRO%" SET MSVCLOCATION=%MSVCLOCATION_PRO% 
 
+@call msvctadp_android_copyassets.bat
 start "%GEN%" "%MSVCLOCATION%" "%SOLUTION%"
 GOTO success
 
