@@ -272,7 +272,7 @@ public:
 
     void OnInit()
     {
-        bool result = m_shader.Init("shader.vsh", "shader.fsh");
+        bool result = m_shader.Init("gles/shader.vsh", "gles/shader.fsh");
         MB_ASSERT(result);
         
         const int triCount = 12;
