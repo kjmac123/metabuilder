@@ -23,19 +23,20 @@ solution "mobileapp3d"
 		}
 
 		config "Debug"
+			tadp.setproguardenabled(true)
 		config_end()
 
 		config "Release"
+			tadp.setproguardenabled(true)
 		config_end()
 
 		config "Master"
+			tadp.setproguardenabled(true)
 		config_end()
 
 		import "metabuilder_android.lua"
 		import "metabuilder_ios.lua"
 		
-		tadp.setproguardenabled(true)
-
 	target_end()
 
 solution_end()
