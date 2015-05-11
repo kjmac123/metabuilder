@@ -18,7 +18,7 @@ solution "mobileapp3d"
 			"metabuilder_ios.lua",
 
 			"app/mainview.cpp",
-      "app/app.cpp",
+			"app/app.cpp",
 			"app/maths.cpp",
 		}
 
@@ -33,6 +33,8 @@ solution "mobileapp3d"
 
 		import "metabuilder_android.lua"
 		import "metabuilder_ios.lua"
+		
+		tadp.setproguardenabled(true)
 
 	target_end()
 
