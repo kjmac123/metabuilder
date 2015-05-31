@@ -272,13 +272,7 @@ public:
 
     void OnInit()
     {
-        #ifdef PLATFORM_IOS
-        #define SHADER_DIR ""
-        #else
-        #define SHADER_DIR "gles/"
-        #endif
-        
-        bool result = m_shader.Init(SHADER_DIR "shader.vsh", SHADER_DIR "shader.fsh");
+        bool result = m_shader.Init("data/gles/shader.vsh", "data/gles/shader.fsh");
         MB_ASSERT(result);
         
         const int triCount = 12;

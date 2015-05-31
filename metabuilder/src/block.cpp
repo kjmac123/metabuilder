@@ -141,13 +141,6 @@ static void BuildFileList(StringVector* result, const FilePathVector& input)
         BuildFileListCtx buildFileListCtx;
         buildFileListCtx.filePathArray = result;
         
-        if (Platform::GetFileType(input[i]) == E_FileType_Dir)
-        {
-            buildFileListCtx.pattern = FilePath("*");
-            Platform::BuildFileListDir(input[i], FilterAndAppendFilepathArray, &buildFileListCtx);
-        }
-        //Else could be dir with wildcard pattern or a file.
-        else
         {
             FilePath split1, split2, dir;
             if (!input[i].SplitLast(&split1, &split2))

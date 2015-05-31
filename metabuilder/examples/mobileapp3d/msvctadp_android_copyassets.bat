@@ -1,5 +1,5 @@
 SET ASSETSRCDIR=projects/android/assets
 SET DATASRCDIR=data
 
-robocopy %DATASRCDIR% %ASSETSRCDIR% /s
+robocopy %DATASRCDIR% %ASSETSRCDIR%/data /s
 
