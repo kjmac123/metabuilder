@@ -75,13 +75,13 @@ void Target::Flatten(FlatConfig* result, const char* platformName, const char* c
 		blocks.push_back(mbGetAppState()->mainSolution);
 	}
 
-	for (int iBlock = 0; iBlock < (int)blocks.size(); ++iBlock)
+	for (size_t iBlock = 0; iBlock < blocks.size(); ++iBlock)
 	{
 		blocks[iBlock]->GetParams(&params, E_BlockType_Unknown, platformName, configName, true);
 	}
 
 	//Merge non config specifc params
-	for (int iBlock = (int)blocks.size()-1; iBlock >= 0; --iBlock)
+	for (int iBlock = static_cast<int>(blocks.size())-1; iBlock >= 0; --iBlock)
 	{
 		const Block* block = blocks[iBlock];
 		MB_LOGDEBUG("Merging block %s", block->GetName().c_str());
@@ -89,7 +89,7 @@ void Target::Flatten(FlatConfig* result, const char* platformName, const char* c
 	}
 
 	//Merge config specific params
-	for (int iBlock = (int)params.size()-1; iBlock >= 0; --iBlock)
+	for (int iBlock = static_cast<int>(params.size())-1; iBlock >= 0; --iBlock)
 	{
 		const Block* block = params[iBlock];
 		MB_LOGDEBUG("Merging config block %s parent config %s", block->GetName().c_str(), block->GetParentPlatform() ? block->GetParentPlatform() : "none");

@@ -14,9 +14,14 @@ enum E_FileType
 namespace Platform
 {
 
-//TODO - SAX style approach so we avoid having to store potentiall large strings
+//TODO - SAX style approach so we avoid having to store potentially large strings
 struct FileInfo
 {
+    FileInfo()
+    {
+        memset(&attributes, 0, sizeof(attributes));
+    }
+    
 	struct Attributes
 	{
 		bool hidden : 1;
@@ -37,11 +42,12 @@ void		Init();
 void		Shutdown();
 
 bool		CreateDir(const char* osDir);
-bool		CreateLink(const char* src, const char* dst);
 void		NormaliseFilePath(char* outFilePath, const char* inFilePath);
 void		NormaliseFilePath(char* filePath);
-E_FileType	GetFileType(const std::string& filepath);
-void		DirWalk(const FilePath& dir, DirWalkFileInfoFunc fileInfoFunc, void* userdata);
+E_FileType	GetFileType(const FilePath& filepath);
+    
+void        BuildFileListDir(const FilePath& dir, DirWalkFileInfoFunc fileInfoFunc, void* userdata);
+void        BuildFileListFile(const FilePath& filePath, DirWalkFileInfoFunc fileInfoFunc, void* userdata);
 
 void		FileSetWorkingDir(const std::string& path);
 std::string	FileGetWorkingDir();

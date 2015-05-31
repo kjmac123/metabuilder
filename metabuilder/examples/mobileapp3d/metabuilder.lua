@@ -10,7 +10,7 @@ solution "mobileapp3d"
 			"../corelib",
 			".",
 		}
-
+		
 		files
 		{
 			"metabuilder.lua",
@@ -23,15 +23,12 @@ solution "mobileapp3d"
 		}
 
 		config "Debug"
-			tadp.setproguardenabled(true)
 		config_end()
 
 		config "Release"
-			tadp.setproguardenabled(true)
 		config_end()
 
 		config "Master"
-			tadp.setproguardenabled(true)
 		config_end()
 
 		import "metabuilder_android.lua"

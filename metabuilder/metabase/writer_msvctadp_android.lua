@@ -39,6 +39,16 @@ function MSVCRootConfigHook(file, config)
 	end
 	file:write("    <Debuggable>" .. debuggable .. "</Debuggable>\n")
 	
+	if config.options.antbuild ~= nil then
+		for jOption = 1, #config.options.antbuild do
+			local keyValue = split(config.options.antbuild[jOption], "=")
+			local key = keyValue[1]
+			local value = keyValue[2]
+
+			file:write("      <" .. key .. ">" .. value .. "</" .. key .. ">\n")
+		end
+	end
+	
 	file:write("  </AntBuild>\n")
 end
 

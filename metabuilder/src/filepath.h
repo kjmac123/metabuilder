@@ -22,6 +22,8 @@ public:
 	bool SplitLast(FilePath* result1, FilePath* result2) const;
 
 	void Join(const FilePath& rhs);
+    
+    bool ContainsWildcards() const;
 
 private:
 	void Normalise() const;

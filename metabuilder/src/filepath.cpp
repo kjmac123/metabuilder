@@ -49,7 +49,7 @@ void FilePath::GetDir(FilePath* outDir) const
 
 	*outDir = FilePath();
 
-	size_t len = m_storage.length();
+	int len = static_cast<int>(m_storage.length());
 	const char* chars = m_storage.c_str();
 	for (int i = len - 1; i >= 0; --i)
 	{
@@ -70,7 +70,7 @@ bool FilePath::GetFilename(FilePath* outFilename) const
 
 	bool result = false;
 
-	size_t len = m_storage.length();
+	int len = static_cast<int>(m_storage.length());
 	const char* chars = m_storage.c_str();
 	for (int i = len - 1; i >= 0; --i)
 	{
@@ -91,7 +91,7 @@ void FilePath::GetFileExtension(FilePath* outExt) const
 {
 	*outExt = FilePath();
 
-	size_t len = m_storage.length();
+	int len = static_cast<int>(m_storage.length());
 	const char* chars = m_storage.c_str();
 	for (int i = len - 1; i >= 0; --i)
 	{
@@ -109,7 +109,7 @@ bool FilePath::SplitLast(FilePath* split1, FilePath* split2) const
 	Normalise();
 
 	bool split = false;
-	size_t len = m_storage.length();
+	int len = static_cast<int>(m_storage.length());
 	const char* chars = m_storage.c_str();
 	for (int i = len - 1; i >= 0; --i)
 	{
@@ -174,6 +174,11 @@ void FilePath::Join(const FilePath& rhs)
 			m_storage = buf;
 		}
 	}
+}
+
+bool FilePath::ContainsWildcards() const
+{
+    return strchr(m_storage.c_str(), '*') != NULL;
 }
 
 void FilePath::Normalise() const

@@ -52,7 +52,10 @@ bool StringWildcardMatch(const char* str, int strLength, const char* pattern_, i
 				mbExitError();
 			}
 			*e = '\0';
-			core_strcpyfix(cards[nCards++], cursor);
+            if (e != cursor)
+            {
+                core_strcpyfix(cards[nCards++], cursor);
+            }
 			core_strcpyfix(cards[nCards++], "*");
 			*e = '*';
 			cursor = e + 1;  //skip separator
@@ -73,52 +76,62 @@ bool StringWildcardMatch(const char* str, int strLength, const char* pattern_, i
 	bool match = true;
 	const char* cursor = str;
 	const char* card = NULL;
-
-	enum E_MatchType
-	{
-		E_MatchType_MatchFirst,
-		E_MatchType_MatchAny,
-
-	} matchType = E_MatchType_MatchFirst;
+    bool resetCursor = false;
 
 	for (int i = 0; i < nCards; ++i)
 	{
 		card = cards[i];
 
-		if (matchType = E_MatchType_MatchFirst)
-		{
-			//must match start
-			const char* result = strstr(cursor, card);
-			if (result != cursor)
-			{
-				match = false;
-				break;
-			}
-		}
-		else
-		{
-			if (card[0] == '*')
-			{
-				if (i == nCards - 1)
-				{
-					//Match the rest of the string. We're done.
-					break;
-				}
-				matchType = E_MatchType_MatchAny;
-			}
-			else
-			{
-				const char* result = strstr(cursor, card);
-				if (result)
-				{
-					cursor = result;
-				}
-				else
-				{
-					match = false;
-					break;
-				}
-			}
+        if (card[0] == '*')
+        {
+            if (i == nCards-1)
+            {
+                //Match remainder of string
+                break;
+            }
+            else
+            {
+                resetCursor = true;
+                continue;
+            }
+        }
+
+        {
+            const char* result = strstr(cursor, card);
+            if (result)
+            {
+                if (resetCursor)
+                {
+                    cursor = result;
+                    resetCursor = false;
+                }
+                
+                //Do we match the entire card?
+                {
+                    int cardLength = static_cast<int>(strlen(card));
+                    {
+                        cursor += cardLength;
+                    }
+                }
+                
+                if (i == nCards-1)
+                {
+                    //If there are chars remaining after this last card then we've failed to match the pattern.
+                    int cursorPos = static_cast<int>(cursor - str);
+                    int remainingLength = strLength - cursorPos;
+                    if (remainingLength != 0)
+                    {
+                        match = false;
+                        break;
+                    }
+                    
+                }
+            }
+            else
+            {
+                match = false;
+                break;
+            }
 		}
 	}
 

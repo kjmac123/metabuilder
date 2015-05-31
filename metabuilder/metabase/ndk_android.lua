@@ -10,8 +10,8 @@ metabase "ndk_android"
 	writer "writer_ndk.lua"
 
 	option("ndkoptions", "APP_ABI",								"all")
-	option("ndkoptions", "APP_PLATFORM",					"android-14")
-	option("ndkoptions", "NDK_TOOLCHAIN_VERSION",	"clang")
+	option("ndkoptions", "APP_PLATFORM",						"android-14")
+	option("ndkoptions", "NDK_TOOLCHAIN_VERSION",				"clang")
 	option("ndkoptions", "APP_STL", 							"stlport_static")
 
 	local appCFLAGSCommon = "-Wno-multichar -fno-rtti -fno-exceptions -marm -fpic -Wno-unused-variable -Wno-unused-value "
@@ -47,14 +47,6 @@ end
 function ndk.settargetapi(targetapi)
 	--option("ndkoptions", "APP_PLATFORM", targetapi)
 end
-
-function ndk.setproguardenabled(value)
-end
-
-function ndk.setdebuggable(value)
-end
-
-ndk = {}
 
 function ndk.setprojectdir(dir)
 	option("_ndk", "ProjectDir", dir)

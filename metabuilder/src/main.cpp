@@ -135,99 +135,15 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	appOptions->verbose = opt.isSet("-v") != 0;
 }
 
-bool StringWildcardMatch(const std::string& str, const char* pattern_)
-{
-	char pattern[MB_MAX_PATH];
-	core_strcpy(pattern, sizeof(pattern), pattern_);
-	std::vector<std::string> cards;
-	{
-		//for each separator
-		char* cursor = const_cast<char*>(pattern);
-		char* e;
-		while ((e = strchr(cursor, '*')) != NULL)
-		{
-			*e = '\0';
-			cards.push_back(cursor);
-			cards.push_back("*");
-			*e = '*';
-			cursor = e + 1;  //skip separator
-		}
-
-		if (*cursor)
-		{
-			cards.push_back(cursor);
-		}
-	}
-
-	//When a * is encountered, look for substring match of next card
-	bool match = true;
-	const char* cursor = str.c_str();
-	const char* card = NULL;
-
-	enum E_MatchType
-	{
-		E_MatchType_MatchFirst,
-		E_MatchType_MatchAny,
-		
-	} matchType = E_MatchType_MatchFirst;
-
-	int nCards = static_cast<int>(cards.size());
-	for (int i = 0; i < nCards; ++i)
-	{
-		card = cards[i].c_str();
-
-		if (matchType = E_MatchType_MatchFirst)
-		{
-			//must match start
-			const char* result = strstr(cursor, card);
-			if (result != cursor)
-			{
-				match = false;
-				break;
-			}
-		}
-		else
-		{
-			if (card[0] == '*')
-			{
-				if (i == nCards - 1)
-				{
-					//Match the rest of the string. We're done.
-					break;
-				}
-				matchType = E_MatchType_MatchAny;
-			}
-			else
-			{
-				const char* result = strstr(cursor, card);
-				if (result)
-				{
-					cursor = result;
-				}
-				else
-				{
-					match = false;
-					break;
-				}
-			}
-		}
-	}
-
-	return match;
-}
-
 int main(int argc, const char * argv[])
 {
     mbCore_Init();
-
-	StringWildcardMatch("tegragraphicsdebugger.log", "t*gra*.log");
 
 	MB_LOGINFO("Metabuilder");
 
 	MB_LOGSETTIMEENABLED(true);
 
 	AppState* appState = mbGetAppState();
-//	appState->makeSetup = new MakeSetup();
 	appState->makeGlobal = new MakeGlobal();
 
 	ParseArgs(&appState->cmdSetup, argc, (const char**)argv);
@@ -241,11 +157,10 @@ int main(int argc, const char * argv[])
 	
 	// We'll add to this array during iteration
 	const StringVector& makeFiles = mbGetMakeFiles();
-//	mbPushDir(appState->makeSetup->metabaseDir);
 	mbPushDir("");
 			
 	appState->isProcessingPrimaryMakefile = true;
-	for (int i = 0; i < (int)makeFiles.size(); ++i)
+	for (size_t i = 0; i < makeFiles.size(); ++i)
 	{
 		MetaBuilderContext* ctx = mbCreateContext();
 		mbPushActiveContext(ctx);		

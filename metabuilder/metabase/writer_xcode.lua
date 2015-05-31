@@ -35,6 +35,10 @@ g_fileListType = {} -- Source, Resource or Framework
 g_PBXProjectConfigIDs = {}
 g_PBXNativeTargetConfigIDs = {}
 
+g_locFiles = {}
+g_locFileByFilename = {}
+g_locFolder = {}
+
 function GetLastKnownFileType(filepath)
 	local ext = mbfilepath.getextension(filepath)
 	local lastKnownType = g_lastKnownFileTypeMap[ext]
@@ -42,6 +46,8 @@ function GetLastKnownFileType(filepath)
 		local filetype = mbwriter.getfiletype(filepath)
 		if filetype == "dir" then
 			return "folder"
+		elseif filetype == "sourcecode.metal" then
+			return "sourcecode.metal"
 		end
 
 		return "text"
@@ -151,6 +157,29 @@ function FolderCompare(a, b)
 	return a.name < b.name
 end
 
+function IsLocFile(f)
+    local locStartIndex = string.find(f, "lproj/Localizable.strings")
+    if locStartIndex then
+        return true
+    end
+    
+    return false
+end
+
+--[[
+function InitLocFiles(sortedFolderList, fileList)
+	for i = 1, #fileList do
+		local f = fileList[i]
+		local path, filename, ext = mbfilepath.decompose(f)
+        
+		if IsLocFile(f) then
+            table.insert(g_locFiles, f)
+            loginfo(f)
+        end
+    end
+end
+--]]
+
 function InitFolders(sortedFolderList, fileList)
 	-- Lazily initialise chains of folders based upon the list of files provided
 	-- For each folder store:
@@ -243,11 +272,14 @@ function WritePBXGroup(file)
 				local f = folder.childIDs[i]
 				file:write("				" .. f .. ",\n")
 			end
+--            file:write("				" .. g_locFolder.id  .. ",\n")
+
 			file:write("			);\n")
 			file:write("			name = \"Source\";\n")
 			file:write("			sourceTree = \"<group>\";\n")
 			file:write("		};	\n")
-		else
+                
+        else
 			file:write("		" .. folder.id .. " /* " .. folder.shortName .. " */ = {\n")
 			file:write("			isa = PBXGroup;\n")
 			file:write("			children = (\n")
@@ -275,6 +307,8 @@ function WritePBXGroup(file)
 				local f = folder.childIDs[i]
 				file:write("				" .. f .. ",\n")
 			end
+            file:write("				" .. g_locFolder.PBXVariantGroupID .. ",\n")
+            
 			file:write("			);\n")
 			file:write("			name = Resources;\n")
 			file:write("			sourceTree = \"<group>\";\n")
@@ -312,6 +346,7 @@ end
 	g_lastKnownFileTypeMap["psh"]		= "sourcecode.glsl"
 	g_lastKnownFileTypeMap["fsh"]		= "sourcecode.glsl"
 	g_lastKnownFileTypeMap["glsl"]		= "sourcecode.glsl"
+	g_lastKnownFileTypeMap["metal"]		= "sourcecode.metal"
 	g_lastKnownFileTypeMap["xcassets"]	= "folder.assetcatalog"
 	g_lastKnownFileTypeMap["xib"]		= "file.xib"
 	g_lastKnownFileTypeMap["png"]		= "image.png"
@@ -319,6 +354,7 @@ end
 	g_lastKnownFileTypeMap["xml"]		= "text.xml"
 	g_lastKnownFileTypeMap["plist"]		= "text.plist.xml"
 	g_lastKnownFileTypeMap["a"]			= "archive.ar"
+    g_lastKnownFileTypeMap["strings"]	= "text.plist.strings"
 	g_lastKnownFileTypeMap["xcodeproj"]	= "wrapper.pb-project"
 
 	--'folder' is also a valid last known type
@@ -396,9 +432,13 @@ function WriteXCBuildConfigurations(file)
 			for j = 1, #config.options._xcode do
 				local option = config.options._xcode[j]
 
-				if mbutil.kvhaskey(option, "INFOPLIST_FILE") then
+				if
+					mbutil.kvhaskey(option, "INFOPLIST_FILE") or
+					mbutil.kvhaskey(option, "CODE_SIGN_ENTITLEMENTS") then
+
 					option = mbutil.kvsetvalue(option, mbwriter.getoutputrelfilepath(mbutil.kvgetvalue(option)))
 				end
+
 				file:write("				" .. option .. ";\n")
 			end
 		end
@@ -489,8 +529,8 @@ function WriteXCBuildConfigurations(file)
 		file:write("			isa = XCBuildConfiguration;\n")
 		file:write("			buildSettings = {\n")
 		file:write("				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;\n")
-		file:write("				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;\n")
-
+--		file:write("				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;\n")
+		file:write("				COMPRESS_PNG_FILES = NO;\n")
 		-- Prefix PCH support
 --		if g_currentTarget.pch ~= nil and g_currentTarget.pch ~= "" then
 --			print(g_currentTarget.name .. " PCH " .. g_currentTarget.pch)
@@ -559,6 +599,97 @@ function WriteXCConfigurationList(file)
 	file:write("			defaultConfigurationIsVisible = 0;\n")
 	file:write("		};\n")
 	file:write("/* End XCConfigurationList section */\n\n")
+end
+
+function WriteXCScheme()
+	local xcschemedir = g_projectoutputfile .. "/xcshareddata/xcschemes"
+	mbwriter.mkdir(xcschemedir)
+	local xcschemeFilename = xcschemedir .. "/" .. g_currentTarget.name .. ".xcscheme"
+	local file = mbfile.open(xcschemeFilename, "w")
+	if file == nil then
+		mbwriter.fatalerror("Failed to open file: " .. xcschemeFilename)
+	end
+
+	file:write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+	file:write("<Scheme\n")
+	file:write("	LastUpgradeVersion = \"0610\"\n")
+	file:write("	version = \"1.3\">\n")
+	file:write("	<BuildAction\n")
+	file:write("	      parallelizeBuildables = \"YES\"\n")
+	file:write("	      buildImplicitDependencies = \"YES\">\n")
+	file:write("	      <BuildActionEntries>\n")
+	file:write("	         <BuildActionEntry\n")
+	file:write("	            buildForTesting = \"YES\"\n")
+	file:write("	            buildForRunning = \"YES\"\n")
+	file:write("	            buildForProfiling = \"YES\"\n")
+	file:write("	            buildForArchiving = \"YES\"\n")
+	file:write("	            buildForAnalyzing = \"YES\">\n")
+	file:write("	            <BuildableReference\n")
+	file:write("	               BuildableIdentifier = \"primary\"\n")
+	file:write("	               BlueprintIdentifier = \"" .. g_pbxNativeTargetID .. "\"\n")
+	file:write("	               BuildableName = \"" .. g_currentTarget.name .. "\"\n")
+	file:write("	               BlueprintName = \"" .. g_currentTarget.name .. "\"\n")
+	file:write("	               ReferencedContainer = \"container:" .. g_currentTarget.name .. ".xcodeproj\">\n")
+	file:write("	            </BuildableReference>\n")
+	file:write("	         </BuildActionEntry>\n")
+	file:write("	      </BuildActionEntries>\n")
+	file:write("	   </BuildAction>\n")
+	file:write("	   <TestAction\n")
+	file:write("	      selectedDebuggerIdentifier = \"Xcode.DebuggerFoundation.Debugger.LLDB\"\n")
+	file:write("	      selectedLauncherIdentifier = \"Xcode.DebuggerFoundation.Launcher.LLDB\"\n")
+	file:write("	      shouldUseLaunchSchemeArgsEnv = \"YES\"\n")
+	file:write("	      buildConfiguration = \"Debug\">\n")
+	file:write("	      <Testables>\n")
+	file:write("	      </Testables>\n")
+	file:write("	   </TestAction>\n")
+	file:write("	   <LaunchAction\n")
+	file:write("	      selectedDebuggerIdentifier = \"Xcode.DebuggerFoundation.Debugger.LLDB\"\n")
+	file:write("	      selectedLauncherIdentifier = \"Xcode.DebuggerFoundation.Launcher.LLDB\"\n")
+	file:write("	      launchStyle = \"0\"\n")
+	file:write("	      useCustomWorkingDirectory = \"NO\"\n")
+	file:write("	      buildConfiguration = \"Debug\"\n")
+	file:write("	      ignoresPersistentStateOnLaunch = \"NO\"\n")
+	file:write("	      debugDocumentVersioning = \"YES\"\n")
+	file:write("	      allowLocationSimulation = \"YES\">\n")
+	file:write("	      <MacroExpansion>\n")
+	file:write("	         <BuildableReference\n")
+	file:write("	            BuildableIdentifier = \"primary\"\n")
+	file:write("	            BlueprintIdentifier = \"" .. g_pbxNativeTargetID .. "\"\n")
+	file:write("	            BuildableName = \"" .. g_currentTarget.name .. "\"\n")
+	file:write("	            BlueprintName = \"" .. g_currentTarget.name .. "\"\n")
+	file:write("	            ReferencedContainer = \"container:" .. g_currentTarget.name .. ".xcodeproj\">\n")
+	file:write("	         </BuildableReference>\n")
+	file:write("	      </MacroExpansion>\n")
+	file:write("	      <AdditionalOptions>\n")
+	file:write("	      </AdditionalOptions>\n")
+	file:write("	   </LaunchAction>\n")
+   	file:write("	<ProfileAction\n")
+	file:write("	      shouldUseLaunchSchemeArgsEnv = \"YES\"\n")
+	file:write("	      savedToolIdentifier = \"\"\n")
+	file:write("	      useCustomWorkingDirectory = \"NO\"\n")
+	file:write("	      buildConfiguration = \"Release\"\n")
+	file:write("	      debugDocumentVersioning = \"YES\">\n")
+	file:write("	      <MacroExpansion>\n")
+	file:write("	         <BuildableReference\n")
+	file:write("	            BuildableIdentifier = \"primary\"\n")
+	file:write("	            BlueprintIdentifier = \"" .. g_pbxNativeTargetID .. "\"\n")
+	file:write("	            BuildableName = \"" .. g_currentTarget.name .. "\"\n")
+	file:write("	            BlueprintName = \"" .. g_currentTarget.name .. "\"\n")
+	file:write("	            ReferencedContainer = \"container:" .. g_currentTarget.name .. ".xcodeproj\">\n")
+	file:write("	         </BuildableReference>\n")
+	file:write("	      </MacroExpansion>\n")
+	file:write("	   </ProfileAction>\n")
+	file:write("	   <AnalyzeAction\n")
+	file:write("	      buildConfiguration = \"Debug\">\n")
+	file:write("	   </AnalyzeAction>\n")
+	file:write("	   <ArchiveAction\n")
+	file:write("	      buildConfiguration = \"Release\"\n")
+	file:write("	      revealArchiveInOrganizer = \"YES\">\n")
+	file:write("	   </ArchiveAction>\n")
+	file:write("</Scheme>\n")
+
+	file:close()
+	mbwriter.reportoutputfile(xcschemeFilename)
 end
 
 --[[Assign PBX files IDs ]] --------------------------------------------------------------------------------
@@ -662,15 +793,44 @@ end
 
 --[[ CREATE FOLDER TREE ]] --------------------------------------------------------------------------------
 
+    --Init loc folders
+    g_locFolder = {
+        name = "Localizable.strings",
+        shortName = "Localizable.strings",
+        PBXVariantGroupID = mbwriter.xcodegenerateid(),
+        PBXBuildFileID = mbwriter.xcodegenerateid(),
+        parentid = "BE854EE418CA1337008EAFCD", --source folder
+        childIDs = {}
+    }
+
 	-- Init Source folders
 	do
 		local sourceFileList = {}
 		for i = 1, #g_currentTarget.allfiles do
 			local f = g_currentTarget.allfiles[i]
 			if GetFileListType(f) == "Source" or GetFileListType(f) == "Unknown" then
-				table.insert(sourceFileList, f)
+            --[[
+                if IsLocFile(f) then
+                    local locFileInfo = {}
+                    locFileInfo.filename = f
+                    local locStartIndex = string.find(f, "lproj/Localizable.strings")
+                    if locStartIndex then
+                        locFileInfo.region = string.sub(f, locStartIndex-3, locStartIndex-2)
+                    else
+                        mbwriter.fatalerror("Failed to set loc region")
+                    end
+                    
+                    table.insert(g_locFiles, locFileInfo)
+                
+                    loginfo("Found loc region " .. locFileInfo.region .. " from " .. locFileInfo.filename)
+                    --InitLocFiles(g_sourceFolders, sourceFileList);
+                else
+            ]]
+                    table.insert(sourceFileList, f)
+              --  end
 			end
 		end
+    
 		InitFolders(g_sourceFolders, sourceFileList)
 	end
 
@@ -680,7 +840,24 @@ end
 		for i = 1, #g_currentTarget.resources do
 			local f = g_currentTarget.resources[i]
 			if GetFileListType(f) == "Resource" then
-				table.insert(resourceFileList, f)
+                if IsLocFile(f) then
+                    local locFileInfo = {}
+                    locFileInfo.filename = f
+                    local locStartIndex = string.find(f, "lproj/Localizable.strings")
+                    if locStartIndex then
+                        locFileInfo.region = string.sub(f, locStartIndex-3, locStartIndex-2)
+                    else
+                        mbwriter.fatalerror("Failed to set loc region")
+                    end
+                    
+                    table.insert(g_locFiles, locFileInfo)
+                    g_locFileByFilename[f] = locFileInfo
+                
+                    loginfo("Found loc region " .. locFileInfo.region .. " from " .. locFileInfo.filename)
+                    --InitLocFiles(g_sourceFolders, sourceFileList);
+                else
+                    table.insert(resourceFileList, f)
+                end
 			end
 		end
 		InitFolders(g_resourceFolders, resourceFileList)
@@ -696,7 +873,7 @@ local pbxprojFilename = g_projectoutputfile .. "/project.pbxproj"
 
 local file = mbfile.open(pbxprojFilename, "w")
 if file == nil then
-	--TODO - error
+	mbwriter.fatalerror("Failed to open file: " .. pbxprojFilename)
 end
 
 file:write(
@@ -734,6 +911,8 @@ for i = 1, #g_currentTarget.depends do
 	local f = filename .. ".a"
 	file:write("		" .. g_PBXBuildFileIDMap[dependency] .. " /* " .. f .. " */ = {isa = PBXBuildFile; fileRef = " .. g_PBXReferenceProxyIDMap[dependency] .. "; };\n")
 end
+
+file:write("		" .. g_locFolder.PBXBuildFileID  	.. " /* " .. g_locFolder.name .. " */ = {isa = PBXBuildFile; fileRef = " .. g_locFolder.PBXVariantGroupID .. "; };\n")
 
 file:write("/* End PBXBuildFile section */\n\n")
 
@@ -779,10 +958,31 @@ end
 mbwriter.xcoderegisterpbxfilereference_external(g_currentTarget.name, g_externalProductID)
 file:write("		" .. g_externalProductID .. " /* " .. g_currentTargetFilenameWithExt .. " */ = {isa = PBXFileReference; explicitFileType = " .. g_productType .. "; includeInIndex = 0; path = \"" .. g_currentTargetFilenameWithExt .. "\"; sourceTree = BUILT_PRODUCTS_DIR; };\n")
 
+local frameworksSetCurrentTarget = mbutil.makeset(g_currentTarget.frameworks);
+
 --All files, regardless of whether they're for this platform or not.
 for i = 1, #g_currentTarget.allfiles do
 	local f = g_currentTarget.allfiles[i]
-	file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. GetLastKnownFileType(f) .. "; name = \"" .. mbfilepath.getshortname(f) .. "\"; path = \"" .. mbwriter.getoutputrelfilepath(f) .. "\"; sourceTree = " .. GetSourceTree(f) .. "; };\n")
+    if IsLocFile(f) then
+        local locFileInfo = g_locFileByFilename[f]
+        
+        file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. "text.plist.strings" .. "; name = \"" .. locFileInfo.region .. "\"; path = \"" .. mbwriter.getoutputrelfilepath(f) .. "\"; sourceTree = " .. "\"<group>\"" .. "; };\n")
+    else
+		local includeThisFile = true
+		local lastKnownFileType = GetLastKnownFileType(f)
+		if lastKnownFileType == "wrapper.framework" then
+			--If this framework is not one of the ones for the current target then we'll not add it the tree of files.
+			if frameworksSetCurrentTarget[f] == nil then
+				includeThisFile = false;
+			end
+		end
+		
+		if includeThisFile then
+			file:write("		" .. g_PBXFileRefIDMap[f] 	.. " /* " .. f .. " */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = " .. lastKnownFileType .. "; name = \"" .. mbfilepath.getshortname(f) .. "\"; path = \"" .. mbwriter.getoutputrelfilepath(f) .. "\"; sourceTree = " .. GetSourceTree(f) .. "; };\n")
+		else
+			
+		end
+    end
 end
 
 for i = 1, #g_currentTarget.depends do
@@ -860,6 +1060,19 @@ file:write("			isa = PBXProject;\n")
 file:write("			attributes = {\n")
 file:write("				LastUpgradeCheck = 0500;\n")
 file:write("				ORGANIZATIONNAME = metabuild;\n")
+--[[
+file:write("				TargetAttributes = {\n")
+file:write("					" .. g_pbxNativeTargetID .. " = {\n")
+file:write("						DevelopmentTeam = XXX;\n")
+file:write("						SystemCapabilities = {\n")
+-- TODO - iterate through array of capabilities
+file:write("							com.apple.iCloud = {\n")
+file:write("								enabled = 1;\n")
+file:write("							};\n")
+file:write("						};\n")
+file:write("					};\n")
+file:write("				};\n")
+--]]
 file:write("			};\n")
 file:write("			buildConfigurationList = BE854EDD18CA1112008EAFCD /* Build configuration list for PBXProject \"" .. g_currentTarget.name .. "\" */;\n")
 file:write("			compatibilityVersion = \"Xcode 3.2\";\n")
@@ -868,6 +1081,12 @@ file:write("			hasScannedForEncodings = 0;\n")
 file:write("			knownRegions = (\n")
 file:write("				en,\n")
 file:write("				Base,\n")
+--[[
+file:write("				fr,\n")
+file:write("				it,\n")
+file:write("				de,\n")
+file:write("				es,\n")
+]]
 file:write("			);\n")
 file:write("			mainGroup = " .. g_mainGroupID .. ";\n")
 file:write("			productRefGroup = BE854EE318CA1112008EAFCD /* Products */;\n")
@@ -913,9 +1132,12 @@ file:write("			buildActionMask = 2147483647;\n")
 file:write("			files = (\n")
 for i = 1, #g_currentTarget.resources do
 	local f = g_currentTarget.resources[i]
-	file:write("				" ..  g_PBXBuildFileIDMap[f] .. " /* " .. f .. " in Resources */,\n")
+    if IsLocFile(f) then
+    else
+        file:write("				" ..  g_PBXBuildFileIDMap[f] .. " /* " .. f .. " in Resources */,\n")
+    end
 end
---file:write("				BE854F0918CA1112008EAFCD /* Images.xcassets in Resources */,\n")
+file:write("				" .. g_locFolder.PBXBuildFileID .. " /* " .. g_locFolder.name .. " in Resources */,\n")
 file:write("			);\n")
 file:write("			runOnlyForDeploymentPostprocessing = 0;\n")
 file:write("		};\n")
@@ -958,36 +1180,17 @@ file:write("/* End PBXTargetDependency section */\n")
 --PBXVariantGroup is used by Xcode to represent localizations.
 --[kenm] TODO - replace hard-coding with final version
 file:write("/* Begin PBXVariantGroup section */\n")
-file:write("		BE854EF218CA1112008EAFCD /* InfoPlist.strings */ = {\n")
+file:write("		" .. g_locFolder.PBXVariantGroupID .. " /* " .. g_locFolder.shortName .. " */ = {\n")
 file:write("			isa = PBXVariantGroup;\n")
+
 file:write("			children = (\n")
-file:write("				BE854EF318CA1112008EAFCD /* en */,\n")
+for i = 1, #g_locFiles do
+    local locFileInfo = g_locFiles[i]
+    file:write("				" .. g_PBXFileRefIDMap[locFileInfo.filename] .. " /* " .. locFileInfo.region .. " */,\n")
+end
 file:write("			);\n")
-file:write("			name = InfoPlist.strings;\n")
-file:write("			sourceTree = \"<group>\";\n")
-file:write("		};\n")
-file:write("		BE854EFB18CA1112008EAFCD /* Main_iPhone.storyboard */ = {\n")
-file:write("			isa = PBXVariantGroup;\n")
-file:write("			children = (\n")
-file:write("				BE854EFC18CA1112008EAFCD /* Base */,\n")
-file:write("			);\n")
-file:write("			name = Main_iPhone.storyboard;\n")
-file:write("			sourceTree = \"<group>\";\n")
-file:write("		};\n")
-file:write("		BE854EFE18CA1112008EAFCD /* Main_iPad.storyboard */ = {\n")
-file:write("			isa = PBXVariantGroup;\n")
-file:write("			children = (\n")
-file:write("				BE854EFF18CA1112008EAFCD /* Base */,\n")
-file:write("			);\n")
-file:write("			name = Main_iPad.storyboard;\n")
-file:write("			sourceTree = \"<group>\";\n")
-file:write("		};\n")
-file:write("		BE854F1818CA1112008EAFCD /* InfoPlist.strings */ = {\n")
-file:write("			isa = PBXVariantGroup;\n")
-file:write("			children = (\n")
-file:write("				BE854F1918CA1112008EAFCD /* en */,\n")
-file:write("			);\n")
-file:write("			name = InfoPlist.strings;\n")
+
+file:write("			name = " .. g_locFolder.shortName .. ";\n")
 file:write("			sourceTree = \"<group>\";\n")
 file:write("		};\n")
 file:write("/* End PBXVariantGroup section */\n\n")
@@ -1001,3 +1204,9 @@ file:write("}\n")
 
 file:close()
 mbwriter.reportoutputfile(pbxprojFilename)
+
+g_projectoutputfile = mbwriter.global.makeoutputdirabs .. "/" .. mbwriter.solution.name .. ".xcodeproj"
+
+mbwriter.mkdir(g_projectoutputfile)
+
+WriteXCScheme()

@@ -14,78 +14,6 @@ function GetJNIDir(currentTargetName, configName)
 	return GetWorkspaceDir(currentTargetName, configName) .. "/jni"
 end
 
-function InitRequiredFileOrDir(templateDir, workspaceDir, relativeFilename)
-
-	local templateFilename = templateDir .. "/" .. relativeFilename
-	local workspaceFilename = workspaceDir .. "/" .. relativeFilename
-
-	--If file not already present in workspace
-	if mbwriter.getfiletype(workspaceFilename) == "missing" then
-		--Look for link candidate in template dir
-		if mbwriter.getfiletype(templateFilename) == "missing" then
-			--Error: Missing link source
-			mbwriter.fatalerror("Required file/dir missing: " .. workspaceFilename)
-		else
-			--Link source exists, so create the link
-			mbwriter.mklink(templateFilename, workspaceFilename)
-			loginfo("Created link from " .. templateFilename .. " -> " .. workspaceFilename)
-		end
-	end
-
-	--Use existing file in workspace
-	loginfo("Required file/dir " .. relativeFilename .. " found in " .. workspaceDir .. "/" .. relativeFilename)
-end
---[[
-function CreateResourceDirLink(currentTarget, config, relativeFilename)
-
-	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
-	mbwriter.mkdir(workspaceDir)
-
-	local srcFilename = relativeFilename
-	local workspaceFilename = workspaceDir .. "/" .. relativeFilename
-
-	--If file not already present in workspace
-	if mbwriter.getfiletype(workspaceFilename) == "missing" then
-		--Look for link candidate in template dir
-		if mbwriter.getfiletype(srcFilename) == "missing" then
-			--Error: Missing link source
-			logerror("Missing resource dir " .. srcFilename)
-		else
-			--Link source exists, so create the link
-			local filetype = mbwriter.getfiletype(srcFilename)
-			if filetype == "dir" then
-				mbwriter.mklink(srcFilename, workspaceFilename)
-				loginfo("Created link from " .. srcFilename .. " -> " .. workspaceFilename)
-			else
-				mbwriter.fatalerror("Cannot use file " .. relativeFilename .. " as a resource for NDK builds. NDK resources must be directories only.")
-			end
-		end
-	end
-
-	loginfo("Resource dir " .. relativeFilename .. " found in " .. workspaceFilename)
-end
-]]
-
-function CreateLinks(currentTarget, config)
-	local templateDir = mbutil.getkvvalue(config.options._ndk, "ProjectDir")
-	if templateDir == nil then
-		mbwriter.fatalerror("ndk project dir not specified")
-	end
-
-	--NOTE: templateDir needs to remain relative to working directory, not output
-	--files as links are made within the metabuilder app itself
-
-	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
-	mbwriter.mkdir(workspaceDir)
-
-	InitRequiredFileOrDir(templateDir, workspaceDir, "build.xml")
-	InitRequiredFileOrDir(templateDir, workspaceDir, "AndroidManifest.xml")
-	InitRequiredFileOrDir(templateDir, workspaceDir, "project.properties")
-	--InitRequiredFileOrDir(templateDir, workspaceDir, "assets")
-	InitRequiredFileOrDir(templateDir, workspaceDir, "res")
-	InitRequiredFileOrDir(templateDir, workspaceDir, "src")
-end
-
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --FILE WRITING
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -301,12 +229,6 @@ function WriteAndroidMk(currentTarget, config)
 end
 
 function WriteJNI(currentTarget, config)
-
-	--links to template folder required for apps, but not libraries
-	if currentTarget.targettype == "app" then
-		CreateLinks(currentTarget, config)
-	end
-
 	WriteApplicationMk(currentTarget, config)
 	WriteAndroidMk(currentTarget, config)
 end

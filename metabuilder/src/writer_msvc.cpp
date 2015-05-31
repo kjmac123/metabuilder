@@ -34,7 +34,7 @@ static int luaFuncGetProjectID(lua_State* l)
     std::string targetName;
 	mbLuaToStringExpandMacros(&targetName, NULL, l, 1);
 	
-	for (int i = 0; i < (int)g_externalProjectReference.size(); ++i)
+	for (size_t i = 0; i < g_externalProjectReference.size(); ++i)
 	{
 		if (g_externalProjectReference[i].key == targetName)
 		{

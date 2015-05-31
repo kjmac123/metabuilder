@@ -24,7 +24,6 @@ static const char* g_stringGroups[] = {
 struct BuildFileListCtx
 {
 	StringVector*		filePathArray;
-	const FilePath*		inputFullPath;
 	FilePath			pattern;
 };
 
@@ -41,6 +40,7 @@ static void FilterAndAppendFilepathArray(const Platform::FileInfo& fileInfo, voi
 	if (fileInfo.attributes.hidden)
 		return;
 
+    
 	if (!StringWildcardMatch(fileInfo.filename.c_str(), fileInfo.filename.GetLength(), ctx->pattern.c_str(), ctx->pattern.GetLength()))
 	{
 		//No match
@@ -62,6 +62,8 @@ static void FilterAndAppendFilepathArray(const Platform::FileInfo& fileInfo, voi
 	{
 		ctx->filePathArray->push_back(dirAndFilename.c_str());
 	}
+    
+    MB_LOGINFO("%s", fileInfo.fullPath.c_str());
 }
 
 static void AddHeadersAutomatically(StringVector* files)
@@ -70,7 +72,8 @@ static void AddHeadersAutomatically(StringVector* files)
 	
 	StringVector result;
 	result.reserve(files->size()*2);
-	for (int i = 0; i < (int)files->size(); ++i)
+
+	for (size_t i = 0; i < files->size(); ++i)
 	{
 		const std::string& filename = (*files)[i];
 		result.push_back(filename);
@@ -133,26 +136,43 @@ static void BuildFileList(StringVector* result, const FilePathVector& input)
 {
 	std::string workingDir = Platform::FileGetWorkingDir();
 	Platform::FileSetWorkingDir(mbGetCurrentLuaDir());
-    for (int i = 0; i < (int)input.size(); ++i)
+    for (size_t i = 0; i < input.size(); ++i)
 	{
-		BuildFileListCtx buildFileListCtx;
-		buildFileListCtx.filePathArray = result;
-		buildFileListCtx.inputFullPath = &input[i];
-
-		FilePath split1, split2, dir;
-		if (!buildFileListCtx.inputFullPath->SplitLast(&split1, &split2))
-		{
-			buildFileListCtx.pattern = split1;
-			dir = FilePath(".");
-		}
-		else
-		{
-			dir = split1;
-			buildFileListCtx.pattern = split2;
-		}
-
-		Platform::DirWalk(dir, FilterAndAppendFilepathArray, &buildFileListCtx);
-	}
+        BuildFileListCtx buildFileListCtx;
+        buildFileListCtx.filePathArray = result;
+        
+        if (Platform::GetFileType(input[i]) == E_FileType_Dir)
+        {
+            buildFileListCtx.pattern = FilePath("*");
+            Platform::BuildFileListDir(input[i], FilterAndAppendFilepathArray, &buildFileListCtx);
+        }
+        //Else could be dir with wildcard pattern or a file.
+        else
+        {
+            FilePath split1, split2, dir;
+            if (!input[i].SplitLast(&split1, &split2))
+            {
+                //Unable to split path. It's either a file or a missing directory. Assume it's a file.
+                Platform::BuildFileListFile(input[i], FilterAndAppendFilepathArray, &buildFileListCtx);
+            }
+            //Dir with wildcard pattern or a missing file
+            else
+            {
+                if (split2.ContainsWildcards())
+                {
+                    dir = split1;
+                    buildFileListCtx.pattern = split2;
+                    Platform::BuildFileListDir(split1, FilterAndAppendFilepathArray, &buildFileListCtx);
+                }
+                else
+                {
+                    //No wildcards, so this is assumed to be a missing file.
+                    Platform::BuildFileListFile(input[i], FilterAndAppendFilepathArray, &buildFileListCtx);
+                }
+            }
+        }
+    }
+        
 	Platform::FileSetWorkingDir(workingDir);
 }
 
@@ -543,7 +563,7 @@ Block::Block()
 
 Block::~Block()
 {
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		delete m_childParams[i];
 	}
@@ -562,7 +582,7 @@ void Block::Process()
 		AddHeadersAutomatically(&it->second);
 	}
 	
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		m_childParams[i]->Process();
 	}
@@ -878,7 +898,7 @@ void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformNa
 {
 	std::vector<Block*> childrenToProcess;
 	
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		Block* child = m_childParams[i];
 				
@@ -934,7 +954,7 @@ void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformNa
 	
 	if (recurseChildParams)
 	{
-		for (int i = 0; i < (int)childrenToProcess.size(); ++i)
+		for (size_t i = 0; i < childrenToProcess.size(); ++i)
 		{
 			Block* child = childrenToProcess[i];
 			child->GetParams(result, t, platformName, configName, recurseChildParams);
@@ -944,7 +964,7 @@ void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformNa
 
 ParamBlock* Block::GetParam(E_BlockType t, const char* name)
 {
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		Block* child = m_childParams[i];
 		if (child->GetType() == t && child->GetName() == name)
@@ -969,7 +989,7 @@ void Block::FlattenThis(FlatConfig* result) const
 void Block::SetMacroCacheDirty() const
 {
 	m_macroCacheDirty = true;
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		m_childParams[i]->SetMacroCacheDirty();
 	}
@@ -983,7 +1003,7 @@ MakeBlock::MakeBlock()
 
 MakeBlock::~MakeBlock()
 {
-	for (int i = 0; i < (int)m_childMakeBlocks.size(); ++i)
+	for (size_t i = 0; i < m_childMakeBlocks.size(); ++i)
 	{
 		delete m_childMakeBlocks[i];
 	}
@@ -1011,7 +1031,7 @@ void MakeBlock::Process()
 {
 	Block::Process();
 	
-	for (int i = 0; i < (int)m_childMakeBlocks.size(); ++i)
+	for (size_t i = 0; i < m_childMakeBlocks.size(); ++i)
 	{
 		m_childMakeBlocks[i]->Process();
 	}

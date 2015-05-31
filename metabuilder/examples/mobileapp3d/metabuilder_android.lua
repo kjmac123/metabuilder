@@ -22,10 +22,22 @@ platform "Android"
 
 	if checkplatform("TADP") then
 		tadp.settargetapi("android-21")
+
+		config "Debug"
+			tadp.setproguardenabled(true)
+		config_end()
+
+		config "Release"
+			tadp.setproguardenabled(true)
+		config_end()
+
+		config "Master"
+			tadp.setproguardenabled(true)
+		config_end()		
 	end
 
 	if checkplatform("NDK") then
 		ndk.setprojectdir("projects/android")
-	end
+	end	
 
 platform_end()

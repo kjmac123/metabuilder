@@ -45,3 +45,11 @@ xcode = {}
 function xcode.setinfoplist(plistFile)
 	option("_xcode", "INFOPLIST_FILE", plistFile)
 end
+
+function xcode.setentitlements(entitlementsFile)
+	option("_xcode", "CODE_SIGN_ENTITLEMENTS", entitlementsFile)
+end
+
+function xcode.addcapability(capability)
+	addoption("_xcode", "_capabilities", capability)
+end

@@ -1,5 +1,5 @@
 #ifndef CORESTRING_H
-#define CORE_STRING_H
+#define CORESTRING_H
 
 //core_snprintf
 //- will write at most size-1 characters to output
