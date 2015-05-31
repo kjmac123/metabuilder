@@ -1209,4 +1209,4 @@ g_projectoutputfile = mbwriter.global.makeoutputdirabs .. "/" .. mbwriter.soluti
 
 mbwriter.mkdir(g_projectoutputfile)
 
-WriteXCScheme()
+--WriteXCScheme()
