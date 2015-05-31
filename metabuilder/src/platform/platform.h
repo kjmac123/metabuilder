@@ -1,7 +1,7 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-#include "FilePath.h"
+#include "filepath.h"
 
 enum E_FileType
 {
