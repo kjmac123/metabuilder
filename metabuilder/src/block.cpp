@@ -1,5 +1,6 @@
 #include "metabuilder_pch.h"
 
+#include "corestring.h"
 #include "configparam.h"
 #include "block.h"
 #include "platformparam.h"
@@ -20,13 +21,59 @@ static const char* g_stringGroups[] = {
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
+struct BuildFileListCtx
+{
+	StringVector*		filePathArray;
+	FilePath			pattern;
+};
+
+static void FilterAndAppendFilepathArray(const Platform::FileInfo& fileInfo, void* data)
+{
+	BuildFileListCtx* ctx = static_cast<BuildFileListCtx*>(data);
+	MB_ASSERT(ctx);
+
+	//Ignore hidden unix files.
+	if (fileInfo.filename.c_str()[0] == '.')
+		return;
+
+	//Ignore hidden files
+	if (fileInfo.attributes.hidden)
+		return;
+
+    
+	if (!StringWildcardMatch(fileInfo.filename.c_str(), fileInfo.filename.GetLength(), ctx->pattern.c_str(), ctx->pattern.GetLength()))
+	{
+		//No match
+		return;
+	}
+		
+	FilePath dirAndFilename = fileInfo.parentDir;
+	dirAndFilename.Join(fileInfo.filename);
+
+	//An ugly little hack to avoid breaking some build systems that don't understand ./ syntax under some circumstances.
+	//MSVC seems to have issues.
+	const char* fp = dirAndFilename.c_str();
+	if (strstr(fp, "./") == fp)
+	{
+		fp += 2;
+		ctx->filePathArray->push_back(fp);
+	}
+	else
+	{
+		ctx->filePathArray->push_back(dirAndFilename.c_str());
+	}
+    
+    //MB_LOGINFO("%s", fileInfo.fullPath.c_str());
+}
+
 static void AddHeadersAutomatically(StringVector* files)
 {
 	MetaBuilderContext* ctx = mbGetMainContext();
 	
 	StringVector result;
 	result.reserve(files->size()*2);
-	for (int i = 0; i < (int)files->size(); ++i)
+
+	for (size_t i = 0; i < files->size(); ++i)
 	{
 		const std::string& filename = (*files)[i];
 		result.push_back(filename);
@@ -85,42 +132,41 @@ static void AddHeadersAutomatically(StringVector* files)
 	*files = result;
 }
 
-static void ProcessWildcards(StringVector* result, const StringVector& input)
+static void BuildFileList(StringVector* result, const FilePathVector& input)
 {
-	int initialResultCount = static_cast<int>(result->size());
-	
-	for (int i = 0; i < (int)input.size(); ++i)
+	std::string workingDir = Platform::FileGetWorkingDir();
+	Platform::FileSetWorkingDir(mbGetCurrentLuaDir());
+    for (size_t i = 0; i < input.size(); ++i)
 	{
-		std::string inputFilepath = input[i];
-
-		//Look for wildcard
-		if (inputFilepath.find('*') != std::string::npos)
-		{
-			const char* excludeDirs = NULL;
-#if 0
-			const char* delimiter = "|excludedirs=";
-			char* tmp = (char*)strstr(inputFilepath.c_str(), delimiter);
-			if (tmp)
-			{
-				excludeDirs = tmp + strlen(delimiter);
-				*tmp = '\0';
-			}
-#endif
-			std::string dir = mbPathGetDir(inputFilepath);
-			std::string filename = mbPathGetFilename(inputFilepath);
-
-			Platform::BuildFileListRecurse(result, dir.c_str(), filename.c_str(), excludeDirs);
-			if ((int)result->size() == initialResultCount)
-			{
-				MB_LOGERROR("No files found matching dir %s and filter %s",  dir.c_str(), filename.c_str());
-				mbExitError();
-			}
-		}
-		else
-		{
-			result->push_back(inputFilepath);
-		}
-	}
+        BuildFileListCtx buildFileListCtx;
+        buildFileListCtx.filePathArray = result;
+        
+        {
+            FilePath split1, split2, dir;
+            if (!input[i].SplitLast(&split1, &split2))
+            {
+                //Unable to split path. It's either a file or a missing directory. Assume it's a file.
+                Platform::BuildFileListFile(input[i], FilterAndAppendFilepathArray, &buildFileListCtx);
+            }
+            //Dir with wildcard pattern or a missing file
+            else
+            {
+                if (split2.ContainsWildcards())
+                {
+                    dir = split1;
+                    buildFileListCtx.pattern = split2;
+                    Platform::BuildFileListDir(split1, FilterAndAppendFilepathArray, &buildFileListCtx);
+                }
+                else
+                {
+                    //No wildcards, so this is assumed to be a missing file.
+                    Platform::BuildFileListFile(input[i], FilterAndAppendFilepathArray, &buildFileListCtx);
+                }
+            }
+        }
+    }
+        
+	Platform::FileSetWorkingDir(workingDir);
 }
 
 static int luaFuncSetOption(lua_State* l)
@@ -308,18 +354,18 @@ static int luaFuncFiles(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector strings;
-    for (int i = 1; i <= tableLen; ++i)
+	FilePathVector strings;
+	for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-		strings.push_back(std::string());
+		strings.push_back(FilePath());
 		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
-    }
+	}
 	
-	StringVector filteredList;
-	ProcessWildcards(&filteredList, strings);
-	b->AddFiles(filteredList);
-		
+	StringVector files;
+	BuildFileList(&files, strings);
+	b->AddFiles(files);
+
     return 0;
 }
 
@@ -335,16 +381,16 @@ static int luaFuncNoPchFiles(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector strings;
+	FilePathVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-		strings.push_back(std::string());
+		strings.push_back(FilePath());
 		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
     }
 	
 	StringVector filteredList;
-	ProcessWildcards(&filteredList, strings);
+	BuildFileList(&filteredList, strings);
 	b->AddNoPchFiles(filteredList);
 		
     return 0;
@@ -387,16 +433,16 @@ static int luaFuncResources(lua_State* l)
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
     
-	StringVector strings;
+	FilePathVector strings;
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-		strings.push_back(std::string());
+		strings.push_back(FilePath());
 		mbLuaToStringExpandMacros(&strings.back(), b, l, -1);
 	}
 	
 	StringVector filteredList;
-	ProcessWildcards(&filteredList, strings);
+	BuildFileList(&filteredList, strings);
 	b->AddResources(filteredList);
     return 0;
 }
@@ -510,7 +556,7 @@ Block::Block()
 
 Block::~Block()
 {
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		delete m_childParams[i];
 	}
@@ -529,7 +575,7 @@ void Block::Process()
 		AddHeadersAutomatically(&it->second);
 	}
 	
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		m_childParams[i]->Process();
 	}
@@ -845,7 +891,7 @@ void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformNa
 {
 	std::vector<Block*> childrenToProcess;
 	
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		Block* child = m_childParams[i];
 				
@@ -901,7 +947,7 @@ void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformNa
 	
 	if (recurseChildParams)
 	{
-		for (int i = 0; i < (int)childrenToProcess.size(); ++i)
+		for (size_t i = 0; i < childrenToProcess.size(); ++i)
 		{
 			Block* child = childrenToProcess[i];
 			child->GetParams(result, t, platformName, configName, recurseChildParams);
@@ -911,7 +957,7 @@ void Block::GetParams(ParamVector* result, E_BlockType t, const char* platformNa
 
 ParamBlock* Block::GetParam(E_BlockType t, const char* name)
 {
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		Block* child = m_childParams[i];
 		if (child->GetType() == t && child->GetName() == name)
@@ -936,7 +982,7 @@ void Block::FlattenThis(FlatConfig* result) const
 void Block::SetMacroCacheDirty() const
 {
 	m_macroCacheDirty = true;
-	for (int i = 0; i < (int)m_childParams.size(); ++i)
+	for (size_t i = 0; i < m_childParams.size(); ++i)
 	{
 		m_childParams[i]->SetMacroCacheDirty();
 	}
@@ -950,7 +996,7 @@ MakeBlock::MakeBlock()
 
 MakeBlock::~MakeBlock()
 {
-	for (int i = 0; i < (int)m_childMakeBlocks.size(); ++i)
+	for (size_t i = 0; i < m_childMakeBlocks.size(); ++i)
 	{
 		delete m_childMakeBlocks[i];
 	}
@@ -978,7 +1024,7 @@ void MakeBlock::Process()
 {
 	Block::Process();
 	
-	for (int i = 0; i < (int)m_childMakeBlocks.size(); ++i)
+	for (size_t i = 0; i < m_childMakeBlocks.size(); ++i)
 	{
 		m_childMakeBlocks[i]->Process();
 	}

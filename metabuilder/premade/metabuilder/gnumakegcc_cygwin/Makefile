@@ -100,9 +100,12 @@ metabuilder_SRC := \
 	../../../src/common.cpp \
 	../../../src/configparam.cpp \
 	../../../src/core.cpp \
+	../../../src/corestring.cpp \
+	../../../src/filepath.cpp \
 	../../../src/luafile.cpp \
 	../../../src/main.cpp \
 	../../../src/makeglobal.cpp \
+	../../../src/mbstring.cpp \
 	../../../src/metabase.cpp \
 	../../../src/metabuilder_pch.cpp \
 	../../../src/platform/platform.cpp \
@@ -122,9 +125,12 @@ metabuilder_OBJ := \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/common.o \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/configparam.o \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/core.o \
+	$(metabuilder_INTDIR.$(BUILDCONFIG))/corestring.o \
+	$(metabuilder_INTDIR.$(BUILDCONFIG))/filepath.o \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/luafile.o \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/main.o \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/makeglobal.o \
+	$(metabuilder_INTDIR.$(BUILDCONFIG))/mbstring.o \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/metabase.o \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/metabuilder_pch.o \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/platform.o \
@@ -153,6 +159,12 @@ $(metabuilder_INTDIR.$(BUILDCONFIG))/configparam.o : ../../../src/configparam.cp
 $(metabuilder_INTDIR.$(BUILDCONFIG))/core.o : ../../../src/core.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/core.d 
 	@echo $(metabuilder_CXX) ../../../src/core.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
+$(metabuilder_INTDIR.$(BUILDCONFIG))/corestring.o : ../../../src/corestring.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/corestring.d 
+	@echo $(metabuilder_CXX) ../../../src/corestring.cpp
+	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
+$(metabuilder_INTDIR.$(BUILDCONFIG))/filepath.o : ../../../src/filepath.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/filepath.d 
+	@echo $(metabuilder_CXX) ../../../src/filepath.cpp
+	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
 $(metabuilder_INTDIR.$(BUILDCONFIG))/luafile.o : ../../../src/luafile.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/luafile.d 
 	@echo $(metabuilder_CXX) ../../../src/luafile.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
@@ -161,6 +173,9 @@ $(metabuilder_INTDIR.$(BUILDCONFIG))/main.o : ../../../src/main.cpp $(metabuilde
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
 $(metabuilder_INTDIR.$(BUILDCONFIG))/makeglobal.o : ../../../src/makeglobal.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/makeglobal.d 
 	@echo $(metabuilder_CXX) ../../../src/makeglobal.cpp
+	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
+$(metabuilder_INTDIR.$(BUILDCONFIG))/mbstring.o : ../../../src/mbstring.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/mbstring.d 
+	@echo $(metabuilder_CXX) ../../../src/mbstring.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
 $(metabuilder_INTDIR.$(BUILDCONFIG))/metabase.o : ../../../src/metabase.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/metabase.d 
 	@echo $(metabuilder_CXX) ../../../src/metabase.cpp
@@ -239,9 +254,12 @@ clean : clean_metabuilder
 -include $(metabuilder_INTDIR.$(BUILDCONFIG))/common.d
 -include $(metabuilder_INTDIR.$(BUILDCONFIG))/configparam.d
 -include $(metabuilder_INTDIR.$(BUILDCONFIG))/core.d
+-include $(metabuilder_INTDIR.$(BUILDCONFIG))/corestring.d
+-include $(metabuilder_INTDIR.$(BUILDCONFIG))/filepath.d
 -include $(metabuilder_INTDIR.$(BUILDCONFIG))/luafile.d
 -include $(metabuilder_INTDIR.$(BUILDCONFIG))/main.d
 -include $(metabuilder_INTDIR.$(BUILDCONFIG))/makeglobal.d
+-include $(metabuilder_INTDIR.$(BUILDCONFIG))/mbstring.d
 -include $(metabuilder_INTDIR.$(BUILDCONFIG))/metabase.d
 -include $(metabuilder_INTDIR.$(BUILDCONFIG))/metabuilder_pch.d
 -include $(metabuilder_INTDIR.$(BUILDCONFIG))/platform.d

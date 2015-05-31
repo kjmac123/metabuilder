@@ -39,7 +39,7 @@ static int luaFuncGetExternalPBXFileReferenceExternal(lua_State* l)
     std::string filename;
 	mbLuaToStringExpandMacros(&filename, NULL, l, 1);
 	
-	for (int i = 0; i < (int)g_externalFileReference.size(); ++i)
+	for (size_t i = 0; i < g_externalFileReference.size(); ++i)
 	{
 		if (g_externalFileReference[i].key == filename)
 		{
@@ -55,7 +55,7 @@ static int luaFuncGetExternalPBXNativeTargetExternal(lua_State* l)
     std::string targetName;
 	mbLuaToStringExpandMacros(&targetName, NULL, l, 1);
 	
-	for (int i = 0; i < (int)g_externalNativeTarget.size(); ++i)
+	for (size_t i = 0; i < g_externalNativeTarget.size(); ++i)
 	{
 		if (g_externalNativeTarget[i].key == targetName)
 		{

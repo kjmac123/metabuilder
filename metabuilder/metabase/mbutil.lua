@@ -33,4 +33,13 @@ function module.kvsetvalue(keyValue, value)
 	return split(keyValue, "=")[1] .. "=" .. value
 end
 
+function module.makeset (list)
+	local set = {}
+	for _, l in ipairs(list) do 
+		set[l] = true 
+	end
+ 
+ 	return set
+end
+
 return module

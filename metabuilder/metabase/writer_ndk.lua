@@ -14,42 +14,11 @@ function GetJNIDir(currentTargetName, configName)
 	return GetWorkspaceDir(currentTargetName, configName) .. "/jni"
 end
 
-function CreateLinks(currentTarget, config)
-	local templateDir = mbutil.getkvvalue(config.options._ndk, "ProjectDir")
-	if templateDir == nil then
-		mbwriter.fatalerror("ndk project dir not specified")
-	end
-
-	--NOTE: templateDir needs to remain relative to working directory, not output
-	--files as links are made withing the metabuilder app itself
-
-	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
-	mbwriter.mkdir(workspaceDir)
-
-	--mbwriter.mklink(templateDir .. "/build.xml",							workspaceDir .. "/build.xml")
-	mbwriter.mklink(templateDir .. "/AndroidManifest.xml",		workspaceDir .. "/AndroidManifest.xml")
-
-	if mbwriter.getfiletype(templateDir .. "/assets") ~= "missing" then
-		mbwriter.mklink(templateDir .. "/assets",									workspaceDir .. "/assets")
-	else
-		loginfo("Not creating link for Android " .. templateDir .. "/assets" .. " folder as does not exist")
-	end
-	mbwriter.mklink(templateDir .. "/res",										workspaceDir .. "/res")
-	mbwriter.mklink(templateDir .. "/src",										workspaceDir .. "/src")
-end
-
-function NDKSetMakeOutputDir(outputDir)
-	--mbwriter.setmakeoutputdirabs(outputDir)
-	--print("NDKSetMakeOutputDir " .. outputDir)
-end
-
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 --FILE WRITING
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 function WriteApplicationMk(currentTarget, config)
-
-	NDKSetMakeOutputDir(g_makeOutputDirAbsTargetConfig)
 
 	local jniDir = GetJNIDir(currentTarget.name, config.name)
 	mbwriter.mkdir(jniDir)
@@ -81,8 +50,6 @@ function WriteApplicationMk(currentTarget, config)
 	end
 	file:close()
 	mbwriter.reportoutputfile(makeFilename)
-
-	NDKSetMakeOutputDir(g_makeOutputDirAbsRoot)
 end
 
 function WriteAndroidMk(currentTarget, config)
@@ -107,7 +74,13 @@ function WriteAndroidMk(currentTarget, config)
 		end
 	end
 
-	NDKSetMakeOutputDir(g_makeOutputDirAbsTargetConfig)
+--[[
+	local workspaceDir = GetWorkspaceDir(currentTarget.name, config.name);
+	for i = 1, #currentTarget.resources do
+		local f = currentTarget.resources[i]
+		CreateResourceDirLink(currentTarget, config, f)
+	end
+]]
 
 	local jniDir = GetJNIDir(currentTarget.name, config.name)
 	mbwriter.mkdir(jniDir)
@@ -253,17 +226,9 @@ function WriteAndroidMk(currentTarget, config)
 
 	file:close()
 	mbwriter.reportoutputfile(makeFilename)
-
-	NDKSetMakeOutputDir(g_makeOutputDirAbsRoot)
 end
 
 function WriteJNI(currentTarget, config)
-
-	--links to template folder required for apps, but not libraries
-	if currentTarget.targettype == "app" then
-		CreateLinks(currentTarget, config)
-	end
-
 	WriteApplicationMk(currentTarget, config)
 	WriteAndroidMk(currentTarget, config)
 end

@@ -8,8 +8,14 @@
 #include "platformparam.h"
 
 #include "ezOptionParser.hpp"
+#include "corestring.h"
+
+//TODO
+//	-	Resolve issues with adding / overriding members of lists. Need to store additional metadata with macros, indicating whether
+//		they were to replace or append when we come around to evaluating them
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
+
 
 static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 {
@@ -93,11 +99,13 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	std::vector<std::string> badOptions;
 
 	if(!opt.gotExpected(badOptions)) {
-		for(size_t i=0; i < badOptions.size(); ++i)
-			std::cerr << "ERROR: Got unexpected number of arguments for option " << badOptions[i] << "\n\n";
+		for (size_t i = 0; i < badOptions.size(); ++i)
+		{
+			MB_LOGERROR("ERROR: Got unexpected number of arguments for option %s\n", badOptions[i].c_str());
+		}
 
 		opt.getUsage(usage);
-		std::cout << usage;
+		MB_LOGERROR("%s", usage.c_str());
 		mbExitError();
 	}
 	
@@ -106,7 +114,7 @@ static void ParseArgs(CmdSetup* appOptions, int argc, const char* argv[])
 	{
 		for(size_t i=0; i < requiredOptions.size(); ++i)
 		{
-			std::cerr << "ERROR: required option missing: " << requiredOptions[i] << "\n";
+			MB_LOGERROR("ERROR: required option missing: %s", requiredOptions[i].c_str());
 		}
 
 		mbExitError();
@@ -136,7 +144,6 @@ int main(int argc, const char * argv[])
 	MB_LOGSETTIMEENABLED(true);
 
 	AppState* appState = mbGetAppState();
-//	appState->makeSetup = new MakeSetup();
 	appState->makeGlobal = new MakeGlobal();
 
 	ParseArgs(&appState->cmdSetup, argc, (const char**)argv);
@@ -150,11 +157,10 @@ int main(int argc, const char * argv[])
 	
 	// We'll add to this array during iteration
 	const StringVector& makeFiles = mbGetMakeFiles();
-//	mbPushDir(appState->makeSetup->metabaseDir);
 	mbPushDir("");
 			
 	appState->isProcessingPrimaryMakefile = true;
-	for (int i = 0; i < (int)makeFiles.size(); ++i)
+	for (size_t i = 0; i < makeFiles.size(); ++i)
 	{
 		MetaBuilderContext* ctx = mbCreateContext();
 		mbPushActiveContext(ctx);		

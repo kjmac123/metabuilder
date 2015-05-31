@@ -405,7 +405,7 @@ static int luaFuncCheckPlatform(lua_State* l)
 
     std::string testPlatform;
 	mbLuaToStringExpandMacros(&testPlatform, b, l, 1);
-	for (int i = 0; i < (int)mbGetActiveContext()->metabase->supportedPlatforms.size(); ++i)
+	for (size_t i = 0; i < mbGetActiveContext()->metabase->supportedPlatforms.size(); ++i)
 	{
 		const std::string& test = mbGetActiveContext()->metabase->supportedPlatforms[i];
 		if (test == testPlatform)
@@ -512,7 +512,7 @@ void mbHostPathJoin(char* result, const char* a, const char* b)
 	}
 
 	//Trim trailing slash
-	int aLen = (int)strlen(a);
+	int aLen = static_cast<int>(strlen(a));
 
 	char trailingSlashToRestore = 0;
 	char* trailingSlashPtr = NULL;
@@ -534,7 +534,7 @@ void mbHostPathJoin(char* result, const char* a, const char* b)
 std::string mbPathGetDir(const std::string& filePath)
 {
     std::string tmp;
-    int len = (int)filePath.length();
+    int len = static_cast<int>(filePath.length());
     char* chars = (char*)filePath.c_str();
     for (int i = len-1; i >= 0; --i)
     {
@@ -554,7 +554,7 @@ std::string mbPathGetDir(const std::string& filePath)
 std::string	mbPathGetFilename(const std::string& filePath)
 {
     std::string tmp;
-    int len = (int)filePath.length();
+    int len = static_cast<int>(filePath.length());
     char* chars = (char*)filePath.c_str();
     for (int i = len-1; i >= 0; --i)
     {
@@ -570,7 +570,7 @@ std::string	mbPathGetFilename(const std::string& filePath)
 
 bool mbPathGetFileExtension(char* result, const char* filename)
 {
-    int len = (int)strlen(filename);
+    int len = static_cast<int>(strlen(filename));
     const char* chars = filename;
     for (int i = len-1; i >= 0; --i)
     {
@@ -589,7 +589,7 @@ bool mbPathReplaceFileExtension(char* result, const char* filename, const char* 
 {
 	strcpy(result, filename);
 	
-    int len = (int)strlen(result);
+    int len = static_cast<int>(strlen(result));
 	char* chars = result;
     for (int i = len-1; i >= 0; --i)
     {
@@ -701,8 +701,8 @@ void mbPopDir()
 
 int luaCreateTable(lua_State* l)
 {
-	int narr = (int)lua_tonumber(l, 1);
-	int nrec = (int)lua_tonumber(l, 2);
+	int narr = static_cast<int>(lua_tonumber(l, 1));
+	int nrec = static_cast<int>(lua_tonumber(l, 2));
 
 	lua_createtable(l, narr, nrec);
 
@@ -806,8 +806,8 @@ void mbMergeOptions(std::map<std::string, KeyValueMap>* result,	const std::map<s
 
 U32 mbRandomU32(mbRandomContext& ctx)
 {
-// Originally by David Jones, UCL in http://www.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf
-// Public domain code for JKISS RNG
+    // Originally by David Jones, UCL in http://www.cs.ucl.ac.uk/staff/d.jones/GoodPracticeRNG.pdf
+    // Public domain code for JKISS RNG
 	U32& x = ctx.seed[0];
 	U32& y = ctx.seed[1];
 	U32& z = ctx.seed[2];
@@ -841,7 +841,7 @@ void mbCheckExpectedBlock(E_BlockType blockExpected, const char* cmdName)
 void mbJoinArrays(StringVector* a, const StringVector& b)
 {
 	a->reserve(a->size() + b.size());
-	for (int i = 0; i < (int)b.size(); ++i)
+	for (size_t i = 0; i < b.size(); ++i)
 	{
 		a->push_back(b[i]);
 	}
@@ -861,7 +861,7 @@ void mbRemoveDuplicates(StringVector* strings_)
 	tmp.reserve(strings.size());
 	
 	UniqueStringHashTable uniqueStrings;
-	for (int i = 0; i < (int)strings.size(); ++i)
+	for (size_t i = 0; i < strings.size(); ++i)
 	{
 		UniqueStringHashTable::const_iterator it = uniqueStrings.find(&strings[i]);
 		if (it == uniqueStrings.end())
@@ -896,7 +896,7 @@ void mbRemoveDuplicatesAndSort(StringVector* strings_)
 	tmp.reserve(strings.size());
 		
 	UniqueStringHashTable uniqueStrings;
-	for (int i = 0; i < (int)strings.size(); ++i)
+	for (size_t i = 0; i < strings.size(); ++i)
 	{
 		uniqueStrings.insert(&strings[i]);
 	}
@@ -915,7 +915,7 @@ void mbRemoveDuplicatesAndSort(StringVector* strings_)
 	std::sort(tmp.begin(), tmp.end(), mbCompareNoCase);
 
 	strings.clear();
-	for (int i = 0; i < (int)tmp.size(); ++i)
+	for (size_t i = 0; i < tmp.size(); ++i)
 	{
 		StringSortRecord* r = tmp[i];
 		strings.push_back(r->originalString);
@@ -991,7 +991,7 @@ static int mbExpandSingleMacro(char* result, const KeyValueMap& macroMap, const 
 	{
 		const std::string& value = it->second;
 		memcpy(result, value.c_str(), value.length());
-		length = (int)value.length();
+		length = static_cast<int>(value.length());
 	}
 
 	if (length == 0)
@@ -999,7 +999,7 @@ static int mbExpandSingleMacro(char* result, const KeyValueMap& macroMap, const 
 		const char* envValue = getenv(macroKey);
 		if (envValue)
 		{
-			length = (int)strlen(envValue);
+			length = static_cast<int>(strlen(envValue));
 			memcpy(result, envValue, length);
 		}
 	}
@@ -1078,7 +1078,27 @@ void mbExpandMacros(std::string* result, const KeyValueMap& macroMap, const char
 	*result = resultBuilderBuf;
 }
 
+void mbExpandMacros(FilePath* result, const KeyValueMap& macroMap, const char* str)
+{
+	//TODO - remove std::string usage
+	std::string tmp(result->c_str());
+	mbExpandMacros(&tmp, macroMap, str);
+	*result = FilePath(tmp);
+}
+
 void mbExpandMacros(std::string* result, Block* block, const char* str)
+{
+	if (block)
+	{
+		mbExpandMacros(result, block->FlattenMacros(), str);
+	}
+	else
+	{
+		mbExpandMacros(result, std::map<std::string, std::string>(), str);
+	}
+}
+
+void mbExpandMacros(FilePath* result, Block* block, const char* str)
 {
 	if (block)
 	{
@@ -1099,7 +1119,18 @@ const char* mbLuaToStringExpandMacros(std::string* result, Block* block, lua_Sta
 	}
 	
 	mbExpandMacros(result, block, str);
-//	MB_LOGINFO("%s -> %s", str, result->c_str());
+	return result->c_str();
+}
+
+const char* mbLuaToStringExpandMacros(FilePath* result, Block* block, lua_State* l, int stackPos)
+{
+	const char* str = lua_tostring(l, stackPos);
+	if (!str)
+	{
+		return NULL;
+	}
+
+	mbExpandMacros(result, block, str);
 	return result->c_str();
 }
 
@@ -1131,6 +1162,11 @@ void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
 	}
 
 	return NULL;
+}
+
+const std::string& mbGetCurrentLuaDir()
+{
+	return g_doFileCurrentDirStack.top();
 }
 
 void mbCommonLuaRegister(lua_State* l, LuaModuleFunctions* luaFn)

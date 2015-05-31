@@ -1,7 +1,7 @@
 #ifndef MB_CORE_H
 #define MB_CORE_H
 
-#define MB_ENABLE_PROFILING
+//#define MB_ENABLE_PROFILING
 
 typedef unsigned char U8;
 typedef char S8;
@@ -29,9 +29,9 @@ typedef double F64;
 #include <vector>
 #include <string>
 
-#if defined(PLATFORM_OSX) || defined(PLATFORM_LINUX)
-#define stricmp strcasecmp
-#endif
+//Maximum path length is a complete mess. Let's go with 512bytes for now.
+//stackoverflow.com/questions/833291/is-there-an-equivalent-to-winapis-max-path-under-linux-unix
+#define MB_MAX_PATH 512
 
 #define MB_LOGSETTIMEENABLED(b)			_mbLogSetTimeEnabled(b)
 #define MB_LOGERROR(...)				_mbLogErrorfLF(__VA_ARGS__)
@@ -40,6 +40,8 @@ typedef double F64;
 
 #define MB_CHECKERROR(test, ...)		{ if (!test) { _LogInfofLF(__VA_ARGS__); } }
 #define MB_CHECKEXPECTEDBLOCK(blockExpected, cmdName) mbCheckExpectedBlock(blockExpected, cmdName);
+
+#define MB_ABORT(...)
 
 void _mbLogSetTimeEnabled(bool b);
 void _mbLogErrorf(const char* fmt, ...);

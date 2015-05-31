@@ -59,132 +59,101 @@ void Shutdown()
 {	
 }
 
-bool CreateLink(const char* src, const char* dst)
-{
-	char existingSrcPath[PATH_MAX] = {0};
-	ssize_t readlinkResult = readlink(dst, existingSrcPath, sizeof(existingSrcPath));
-	if (readlinkResult > 0)
-	{
-		//link already exists
-		if (!strcmp(existingSrcPath, src))
-			return true;
-			
-		//Link is to a different location.
-		MB_LOGERROR("Cannot create symbolic link from %s to %s as destination is already linked to %s", src, dst, existingSrcPath);
-		mbExitError();
-		return 0;
-	}
-
-	int result = symlink(src, dst);
-	if (result == 0)
-		return true;
-
-	MB_LOGERROR("Failed to create symbolic link from %s to %s", src, dst);
-	return false;
-}
-
-E_FileType GetFileType(const std::string& filepath)
+E_FileType GetFileType(const FilePath& filepath)
 {
 	struct stat statbuf;
     if (stat(filepath.c_str(), &statbuf) == -1)
 	{
 		return E_FileType_Missing;
 	}
-	
-	if(S_ISDIR(statbuf.st_mode))
+	else if(S_ISDIR(statbuf.st_mode))
 	{
 		return E_FileType_Dir;
 	}
+    else if(S_ISREG(statbuf.st_mode))
+    {
+        return E_FileType_File;
+    }
 	
-	return E_FileType_File;
+    return E_FileType_Unknown;
+}
+    
+void BuildFileListAddFile(
+    const FilePath& parentDir,
+    const FilePath& filename,
+    const FilePath& fullPath,
+    DirWalkFileInfoFunc fileInfoFunc,
+    void* userdata)
+{
+    FileInfo fileInfo;
+    fileInfo.parentDir = parentDir;
+    fileInfo.filename = filename;
+    fileInfo.fullPath = fullPath;
+    fileInfo.fileType = GetFileType(fullPath);
+    
+    fileInfoFunc(fileInfo, userdata);
+//    MB_LOGINFO("%s", fullPath.c_str());
 }
 
-bool BuildFileListRecurse(std::vector<std::string>* fileList, const char* osInputDir, const char* includeFilePattern, const char* excludeDirs)
+void BuildFileListAddFile(
+    const FilePath& fullPath,
+    DirWalkFileInfoFunc fileInfoFunc,
+    void* userdata)
 {
-	if (osInputDir[0] == '\0')
-	{
-		osInputDir = ".";
-	}
-	
-	DIR* dir = opendir(osInputDir);
-	if (!dir)
+    FilePath split1, split2, dir;
+    if (fullPath.SplitLast(&split1, &split2))
     {
-//        Debug::Error("Failed to open directory %s", osInputDir);
-        return false;
+        BuildFileListAddFile(split1, split2, fullPath, fileInfoFunc, userdata);
     }
-    
-    struct dirent* dirEntry;
-    
-    std::vector<std::string> dirStack;
-    while((dirEntry = readdir(dir)))
+    else
     {
-		if (!strcmp(dirEntry->d_name, ".") || !strcmp(dirEntry->d_name, ".."))
-			continue;
-        
-        char filePath[FILENAME_MAX];
-		
-        sprintf(filePath, "%s/%s", osInputDir, dirEntry->d_name);
-        
-        struct stat statResult;
-		if (stat(filePath, &statResult) == -1)
+        BuildFileListAddFile(FilePath(), fullPath, fullPath, fileInfoFunc, userdata);
+    }
+}
+
+void DirWalk(const FilePath& currentDirFullPath, DirWalkFileInfoFunc fileInfoFunc, void* userdata)
+{
+    //Recurse directories
+    {
+        const char* osDir = currentDirFullPath.GetLength() == 0 ? "." : currentDirFullPath.c_str();
+        DIR* dir = opendir(osDir);
+        if (!dir)
         {
-//            Debug::Error("Stat failed for %s", filePath);
-            return false;
-		}
-        
-        if (S_ISDIR(statResult.st_mode))
-        {
-			//If not excluded...
-			bool filterMatched = false;
-			
-			if (excludeDirs)
-			{
-				char tmp[PATH_MAX];
-				strcpy(tmp, excludeDirs);
-				char* current = strtok (tmp,",");
-				while (current != NULL)
-				{
-					if (strcmp(current, dirEntry->d_name) == 0)
-					{
-						filterMatched = true;
-						break;
-					}
-					
-					current = strtok(NULL, ",");
-				}
-			}
-			
-			if (!filterMatched)
-			{
-				dirStack.push_back(filePath);
-			}
+            return;
         }
-        else
+
+        struct dirent* dirEntry;
+        while((dirEntry = readdir(dir)))
         {
-            //Ignore hidden unix files.
             if (dirEntry->d_name[0] == '.')
                 continue;
             
-            if (!includeFilePattern || fnmatch(includeFilePattern, dirEntry->d_name, 0) == 0)
+            FilePath childItem(dirEntry->d_name);
+            
+            FilePath childFullPath;
+            childFullPath.Join(currentDirFullPath);
+            childFullPath.Join(childItem);
+
+            if (GetFileType(childFullPath) == E_FileType_Dir)
             {
-				char* fp = filePath;
-				if (strstr(fp, "./") == fp)
-				{
-					fp += 2;
-				}
-				fileList->push_back(fp);
+                DirWalk(childFullPath, fileInfoFunc, userdata);
+            }
+            else
+            {
+                BuildFileListAddFile(currentDirFullPath, childItem, childFullPath, fileInfoFunc, userdata);
             }
         }
     }
+}
     
-    closedir(dir);
+void BuildFileListDir(const FilePath& dir, DirWalkFileInfoFunc fileInfoFunc, void* userdata)
+{
+    Platform::DirWalk(dir, fileInfoFunc, userdata);
+}
 
-    for (int i = 0; i < (int)dirStack.size(); ++i)
-    {
-        BuildFileListRecurse(fileList, dirStack[i].c_str(), includeFilePattern, excludeDirs);
-    }
-    
-    return true;
+void BuildFileListFile(const FilePath& filePath, DirWalkFileInfoFunc fileInfoFunc, void* userdata)
+{
+    BuildFileListAddFile(filePath, fileInfoFunc, userdata);
 }
 
 void FileSetWorkingDir(const std::string& path)
@@ -224,7 +193,7 @@ char GetDirSep()
 {
 	return '/';
 }
-
+    
 void LogError(const char* str)
 {
 	printf("%s", str);

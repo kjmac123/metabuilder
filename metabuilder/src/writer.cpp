@@ -37,39 +37,12 @@ static int luaFuncMkdir(lua_State* l)
 	return 0;
 }
 
-static int luaFuncMklink(lua_State* l)
-{
-	Block* b = mbGetActiveContext()->ActiveBlock();
-
-    std::string src, dst;
-	if (!mbLuaToStringExpandMacros(&src, b, l, 1) || !mbLuaToStringExpandMacros(&dst, b, l, 2))
-	{
-		MB_LOGERROR("Must specify both source and destination when creating link");
-		mbExitError();
-	}
-
-	char normalisedLinkSrc[MB_MAX_PATH];
-	Platform::NormaliseFilePath(normalisedLinkSrc, src.c_str());
-	char normalisedLinkDst[MB_MAX_PATH];
-	Platform::NormaliseFilePath(normalisedLinkDst, dst.c_str());
-    
-    std::string srcRealPath = Platform::FileGetAbsPath(normalisedLinkSrc);
-    
-	if (!Platform::CreateLink(srcRealPath.c_str(), normalisedLinkDst))
-	{
-		MB_LOGERROR("Failed to create link %s->%s", normalisedLinkSrc, normalisedLinkDst);
-		mbExitError();
-	}
-	
-	return 0;
-}
-
 static int luaFuncGetFileType(lua_State* l)
 {
 	std::string filepath;
 	mbLuaToStringExpandMacros(&filepath, NULL, l, 1);
 
-	E_FileType fileType = Platform::GetFileType(filepath.c_str());
+	E_FileType fileType = Platform::GetFileType(FilePath(filepath));
 	
 	const char* result = "unknown";
 	switch (fileType)
@@ -191,7 +164,7 @@ static int luaFuncWriterGetTarget(lua_State* l)
     std::string target;
 	mbLuaToStringExpandMacros(&target, NULL, l, 1);
 	
-	for (int i = 0; i < (int)g_registeredTargets.size(); ++i)
+	for (size_t i = 0; i < g_registeredTargets.size(); ++i)
 	{
 		if (g_registeredTargets[i].key == target)
 		{
@@ -316,11 +289,11 @@ static void mbWriterSetStringGroups(lua_State* l, const std::map<std::string, St
 
 		lua_createtable(l, 0, 0);
 		{
-			for (int jString = 0; jString < (int)strings.size(); ++jString)
+			for (size_t jString = 0; jString < strings.size(); ++jString)
 			{
 				const char* value = strings[jString].c_str();
 				lua_pushstring(l, value);
-				lua_rawseti(l, -2, jString+1);
+				lua_rawseti(l, -2, static_cast<int>(jString+1));
 			}
 		}
 		lua_setfield(l, -2, groupName.c_str());
@@ -466,10 +439,10 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		lua_setfield(l, -2, "name");
 
 		//Target table
-		int nTargets = (int)solution->targetVector.size();
-		lua_createtable(l, 0, nTargets);
+		size_t nTargets = solution->targetVector.size();
+		lua_createtable(l, 0, static_cast<int>(nTargets));
 				
-		for (int iTarget = 0; iTarget < nTargets; ++iTarget)
+		for (size_t iTarget = 0; iTarget < nTargets; ++iTarget)
 		{
 			Target* target = solution->targetVector[iTarget];
 
@@ -495,13 +468,13 @@ void mbWriterDo(MetaBuilderContext* ctx)
 						
 					lua_createtable(l, 0, 0);
 					{
-						for (int jFile = 0; jFile < (int)allFiles.size(); ++jFile)
+						for (size_t jFile = 0; jFile < allFiles.size(); ++jFile)
 						{
 							const std::string& filepath = allFiles[jFile];
 //							MB_LOGINFO(filepath.c_str());
 							
 							lua_pushstring(l, filepath.c_str());
-							lua_rawseti(l, -2, jFile+1);
+							lua_rawseti(l, -2, static_cast<int>(jFile+1));
 						}
 					}
 					lua_setfield(l, -2, "allsourcefiles");
@@ -512,13 +485,13 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					
 					lua_createtable(l, 0, 0);
 					{
-						for (int jFile = 0; jFile < (int)allFiles.size(); ++jFile)
+						for (size_t jFile = 0; jFile < allFiles.size(); ++jFile)
 						{
 							const std::string& filepath = allFiles[jFile];
 //							MB_LOGINFO(filepath.c_str());
 							
 							lua_pushstring(l, filepath.c_str());
-							lua_rawseti(l, -2, jFile+1);
+							lua_rawseti(l, -2, static_cast<int>(jFile+1));
 						}
 					}
 					
@@ -531,7 +504,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					{
 						ConfigParamVector configs;
 						target->GetParams((ParamVector*)&configs, E_BlockType_ConfigParam, NULL, NULL, true);
-						for (int jConfig = 0; jConfig < (int)configs.size(); ++jConfig)
+						for (size_t jConfig = 0; jConfig < configs.size(); ++jConfig)
 						{
 							configNames.push_back(configs[jConfig]->GetName());
 						}
@@ -541,11 +514,11 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					//Write out configs, with embedded expanded out data per platform.
 					lua_createtable(l, 0, 0);
 					{
-						for (int jConfig = 0; jConfig < (int)configNames.size(); ++jConfig)
+						for (size_t jConfig = 0; jConfig < configNames.size(); ++jConfig)
 						{
 							const char* configName = configNames[jConfig].c_str();
 							FlatConfig flatConfig;
-							for (int kPlatform = 0; kPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++kPlatform)
+							for (size_t kPlatform = 0; kPlatform < ctx->metabase->supportedPlatforms.size(); ++kPlatform)
 							{
 								const char* platformName = ctx->metabase->supportedPlatforms[kPlatform].c_str();
 								target->Flatten(&flatConfig, platformName, configName);
@@ -566,7 +539,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 								}
 							}
 
-							lua_rawseti(l, -2, jConfig+1);
+							lua_rawseti(l, -2, static_cast<int>(jConfig+1));
 						}
 					}
 					lua_setfield(l, -2, "configs");
@@ -576,7 +549,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector uniqueFiles;
 					{
-						for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 						{
 							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
 							target->FlattenFiles(&uniqueFiles, platformName);
@@ -585,11 +558,11 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					}
 					lua_createtable(l, 0, 0);
 					{
-						for (int jFile = 0; jFile < (int)uniqueFiles.size(); ++jFile)
+						for (size_t jFile = 0; jFile < uniqueFiles.size(); ++jFile)
 						{
 							const char* str = uniqueFiles[jFile].c_str();
 							lua_pushstring(l, str);
-							lua_rawseti(l, -2, jFile+1);
+							lua_rawseti(l, -2, static_cast<int>(jFile+1));
 						}
 					}
 					lua_setfield(l, -2, "files");
@@ -599,7 +572,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector uniqueFiles;
 					{
-						for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 						{
 							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
 							target->FlattenNoPchFiles(&uniqueFiles, platformName);
@@ -608,11 +581,11 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					}
 					lua_createtable(l, 0, 0);
 					{
-						for (int jFile = 0; jFile < (int)uniqueFiles.size(); ++jFile)
+						for (size_t jFile = 0; jFile < uniqueFiles.size(); ++jFile)
 						{
 							const char* str = uniqueFiles[jFile].c_str();
 							lua_pushstring(l, str);
-							lua_rawseti(l, -2, jFile+1);
+							lua_rawseti(l, -2, static_cast<int>(jFile+1));
 						}
 					}
 					lua_setfield(l, -2, "nopchfiles");
@@ -623,7 +596,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector uniqueFrameworks;
 					{
-						for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 						{
 							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
 							target->FlattenFrameworks(&uniqueFrameworks, platformName);
@@ -632,11 +605,11 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					}
 					lua_createtable(l, 0, 0);
 					{
-						for (int jFile = 0; jFile < (int)uniqueFrameworks.size(); ++jFile)
+						for (size_t jFile = 0; jFile < uniqueFrameworks.size(); ++jFile)
 						{
 							const char* str = uniqueFrameworks[jFile].c_str();
 							lua_pushstring(l, str);
-							lua_rawseti(l, -2, jFile+1);
+							lua_rawseti(l, -2, static_cast<int>(jFile+1));
 						}
 					}
 					lua_setfield(l, -2, "frameworks");
@@ -646,7 +619,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector uniqueResources;
 					{
-						for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 						{
 							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
 							target->FlattenResources(&uniqueResources, platformName);
@@ -655,11 +628,11 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					}
 					lua_createtable(l, 0, 0);
 					{
-						for (int jFile = 0; jFile < (int)uniqueResources.size(); ++jFile)
+						for (size_t jFile = 0; jFile < uniqueResources.size(); ++jFile)
 						{
 							const char* str = uniqueResources[jFile].c_str();
 							lua_pushstring(l, str);
-							lua_rawseti(l, -2, jFile+1);
+							lua_rawseti(l, -2, static_cast<int>(jFile+1));
 						}
 					}
 					lua_setfield(l, -2, "resources");
@@ -668,14 +641,14 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				//Depends
 				lua_createtable(l, 0, 0);
 				{
-					for (int jConfig = 0; jConfig < (int)target->depends.size(); ++jConfig)
+					for (size_t jConfig = 0; jConfig < target->depends.size(); ++jConfig)
 					{
 						const TargetDepends& depends = target->depends[jConfig];
 						std::string dependsFilePath = mbPathGetDir(depends.libMakefile);
 						char buf[4096];
 						sprintf(buf, "%s/%s", dependsFilePath.c_str(), depends.libTargetName.c_str());
 						lua_pushstring(l,  buf);
-						lua_rawseti(l, -2, jConfig+1);
+						lua_rawseti(l, -2, static_cast<int>(jConfig+1));
 					}
 				}
 				lua_setfield(l, -2, "depends");
@@ -684,7 +657,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					FlatConfig flatTarget;
 
-					for (int jPlatform = 0; jPlatform < (int)ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+					for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
 					{
 						const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
 						target->Flatten(&flatTarget, platformName, NULL);
@@ -693,7 +666,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					mbWriterSetOptions(l, flatTarget.options);
 				}
 			}
-			lua_rawseti(l, -2, iTarget+1);
+			lua_rawseti(l, -2, static_cast<int>(iTarget+1));
 		}
 		lua_setfield(l, -2, "targets");
 
@@ -731,7 +704,6 @@ void luaRegisterWriterFuncs(lua_State* l)
 		mbWriterUtilityLuaRegister(l, &luaFn);
 
 		luaFn.AddFunction("mkdir", luaFuncMkdir);
-		luaFn.AddFunction("mklink", luaFuncMklink);
 		luaFn.AddFunction("getfiletype", luaFuncGetFileType);
 		luaFn.AddFunction("copyfile", luaFuncCopyFile);
 		luaFn.AddFunction("reportoutputfile", luaFuncReportOutputFile);

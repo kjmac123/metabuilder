@@ -49,7 +49,7 @@ static void mbWriterUtility_FileConvertToAbsolute(char* filepathAbs, const char*
 	//Bail if we've marked this filepath to not be expanded
 	if (mbWriterUtility_FilePathMarkedAsRaw(filepath))
 	{
-		int len = (int)strlen(filepath);
+		size_t len = strlen(filepath);
 		//As we're truncating, len will account for null termination.
 		memcpy(filepathAbs, filepath + 1, len);
 		return;
@@ -132,7 +132,7 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 				{
 					//Take sequence up to last dir sep as our base dir
 					*lastDirSep = '\0';
-					baseDirLength = (int)(lastDirSep - commonSubSequence);
+					baseDirLength = static_cast<int>(lastDirSep - commonSubSequence);
 				}
 			}
 		}
