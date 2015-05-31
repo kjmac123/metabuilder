@@ -27,12 +27,12 @@ namespace Platform
     
     S64 File::Read(void* dst, S64 toRead)
     {
-        return (S64)fread(dst, 1, toRead, m_impl->handle);
+        return static_cast<S64>(fread(dst, 1, static_cast<size_t>(toRead), m_impl->handle));
     }
     
     S64 File::Write(S64 toWrite, void* data)
     {
-        return fwrite(data, 1, toWrite, m_impl->handle);
+        return static_cast<S64>(fwrite(data, 1, static_cast<size_t>(toWrite), m_impl->handle));
     }
     
     S64 File::GetLength() const
@@ -45,7 +45,7 @@ namespace Platform
             if (result == -1)
                 return -1;
             m_impl->length = ftell(m_impl->handle);
-            result = fseek(m_impl->handle, oldPos, SEEK_SET);
+            result = fseek(m_impl->handle, static_cast<size_t>(oldPos), SEEK_SET);
             if (result == -1)
                 return -1;
             
