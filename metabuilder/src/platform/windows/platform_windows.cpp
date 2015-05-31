@@ -48,7 +48,7 @@ static E_FileType GetFileType(DWORD fileAttr)
     return E_FileType_File;
 }
 
-E_FileType GetFileType(const std::string& filepath)
+E_FileType GetFileType(const FilePath& filepath)
 {
     DWORD fileAttr = GetFileAttributesA(filepath.c_str());
     return GetFileType(fileAttr);
@@ -58,16 +58,15 @@ void BuildFileListAddFile(
     const FilePath& parentDir,
     const FilePath& filename, 
     const FilePath& fullPath,
-    DWORD fileAttr,
     DirWalkFileInfoFunc fileInfoFunc,
     void* userdata)
 {
     FileInfo fileInfo;
-    fileInfo.attributes.hidden = (fileAttr != INVALID_FILE_ATTRIBUTES) && (fileAttr & FILE_ATTRIBUTE_HIDDEN);
+    fileInfo.attributes.hidden = false;
     fileInfo.parentDir = parentDir;
     fileInfo.filename = filename;
     fileInfo.fullPath = fullPath;
-    fileInfo.fileType = GetFileType(fileAttr);
+    fileInfo.fileType = GetFileType(fullPath);
 
     fileInfoFunc(fileInfo, userdata);
 }
@@ -100,7 +99,7 @@ static bool IgnoreSpecial(const char* filename, DWORD fileAttr)
     return false;
 }
 
-void DirWalk(const FilePath& parentDir, const FilePath& dir, DirWalkFileInfoFunc fileInfoFunc, void* userdata)
+void DirWalk(const FilePath& dir, DirWalkFileInfoFunc fileInfoFunc, void* userdata)
 {
     //Recurse directories
     {
@@ -123,7 +122,7 @@ void DirWalk(const FilePath& parentDir, const FilePath& dir, DirWalkFileInfoFunc
                     FilePath childDir = dir;
                     childDir.Join(FilePath(fdFile.cFileName));
                     
-                    DirWalk(dir, childDir, fileInfoFunc, userdata);
+                    DirWalk(childDir, fileInfoFunc, userdata);
                 }
             }
         } 
@@ -152,9 +151,9 @@ void DirWalk(const FilePath& parentDir, const FilePath& dir, DirWalkFileInfoFunc
                     FilePath childFilename(fdFile.cFileName);
 
                     FilePath childFullPath;
-                    childFullPath.Join(parentDir);
+                    childFullPath.Join(dir);
                     childFullPath.Join(childFilename);
-                    BuildFileListAddFile(parentDir, childFilename, childFullPath, fdFile.dwFileAttributes, fileInfoFunc, userdata);
+                    BuildFileListAddFile(dir, childFilename, childFullPath, fileInfoFunc, userdata);
                 }
             }
         } 

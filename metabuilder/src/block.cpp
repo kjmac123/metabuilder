@@ -63,7 +63,7 @@ static void FilterAndAppendFilepathArray(const Platform::FileInfo& fileInfo, voi
 		ctx->filePathArray->push_back(dirAndFilename.c_str());
 	}
     
-    MB_LOGINFO("%s", fileInfo.fullPath.c_str());
+    //MB_LOGINFO("%s", fileInfo.fullPath.c_str());
 }
 
 static void AddHeadersAutomatically(StringVector* files)
