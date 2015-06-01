@@ -105,6 +105,9 @@ Currently the examples are rather simplistic, more involved ones will be added.
 ##The Metabase
 If you wish to modify/examine the Metabase Lua files they can be found in metabuilder/metabase
 
+##Missing iOS Features
+* Currently configuring entitlements and localisation require some manual hacking of the metabase. This obviously needs to be configurable on a per application basis and sorting this out is a high priority. It can certainly be worked around if you're brave and metabuilder has been used to ship iOS projects.
+
 ##A few final notes
 * This document, and metabuilder itself, remain a work in progress. I’ll try and tidy up and document things as soon as I’m able.
 * Documentation for the metabuilder syntax is obviously needed but will take a little time to write up.
