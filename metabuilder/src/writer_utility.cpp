@@ -19,12 +19,12 @@ static bool mbWriterUtility_FilePathMarkedAsRaw(const char* filepath)
 
 static void mbWriterUtility_NormaliseTargetFilePath(char* filepath)
 {
-	mbNormaliseFilePath(filepath, mbGetAppState()->makeGlobal->GetTargetDirSep());
+	mbNormaliseFilePath(filepath, '/');
 }
 
 static int mbWriterUtility_GetNumDirLevels(const char* dir)
 {
-	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
+	char dirSep = '/';
 	int dirCount = 0;
 
 	for (const char* cursor = dir; *cursor; ++cursor)
@@ -56,12 +56,12 @@ static void mbWriterUtility_FileConvertToAbsolute(char* filepathAbs, const char*
 	}
 
 	//Expand!
-	sprintf(filepathAbs, "%s%c%s", baseDir, mbGetAppState()->makeGlobal->GetTargetDirSep(), filepath);
+	sprintf(filepathAbs, "%s/%s", baseDir, filepath);
 }
 
 void mbWriterUtility_BuildPathBack(char* result, int nLevels)
 {
-	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
+	char dirSep = '/';
 	
 	char* cursor = result;
 	for (int i = 0; i < nLevels; ++i)
@@ -74,6 +74,11 @@ void mbWriterUtility_BuildPathBack(char* result, int nLevels)
 	*cursor = '\0';
 }
 
+static bool isValidPathElementEnd(const char* str)
+{
+	return (*(str+1) == '\0' || *(str) == '/');
+}
+
 int mbWriterUtility_GetLongestCommonSequenceLengthFromStart(const char* str1, const char* str2)
 {
 	int commonCount = 0;
@@ -84,29 +89,60 @@ int mbWriterUtility_GetLongestCommonSequenceLengthFromStart(const char* str1, co
 		if (*str1Cursor != *str2Cursor)
 			break;
 	}
-	
+
+	if (commonCount > 0)
+	{
+		const char* lastCommonCharStr1 = str1+commonCount-1;
+		const char* lastCommonCharStr2 = str2+commonCount-1;
+
+		const char* invalidString = NULL;
+		const char* validString = NULL;
+		if (!isValidPathElementEnd(lastCommonCharStr1))
+		{
+			invalidString = str1;
+			validString = str2;
+		}
+		else if (!isValidPathElementEnd(lastCommonCharStr2))
+		{
+			invalidString = str2;
+			validString = str1;
+		}
+
+		//Rewind to valid match if we're in the middle path component.
+		if (invalidString)
+		{
+			int oldCommonCount = commonCount;
+			commonCount = 0;
+
+			for (int i = oldCommonCount; i >= 0; --i)
+			{
+				if (validString[i] == '/')
+				{
+					commonCount = i+1;
+					break;
+				}
+			}
+
+		}
+	}
+
 	return commonCount;
 }
 
 
 static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepathUnnormalised, const char* oldBaseDir, const char* newBaseDir)
 {    
-	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
-
-	char filepath[MB_MAX_PATH];
-	strcpy(filepath, filepathUnnormalised);
-
-	mbWriterUtility_NormaliseTargetFilePath(filepath);
-
 	//If filepath has been flagged to escape any kind of modification
-	if (mbWriterUtility_FilePathMarkedAsRaw(filepath))
+	if (mbWriterUtility_FilePathMarkedAsRaw(filepathUnnormalised))
 	{
-		strcpy(result, filepath+1);
+		strcpy(result, filepathUnnormalised+1);
 	}
 	else
 	{
+		FilePath filepath(filepathUnnormalised);
+
 		char normalisedFilepathAbs[MB_MAX_PATH];
-		mbWriterUtility_FileConvertToAbsolute(normalisedFilepathAbs, oldBaseDir, filepath);
+		mbWriterUtility_FileConvertToAbsolute(normalisedFilepathAbs, oldBaseDir, filepath.c_str());
 		const char* normalisedMakeOutputDirAbs = newBaseDir;
 
 		//baseDirLength is the common path length shared by the makefile output directory and 'filepath'
@@ -117,7 +153,7 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 			memcpy(commonSubSequence, normalisedFilepathAbs, commonSubSequenceLength);
 
 			//If entire sequence is a directory match
-			if (normalisedFilepathAbs[commonSubSequenceLength] == dirSep)
+			if (normalisedFilepathAbs[commonSubSequenceLength] == '/')
 			{
 				baseDirLength = commonSubSequenceLength;
 			}
@@ -127,7 +163,7 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 				commonSubSequence[commonSubSequenceLength] = '\0';
 
 				//Look for last dir sep character in order to ignore a partial path or file match
-				char* lastDirSep = strrchr(commonSubSequence, dirSep);
+				char* lastDirSep = strrchr(commonSubSequence, '/');
 				if (lastDirSep != NULL)
 				{
 					//Take sequence up to last dir sep as our base dir
@@ -166,7 +202,7 @@ static void mbWriterUtility_GetRelativeFilePath(char* result, const char* filepa
 
 static int mbWriterUtility_LuaNormaliseTargetFilePath(lua_State* l)
 {
-	char dirSep = mbGetAppState()->makeGlobal->GetTargetDirSep();
+	char dirSep = '/';
 	std::string filepathUnnormalised;
 	mbLuaToStringExpandMacros(&filepathUnnormalised, NULL, l, 1);
 	

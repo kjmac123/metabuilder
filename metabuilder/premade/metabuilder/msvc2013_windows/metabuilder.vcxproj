@@ -51,7 +51,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>METABUILDER;PLATFORM_WINDOWS;WIN32;_CRT_SECURE_NO_WARNINGS;_WINDOWS;BUILD_CONFIG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;..\..\..\src;..\..\..\..\external\dlmalloc-2.8.6;..\..\..\..\external\ezOptionParser-0.2.1;..\..\..\..\external\lua-5.2.2\src;..\..\..\..\external;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;../../../src;../../../../external/dlmalloc-2.8.6;../../../../external/ezOptionParser-0.2.1;../../../../external/lua-5.2.2/src;../../../../external;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
     <SubSystem>Console</SubSystem>      <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x86;</AdditionalLibraryDirectories>
@@ -86,7 +86,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>METABUILDER;PLATFORM_WINDOWS;WIN32;_CRT_SECURE_NO_WARNINGS;_WINDOWS;BUILD_CONFIG_RELEASE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;..\..\..\src;..\..\..\..\external\dlmalloc-2.8.6;..\..\..\..\external\ezOptionParser-0.2.1;..\..\..\..\external\lua-5.2.2\src;..\..\..\..\external;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;../../../src;../../../../external/dlmalloc-2.8.6;../../../../external/ezOptionParser-0.2.1;../../../../external/lua-5.2.2/src;../../../../external;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
     <SubSystem>Console</SubSystem>      <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x86;</AdditionalLibraryDirectories>

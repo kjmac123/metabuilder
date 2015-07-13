@@ -49,9 +49,9 @@ E_FileType	GetFileType(const FilePath& filepath);
 void        BuildFileListDir(const FilePath& dir, DirWalkFileInfoFunc fileInfoFunc, void* userdata);
 void        BuildFileListFile(const FilePath& filePath, DirWalkFileInfoFunc fileInfoFunc, void* userdata);
 
-void		FileSetWorkingDir(const std::string& path);
-std::string	FileGetWorkingDir();
-std::string	FileGetAbsPath(const std::string& path);
+void		FileSetWorkingDir(const FilePath& path);
+FilePath	FileGetWorkingDir();
+FilePath	FileGetAbsPath(const FilePath& path);
 char		GetDirSep();
 
 void		LogError(const char* str);

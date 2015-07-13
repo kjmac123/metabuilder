@@ -134,7 +134,7 @@ static void AddHeadersAutomatically(StringVector* files)
 
 static void BuildFileList(StringVector* result, const FilePathVector& input)
 {
-	std::string workingDir = Platform::FileGetWorkingDir();
+	FilePath workingDir = Platform::FileGetWorkingDir();
 	Platform::FileSetWorkingDir(mbGetCurrentLuaDir());
     for (size_t i = 0; i < input.size(); ++i)
 	{

@@ -6,19 +6,21 @@
 
 MakeGlobal::MakeGlobal()
 {
-	m_targetDirSep = '/';
+//	m_targetDirSep = '/';
 }
 
-void MakeGlobal::SetTargetDirSep(char dirSep)
-{
-	m_targetDirSep = dirSep;
-	mbGetAppState()->OnTargetDirSepChanged();
-}
+//void MakeGlobal::SetTargetDirSep(char dirSep)
+//{
+//	m_targetDirSep = dirSep;
+//	mbGetAppState()->OnTargetDirSepChanged();
+//}
 
+/*
 char MakeGlobal::GetTargetDirSep() const
 {
 	return m_targetDirSep;
 }
+*/
 
 E_BlockType MakeGlobal::GetType() const
 {
@@ -60,7 +62,7 @@ static int luaFuncDirSep(lua_State* l)
 		mbExitError();
 	}
 
-	mbGetAppState()->makeGlobal->SetTargetDirSep(str[0]);
+	//mbGetAppState()->makeGlobal->SetTargetDirSep(str[0]);
 	return 0;
 }
 

@@ -173,21 +173,21 @@ void BuildFileListFile(const FilePath& filePath, DirWalkFileInfoFunc fileInfoFun
     BuildFileListAddFile(filePath, fileInfoFunc, userdata);
 }
 
-void FileSetWorkingDir(const std::string& path)
+void FileSetWorkingDir(const FilePath& path)
 {
     _chdir(path.c_str());
 }
 
-std::string FileGetWorkingDir()
+FilePath FileGetWorkingDir()
 {
     char workingDir[MB_MAX_PATH];
-    return _getcwd(workingDir, sizeof(workingDir));
+    return FilePath(_getcwd(workingDir, sizeof(workingDir)));
 }
 
-std::string	FileGetAbsPath(const std::string& path)
+FilePath FileGetAbsPath(const FilePath& path)
 {
     char tmp[MB_MAX_PATH];
-    return _fullpath(tmp, path.c_str(), sizeof(tmp));
+    return FilePath(_fullpath(tmp, path.c_str(), sizeof(tmp)));
 }
 
 char GetDirSep()

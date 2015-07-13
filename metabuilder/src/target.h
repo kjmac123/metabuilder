@@ -5,8 +5,8 @@
 
 struct TargetDepends
 {
-	std::string libTargetName;
-	std::string libMakefile;
+	std::string		libTargetName;
+	FilePath		libMakefile;
 };
 
 class Target : public MakeBlock

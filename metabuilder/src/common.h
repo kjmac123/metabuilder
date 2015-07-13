@@ -100,10 +100,10 @@ public:
 	void ProcessGlobal();
 	
 	Block*					mainSolution;
-    std::string				mainMetaMakeFileAbs;
+    FilePath				mainMetaMakeFileAbs;
     std::string				generator;
-	std::string				metabaseDirAbs;
-	std::string				makeOutputTopDirAbs;
+	FilePath				metabaseDirAbs;
+	FilePath				makeOutputTopDirAbs;
 	E_LineEndingStyle		lineEndingStyle;
 	
 	CmdSetup				cmdSetup;
@@ -147,10 +147,9 @@ public:
 
 	void		OnTargetDirSepChanged();
 
-    std::string					currentMetaMakeDirAbs;
-	std::string					makeOutputBaseAbs;
-//	std::string					makeOutputDirAbs;
-	std::string					makeOutputDirAbs;
+    FilePath					currentMetaMakeDirAbs;
+	FilePath					makeOutputBaseAbs;
+	FilePath					makeOutputDirAbs;
 	Metabase*					metabase;
     Solution*					solution;
     std::stack<Block*>			activeBlockStack;
@@ -180,11 +179,11 @@ const char**		mbGetCAndCPPSourceFileExtensions();
 const char**		mbGetCAndCPPHeaderFileExtensions();
 const char**		mbGetCAndCPPInlineFileExtensions();
 
-void				mbPushDir(const std::string& path);
+void				mbPushDir(const FilePath& path);
 void				mbPopDir();
 void				mbCommonLuaRegister(lua_State* lua, LuaModuleFunctions* luaFn);
 
-void				mbAddMakeFile(const char* makefile);
+void				mbAddMakeFile(const FilePath& makefile);
 const StringVector&	mbGetMakeFiles();
 
 MetaBuilderContext* mbCreateContext();
@@ -197,7 +196,7 @@ const std::list<MetaBuilderContext*>&
 					mbGetContexts();
 
 void				mbExitError();
-void				mbLuaDoFile(lua_State* lua, const std::string& filepath, PostLoadInitFunc initFunc);
+void				mbLuaDoFile(lua_State* lua, const FilePath& filepath, PostLoadInitFunc initFunc);
 void				mbHostPathJoin(char* result, const char* a, const char* b);
 std::string			mbPathGetDir(const std::string& filePath);
 std::string			mbPathGetFilename(const std::string& filePath);
@@ -250,6 +249,6 @@ const char*			mbLuaToStringExpandMacros(FilePath* result, Block* block, lua_Stat
 
 void*				mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
 
-const std::string&	mbGetCurrentLuaDir();
+const FilePath&		mbGetCurrentLuaDir();
 
 #endif

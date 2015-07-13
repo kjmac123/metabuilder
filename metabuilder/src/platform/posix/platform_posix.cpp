@@ -156,7 +156,7 @@ void BuildFileListFile(const FilePath& filePath, DirWalkFileInfoFunc fileInfoFun
     BuildFileListAddFile(filePath, fileInfoFunc, userdata);
 }
 
-void FileSetWorkingDir(const std::string& path)
+void FileSetWorkingDir(const FilePath& path)
 {
     if (chdir(path.c_str()) != 0)
     {
@@ -165,7 +165,7 @@ void FileSetWorkingDir(const std::string& path)
     }
 }
 
-std::string FileGetWorkingDir()
+FilePath FileGetWorkingDir()
 {
    	char workingDir[PATH_MAX];
 	if (getcwd(workingDir, sizeof(workingDir)) == NULL)
@@ -174,19 +174,19 @@ std::string FileGetWorkingDir()
 		mbExitError();
  	}
 
-	return workingDir;
+	return FilePath(workingDir);
 }
 
-std::string FileGetAbsPath(const std::string& path)
+FilePath FileGetAbsPath(const FilePath& path)
 {
    	char storage[PATH_MAX];
-	if (/*FreeBSD::*/realpath(path.c_str(), storage) == NULL)
+	if (realpath(path.c_str(), storage) == NULL)
    	{
 		MB_LOGERROR("Failed to get absolute path for %s", path.c_str());
 		mbExitError();
    	}
 
-	return storage;
+	return FilePath(storage);
 }
 
 char GetDirSep()

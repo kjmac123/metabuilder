@@ -151,13 +151,13 @@ int main(int argc, const char * argv[])
 	//---------- GLOBAL SCOPE FUNCTIONS ----------
 	   
 	// build context objects
-    std::string inputFileAbs = Platform::FileGetAbsPath(appState->cmdSetup._inputFile);
+    FilePath inputFileAbs = Platform::FileGetAbsPath(FilePath(appState->cmdSetup._inputFile));
 		
-	mbAddMakeFile(inputFileAbs.c_str());
+	mbAddMakeFile(inputFileAbs);
 	
 	// We'll add to this array during iteration
 	const StringVector& makeFiles = mbGetMakeFiles();
-	mbPushDir("");
+	mbPushDir(FilePath(""));
 			
 	appState->isProcessingPrimaryMakefile = true;
 	for (size_t i = 0; i < makeFiles.size(); ++i)
@@ -167,8 +167,7 @@ int main(int argc, const char * argv[])
 		{
 			{
 				std::string makedir = mbPathGetDir(makeFiles[i]);
-				ctx->currentMetaMakeDirAbs = Platform::FileGetAbsPath(makedir);
-				mbNormaliseFilePath(&ctx->currentMetaMakeDirAbs, mbGetAppState()->makeGlobal->GetTargetDirSep());
+				ctx->currentMetaMakeDirAbs = Platform::FileGetAbsPath(FilePath(makedir));
 			}
 		
 			lua_State *l;
@@ -194,11 +193,11 @@ int main(int argc, const char * argv[])
 			{
 				std::string metabase = appState->cmdSetup._generator + ".lua";
 				//Process metabase
-				mbLuaDoFile(l, metabase.c_str(), NULL);
+				mbLuaDoFile(l, FilePath(metabase), NULL);
 			}
 			mbPushDir(ctx->currentMetaMakeDirAbs);
 			//Process makefile
-			mbLuaDoFile(l, makeFiles[i], NULL);
+			mbLuaDoFile(l, FilePath(makeFiles[i]), NULL);
 			mbPopDir();
 			
 			lua_close(l);

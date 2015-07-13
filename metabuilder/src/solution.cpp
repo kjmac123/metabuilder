@@ -45,7 +45,7 @@ static int luaFuncSolution(lua_State* l)
 
 			std::string metabase = appState->cmdSetup._generator + ".lua";
 			//Process metabase
-			mbLuaDoFile(l, metabase.c_str(), NULL);
+			mbLuaDoFile(l, FilePath(metabase), NULL);
 
 			appState->ProcessGlobal();
 		}

@@ -60,7 +60,7 @@ static AppState								g_appState;
 static StringVector							g_makefiles;
 static std::list<MetaBuilderContext*>		g_contexts; //Has memory ownership of context
 static std::list<MetaBuilderContext*>		g_contextStack;
-static std::stack<std::string>				g_doFileCurrentDirStack;
+static std::stack<FilePath>					g_doFileCurrentDirStack;
 static mbRandomContext						g_randomContext;
 
 const char* g_cAndCPPSourceExt[] = { "cpp", "cxx", "c", "cc", "m", "mm", NULL };
@@ -103,8 +103,8 @@ void AppState::ProcessSetup()
 	generator = cmdSetup._generator;
 
 	//cmdline overrides
-	if (cmdSetup._metabaseDir.length() > 0)		metabaseDirAbs = cmdSetup._metabaseDir;
-	if (cmdSetup._makeOutputTopDir.length() > 0)	makeOutputTopDirAbs = cmdSetup._makeOutputTopDir;
+	if (cmdSetup._metabaseDir.length() > 0)			metabaseDirAbs = FilePath(cmdSetup._metabaseDir);
+	if (cmdSetup._makeOutputTopDir.length() > 0)	makeOutputTopDirAbs = FilePath(cmdSetup._makeOutputTopDir);
 
 	if (!mbCreateDirChain(cmdSetup._makeOutputTopDir.c_str()))
 	{
@@ -112,9 +112,9 @@ void AppState::ProcessSetup()
 		mbExitError();
 	}
 
-	mainMetaMakeFileAbs = Platform::FileGetAbsPath(cmdSetup._inputFile);
-	metabaseDirAbs = Platform::FileGetAbsPath(cmdSetup._metabaseDir);
-	makeOutputTopDirAbs = Platform::FileGetAbsPath(cmdSetup._makeOutputTopDir);
+	mainMetaMakeFileAbs = Platform::FileGetAbsPath(FilePath(cmdSetup._inputFile));
+	metabaseDirAbs = Platform::FileGetAbsPath(FilePath(cmdSetup._metabaseDir));
+	makeOutputTopDirAbs = Platform::FileGetAbsPath(FilePath(cmdSetup._makeOutputTopDir));
 	/*
 	//Set defaults if required.
 	if (intDir.size() == 0)
@@ -153,15 +153,12 @@ void AppState::ProcessGlobal()
 {
 	char tmp[MB_MAX_PATH];
 	Platform::NormaliseFilePath(tmp, metabaseDirAbs.c_str());
-	metabaseDirAbs = tmp;
+	metabaseDirAbs = FilePath(tmp);
 	OnTargetDirSepChanged();
 }
 
 void AppState::OnTargetDirSepChanged()
 {
-	mbNormaliseFilePath(&mainMetaMakeFileAbs,	makeGlobal->GetTargetDirSep());
-	mbNormaliseFilePath(&makeOutputTopDirAbs,	makeGlobal->GetTargetDirSep());
-
 	MetaBuilderContext* ctx = mbGetActiveContext();
 	if (ctx)
 	{
@@ -211,8 +208,6 @@ void MetaBuilderContext::PopActiveBlock()
 
 void MetaBuilderContext::OnTargetDirSepChanged()
 {
-	mbNormaliseFilePath(&currentMetaMakeDirAbs, mbGetAppState()->makeGlobal->GetTargetDirSep());
-	mbNormaliseFilePath(&makeOutputDirAbs, mbGetAppState()->makeGlobal->GetTargetDirSep());
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -248,9 +243,9 @@ void LuaModuleFunctions::RegisterLuaModule(lua_State* l, const char* moduleName)
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-void mbAddMakeFile(const char* makefile)
+void mbAddMakeFile(const FilePath& makefile)
 {
-	g_makefiles.push_back(makefile);
+	g_makefiles.push_back(makefile.c_str());
 }
 
 const StringVector& mbGetMakeFiles()
@@ -300,7 +295,7 @@ static int luaFuncGlobalImport(lua_State* lua)
 	std::string requireFile;
 	mbLuaToStringExpandMacros(&requireFile, b, lua, 1);
 	//MB_LOGINFO("DOFILE %s", requireFile.c_str());
-	mbLuaDoFile(lua, requireFile.c_str(), NULL);
+	mbLuaDoFile(lua, FilePath(requireFile.c_str()), NULL);
     return 0;
 }
 
@@ -419,29 +414,27 @@ static int luaFuncCheckPlatform(lua_State* l)
 	return 1;
 }
 
-void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc initFunc)
+void mbLuaDoFile(lua_State* l, const FilePath& filepath, PostLoadInitFunc initFunc)
 {
 	char normalisedCurrentDir[MB_MAX_PATH];
 	{
-		const std::string& currentDir = g_doFileCurrentDirStack.top();
+		const FilePath& currentDir = g_doFileCurrentDirStack.top();
 		strcpy(normalisedCurrentDir, currentDir.c_str());
-		Platform::NormaliseFilePath(normalisedCurrentDir);
 	}
 
-    std::string absPath;
+    FilePath absPath;
     //Try relative to make file first.
     {
 		char tmp[MB_MAX_PATH];
 		mbHostPathJoin(tmp, normalisedCurrentDir, filepath.c_str());
-		Platform::NormaliseFilePath(tmp);
 		if (mbFileExists(tmp))
         {
-            absPath = tmp;
+            absPath = FilePath(tmp);
         }
     }
 	
 	//Attempt to open directly
-    if (absPath.length() == 0)
+	if (absPath.GetLength() == 0)
 	{
 		if (mbFileExists(filepath.c_str()))
 		{
@@ -450,15 +443,15 @@ void mbLuaDoFile(lua_State* l, const std::string& filepath, PostLoadInitFunc ini
 	}
 
     //Fall back to lua base dir
-    if (absPath.length() == 0)
+    if (absPath.GetLength() == 0)
     {
 		char tmpJoin[MB_MAX_PATH];
 		mbHostPathJoin(tmpJoin, mbGetAppState()->metabaseDirAbs.c_str(), filepath.c_str());
-		absPath = tmpJoin;
+		absPath = FilePath(tmpJoin);
     }
 	
 	std::string newDir = mbPathGetDir(absPath.c_str());
-	g_doFileCurrentDirStack.push(newDir);
+	g_doFileCurrentDirStack.push(FilePath(newDir));
 	
 	char normalisedLuaFile[MB_MAX_PATH];
 	Platform::NormaliseFilePath(normalisedLuaFile, absPath.c_str());
@@ -669,9 +662,9 @@ AppState* mbGetAppState()
 
 void mbCommonInit(lua_State* l, const std::string& path)
 {
-	g_doFileCurrentDirStack.push(path);
+	g_doFileCurrentDirStack.push(FilePath(path));
 	
-	mbLuaDoFile(l, "metabase.lua", NULL);
+	mbLuaDoFile(l, FilePath("metabase.lua"), NULL);
 }
 
 const char** mbGetCAndCPPSourceFileExtensions()
@@ -689,7 +682,7 @@ const char** mbGetCAndCPPInlineFileExtensions()
 	return g_cAndCPPInlineExt;
 }
 
-void mbPushDir(const std::string& path)
+void mbPushDir(const FilePath& path)
 {
 	g_doFileCurrentDirStack.push(path);
 }
@@ -1164,7 +1157,7 @@ void* mbLuaAllocator(void* ud, void* ptr, size_t osize, size_t nsize)
 	return NULL;
 }
 
-const std::string& mbGetCurrentLuaDir()
+const FilePath& mbGetCurrentLuaDir()
 {
 	return g_doFileCurrentDirStack.top();
 }

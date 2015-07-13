@@ -199,8 +199,8 @@ static int luaFuncWriterSetMakeOutputDirAbs(lua_State* l)
 		MetaBuilderContext* ctx = mbGetActiveContext();
 		char buf[MB_MAX_PATH];
 		strcpy(buf, newMakeOutputDir.c_str());
-		mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
-		ctx->makeOutputDirAbs = buf;
+		mbNormaliseFilePath(buf, '/');//appState->makeGlobal->GetTargetDirSep());
+		ctx->makeOutputDirAbs = FilePath(buf);
 	}
 
 	lua_settable(l, -3);
@@ -346,30 +346,21 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		{
 			//Root of output directory
 			{
-				char buf[MB_MAX_PATH];
-				strcpy(buf, appState->makeOutputTopDirAbs.c_str());
-				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
-				ctx->makeOutputDirAbs = buf;
+				ctx->makeOutputDirAbs = appState->makeOutputTopDirAbs;
 			}
 			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
 			lua_setfield(l, -2, "makeoutputdirbaseabs");
 
 			//Solution name
 			{
-				char buf[MB_MAX_PATH];
-				strcpy(buf, appState->makeOutputTopDirAbs.c_str());
-				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
-				ctx->makeOutputDirAbs = buf;
+				ctx->makeOutputDirAbs = appState->makeOutputTopDirAbs;
 			}
 			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
 			lua_setfield(l, -2, "solutionname");
 			
 			//Name of metabase configuration used
 			{
-				char buf[MB_MAX_PATH];
-				strcpy(buf, appState->makeOutputTopDirAbs.c_str());
-				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
-				ctx->makeOutputDirAbs = buf;
+				ctx->makeOutputDirAbs = appState->makeOutputTopDirAbs;
 			}
 			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
 			lua_setfield(l, -2, "metabasename");
@@ -378,8 +369,8 @@ void mbWriterDo(MetaBuilderContext* ctx)
 			{
 				char buf[MB_MAX_PATH];
 				sprintf(buf, "%s/%s/%s", appState->makeOutputTopDirAbs.c_str(), appState->mainSolution->GetName().c_str(), metabase->GetName().c_str());
-				mbNormaliseFilePath(buf, appState->makeGlobal->GetTargetDirSep());
-				ctx->makeOutputDirAbs = buf;
+				mbNormaliseFilePath(buf, '/');//appState->makeGlobal->GetTargetDirSep());
+				ctx->makeOutputDirAbs = FilePath(buf);
 			}
 			lua_pushstring(l, ctx->makeOutputDirAbs.c_str());
 			lua_setfield(l, -2, "makeoutputdirabs");
@@ -403,7 +394,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 		lua_pushstring(l, appState->outDir.c_str());
 		lua_setfield(l, -2, "outdir");
 		*/
-
+		/*
 		{
 			char tmp[2];
 			tmp[0] = appState->makeGlobal->GetTargetDirSep();
@@ -411,6 +402,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 			lua_pushstring(l, tmp);
 			lua_setfield(l, -2, "targetDirSep");
 		}
+		*/
 
 		//Write out the set of options associated with our metabase node.
 		{
@@ -644,7 +636,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
 					for (size_t jConfig = 0; jConfig < target->depends.size(); ++jConfig)
 					{
 						const TargetDepends& depends = target->depends[jConfig];
-						std::string dependsFilePath = mbPathGetDir(depends.libMakefile);
+						FilePath dependsFilePath = FilePath(mbPathGetDir(depends.libMakefile.c_str()));
 						char buf[4096];
 						sprintf(buf, "%s/%s", dependsFilePath.c_str(), depends.libTargetName.c_str());
 						lua_pushstring(l,  buf);
@@ -680,7 +672,7 @@ void mbWriterDo(MetaBuilderContext* ctx)
     }
 	
 	//MB_LOGINFO("PROFILE - Writer %s", metabase->writerLua.c_str());
-    mbLuaDoFile(l, metabase->writerLua, NULL);
+    mbLuaDoFile(l, FilePath(metabase->writerLua), NULL);
     
     lua_close(l);
 	
