@@ -31,11 +31,11 @@ metabuilder_DEFINES.Debug := \
 metabuilder_CPPFLAGS.Debug += $(metabuilder_DEFINES.Debug)
 metabuilder_INCLUDES.Debug := \
   -I"$(DXSDK_DIR)Include" \
-  -I"..\..\..\src" \
-  -I"..\..\..\..\external\dlmalloc-2.8.6" \
-  -I"..\..\..\..\external\ezOptionParser-0.2.1" \
-  -I"..\..\..\..\external\lua-5.2.2\src" \
-  -I"..\..\..\..\external" \
+  -I"../../../src" \
+  -I"../../../../external/dlmalloc-2.8.6" \
+  -I"../../../../external/ezOptionParser-0.2.1" \
+  -I"../../../../external/lua-5.2.2/src" \
+  -I"../../../../external" \
 
 metabuilder_CPPFLAGS.Debug += $(metabuilder_INCLUDES.Debug)
 metabuilder_INTDIR.Release := int/metabuilder/Release
@@ -61,11 +61,11 @@ metabuilder_DEFINES.Release := \
 metabuilder_CPPFLAGS.Release += $(metabuilder_DEFINES.Release)
 metabuilder_INCLUDES.Release := \
   -I"$(DXSDK_DIR)Include" \
-  -I"..\..\..\src" \
-  -I"..\..\..\..\external\dlmalloc-2.8.6" \
-  -I"..\..\..\..\external\ezOptionParser-0.2.1" \
-  -I"..\..\..\..\external\lua-5.2.2\src" \
-  -I"..\..\..\..\external" \
+  -I"../../../src" \
+  -I"../../../../external/dlmalloc-2.8.6" \
+  -I"../../../../external/ezOptionParser-0.2.1" \
+  -I"../../../../external/lua-5.2.2/src" \
+  -I"../../../../external" \
 
 metabuilder_CPPFLAGS.Release += $(metabuilder_INCLUDES.Release)
 metabuilder_CPPFLAGS	:= -MMD -MP $(metabuilder_CPPFLAGS.$(BUILDCONFIG))
@@ -124,29 +124,29 @@ metabuilder_LDLIBS.Release += $(metabuilder_LIBS.Release)
 metabuilder_LDFLAGS := $(metabuilder_LDFLAGS.$(BUILDCONFIG)) $(metabuilder_LDLIBS.$(BUILDCONFIG))
 
 metabuilder_SRC := \
-	..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp \
-	..\..\..\src\block.cpp \
-	..\..\..\src\common.cpp \
-	..\..\..\src\configparam.cpp \
-	..\..\..\src\core.cpp \
-	..\..\..\src\corestring.cpp \
-	..\..\..\src\filepath.cpp \
-	..\..\..\src\luafile.cpp \
-	..\..\..\src\main.cpp \
-	..\..\..\src\makeglobal.cpp \
-	..\..\..\src\mbstring.cpp \
-	..\..\..\src\metabase.cpp \
-	..\..\..\src\metabuilder_pch.cpp \
-	..\..\..\src\platform\platform.cpp \
-	..\..\..\src\platform\windows\platform_windows.cpp \
-	..\..\..\src\platformparam.cpp \
-	..\..\..\src\solution.cpp \
-	..\..\..\src\target.cpp \
-	..\..\..\src\timeutil.cpp \
-	..\..\..\src\writer.cpp \
-	..\..\..\src\writer_msvc.cpp \
-	..\..\..\src\writer_utility.cpp \
-	..\..\..\src\writer_xcode.cpp \
+	../../../../external/dlmalloc-2.8.6/dlmalloc.cpp \
+	../../../src/block.cpp \
+	../../../src/common.cpp \
+	../../../src/configparam.cpp \
+	../../../src/core.cpp \
+	../../../src/corestring.cpp \
+	../../../src/filepath.cpp \
+	../../../src/luafile.cpp \
+	../../../src/main.cpp \
+	../../../src/makeglobal.cpp \
+	../../../src/mbstring.cpp \
+	../../../src/metabase.cpp \
+	../../../src/metabuilder_pch.cpp \
+	../../../src/platform/platform.cpp \
+	../../../src/platform/windows/platform_windows.cpp \
+	../../../src/platformparam.cpp \
+	../../../src/solution.cpp \
+	../../../src/target.cpp \
+	../../../src/timeutil.cpp \
+	../../../src/writer.cpp \
+	../../../src/writer_msvc.cpp \
+	../../../src/writer_utility.cpp \
+	../../../src/writer_xcode.cpp \
 
 metabuilder_OBJ := \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/dlmalloc.o \
@@ -173,74 +173,74 @@ metabuilder_OBJ := \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/writer_utility.o \
 	$(metabuilder_INTDIR.$(BUILDCONFIG))/writer_xcode.o \
 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/dlmalloc.o : ..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/dlmalloc.d 
-	@echo $(metabuilder_CXX) ..\..\..\..\external\dlmalloc-2.8.6\dlmalloc.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/dlmalloc.o : ../../../../external/dlmalloc-2.8.6/dlmalloc.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/dlmalloc.d 
+	@echo $(metabuilder_CXX) ../../../../external/dlmalloc-2.8.6/dlmalloc.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/block.o : ..\..\..\src\block.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/block.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\block.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/block.o : ../../../src/block.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/block.d 
+	@echo $(metabuilder_CXX) ../../../src/block.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/common.o : ..\..\..\src\common.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/common.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\common.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/common.o : ../../../src/common.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/common.d 
+	@echo $(metabuilder_CXX) ../../../src/common.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/configparam.o : ..\..\..\src\configparam.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/configparam.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\configparam.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/configparam.o : ../../../src/configparam.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/configparam.d 
+	@echo $(metabuilder_CXX) ../../../src/configparam.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/core.o : ..\..\..\src\core.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/core.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\core.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/core.o : ../../../src/core.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/core.d 
+	@echo $(metabuilder_CXX) ../../../src/core.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/corestring.o : ..\..\..\src\corestring.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/corestring.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\corestring.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/corestring.o : ../../../src/corestring.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/corestring.d 
+	@echo $(metabuilder_CXX) ../../../src/corestring.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/filepath.o : ..\..\..\src\filepath.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/filepath.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\filepath.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/filepath.o : ../../../src/filepath.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/filepath.d 
+	@echo $(metabuilder_CXX) ../../../src/filepath.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/luafile.o : ..\..\..\src\luafile.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/luafile.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\luafile.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/luafile.o : ../../../src/luafile.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/luafile.d 
+	@echo $(metabuilder_CXX) ../../../src/luafile.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/main.o : ..\..\..\src\main.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/main.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\main.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/main.o : ../../../src/main.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/main.d 
+	@echo $(metabuilder_CXX) ../../../src/main.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/makeglobal.o : ..\..\..\src\makeglobal.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/makeglobal.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\makeglobal.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/makeglobal.o : ../../../src/makeglobal.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/makeglobal.d 
+	@echo $(metabuilder_CXX) ../../../src/makeglobal.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/mbstring.o : ..\..\..\src\mbstring.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/mbstring.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\mbstring.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/mbstring.o : ../../../src/mbstring.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/mbstring.d 
+	@echo $(metabuilder_CXX) ../../../src/mbstring.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/metabase.o : ..\..\..\src\metabase.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/metabase.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\metabase.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/metabase.o : ../../../src/metabase.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/metabase.d 
+	@echo $(metabuilder_CXX) ../../../src/metabase.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/metabuilder_pch.o : ..\..\..\src\metabuilder_pch.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/metabuilder_pch.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\metabuilder_pch.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/metabuilder_pch.o : ../../../src/metabuilder_pch.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/metabuilder_pch.d 
+	@echo $(metabuilder_CXX) ../../../src/metabuilder_pch.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/platform.o : ..\..\..\src\platform\platform.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/platform.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\platform\platform.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/platform.o : ../../../src/platform/platform.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/platform.d 
+	@echo $(metabuilder_CXX) ../../../src/platform/platform.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/platform_windows.o : ..\..\..\src\platform\windows\platform_windows.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/platform_windows.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\platform\windows\platform_windows.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/platform_windows.o : ../../../src/platform/windows/platform_windows.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/platform_windows.d 
+	@echo $(metabuilder_CXX) ../../../src/platform/windows/platform_windows.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/platformparam.o : ..\..\..\src\platformparam.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/platformparam.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\platformparam.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/platformparam.o : ../../../src/platformparam.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/platformparam.d 
+	@echo $(metabuilder_CXX) ../../../src/platformparam.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/solution.o : ..\..\..\src\solution.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/solution.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\solution.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/solution.o : ../../../src/solution.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/solution.d 
+	@echo $(metabuilder_CXX) ../../../src/solution.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/target.o : ..\..\..\src\target.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/target.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\target.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/target.o : ../../../src/target.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/target.d 
+	@echo $(metabuilder_CXX) ../../../src/target.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/timeutil.o : ..\..\..\src\timeutil.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/timeutil.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\timeutil.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/timeutil.o : ../../../src/timeutil.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/timeutil.d 
+	@echo $(metabuilder_CXX) ../../../src/timeutil.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/writer.o : ..\..\..\src\writer.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/writer.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\writer.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/writer.o : ../../../src/writer.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/writer.d 
+	@echo $(metabuilder_CXX) ../../../src/writer.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/writer_msvc.o : ..\..\..\src\writer_msvc.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/writer_msvc.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\writer_msvc.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/writer_msvc.o : ../../../src/writer_msvc.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/writer_msvc.d 
+	@echo $(metabuilder_CXX) ../../../src/writer_msvc.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/writer_utility.o : ..\..\..\src\writer_utility.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/writer_utility.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\writer_utility.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/writer_utility.o : ../../../src/writer_utility.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/writer_utility.d 
+	@echo $(metabuilder_CXX) ../../../src/writer_utility.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
-$(metabuilder_INTDIR.$(BUILDCONFIG))/writer_xcode.o : ..\..\..\src\writer_xcode.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/writer_xcode.d 
-	@echo $(metabuilder_CXX) ..\..\..\src\writer_xcode.cpp
+$(metabuilder_INTDIR.$(BUILDCONFIG))/writer_xcode.o : ../../../src/writer_xcode.cpp $(metabuilder_INTDIR.$(BUILDCONFIG))/writer_xcode.d 
+	@echo $(metabuilder_CXX) ../../../src/writer_xcode.cpp
 	@$(metabuilder_CXX) $(metabuilder_CPPFLAGS) $(metabuilder_CXXFLAGS) -o '$@' '$<'; 
 
 $(metabuilder_INTDIR.$(BUILDCONFIG))/__metabuilder__prelink__ : $(metabuilder_OBJ) $(lua_OUTDIR.$(BUILDCONFIG))/lua 

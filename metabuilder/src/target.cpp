@@ -175,9 +175,6 @@ static int luaFuncTargetDepends(lua_State* l)
 	mbLuaToStringExpandMacros(&target->depends.back().libMakefile, target, l, 2);	// libMakefile;
 	FilePath& makeFilePath = target->depends.back().libMakefile;
 	
-	MetaBuilderContext* ctx = mbGetActiveContext();
-	makeFilePath = FilePath(Platform::FileGetAbsPath(makeFilePath));
-	
 	//Record this makefile, we'll process it later.
 	mbAddMakeFile(makeFilePath);
     return 0;

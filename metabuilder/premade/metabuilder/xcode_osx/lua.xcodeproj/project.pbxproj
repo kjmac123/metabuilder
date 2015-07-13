@@ -60,6 +60,7 @@
 		b2ae710199e2d685fb7f376b /* src/lvm.h */ = {isa = PBXBuildFile; fileRef = d846e3dc265377612abd1372; };
 		ddf5d6f450ee05fe3e4f6b45 /* src/lzio.c */ = {isa = PBXBuildFile; fileRef = fdc1cecc5e55cd886fa265bb; };
 		8fc2a2e44032fe9c3fae2d71 /* src/lzio.h */ = {isa = PBXBuildFile; fileRef = cd4da42a19bef4dac1d24f1f; };
+		68595499aef01d4d3adfbb3a /* Localizable.strings */ = {isa = PBXBuildFile; fileRef = 916489d3d85c518834817a74; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -162,12 +163,12 @@
 			isa = PBXGroup;
 			children = (
 				07be703b9d2002e484d741d9,
-				68595499aef01d4d3adfbb3a,
+				6df2c4005cb405200e93c9a5,
 			);
 			name = "Source";
 			sourceTree = "<group>";
 		};	
-		68595499aef01d4d3adfbb3a /* src */ = {
+		6df2c4005cb405200e93c9a5 /* src */ = {
 			isa = PBXGroup;
 			children = (
 				4b0237a220318df1c3eb7eef,
@@ -280,6 +281,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68595499aef01d4d3adfbb3a /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,36 +330,11 @@
 /* Begin PBXTargetDependency section */
 /* End PBXTargetDependency section */
 /* Begin PBXVariantGroup section */
-		BE854EF218CA1112008EAFCD /* InfoPlist.strings */ = {
+		916489d3d85c518834817a74 /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				BE854EF318CA1112008EAFCD /* en */,
 			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		BE854EFB18CA1112008EAFCD /* Main_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BE854EFC18CA1112008EAFCD /* Base */,
-			);
-			name = Main_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		BE854EFE18CA1112008EAFCD /* Main_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BE854EFF18CA1112008EAFCD /* Base */,
-			);
-			name = Main_iPad.storyboard;
-			sourceTree = "<group>";
-		};
-		BE854F1818CA1112008EAFCD /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BE854F1918CA1112008EAFCD /* en */,
-			);
-			name = InfoPlist.strings;
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -533,7 +510,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				COMPRESS_PNG_FILES = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -544,7 +521,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				COMPRESS_PNG_FILES = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -555,7 +532,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				COMPRESS_PNG_FILES = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

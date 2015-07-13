@@ -82,7 +82,7 @@ function InitFolder(folderList, path, filename)
 		table.insert(pathComponents, 1, "")
 	end
 
-	local fullProjectRelativeFilePath = mbfilepath.join(path, filename, mbwriter.global.targetDirSep)
+	local fullProjectRelativeFilePath = mbfilepath.join(path, filename, "/")
 
 	local currentPath = ""
 	local currentParentID = g_mainGroupID

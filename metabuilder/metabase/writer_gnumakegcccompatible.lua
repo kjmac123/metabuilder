@@ -323,15 +323,16 @@ function WriteMakeFileStaticLibTarget(file, currentTarget)
 end
 
 function WriteMakeFile(currentTarget)
-
-	local makeDir = mbfilepath.join(mbwriter.global.makeoutputdirabs, "", mbwriter.global.targetDirSep)
+	local dirSep = "/"
+	
+	local makeDir = mbfilepath.join(mbwriter.global.makeoutputdirabs, "", dirSep)
 	mbwriter.mkdir(makeDir)
 
 	local makeFilename = ""
 	if (mbwriter.global.ismainmakefile) then
-		makeFilename = mbfilepath.join(makeDir, "Makefile", mbwriter.global.targetDirSep)
+		makeFilename = mbfilepath.join(makeDir, "Makefile", dirSep)
 	else
-		makeFilename = mbfilepath.join(makeDir, currentTarget.name .. ".mk", mbwriter.global.targetDirSep)
+		makeFilename = mbfilepath.join(makeDir, currentTarget.name .. ".mk", dirSep)
 	end
 
 	makeFilename = mbwriter.normalisetargetfilepath(makeFilename)

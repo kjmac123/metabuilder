@@ -26,7 +26,7 @@ lua_DEFINES.Debug := \
 lua_CPPFLAGS.Debug += $(lua_DEFINES.Debug)
 lua_INCLUDES.Debug := \
   -I"$(DXSDK_DIR)Include" \
-  -I"..\..\..\..\external\lua-5.2.2\src" \
+  -I"../../../../external/lua-5.2.2/src" \
 
 lua_CPPFLAGS.Debug += $(lua_INCLUDES.Debug)
 lua_INTDIR.Release := int/lua/Release
@@ -52,7 +52,7 @@ lua_DEFINES.Release := \
 lua_CPPFLAGS.Release += $(lua_DEFINES.Release)
 lua_INCLUDES.Release := \
   -I"$(DXSDK_DIR)Include" \
-  -I"..\..\..\..\external\lua-5.2.2\src" \
+  -I"../../../../external/lua-5.2.2/src" \
 
 lua_CPPFLAGS.Release += $(lua_INCLUDES.Release)
 lua_INTDIR.Master := int/lua/Master
@@ -78,7 +78,7 @@ lua_DEFINES.Master := \
 lua_CPPFLAGS.Master += $(lua_DEFINES.Master)
 lua_INCLUDES.Master := \
   -I"$(DXSDK_DIR)Include" \
-  -I"..\..\..\..\external\lua-5.2.2\src" \
+  -I"../../../../external/lua-5.2.2/src" \
 
 lua_CPPFLAGS.Master += $(lua_INCLUDES.Master)
 lua_CPPFLAGS	:= -MMD -MP $(lua_CPPFLAGS.$(BUILDCONFIG))
@@ -90,38 +90,38 @@ lua_CXXFLAGS += -c
 lua_LDFLAGS := 
 
 lua_SRC := \
-	..\..\..\..\external\lua-5.2.2\src\lapi.c \
-	..\..\..\..\external\lua-5.2.2\src\lauxlib.c \
-	..\..\..\..\external\lua-5.2.2\src\lbaselib.c \
-	..\..\..\..\external\lua-5.2.2\src\lbitlib.c \
-	..\..\..\..\external\lua-5.2.2\src\lcode.c \
-	..\..\..\..\external\lua-5.2.2\src\lcorolib.c \
-	..\..\..\..\external\lua-5.2.2\src\lctype.c \
-	..\..\..\..\external\lua-5.2.2\src\ldblib.c \
-	..\..\..\..\external\lua-5.2.2\src\ldebug.c \
-	..\..\..\..\external\lua-5.2.2\src\ldo.c \
-	..\..\..\..\external\lua-5.2.2\src\ldump.c \
-	..\..\..\..\external\lua-5.2.2\src\lfunc.c \
-	..\..\..\..\external\lua-5.2.2\src\lgc.c \
-	..\..\..\..\external\lua-5.2.2\src\linit.c \
-	..\..\..\..\external\lua-5.2.2\src\liolib.c \
-	..\..\..\..\external\lua-5.2.2\src\llex.c \
-	..\..\..\..\external\lua-5.2.2\src\lmathlib.c \
-	..\..\..\..\external\lua-5.2.2\src\lmem.c \
-	..\..\..\..\external\lua-5.2.2\src\loadlib.c \
-	..\..\..\..\external\lua-5.2.2\src\lobject.c \
-	..\..\..\..\external\lua-5.2.2\src\lopcodes.c \
-	..\..\..\..\external\lua-5.2.2\src\loslib.c \
-	..\..\..\..\external\lua-5.2.2\src\lparser.c \
-	..\..\..\..\external\lua-5.2.2\src\lstate.c \
-	..\..\..\..\external\lua-5.2.2\src\lstring.c \
-	..\..\..\..\external\lua-5.2.2\src\lstrlib.c \
-	..\..\..\..\external\lua-5.2.2\src\ltable.c \
-	..\..\..\..\external\lua-5.2.2\src\ltablib.c \
-	..\..\..\..\external\lua-5.2.2\src\ltm.c \
-	..\..\..\..\external\lua-5.2.2\src\lundump.c \
-	..\..\..\..\external\lua-5.2.2\src\lvm.c \
-	..\..\..\..\external\lua-5.2.2\src\lzio.c \
+	../../../../external/lua-5.2.2/src/lapi.c \
+	../../../../external/lua-5.2.2/src/lauxlib.c \
+	../../../../external/lua-5.2.2/src/lbaselib.c \
+	../../../../external/lua-5.2.2/src/lbitlib.c \
+	../../../../external/lua-5.2.2/src/lcode.c \
+	../../../../external/lua-5.2.2/src/lcorolib.c \
+	../../../../external/lua-5.2.2/src/lctype.c \
+	../../../../external/lua-5.2.2/src/ldblib.c \
+	../../../../external/lua-5.2.2/src/ldebug.c \
+	../../../../external/lua-5.2.2/src/ldo.c \
+	../../../../external/lua-5.2.2/src/ldump.c \
+	../../../../external/lua-5.2.2/src/lfunc.c \
+	../../../../external/lua-5.2.2/src/lgc.c \
+	../../../../external/lua-5.2.2/src/linit.c \
+	../../../../external/lua-5.2.2/src/liolib.c \
+	../../../../external/lua-5.2.2/src/llex.c \
+	../../../../external/lua-5.2.2/src/lmathlib.c \
+	../../../../external/lua-5.2.2/src/lmem.c \
+	../../../../external/lua-5.2.2/src/loadlib.c \
+	../../../../external/lua-5.2.2/src/lobject.c \
+	../../../../external/lua-5.2.2/src/lopcodes.c \
+	../../../../external/lua-5.2.2/src/loslib.c \
+	../../../../external/lua-5.2.2/src/lparser.c \
+	../../../../external/lua-5.2.2/src/lstate.c \
+	../../../../external/lua-5.2.2/src/lstring.c \
+	../../../../external/lua-5.2.2/src/lstrlib.c \
+	../../../../external/lua-5.2.2/src/ltable.c \
+	../../../../external/lua-5.2.2/src/ltablib.c \
+	../../../../external/lua-5.2.2/src/ltm.c \
+	../../../../external/lua-5.2.2/src/lundump.c \
+	../../../../external/lua-5.2.2/src/lvm.c \
+	../../../../external/lua-5.2.2/src/lzio.c \
 
 lua_OBJ := \
 	$(lua_INTDIR.$(BUILDCONFIG))/lapi.o \
@@ -157,101 +157,101 @@ lua_OBJ := \
 	$(lua_INTDIR.$(BUILDCONFIG))/lvm.o \
 	$(lua_INTDIR.$(BUILDCONFIG))/lzio.o \
 
-$(lua_INTDIR.$(BUILDCONFIG))/lapi.o : ..\..\..\..\external\lua-5.2.2\src\lapi.c $(lua_INTDIR.$(BUILDCONFIG))/lapi.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lapi.c
+$(lua_INTDIR.$(BUILDCONFIG))/lapi.o : ../../../../external/lua-5.2.2/src/lapi.c $(lua_INTDIR.$(BUILDCONFIG))/lapi.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lapi.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lauxlib.o : ..\..\..\..\external\lua-5.2.2\src\lauxlib.c $(lua_INTDIR.$(BUILDCONFIG))/lauxlib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lauxlib.c
+$(lua_INTDIR.$(BUILDCONFIG))/lauxlib.o : ../../../../external/lua-5.2.2/src/lauxlib.c $(lua_INTDIR.$(BUILDCONFIG))/lauxlib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lauxlib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lbaselib.o : ..\..\..\..\external\lua-5.2.2\src\lbaselib.c $(lua_INTDIR.$(BUILDCONFIG))/lbaselib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lbaselib.c
+$(lua_INTDIR.$(BUILDCONFIG))/lbaselib.o : ../../../../external/lua-5.2.2/src/lbaselib.c $(lua_INTDIR.$(BUILDCONFIG))/lbaselib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lbaselib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lbitlib.o : ..\..\..\..\external\lua-5.2.2\src\lbitlib.c $(lua_INTDIR.$(BUILDCONFIG))/lbitlib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lbitlib.c
+$(lua_INTDIR.$(BUILDCONFIG))/lbitlib.o : ../../../../external/lua-5.2.2/src/lbitlib.c $(lua_INTDIR.$(BUILDCONFIG))/lbitlib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lbitlib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lcode.o : ..\..\..\..\external\lua-5.2.2\src\lcode.c $(lua_INTDIR.$(BUILDCONFIG))/lcode.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lcode.c
+$(lua_INTDIR.$(BUILDCONFIG))/lcode.o : ../../../../external/lua-5.2.2/src/lcode.c $(lua_INTDIR.$(BUILDCONFIG))/lcode.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lcode.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lcorolib.o : ..\..\..\..\external\lua-5.2.2\src\lcorolib.c $(lua_INTDIR.$(BUILDCONFIG))/lcorolib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lcorolib.c
+$(lua_INTDIR.$(BUILDCONFIG))/lcorolib.o : ../../../../external/lua-5.2.2/src/lcorolib.c $(lua_INTDIR.$(BUILDCONFIG))/lcorolib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lcorolib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lctype.o : ..\..\..\..\external\lua-5.2.2\src\lctype.c $(lua_INTDIR.$(BUILDCONFIG))/lctype.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lctype.c
+$(lua_INTDIR.$(BUILDCONFIG))/lctype.o : ../../../../external/lua-5.2.2/src/lctype.c $(lua_INTDIR.$(BUILDCONFIG))/lctype.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lctype.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/ldblib.o : ..\..\..\..\external\lua-5.2.2\src\ldblib.c $(lua_INTDIR.$(BUILDCONFIG))/ldblib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\ldblib.c
+$(lua_INTDIR.$(BUILDCONFIG))/ldblib.o : ../../../../external/lua-5.2.2/src/ldblib.c $(lua_INTDIR.$(BUILDCONFIG))/ldblib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/ldblib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/ldebug.o : ..\..\..\..\external\lua-5.2.2\src\ldebug.c $(lua_INTDIR.$(BUILDCONFIG))/ldebug.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\ldebug.c
+$(lua_INTDIR.$(BUILDCONFIG))/ldebug.o : ../../../../external/lua-5.2.2/src/ldebug.c $(lua_INTDIR.$(BUILDCONFIG))/ldebug.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/ldebug.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/ldo.o : ..\..\..\..\external\lua-5.2.2\src\ldo.c $(lua_INTDIR.$(BUILDCONFIG))/ldo.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\ldo.c
+$(lua_INTDIR.$(BUILDCONFIG))/ldo.o : ../../../../external/lua-5.2.2/src/ldo.c $(lua_INTDIR.$(BUILDCONFIG))/ldo.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/ldo.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/ldump.o : ..\..\..\..\external\lua-5.2.2\src\ldump.c $(lua_INTDIR.$(BUILDCONFIG))/ldump.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\ldump.c
+$(lua_INTDIR.$(BUILDCONFIG))/ldump.o : ../../../../external/lua-5.2.2/src/ldump.c $(lua_INTDIR.$(BUILDCONFIG))/ldump.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/ldump.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lfunc.o : ..\..\..\..\external\lua-5.2.2\src\lfunc.c $(lua_INTDIR.$(BUILDCONFIG))/lfunc.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lfunc.c
+$(lua_INTDIR.$(BUILDCONFIG))/lfunc.o : ../../../../external/lua-5.2.2/src/lfunc.c $(lua_INTDIR.$(BUILDCONFIG))/lfunc.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lfunc.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lgc.o : ..\..\..\..\external\lua-5.2.2\src\lgc.c $(lua_INTDIR.$(BUILDCONFIG))/lgc.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lgc.c
+$(lua_INTDIR.$(BUILDCONFIG))/lgc.o : ../../../../external/lua-5.2.2/src/lgc.c $(lua_INTDIR.$(BUILDCONFIG))/lgc.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lgc.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/linit.o : ..\..\..\..\external\lua-5.2.2\src\linit.c $(lua_INTDIR.$(BUILDCONFIG))/linit.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\linit.c
+$(lua_INTDIR.$(BUILDCONFIG))/linit.o : ../../../../external/lua-5.2.2/src/linit.c $(lua_INTDIR.$(BUILDCONFIG))/linit.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/linit.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/liolib.o : ..\..\..\..\external\lua-5.2.2\src\liolib.c $(lua_INTDIR.$(BUILDCONFIG))/liolib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\liolib.c
+$(lua_INTDIR.$(BUILDCONFIG))/liolib.o : ../../../../external/lua-5.2.2/src/liolib.c $(lua_INTDIR.$(BUILDCONFIG))/liolib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/liolib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/llex.o : ..\..\..\..\external\lua-5.2.2\src\llex.c $(lua_INTDIR.$(BUILDCONFIG))/llex.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\llex.c
+$(lua_INTDIR.$(BUILDCONFIG))/llex.o : ../../../../external/lua-5.2.2/src/llex.c $(lua_INTDIR.$(BUILDCONFIG))/llex.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/llex.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lmathlib.o : ..\..\..\..\external\lua-5.2.2\src\lmathlib.c $(lua_INTDIR.$(BUILDCONFIG))/lmathlib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lmathlib.c
+$(lua_INTDIR.$(BUILDCONFIG))/lmathlib.o : ../../../../external/lua-5.2.2/src/lmathlib.c $(lua_INTDIR.$(BUILDCONFIG))/lmathlib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lmathlib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lmem.o : ..\..\..\..\external\lua-5.2.2\src\lmem.c $(lua_INTDIR.$(BUILDCONFIG))/lmem.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lmem.c
+$(lua_INTDIR.$(BUILDCONFIG))/lmem.o : ../../../../external/lua-5.2.2/src/lmem.c $(lua_INTDIR.$(BUILDCONFIG))/lmem.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lmem.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/loadlib.o : ..\..\..\..\external\lua-5.2.2\src\loadlib.c $(lua_INTDIR.$(BUILDCONFIG))/loadlib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\loadlib.c
+$(lua_INTDIR.$(BUILDCONFIG))/loadlib.o : ../../../../external/lua-5.2.2/src/loadlib.c $(lua_INTDIR.$(BUILDCONFIG))/loadlib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/loadlib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lobject.o : ..\..\..\..\external\lua-5.2.2\src\lobject.c $(lua_INTDIR.$(BUILDCONFIG))/lobject.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lobject.c
+$(lua_INTDIR.$(BUILDCONFIG))/lobject.o : ../../../../external/lua-5.2.2/src/lobject.c $(lua_INTDIR.$(BUILDCONFIG))/lobject.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lobject.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lopcodes.o : ..\..\..\..\external\lua-5.2.2\src\lopcodes.c $(lua_INTDIR.$(BUILDCONFIG))/lopcodes.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lopcodes.c
+$(lua_INTDIR.$(BUILDCONFIG))/lopcodes.o : ../../../../external/lua-5.2.2/src/lopcodes.c $(lua_INTDIR.$(BUILDCONFIG))/lopcodes.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lopcodes.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/loslib.o : ..\..\..\..\external\lua-5.2.2\src\loslib.c $(lua_INTDIR.$(BUILDCONFIG))/loslib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\loslib.c
+$(lua_INTDIR.$(BUILDCONFIG))/loslib.o : ../../../../external/lua-5.2.2/src/loslib.c $(lua_INTDIR.$(BUILDCONFIG))/loslib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/loslib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lparser.o : ..\..\..\..\external\lua-5.2.2\src\lparser.c $(lua_INTDIR.$(BUILDCONFIG))/lparser.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lparser.c
+$(lua_INTDIR.$(BUILDCONFIG))/lparser.o : ../../../../external/lua-5.2.2/src/lparser.c $(lua_INTDIR.$(BUILDCONFIG))/lparser.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lparser.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lstate.o : ..\..\..\..\external\lua-5.2.2\src\lstate.c $(lua_INTDIR.$(BUILDCONFIG))/lstate.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lstate.c
+$(lua_INTDIR.$(BUILDCONFIG))/lstate.o : ../../../../external/lua-5.2.2/src/lstate.c $(lua_INTDIR.$(BUILDCONFIG))/lstate.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lstate.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lstring.o : ..\..\..\..\external\lua-5.2.2\src\lstring.c $(lua_INTDIR.$(BUILDCONFIG))/lstring.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lstring.c
+$(lua_INTDIR.$(BUILDCONFIG))/lstring.o : ../../../../external/lua-5.2.2/src/lstring.c $(lua_INTDIR.$(BUILDCONFIG))/lstring.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lstring.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lstrlib.o : ..\..\..\..\external\lua-5.2.2\src\lstrlib.c $(lua_INTDIR.$(BUILDCONFIG))/lstrlib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lstrlib.c
+$(lua_INTDIR.$(BUILDCONFIG))/lstrlib.o : ../../../../external/lua-5.2.2/src/lstrlib.c $(lua_INTDIR.$(BUILDCONFIG))/lstrlib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lstrlib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/ltable.o : ..\..\..\..\external\lua-5.2.2\src\ltable.c $(lua_INTDIR.$(BUILDCONFIG))/ltable.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\ltable.c
+$(lua_INTDIR.$(BUILDCONFIG))/ltable.o : ../../../../external/lua-5.2.2/src/ltable.c $(lua_INTDIR.$(BUILDCONFIG))/ltable.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/ltable.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/ltablib.o : ..\..\..\..\external\lua-5.2.2\src\ltablib.c $(lua_INTDIR.$(BUILDCONFIG))/ltablib.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\ltablib.c
+$(lua_INTDIR.$(BUILDCONFIG))/ltablib.o : ../../../../external/lua-5.2.2/src/ltablib.c $(lua_INTDIR.$(BUILDCONFIG))/ltablib.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/ltablib.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/ltm.o : ..\..\..\..\external\lua-5.2.2\src\ltm.c $(lua_INTDIR.$(BUILDCONFIG))/ltm.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\ltm.c
+$(lua_INTDIR.$(BUILDCONFIG))/ltm.o : ../../../../external/lua-5.2.2/src/ltm.c $(lua_INTDIR.$(BUILDCONFIG))/ltm.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/ltm.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lundump.o : ..\..\..\..\external\lua-5.2.2\src\lundump.c $(lua_INTDIR.$(BUILDCONFIG))/lundump.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lundump.c
+$(lua_INTDIR.$(BUILDCONFIG))/lundump.o : ../../../../external/lua-5.2.2/src/lundump.c $(lua_INTDIR.$(BUILDCONFIG))/lundump.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lundump.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lvm.o : ..\..\..\..\external\lua-5.2.2\src\lvm.c $(lua_INTDIR.$(BUILDCONFIG))/lvm.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lvm.c
+$(lua_INTDIR.$(BUILDCONFIG))/lvm.o : ../../../../external/lua-5.2.2/src/lvm.c $(lua_INTDIR.$(BUILDCONFIG))/lvm.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lvm.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
-$(lua_INTDIR.$(BUILDCONFIG))/lzio.o : ..\..\..\..\external\lua-5.2.2\src\lzio.c $(lua_INTDIR.$(BUILDCONFIG))/lzio.d 
-	@echo $(lua_CC) ..\..\..\..\external\lua-5.2.2\src\lzio.c
+$(lua_INTDIR.$(BUILDCONFIG))/lzio.o : ../../../../external/lua-5.2.2/src/lzio.c $(lua_INTDIR.$(BUILDCONFIG))/lzio.d 
+	@echo $(lua_CC) ../../../../external/lua-5.2.2/src/lzio.c
 	@$(lua_CC) $(lua_CPPFLAGS) $(lua_CFLAGS) -o '$@' '$<'; 
 
 $(lua_INTDIR.$(BUILDCONFIG))/__lua__prelink__ : $(lua_OBJ) 

@@ -195,7 +195,7 @@ static int luaFuncWriterSetMakeOutputDirAbs(lua_State* l)
 
 	//Store new normalised dir
 	{
-		AppState* appState = mbGetAppState();
+//		AppState* appState = mbGetAppState();
 		MetaBuilderContext* ctx = mbGetActiveContext();
 		char buf[MB_MAX_PATH];
 		strcpy(buf, newMakeOutputDir.c_str());

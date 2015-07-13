@@ -16,12 +16,12 @@ static bool mbWriterUtility_FilePathMarkedAsRaw(const char* filepath)
 {
 	return filepath[0] == '!';
 }
-
+/*
 static void mbWriterUtility_NormaliseTargetFilePath(char* filepath)
 {
 	mbNormaliseFilePath(filepath, '/');
 }
-
+*/
 static int mbWriterUtility_GetNumDirLevels(const char* dir)
 {
 	char dirSep = '/';
