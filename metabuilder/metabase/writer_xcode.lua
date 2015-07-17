@@ -426,6 +426,18 @@ function WriteXCBuildConfigurations(file)
 		file:write("		" .. configID .. " /* " .. config.name .. " */ = {\n")
 		file:write("			isa = XCBuildConfiguration;\n")
 		file:write("			buildSettings = {\n")
+		
+		file:write("				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;\n")
+--		file:write("				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;\n")
+		file:write("				COMPRESS_PNG_FILES = NO;\n")
+		-- Prefix PCH support - TODO
+--		if g_currentTarget.pch ~= nil and g_currentTarget.pch ~= "" then
+--			print(g_currentTarget.name .. " PCH " .. g_currentTarget.pch)
+--			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = YES;\n")
+--			file:write("				GCC_PREFIX_HEADER = \"" .. mbwriter.getoutputrelfilepath(g_currentTarget.pch) .. "\";\n")
+--		else
+--			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = NO;\n")
+--		end
 
 		-- Add internal options (set using xcode specific metabuilder API)
 		if config.options._xcode ~= nil then
@@ -515,31 +527,7 @@ function WriteXCBuildConfigurations(file)
 			end
 			file:write("				);\n\n")
 		end
-
-		file:write("			};\n")
-		file:write("			name = " .. config.name .. ";\n")
-		file:write("		};\n")
-	end
-
-	for i = 1, #g_currentTarget.configs do
-		local config = g_currentTarget.configs[i]
-		local configID = g_PBXNativeTargetConfigIDs[config.name]
-
-		file:write("		" .. configID .. " /* " .. config.name .. " */ = {\n")
-		file:write("			isa = XCBuildConfiguration;\n")
-		file:write("			buildSettings = {\n")
-		file:write("				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;\n")
---		file:write("				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;\n")
-		file:write("				COMPRESS_PNG_FILES = NO;\n")
-		-- Prefix PCH support
---		if g_currentTarget.pch ~= nil and g_currentTarget.pch ~= "" then
---			print(g_currentTarget.name .. " PCH " .. g_currentTarget.pch)
---			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = YES;\n")
---			file:write("				GCC_PREFIX_HEADER = \"" .. mbwriter.getoutputrelfilepath(g_currentTarget.pch) .. "\";\n")
---		else
-			file:write("				GCC_PRECOMPILE_PREFIX_HEADER = NO;\n")
---		end
-
+		
 		local stringListsPerSDK, sdkNames = BuildListPerSDK(config.libs)
 		for iSDK = 1, #sdkNames do
 			local sdk =  sdkNames[iSDK]
@@ -553,8 +541,10 @@ function WriteXCBuildConfigurations(file)
 				file:write("					\"" .. strings[jString] .. "\",\n")
 			end
 			file:write("				);\n\n")
-		end
-
+		end		
+		
+		-- XXX --
+		
 		file:write("				PRODUCT_NAME = \"$(TARGET_NAME)\";\n")
 		if g_currentTarget.targettype == "app" then
 			if g_currentTarget.targetsubsystem == "console" then
@@ -564,6 +554,7 @@ function WriteXCBuildConfigurations(file)
 		elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
 			file:write("				SKIP_INSTALL = YES;\n")
 		end
+
 		file:write("			};\n")
 		file:write("			name = " .. config.name .. ";\n")
 		file:write("		};\n")
