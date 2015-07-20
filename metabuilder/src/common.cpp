@@ -400,9 +400,9 @@ static int luaFuncCheckPlatform(lua_State* l)
 
     std::string testPlatform;
 	mbLuaToStringExpandMacros(&testPlatform, b, l, 1);
-	for (size_t i = 0; i < mbGetActiveContext()->metabase->supportedPlatforms.size(); ++i)
+	for (size_t i = 0; i < mbGetActiveContext()->supportedPlatforms.size(); ++i)
 	{
-		const std::string& test = mbGetActiveContext()->metabase->supportedPlatforms[i];
+		const std::string& test = mbGetActiveContext()->supportedPlatforms[i];
 		if (test == testPlatform)
 		{
 			lua_pushboolean(l, 1);

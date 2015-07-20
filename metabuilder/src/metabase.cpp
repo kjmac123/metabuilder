@@ -51,13 +51,6 @@ static int luaFuncMetabaseEnd(lua_State* lua)
 static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
 {
 	MetaBuilderContext* ctx = mbGetActiveContext();
-	Block* b = mbGetActiveContext()->ActiveBlock();
-	if (b != ctx->metabase)
-	{
-		MB_LOGERROR("must be within metabase block");
-		mbExitError();
-	}
-	Metabase* metabase = (Metabase*)b;
 	
     luaL_checktype(l, 1, LUA_TTABLE);
     int tableLen =  luaL_len(l, 1);
@@ -65,8 +58,8 @@ static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
     for (int i = 1; i <= tableLen; ++i)
     {
         lua_rawgeti(l, 1, i);
-		metabase->supportedPlatforms.push_back(std::string());
-		mbLuaToStringExpandMacros(&metabase->supportedPlatforms.back(), metabase, l, -1);
+		ctx->supportedPlatforms.push_back(std::string());
+		mbLuaToStringExpandMacros(&ctx->supportedPlatforms.back(), mbGetActiveContext()->ActiveBlock(), l, -1);
     }
 		
 	return 0;
@@ -76,7 +69,7 @@ static int luaFuncMetabaseWriter(lua_State* l)
 {
 	MetaBuilderContext* ctx = mbGetActiveContext();
 	Block* b = mbGetActiveContext()->ActiveBlock();
-	if (b != ctx->metabase)
+	if (!b || b != ctx->metabase)
 	{
 		MB_LOGERROR("must be within metabase block");
 		mbExitError();

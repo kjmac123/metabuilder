@@ -153,6 +153,7 @@ public:
 	Metabase*					metabase;
     Solution*					solution;
     std::stack<Block*>			activeBlockStack;
+	StringVector				supportedPlatforms;
 	bool						isMainMakefile;
 };
 

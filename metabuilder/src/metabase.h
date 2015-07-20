@@ -11,8 +11,6 @@ public:
     virtual E_BlockType GetType() const;
 	virtual bool		IsA(E_BlockType t) const;		
 	
-	StringVector		supportedPlatforms;
-		
 	std::string			writerLua;
 
 protected:

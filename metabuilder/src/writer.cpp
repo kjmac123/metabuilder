@@ -510,9 +510,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 						{
 							const char* configName = configNames[jConfig].c_str();
 							FlatConfig flatConfig;
-							for (size_t kPlatform = 0; kPlatform < ctx->metabase->supportedPlatforms.size(); ++kPlatform)
+							for (size_t kPlatform = 0; kPlatform < ctx->supportedPlatforms.size(); ++kPlatform)
 							{
-								const char* platformName = ctx->metabase->supportedPlatforms[kPlatform].c_str();
+								const char* platformName = ctx->supportedPlatforms[kPlatform].c_str();
 								target->Flatten(&flatConfig, platformName, configName);
 
 								flatConfig.Init(configName);
@@ -541,9 +541,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector uniqueFiles;
 					{
-						for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						for (size_t jPlatform = 0; jPlatform < ctx->supportedPlatforms.size(); ++jPlatform)
 						{
-							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+							const char* platformName = ctx->supportedPlatforms[jPlatform].c_str();
 							target->FlattenFiles(&uniqueFiles, platformName);
 						}
 						mbRemoveDuplicatesAndSort(&uniqueFiles);
@@ -564,9 +564,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector uniqueFiles;
 					{
-						for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						for (size_t jPlatform = 0; jPlatform < ctx->supportedPlatforms.size(); ++jPlatform)
 						{
-							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+							const char* platformName = ctx->supportedPlatforms[jPlatform].c_str();
 							target->FlattenNoPchFiles(&uniqueFiles, platformName);
 						}
 						mbRemoveDuplicatesAndSort(&uniqueFiles);
@@ -588,9 +588,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector uniqueFrameworks;
 					{
-						for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						for (size_t jPlatform = 0; jPlatform < ctx->supportedPlatforms.size(); ++jPlatform)
 						{
-							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+							const char* platformName = ctx->supportedPlatforms[jPlatform].c_str();
 							target->FlattenFrameworks(&uniqueFrameworks, platformName);
 						}
 						mbRemoveDuplicatesAndSort(&uniqueFrameworks);
@@ -611,9 +611,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					StringVector uniqueResources;
 					{
-						for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+						for (size_t jPlatform = 0; jPlatform < ctx->supportedPlatforms.size(); ++jPlatform)
 						{
-							const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+							const char* platformName = ctx->supportedPlatforms[jPlatform].c_str();
 							target->FlattenResources(&uniqueResources, platformName);
 						}
 						mbRemoveDuplicatesAndSort(&uniqueResources);
@@ -649,9 +649,9 @@ void mbWriterDo(MetaBuilderContext* ctx)
 				{
 					FlatConfig flatTarget;
 
-					for (size_t jPlatform = 0; jPlatform < ctx->metabase->supportedPlatforms.size(); ++jPlatform)
+					for (size_t jPlatform = 0; jPlatform < ctx->supportedPlatforms.size(); ++jPlatform)
 					{
-						const char* platformName = ctx->metabase->supportedPlatforms[jPlatform].c_str();
+						const char* platformName = ctx->supportedPlatforms[jPlatform].c_str();
 						target->Flatten(&flatTarget, platformName, NULL);
 					}
 
