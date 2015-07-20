@@ -538,10 +538,10 @@ function WriteXCBuildConfigurations(file)
 				file:write("				\"OTHER_LDFLAGS" .. sdk .. "\" = (\n")
 			end
 			for jString = 1, #strings do
-				file:write("					\"" .. strings[jString] .. "\",\n")
+				file:write("					\"" ..  mbwriter.getoutputrelfilepath(strings[jString]) .. "\",\n")
 			end
 			file:write("				);\n\n")
-		end		
+		end	
 		
 		-- XXX --
 		
