@@ -60,7 +60,9 @@ static int luaFuncMetabaseSupportedPlatforms(lua_State* l)
         lua_rawgeti(l, 1, i);
 		ctx->supportedPlatforms.push_back(std::string());
 		mbLuaToStringExpandMacros(&ctx->supportedPlatforms.back(), mbGetActiveContext()->ActiveBlock(), l, -1);
+        MB_LOGINFO("Added supported platform %s", ctx->supportedPlatforms.back().c_str());
     }
+    mbRemoveDuplicates(&ctx->supportedPlatforms);
 		
 	return 0;
 }
