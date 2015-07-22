@@ -1,6 +1,7 @@
 metabase "xcode_osx"
 	import "metabase_common.lua"
 	import "platform_osx.lua"
+	import "xcode_common.lua"
 
 	writer "writer_xcode.lua"
 

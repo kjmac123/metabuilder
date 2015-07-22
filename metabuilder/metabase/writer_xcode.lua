@@ -527,7 +527,7 @@ function WriteXCBuildConfigurations(file)
 			end
 			file:write("				);\n\n")
 		end
-		
+
 		local stringListsPerSDK, sdkNames = BuildListPerSDK(config.libs)
 		for iSDK = 1, #sdkNames do
 			local sdk =  sdkNames[iSDK]
@@ -541,10 +541,8 @@ function WriteXCBuildConfigurations(file)
 				file:write("					\"" ..  mbwriter.getoutputrelfilepath(strings[jString]) .. "\",\n")
 			end
 			file:write("				);\n\n")
-		end	
-		
-		-- XXX --
-		
+		end
+
 		file:write("				PRODUCT_NAME = \"$(TARGET_NAME)\";\n")
 		if g_currentTarget.targettype == "app" then
 			if g_currentTarget.targetsubsystem == "console" then
@@ -554,7 +552,6 @@ function WriteXCBuildConfigurations(file)
 		elseif g_currentTarget.targettype == "module" or g_currentTarget.targettype == "staticlib" then
 			file:write("				SKIP_INSTALL = YES;\n")
 		end
-
 		file:write("			};\n")
 		file:write("			name = " .. config.name .. ";\n")
 		file:write("		};\n")
@@ -895,6 +892,36 @@ for i = 1, #g_currentTarget.files do
 	file:write("		" .. g_PBXBuildFileIDMap[f] 	.. " /* " .. g_currentTarget.files[i] .. " */ = {isa = PBXBuildFile; fileRef = " .. g_PBXFileRefIDMap[f] .. "; };\n")
 end
 
+local copyFiles = {}
+
+	--print(inspect(g_currentTarget))
+for i = 1, #g_currentTarget.configs do
+	local config = g_currentTarget.configs[i]
+
+	if config.options.xcodeconfiguration ~= nil then
+		local xcodeconfig = config.options.xcodeconfiguration
+
+		for jOption = 1, #xcodeconfig do
+			local keyValue = split(xcodeconfig[jOption], "=")
+			local key = keyValue[1]
+			if key == "copyframework" then
+				local spaceDelimitedFilesToCopy = keyValue[2]
+				table.insert(copyFiles, spaceDelimitedFilesToCopy)
+			end
+		end
+	end
+	break
+end
+
+for i = 1, #copyFiles do
+	local f = copyFiles[i]
+	local copyf = "copy_" .. f
+	g_PBXBuildFileIDMap[copyf] = mbwriter.xcodegenerateid()
+	local fileID = g_PBXBuildFileIDMap[copyf]
+
+	file:write("		" .. fileID 	.. " /* " .. f .. " */ = {isa = PBXBuildFile; fileRef = " .. g_PBXFileRefIDMap[f] .. "; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };\n")
+end
+
 -- Link with required projects
 for i = 1, #g_currentTarget.depends do
 	local dependency = g_currentTarget.depends[i]
@@ -931,6 +958,24 @@ for i = 1, #g_currentTarget.depends do
 end
 
 file:write("/* End PBXContainerItemProxy section */\n\n")
+
+--Copy phase
+file:write("/* Begin PBXCopyFilesBuildPhase section */\n")
+file:write("		9664A80C1B590CC6008C6C5B /* CopyFiles */ = {\n")
+file:write("			isa = PBXCopyFilesBuildPhase;\n")
+file:write("			buildActionMask = 2147483647;\n")
+file:write("			dstPath = \"\";\n")
+file:write("			dstSubfolderSpec = 10;\n")
+file:write("			files = (\n")
+for i = 1, #copyFiles do
+	local f = copyFiles[i]
+	local copyf = "copy_" .. f
+	file:write("				" .. g_PBXBuildFileIDMap[copyf] .. " /* " .. f .. " in CopyFiles */,\n")
+end
+file:write("			);\n")
+file:write("			runOnlyForDeploymentPostprocessing = 0;\n")
+file:write("		};\n")
+file:write("/* End PBXCopyFilesBuildPhase section */\n")
 
 --PBXFileReference
 file:write("/* Begin PBXFileReference section */\n")
@@ -1018,6 +1063,7 @@ file:write("			buildPhases = (\n")
 file:write("				BE854EDE18CA1112008EAFCD /* Sources */,\n")
 file:write("				BE854EDF18CA1112008EAFCD /* Frameworks */,\n")
 file:write("				BE854EE018CA1112008EAFCD /* Resources */,\n")
+file:write("				9664A80C1B590CC6008C6C5B /* CopyFiles */,\n")
 file:write("			);\n")
 file:write("			buildRules = (\n")
 file:write("			);\n")
