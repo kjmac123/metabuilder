@@ -12,7 +12,7 @@ Status: A very active work in progress, pre-alpha if you like. That said it was 
 
 Author: Ken Macleod  
 Email: kjmac123@gmail.com  
-Twitter: @PanzerGnome  
+Twitter: @kjmacuk  
 
 ##What is Metabuilder?
 Metabuilder is a system for generating project files or makefiles for multiple development environments using a single ‘meta’ makefile. Metabuilder’s makefiles are written in Lua with (I hope) an emphasis on simplicity and ease of maintenance.
